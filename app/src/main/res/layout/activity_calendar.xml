@@ -1,0 +1,414 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="8dp">
+
+            <ImageView
+                android:id="@+id/btnProfile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_bottom_sheet"
+                android:backgroundTint="@color/slate_200"
+                android:padding="8dp"
+                android:src="@drawable/ic_person"
+                app:tint="@color/slate_600" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Calendar"
+                android:textColor="@color/slate_900"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnToday"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:text="Today"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:background="@drawable/bg_bottom_sheet"
+            android:backgroundTint="@color/slate_200"
+            android:padding="4dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_bottom_sheet"
+                android:gravity="center"
+                android:text="Month"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Week"
+                android:textColor="@color/slate_500"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentStart="true"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/slate_500" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="October 2023"
+                android:textColor="@color/slate_800"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/slate_500" />
+        </RelativeLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="7"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="8dp">
+
+            <TextView android:text="S" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="M" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="T" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="W" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="T" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="F" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="S" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_marginBottom="8dp"/>
+
+            <Space android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+            <Space android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+            <Space android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="1" android:gravity="center" android:textColor="@color/slate_700" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+            <TextView android:text="2" android:gravity="center" android:textColor="@color/slate_700" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+            <TextView android:text="3" android:gravity="center" android:textColor="@color/slate_700" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+            <TextView android:text="4" android:gravity="center" android:textColor="@color/slate_700" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="5" android:gravity="center" android:textColor="@color/white" android:textStyle="bold" android:background="@drawable/bg_bottom_sheet" android:backgroundTint="@color/primary" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="6" android:gravity="center" android:textColor="@color/slate_700" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+            <TextView android:text="7" android:gravity="center" android:textColor="@color/slate_400" android:layout_width="0dp" android:layout_height="40dp" android:layout_columnWeight="1"/>
+        </GridLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_bottom_sheet"
+            android:elevation="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="80dp">
+
+                <View
+                    android:layout_width="48dp"
+                    android:layout_height="6dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/slate_200"
+                    app:layout_cornerRadii="3dp" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:paddingBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today, Oct 5"
+                            android:textColor="@color/slate_900"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3 tasks remaining"
+                            android:textColor="@color/slate_500"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:text="View All"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_ai_card"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_lightbulb"
+                            app:tint="@color/indigo_500" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="AI Insight"
+                            android:textColor="@color/slate_800"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginStart="28dp"
+                        android:text="You have 2 high-priority tasks overlapping at 2:00 PM. Suggest moving 'Email blast' to tomorrow."
+                        android:textColor="@color/slate_600"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="28dp"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Reschedule"
+                            android:textColor="@color/indigo_600"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="Dismiss"
+                            android:textColor="@color/slate_500"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/bg_task_item"
+                    android:padding="16dp">
+
+                    <CheckBox
+                        android:id="@+id/cb1"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/llTag1"
+                        app:layout_constraintStart_toEndOf="@+id/cb1"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Q3 Report Review"
+                            android:textColor="@color/slate_800"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="10:00 AM - 11:30 AM"
+                            android:textColor="@color/slate_500"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/llTag1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#1A22C55E"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="2dp"
+                            android:text="TEAM"
+                            android:textColor="@color/green_500"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_task_item"
+                    android:padding="16dp">
+
+                    <View
+                        android:layout_width="4dp"
+                        android:layout_height="0dp"
+                        android:background="@color/red_500"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <CheckBox
+                        android:id="@+id/cb2"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/llTag2"
+                        app:layout_constraintStart_toEndOf="@+id/cb2"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Client Call"
+                            android:textColor="@color/slate_800"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2:00 PM - 3:00 PM"
+                            android:textColor="@color/slate_500"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/llTag2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#1AEF4444"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="2dp"
+                            android:text="HIGH"
+                            android:textColor="@color/red_500"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:backgroundTint="@color/primary"
+        android:src="@drawable/ic_add"
+        app:tint="@color/white"
+        app:borderWidth="0dp"
+        app:elevation="6dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
