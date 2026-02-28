@@ -37,6 +37,7 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        SessionManager.init(this);
         setContentView(R.layout.activity_signup);
 
         // ── View references ────────────────────────────────────────────

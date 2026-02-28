@@ -111,30 +111,66 @@
             android:textColor="@color/text_slate_900"
             app:layout_constraintTop_toBottomOf="@+id/etEmail" />
 
-        <EditText
-            android:id="@+id/etPassword"
+        <!-- Password field with eye toggle -->
+        <FrameLayout
+            android:id="@+id/passwordContainer"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
-            android:background="@drawable/bg_input"
-            android:hint="Enter your password"
-            android:inputType="textPassword"
-            android:paddingHorizontal="16dp"
-            android:textColor="@color/text_slate_900"
-            android:textColorHint="@color/text_slate_500"
-            app:layout_constraintTop_toBottomOf="@+id/labelPassword" />
+            app:layout_constraintTop_toBottomOf="@+id/labelPassword">
 
-        <android.widget.Button
-            android:id="@+id/btnLogin"
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_input"
+                android:hint="Enter your password"
+                android:inputType="textPassword"
+                android:autofillHints="password"
+                android:paddingStart="16dp"
+                android:paddingEnd="52dp"
+                android:textColor="@color/text_slate_900"
+                android:textColorHint="@color/text_slate_500" />
+
+            <ImageButton
+                android:id="@+id/btnTogglePassword"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Toggle password visibility"
+                android:src="@drawable/ic_eye"
+                app:tint="@color/slate_400" />
+        </FrameLayout>
+
+        <!-- Log In button + ProgressBar overlay -->
+        <FrameLayout
+            android:id="@+id/btnLoginContainer"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
-            android:backgroundTint="@color/primary"
-            android:text="Log in"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@+id/etPassword" />
+            app:layout_constraintTop_toBottomOf="@+id/passwordContainer">
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:backgroundTint="@color/primary"
+                android:text="Log In"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:cornerRadius="12dp" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/dividerLayout"
@@ -143,7 +179,7 @@
             android:layout_marginTop="32dp"
             android:gravity="center"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@+id/btnLogin">
+            app:layout_constraintTop_toBottomOf="@+id/btnLoginContainer">
 
             <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="@color/border_slate_300" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:text="Or continue with" android:textColor="@color/text_slate_500" android:textSize="12sp" />
