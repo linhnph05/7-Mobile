@@ -13,9 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class TimelineActivity extends AppCompatActivity {
 
@@ -28,31 +25,6 @@ public class TimelineActivity extends AppCompatActivity {
         // Back / menu button
         findViewById(R.id.btnMenu).setOnClickListener(v -> finish());
 
-        // Shift the bottom bar above the system navigation bar
-        View bottomBar = findViewById(R.id.bottomBar);
-        ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v, insets) -> {
-            Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(
-                v.getPaddingLeft(),
-                v.getPaddingTop(),
-                v.getPaddingRight(),
-                navInsets.bottom + (int) (12 * getResources().getDisplayMetrics().density)
-            );
-            return insets;
-        });
-
-        // Shift the top app bar below the status bar
-        View topAppBar = findViewById(R.id.topAppBar);
-        ViewCompat.setOnApplyWindowInsetsListener(topAppBar, (v, insets) -> {
-            Insets statusInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(
-                v.getPaddingLeft(),
-                statusInsets.top,
-                v.getPaddingRight(),
-                v.getPaddingBottom()
-            );
-            return insets;
-        });
 
         // New Task button
         findViewById(R.id.btnNewTask).setOnClickListener(v -> {

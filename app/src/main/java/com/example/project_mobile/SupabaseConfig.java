@@ -20,5 +20,11 @@ public final class SupabaseConfig {
     /** Public anon key injected from .env → SUPABASE_ANON_KEY */
     public static final String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
 
+    /**
+     * Google OAuth Web Client ID injected from .env → GOOGLE_WEB_CLIENT_ID
+     * Must be the *Web* client ID (not Android), as required by Supabase.
+     */
+    public static final String GOOGLE_WEB_CLIENT_ID = BuildConfig.GOOGLE_WEB_CLIENT_ID;
+
     private SupabaseConfig() { /* no instances */ }
 }

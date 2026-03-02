@@ -11,13 +11,9 @@
          TOP APP BAR
          ══════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="56dp"
+        android:layout_height="56dp"
         android:paddingHorizontal="16dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="8dp"
         android:background="@color/background_light">
 
         <ImageButton
@@ -692,16 +688,13 @@
          BOTTOM BAR  (stacked avatars  +  New Task button)
          ══════════════════════════════════ -->
     <LinearLayout
-        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="68dp"
         android:background="@color/white"
         android:elevation="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingHorizontal="20dp">
 
         <!-- Stacked avatars -->
         <FrameLayout

@@ -23,6 +23,9 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -32,6 +35,8 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText etFullName, etEmail, etPassword;
     private Button   btnSignUp;
     private ProgressBar progressBar;
+    private AppCompatButton btnGoogle;
+    private ActivityResultLauncher<Intent> googleSignInLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +51,7 @@ public class SignUpActivity extends AppCompatActivity {
         etPassword   = findViewById(R.id.etPassword);
         btnSignUp    = findViewById(R.id.btnSignUp);
         progressBar  = findViewById(R.id.progressBar);
+        btnGoogle    = findViewById(R.id.btnGoogle);
 
         // ── Back button → go back to login ─────────────────────────────
         ImageButton btnBack = findViewById(R.id.btnBack);
@@ -95,6 +101,37 @@ public class SignUpActivity extends AppCompatActivity {
 
         // ── Sign Up button ─────────────────────────────────────────────
         btnSignUp.setOnClickListener(v -> attemptSignUp());
+
+        // ── Google Sign-In / Sign-Up ───────────────────────────────────
+        googleSignInLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    setGoogleLoading(false);
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        GoogleAuthHelper.handleSignInResult(result.getData(),
+                                new GoogleAuthHelper.GoogleSignInCallback() {
+                                    @Override
+                                    public void onSuccess(String userId) {
+                                        runOnUiThread(() -> goToMain());
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        runOnUiThread(() -> {
+                                            if (!message.equals("Sign-in cancelled.")) {
+                                                Toast.makeText(SignUpActivity.this, message,
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                                    }
+                                });
+                    }
+                });
+
+        btnGoogle.setOnClickListener(v -> {
+            setGoogleLoading(true);
+            googleSignInLauncher.launch(GoogleAuthHelper.getSignInIntent(this));
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -142,7 +179,7 @@ public class SignUpActivity extends AppCompatActivity {
                             "Account created! Please check your email to confirm.",
                             Toast.LENGTH_LONG
                     ).show();
-                    // Navigate to Login after successful sign-up
+                    // Navigate to Login to sign in after confirming email
                     Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
@@ -161,8 +198,27 @@ public class SignUpActivity extends AppCompatActivity {
 
     /** Toggles the loading spinner and disables the sign-up button while loading. */
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (progressBar != null) {
+            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        }
         btnSignUp.setEnabled(!loading);
         btnSignUp.setText(loading ? "" : "Sign Up");
+        btnGoogle.setEnabled(!loading);
+    }
+
+    /** Disables all buttons while Google sign-in is in progress. */
+    private void setGoogleLoading(boolean loading) {
+        btnGoogle.setEnabled(!loading);
+        btnGoogle.setText(loading ? "Signing in…" : "Google");
+        btnSignUp.setEnabled(!loading);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE); // no spinner for Google flow
+        }
+    }
+
+    private void goToMain() {
+        Intent intent = new Intent(this, ProjectBoardActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

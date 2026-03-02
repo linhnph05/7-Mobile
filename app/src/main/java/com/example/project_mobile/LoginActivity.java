@@ -23,6 +23,9 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -32,19 +35,20 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean passwordVisible = false;
 
-    private EditText  etEmail, etPassword;
-    private Button    btnLogin;
+    private EditText    etEmail, etPassword;
+    private Button      btnLogin;
     private ProgressBar progressBar;
+    private AppCompatButton btnGoogle;
+    private ActivityResultLauncher<Intent> googleSignInLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        // Init session manager
         SessionManager.init(this);
 
-        // If already logged in, skip straight to the main screen
+        // Skip login if already authenticated
         if (SessionManager.isLoggedIn()) {
             goToMain();
             return;
@@ -60,16 +64,16 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        // ── View references ────────────────────────────────────────────
         etEmail     = findViewById(R.id.etEmail);
         etPassword  = findViewById(R.id.etPassword);
         btnLogin    = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progressBar);
+        btnGoogle   = findViewById(R.id.btnGoogle);
 
-        // ── Back button ────────────────────────────────────────────────
+        // Back button
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        // ── Password visibility toggle ─────────────────────────────────
+        // Password toggle
         ImageButton btnToggle = findViewById(R.id.btnTogglePassword);
         btnToggle.setOnClickListener(v -> {
             if (passwordVisible) {
@@ -84,20 +88,54 @@ public class LoginActivity extends AppCompatActivity {
             etPassword.setSelection(etPassword.getText().length());
         });
 
-        // ── Log In button ──────────────────────────────────────────────
+        // Email/password login
         btnLogin.setOnClickListener(v -> attemptLogin());
 
-        // ── "Don't have an account? Sign Up" link ─────────────────────
+        // ── Google Sign-In ─────────────────────────────────────────────
+        googleSignInLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    setGoogleLoading(false);
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        GoogleAuthHelper.handleSignInResult(result.getData(),
+                                new GoogleAuthHelper.GoogleSignInCallback() {
+                                    @Override
+                                    public void onSuccess(String userId) {
+                                        runOnUiThread(() -> goToMain());
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        runOnUiThread(() -> {
+                                            if (!message.equals("Sign-in cancelled.")) {
+                                                Toast.makeText(LoginActivity.this, message,
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                                    }
+                                });
+                    }
+                });
+
+        btnGoogle.setOnClickListener(v -> {
+            setGoogleLoading(true);
+            googleSignInLauncher.launch(GoogleAuthHelper.getSignInIntent(this));
+        });
+
+        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
+        tvForgotPassword.setOnClickListener(v ->
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class)));
+
+        // "Don't have an account? Sign Up" link
         TextView tvSignUp = findViewById(R.id.tvSignUp);
         String text = "Don't have an account? Sign Up";
         SpannableString spannable = new SpannableString(text);
         int start = text.indexOf("Sign Up");
         int end   = start + "Sign Up".length();
-        spannable.setSpan(
-                new ForegroundColorSpan(ContextCompat.getColor(this, R.color.primary)),
+        spannable.setSpan(new ForegroundColorSpan(
+                ContextCompat.getColor(this, R.color.primary)),
                 start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(
-                new StyleSpan(Typeface.BOLD),
+        spannable.setSpan(new StyleSpan(Typeface.BOLD),
                 start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannable.setSpan(new ClickableSpan() {
             @Override
@@ -109,15 +147,12 @@ public class LoginActivity extends AppCompatActivity {
         tvSignUp.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Validation + Supabase sign-in
-    // ─────────────────────────────────────────────────────────────────────
+    // ── Email/password sign-in ─────────────────────────────────────────────
 
     private void attemptLogin() {
         String email    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString();
 
-        // Client-side validation
         if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             etEmail.setError("Enter a valid email address");
             etEmail.requestFocus();
@@ -154,6 +189,15 @@ public class LoginActivity extends AppCompatActivity {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnLogin.setEnabled(!loading);
         btnLogin.setText(loading ? "" : "Log In");
+        btnGoogle.setEnabled(!loading);
+    }
+
+    /** Disables all buttons while Google sign-in is in progress. */
+    private void setGoogleLoading(boolean loading) {
+        btnGoogle.setEnabled(!loading);
+        btnGoogle.setText(loading ? "Signing in…" : "Google");
+        btnLogin.setEnabled(!loading);
+        progressBar.setVisibility(View.GONE);
     }
 
     private void goToMain() {

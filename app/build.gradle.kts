@@ -13,16 +13,12 @@ if (envFile.exists()) {
         if (trimmed.isNotEmpty() && !trimmed.startsWith("#")) {
             val idx = trimmed.indexOf('=')
             if (idx > 0) {
-                val key   = trimmed.substring(0, idx).trim()
-                val value = trimmed.substring(idx + 1).trim()
-                envProps[key] = value
+                envProps[trimmed.substring(0, idx).trim()] = trimmed.substring(idx + 1).trim()
             }
         }
     }
 }
-
-fun env(key: String): String =
-    envProps.getProperty(key) ?: System.getenv(key) ?: ""
+fun env(key: String): String = envProps.getProperty(key) ?: System.getenv(key) ?: ""
 
 android {
     namespace = "com.example.project_mobile"
@@ -40,8 +36,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // ── Inject .env values into BuildConfig ────────────────────────
-        buildConfigField("String", "SUPABASE_URL",      "\"${env("SUPABASE_URL")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${env("SUPABASE_ANON_KEY")}\"")
+        buildConfigField("String", "SUPABASE_URL",         "\"${env("SUPABASE_URL")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY",    "\"${env("SUPABASE_ANON_KEY")}\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${env("GOOGLE_WEB_CLIENT_ID")}\"")
     }
 
     buildFeatures {
@@ -70,6 +67,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.okhttp)
     implementation(libs.json)
+    implementation(libs.play.services.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
