@@ -1,0 +1,37 @@
+# Android Development Rules for Project "TaskFlow" (7-Mobile)
+
+## 1. UI & Theming (Crucial)
+- NEVER hardcode hex colors (e.g., `#1E2235`) in XML layouts.
+- ALWAYS use semantic theme colors for DayNight (Light/Dark mode) compatibility:
+    - Use `@color/theme_background`, `@color/theme_surface`, `@color/theme_text_primary`, `@color/theme_text_secondary`, etc.
+    - DO NOT use static colors like `@color/slate_900`, `@color/white`, or `@color/background_dark` directly unless they are inside a color overlay that never changes in dark mode (like an accent button).
+- Dimensions: Use `dp` for margins/padding/sizes and `sp` for text. Avoid hardcoded heights like `180dp` unless strictly necessary; prefer `wrap_content` or `match_parent` with constraints.
+- Previews: Always use `tools:text`, `tools:listitem`, and `tools:visibility` to make layouts previewable in Android Studio without affecting runtime data.
+
+## 2. Architecture & Logic Delegation (Supabase First)
+- Lean Client Policy: The Android app is a "thin client". Do not implement complex business logic that the database can handle.
+- Database Triggers: Side effects such as creating Notifications, Task Activities (logs), or adding Project Owners are handled by PostgreSQL Triggers on Supabase.
+- DO NOT write Android API calls to manually insert rows into the `notifications`, `task_activities`, or `project_members` (for the creator) tables. Rely on the DB to fire these automatically (Fire and Forget).
+- Constraints: Respect DB constraints. Perform simple client-side checks for UX (e.g., `start_date < due_date`, non-empty titles), but know that the DB is the final gatekeeper.
+
+## 3. Modern Material Design 3
+- Use Material3 components: `com.google.android.material.button.MaterialButton`, `com.google.android.material.imageview.ShapeableImageView`, etc.
+- Styling: Use `app:cornerRadius` for rounded corners on Material components instead of creating separate `shape.xml` files for every small change.
+- Hierarchy: Maintain clear visual hierarchy using typography (bold for titles, smaller secondary colors for metadata).
+
+## 4. Coding Standards (Java/Android)
+- Repository Pattern: All Supabase interactions must go through a Repository class. Activities/Fragments should never make direct network calls.
+- Single Responsibility (SRP): A DAO/Repository should only handle data fetching, not connection/session management or UI updates.
+- ID Handling: Treat `project_id` and `task_id` as `Long` (bigint in DB) and `user_id` as `String` (UUID in DB) to correctly match the database schema.
+- ViewBinding: Use ViewBinding (`ActivityMainBinding.inflate`) to interact with XML views. Avoid `findViewById`.
+- RecyclerView Lists: If the list is dynamic, prefer using `DiffUtil` with Adapters to optimize list updates instead of raw `notifyDataSetChanged()`.
+
+## 5. Network & Asynchrony (Supabase REST API)
+- Non-blocking UI: All Supabase REST API calls must be executed on a background thread (e.g., using `ExecutorService` or `CompletableFuture`).
+- UI Updates: Callbacks returning data to the UI layer MUST explicitly post updates back to the Main Thread via `Activity.runOnUiThread()` or a main looper `Handler`.
+- Graceful Error Handling: Parse HTTP error responses and show user-friendly `Toast` or `Snackbar` messages instead of crashing.
+
+## 6. Security & Configuration
+- Secrets Management: NEVER hardcode Supabase URLs, Anon Keys, or OAuth Client IDs in Java code.
+- Always use `SupabaseConfig.SUPABASE_URL` and `SupabaseConfig.SUPABASE_KEY`, which safely pull credentials from `BuildConfig` at compile time.
+- Authentication: Securely store JWT tokens (access_token, refresh_token) in `SharedPreferences` (or EncryptedSharedPreferences) via the `SessionManager`. 

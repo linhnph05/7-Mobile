@@ -1,3 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Project_Mobile</string>
+    <string name="app_name">TaskFlow</string>
+
+    <!-- ==================== -->
+    <!-- COMMON               -->
+    <!-- ==================== -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="search">Search</string>
+    <string name="back">Back</string>
+    <string name="done">Done</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="loading">Loading…</string>
+
+    <!-- ==================== -->
+    <!-- DASHBOARD            -->
+    <!-- Owner: [Bạn]         -->
+    <!-- ==================== -->
+    <string name="dashboard_greeting_morning">Good morning,</string>
+    <string name="dashboard_greeting_afternoon">Good afternoon,</string>
+    <string name="dashboard_greeting_evening">Good evening,</string>
+    <string name="dashboard_search_hint">Search projects or ask AI…</string>
+    <string name="dashboard_tab_ai">✨ AI Insights</string>
+    <string name="dashboard_tab_all">All Projects</string>
+    <string name="dashboard_tab_recent">Recent</string>
+    <string name="dashboard_focus_title">Focus for today</string>
+    <string name="dashboard_focus_desc">AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days.</string>
+
+    <!-- ==================== -->
+    <!-- PROJECT              -->
+    <!-- Owner: [Bạn]         -->
+    <!-- ==================== -->
+    <string name="project_create_title">Create Project</string>
+    <string name="project_setting_title">Project Settings</string>
+    <string name="project_name_label">Project Name</string>
+    <string name="project_name_hint">Enter project name</string>
+    <string name="project_description_label">Description</string>
+    <string name="project_description_hint">Enter project description</string>
+    <string name="project_color_label">Project Color</string>
+    <string name="project_space_key_label">Space Key</string>
+    <string name="project_category_label">Category</string>
+    <string name="project_owner_label">Space Owner</string>
+    <string name="project_create_button">Create Project</string>
+    <string name="project_save_button">Save Changes</string>
+    <string name="project_delete_button">Delete Project</string>
+    <string name="project_delete_confirm_title">Delete Project</string>
+    <string name="project_delete_confirm_message">Are you sure you want to delete this project? All tasks will also be deleted.</string>
+    <string name="project_created_success">Project created successfully!</string>
+    <string name="project_saved_success">Changes saved!</string>
+    <string name="project_deleted_success">Project deleted!</string>
+    <string name="project_name_required">Please enter project name</string>
+
+    <!-- ==================== -->
+    <!-- AUTH                 -->
+    <!-- Owner: [Đồng đội 1]  -->
+    <!-- ==================== -->
+    <string name="auth_login_title">Login</string>
+    <string name="auth_register_title">Register</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_email_hint">Enter your email</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_password_hint">Enter your password</string>
+    <string name="auth_login_button">Login</string>
+    <string name="auth_register_button">Register</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_no_account">Don\'t have an account? Register</string>
+    <string name="auth_have_account">Already have an account? Login</string>
+
+    <!-- ==================== -->
+    <!-- TASK                 -->
+    <!-- Owner: [Đồng đội 2]  -->
+    <!-- ==================== -->
+    <string name="task_list_title">Tasks</string>
+    <string name="task_create_title">Create Task</string>
+    <string name="task_detail_title">Task Detail</string>
+    <string name="task_title_label">Task Title</string>
+    <string name="task_title_hint">Enter task title</string>
+    <string name="task_description_label">Description</string>
+    <string name="task_description_hint">Enter task description</string>
+    <string name="task_due_date_label">Due Date</string>
+    <string name="task_priority_label">Priority</string>
+    <string name="task_status_label">Status</string>
+    <string name="task_status_todo">To Do</string>
+    <string name="task_status_in_progress">In Progress</string>
+    <string name="task_status_done">Done</string>
+    <string name="task_priority_low">Low</string>
+    <string name="task_priority_medium">Medium</string>
+    <string name="task_priority_high">High</string>
+
+    <!-- ==================== -->
+    <!-- BOTTOM NAV           -->
+    <!-- ==================== -->
+    <string name="nav_home">Home</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_assistant">Assistant</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- ==================== -->
+    <!-- ERRORS               -->
+    <!-- ==================== -->
+    <string name="error_network">Network error. Please try again.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    <string name="error_empty_field">This field is required.</string>
 </resources>

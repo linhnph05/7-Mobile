@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    ╔══════════════════════════════════════════════════════════════╗
+    ║           STYLES - DESIGN SYSTEM FOR TASK FLOW APP           ║
+    ╠══════════════════════════════════════════════════════════════╣
+    ║  Quy tắc:                                                    ║
+    ║  - Tất cả UI components nên dùng style thay vì hardcode      ║
+    ║  - Đặt tên: [Component]_[Variant]                            ║
+    ╚══════════════════════════════════════════════════════════════╝
+    -->
+
+    <!-- ==================== -->
+    <!-- BUTTON STYLES        -->
+    <!-- ==================== -->
+    <style name="AppButton_Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppButton_Secondary" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:backgroundTint">@color/input_background</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="AppButton_Danger" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:backgroundTint">@color/danger</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- ==================== -->
+    <!-- INPUT STYLES         -->
+    <!-- ==================== -->
+    <style name="AppInput_Default" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/input_height</item>
+        <item name="android:background">@color/input_background</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="android:padding">@dimen/padding_input</item>
+    </style>
+
+    <style name="AppInput_MultiLine" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:background">@color/input_background</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="android:padding">@dimen/padding_input</item>
+        <item name="android:gravity">top</item>
+        <item name="android:inputType">textMultiLine</item>
+    </style>
+
+    <!-- ==================== -->
+    <!-- TEXT STYLES          -->
+    <!-- ==================== -->
+    <style name="AppText_Title" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_xl</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppText_Subtitle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_lg</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppText_Body" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_md</item>
+    </style>
+
+    <style name="AppText_Caption" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/text_sm</item>
+    </style>
+
+    <style name="AppText_Label" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/text_sm</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_sm</item>
+    </style>
+
+    <!-- ==================== -->
+    <!-- CARD STYLES          -->
+    <!-- ==================== -->
+    <style name="AppCard_Default" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/surface_dark</item>
+        <item name="cardCornerRadius">@dimen/radius_lg</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <!-- ==================== -->
+    <!-- HEADER STYLES        -->
+    <!-- ==================== -->
+    <style name="AppHeader_Back" parent="android:Widget.ImageButton">
+        <item name="android:layout_width">@dimen/icon_lg</item>
+        <item name="android:layout_height">@dimen/icon_lg</item>
+        <item name="android:contentDescription">@string/back</item>
+    </style>
+
+    <!-- ==================== -->
+    <!-- CHIP STYLES          -->
+    <!-- ==================== -->
+    <style name="RoundedChip" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+</resources>
+
+

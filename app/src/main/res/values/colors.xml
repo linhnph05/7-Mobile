@@ -1,22 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#136DEC</color>
-    <color name="background_dark">#101822</color>
-    <color name="surface_dark">#1C2430</color>
-    <color name="text_slate_400">#94A3B8</color>
-    <color name="border_color">#334155</color>
+    <!-- ════════════════════════════════════════════
+         BRAND COLORS (same in light & dark)
+         ════════════════════════════════════════════ -->
+    <color name="primary">#2945FF</color>
+    <color name="primary_dark">#1E35CC</color>
+    <color name="primary_light">#5C6FFF</color>
+
+    <!-- Status -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF9800</color>
+    <color name="danger">#EF4444</color>
+    <color name="info">#00BCD4</color>
+
+    <!-- Priority -->
+    <color name="priority_high">#EF4444</color>
+    <color name="priority_medium">#FF9800</color>
+    <color name="priority_low">#4CAF50</color>
+
+    <!-- Project accent -->
+    <color name="project_blue">#2945FF</color>
+    <color name="project_orange">#FF5722</color>
+    <color name="project_green">#4CAF50</color>
+    <color name="project_purple">#9C27B0</color>
+    <color name="project_cyan">#00BCD4</color>
+
+    <!-- Absolute -->
     <color name="white">#FFFFFF</color>
-    <color name="background_light">#F6F7F8</color>
-    <color name="text_slate_900">#0F172A</color>
-    <color name="text_slate_500">#64748B</color>
-    <color name="border_slate_300">#CBD5E1</color>
-    <color name="bg_red_50">#FEF2F2</color>
-    <color name="text_red_600">#DC2626</color>
-    <color name="bg_blue_100">#DBEAFE</color>
-    <color name="bg_purple_100">#F3E8FF</color>
-    <color name="text_purple_600">#9333EA</color>
-    <color name="bg_orange_100">#FFEDD5</color>
-    <color name="text_orange_600">#EA580C</color>
+    <color name="black">#000000</color>
+
+    <!-- Slate palette (raw values, use theme_* below in layouts) -->
     <color name="slate_50">#F8FAFC</color>
     <color name="slate_100">#F1F5F9</color>
     <color name="slate_200">#E2E8F0</color>
@@ -27,9 +40,68 @@
     <color name="slate_700">#334155</color>
     <color name="slate_800">#1E293B</color>
     <color name="slate_900">#0F172A</color>
+
+    <!-- Indigo palette -->
     <color name="indigo_50">#EEF2FF</color>
     <color name="indigo_500">#6366F1</color>
     <color name="indigo_600">#4F46E5</color>
     <color name="red_500">#EF4444</color>
     <color name="green_500">#22C55E</color>
+
+    <!-- ════════════════════════════════════════════
+         THEME-AWARE SEMANTIC COLORS  (LIGHT values)
+         Override these in values-night/colors.xml
+         ════════════════════════════════════════════ -->
+
+    <!-- Backgrounds -->
+    <color name="theme_background">#F6F7F8</color>
+    <color name="theme_surface">#FFFFFF</color>
+    <color name="theme_surface_variant">#F1F5F9</color>
+    <color name="theme_card">#FFFFFF</color>
+    <color name="theme_input_bg">#F1F5F9</color>
+    <color name="theme_bottom_nav_bg">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="theme_text_primary">#0F172A</color>
+    <color name="theme_text_secondary">#64748B</color>
+    <color name="theme_text_hint">#94A3B8</color>
+
+    <!-- Borders & dividers -->
+    <color name="theme_border">#CBD5E1</color>
+    <color name="theme_divider">#E2E8F0</color>
+
+    <!-- Notification -->
+    <color name="theme_notification_unread">#EEF2FF</color>
+    <color name="theme_notification_read">#FFFFFF</color>
+
+    <!-- Settings icon backgrounds -->
+    <color name="theme_icon_blue_bg">#DBEAFE</color>
+    <color name="theme_icon_purple_bg">#F3E8FF</color>
+    <color name="theme_icon_orange_bg">#FFEDD5</color>
+    <color name="theme_btn_danger_bg">#FEF2F2</color>
+    <color name="theme_btn_danger_text">#DC2626</color>
+
+    <!-- ═══ LEGACY aliases (so old layouts don't break) ═══ -->
+    <color name="background_dark">#121629</color>
+    <color name="surface_dark">#1A1F36</color>
+    <color name="notification_unread_bg">@color/theme_notification_unread</color>
+    <color name="notification_read_bg">@color/theme_notification_read</color>
+    <color name="input_background">@color/theme_input_bg</color>
+    <color name="text_primary">@color/theme_text_primary</color>
+    <color name="text_secondary">@color/theme_text_secondary</color>
+    <color name="text_hint">@color/theme_text_hint</color>
+    <color name="text_slate_400">#94A3B8</color>
+    <color name="text_slate_900">@color/theme_text_primary</color>
+    <color name="text_slate_500">@color/theme_text_secondary</color>
+    <color name="border_color">@color/theme_border</color>
+    <color name="divider">@color/theme_divider</color>
+    <color name="background_light">@color/theme_background</color>
+    <color name="border_slate_300">@color/theme_border</color>
+    <color name="bg_red_50">@color/theme_btn_danger_bg</color>
+    <color name="text_red_600">@color/theme_btn_danger_text</color>
+    <color name="bg_blue_100">@color/theme_icon_blue_bg</color>
+    <color name="bg_purple_100">@color/theme_icon_purple_bg</color>
+    <color name="text_purple_600">#9333EA</color>
+    <color name="bg_orange_100">@color/theme_icon_orange_bg</color>
+    <color name="text_orange_600">#EA580C</color>
 </resources>

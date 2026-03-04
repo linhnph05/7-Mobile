@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ════════════════════════════════════════════
+         THEME-AWARE SEMANTIC COLORS  (DARK values)
+         These override the same names from values/colors.xml
+         when night mode is active.
+         ════════════════════════════════════════════ -->
+
+    <!-- Backgrounds -->
+    <color name="theme_background">#121629</color>
+    <color name="theme_surface">#1A1F36</color>
+    <color name="theme_surface_variant">#1E2235</color>
+    <color name="theme_card">#1A1F36</color>
+    <color name="theme_input_bg">#1E2235</color>
+    <color name="theme_bottom_nav_bg">#1A1F36</color>
+
+    <!-- Text -->
+    <color name="theme_text_primary">#FFFFFF</color>
+    <color name="theme_text_secondary">#A0A0A0</color>
+    <color name="theme_text_hint">#606060</color>
+
+    <!-- Borders & dividers -->
+    <color name="theme_border">#334155</color>
+    <color name="theme_divider">#2A2F45</color>
+
+    <!-- Notification -->
+    <color name="theme_notification_unread">#1E2A3A</color>
+    <color name="theme_notification_read">#121629</color>
+
+    <!-- Settings icon backgrounds (slightly dimmed for dark) -->
+    <color name="theme_icon_blue_bg">#1E2A4A</color>
+    <color name="theme_icon_purple_bg">#2A1E3A</color>
+    <color name="theme_icon_orange_bg">#2A2218</color>
+    <color name="theme_btn_danger_bg">#2A1515</color>
+    <color name="theme_btn_danger_text">#F87171</color>
+
+    <!-- ═══ LEGACY aliases (dark overrides) ═══ -->
+    <color name="notification_unread_bg">@color/theme_notification_unread</color>
+    <color name="notification_read_bg">@color/theme_notification_read</color>
+    <color name="input_background">@color/theme_input_bg</color>
+    <color name="text_primary">@color/theme_text_primary</color>
+    <color name="text_secondary">@color/theme_text_secondary</color>
+    <color name="text_hint">@color/theme_text_hint</color>
+    <color name="text_slate_900">@color/theme_text_primary</color>
+    <color name="text_slate_500">@color/theme_text_secondary</color>
+    <color name="border_color">@color/theme_border</color>
+    <color name="divider">@color/theme_divider</color>
+    <color name="background_light">@color/theme_background</color>
+    <color name="border_slate_300">@color/theme_border</color>
+    <color name="bg_red_50">@color/theme_btn_danger_bg</color>
+    <color name="text_red_600">@color/theme_btn_danger_text</color>
+    <color name="bg_blue_100">@color/theme_icon_blue_bg</color>
+    <color name="bg_purple_100">@color/theme_icon_purple_bg</color>
+    <color name="bg_orange_100">@color/theme_icon_orange_bg</color>
+</resources>

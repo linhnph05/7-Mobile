@@ -80,17 +80,19 @@
 
         <TextView
             android:id="@+id/labelEmail"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Email Address"
             android:textStyle="bold"
             android:textColor="@color/text_slate_900"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvSubtitle" />
 
         <EditText
             android:id="@+id/etEmail"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_input"
@@ -99,24 +101,30 @@
             android:paddingHorizontal="16dp"
             android:textColor="@color/text_slate_900"
             android:textColorHint="@color/text_slate_500"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/labelEmail" />
 
         <TextView
             android:id="@+id/labelPassword"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Password"
             android:textStyle="bold"
             android:textColor="@color/text_slate_900"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/etEmail" />
 
         <!-- Password field with eye toggle -->
         <FrameLayout
             android:id="@+id/passwordContainer"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/labelPassword">
 
             <EditText
@@ -159,9 +167,11 @@
         <!-- Log In button + ProgressBar overlay -->
         <FrameLayout
             android:id="@+id/btnLoginContainer"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvForgotPassword">
 
             <Button
@@ -186,11 +196,13 @@
 
         <LinearLayout
             android:id="@+id/dividerLayout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:gravity="center"
             android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnLoginContainer">
 
             <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="@color/border_slate_300" />
@@ -200,10 +212,12 @@
 
         <LinearLayout
             android:id="@+id/socialLayout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
             android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dividerLayout">
 
             <androidx.appcompat.widget.AppCompatButton

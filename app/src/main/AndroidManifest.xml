@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions for Supabase API -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <queries>
         <package android:name="com.google.android.gms" />
@@ -16,46 +18,64 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Project_Mobile">
+        android:theme="@style/Theme.TaskFlow">
 
+        <!-- Auth - Đăng nhập (Launcher) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Dashboard -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.dashboard.DashboardActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
+
+        <!-- Auth -->
+        <activity
+            android:name=".ui.auth.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ResetPasswordActivity"
+            android:name=".ui.auth.ResetPasswordActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
                     android:host="reset-password"
                     android:scheme="taskai" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".SignUpActivity"
+            android:name=".ui.auth.SignUpActivity"
+            android:exported="false" />
+
+        <!-- Project -->
+        <activity android:name=".ui.project.CreateProjectActivity" />
+        <activity
+            android:name=".ui.project.ProjectBoardActivity"
             android:exported="false" />
         <activity
-            android:name=".ProjectBoardActivity"
+            android:name=".ui.timeline.TimelineActivity"
             android:exported="false" />
+
+        <!-- Notification -->
+        <activity android:name=".ui.notification.NotificationsActivity" />
+
+        <!-- Profile -->
         <activity
-            android:name=".TimelineActivity"
+            android:name=".ui.profile.ProfileActivity"
             android:exported="false" />
+
+        <!-- MainActivity cũ -->
+        <activity android:name=".MainActivity" />
+
     </application>
 
 </manifest>

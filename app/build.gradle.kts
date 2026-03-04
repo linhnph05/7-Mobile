@@ -21,13 +21,11 @@ if (envFile.exists()) {
 fun env(key: String): String = envProps.getProperty(key) ?: System.getenv(key) ?: ""
 
 android {
-    namespace = "com.example.project_mobile"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "com.team7.taskflow"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.project_mobile"
+        applicationId = "com.team7.taskflow"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
@@ -65,9 +63,22 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.coordinatorlayout)
+    implementation(libs.cardview)
+    implementation(libs.recyclerview)
+    implementation(libs.core.ktx)
+    implementation(libs.swiperefreshlayout)
+
+    // Supabase REST API
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
     implementation(libs.json)
     implementation(libs.play.services.auth)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
