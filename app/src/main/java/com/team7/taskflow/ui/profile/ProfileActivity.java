@@ -1,12 +1,16 @@
 package com.team7.taskflow.ui.profile;
 
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.remote.SupabaseClient;
+import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
+import com.team7.taskflow.utils.SessionManager;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -25,6 +29,8 @@ public class ProfileActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        SessionManager.init(this);
+
         // Dark Mode switch
         switchDarkMode = findViewById(R.id.switchDarkMode);
 
@@ -42,6 +48,19 @@ public class ProfileActivity extends BaseActivity {
                     isChecked ? AppCompatDelegate.MODE_NIGHT_YES
                             : AppCompatDelegate.MODE_NIGHT_NO);
         });
+
+        Button btnLogout = findViewById(R.id.btnLogout);
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> {
+                SessionManager.clearSession();
+                SupabaseClient.getInstance().clearAccessToken();
+
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            });
+        }
 
         // Bottom Navigation Bar
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);

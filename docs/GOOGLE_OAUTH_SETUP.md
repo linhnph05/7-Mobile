@@ -3,6 +3,7 @@
 ## Tại sao cần làm bước này?
 
 Khi user nhấn nút Google trong app, app sẽ tự động:
+
 1. Hiện danh sách tài khoản Google trên máy
 2. User chọn email → Google trả về ID token
 3. App gửi ID token cho Supabase → Supabase xác thực → trả về session
@@ -12,7 +13,35 @@ Nhưng Google cần biết **app nào** đang yêu cầu đăng nhập → bạn
 ## Thông tin dự án
 
 - **Package name**: `com.team7.taskflow`
-- **SHA-1 (debug)**: `D1:53:B5:AE:39:C4:4A:26:E8:DF:6E:C9:F9:E6:0F:D0:66:CD:8E:7B`
+- **SHA-1 (debug)**: lấy từ máy local của bạn (xem Bước 0)
+
+---
+
+## Bước 0: Lấy SHA-1 debug trên máy của bạn (BẮT BUỘC)
+
+Mỗi máy có `~/.android/debug.keystore` khác nhau, nên SHA-1 sẽ khác nhau.
+
+### macOS / Linux
+
+```bash
+keytool -list -v \
+   -alias androiddebugkey \
+   -keystore ~/.android/debug.keystore \
+   -storepass android \
+   -keypass android | grep SHA1
+```
+
+### Windows (PowerShell)
+
+```powershell
+keytool -list -v `
+   -alias androiddebugkey `
+   -keystore "$env:USERPROFILE\.android\debug.keystore" `
+   -storepass android `
+   -keypass android | findstr SHA1
+```
+
+Copy giá trị SHA-1 này để dùng ở Bước 4b.
 
 ---
 
@@ -56,7 +85,7 @@ Nhưng Google cần biết **app nào** đang yêu cầu đăng nhập → bạn
 2. Application type: **Android**
 3. Name: `TaskFlow Android Debug`
 4. Package name: `com.team7.taskflow`
-5. SHA-1: `D1:53:B5:AE:39:C4:4A:26:E8:DF:6E:C9:F9:E6:0F:D0:66:CD:8E:7B`
+5. SHA-1: dùng giá trị lấy ở **Bước 0**
 6. **Create**
 
 ## Bước 5: Cấu hình Supabase
@@ -82,4 +111,3 @@ GOOGLE_WEB_CLIENT_ID=paste-web-client-id-ở-đây.apps.googleusercontent.com
 ```
 
 Done! Nhấn nút Google trong app sẽ hiện danh sách email để chọn.
-

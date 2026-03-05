@@ -15,17 +15,6 @@ import retrofit2.http.Query;
 public interface UserApi {
 
     /**
-     * Get user by email and password_hash (direct DB login)
-     * Supabase query: /users?email=eq.{email}&password_hash=eq.{password}
-     */
-    @GET("users")
-    Call<List<User>> getUserByEmailAndPassword(
-            @Query("email") String emailFilter,
-            @Query("password_hash") String passwordFilter,
-            @Query("select") String select
-    );
-
-    /**
      * Get user by email
      * Supabase query: /users?email=eq.{email}
      */
