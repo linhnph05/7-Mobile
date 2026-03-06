@@ -17,6 +17,7 @@ import android.text.style.StyleSpan;
 import android.graphics.Typeface;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Patterns;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,6 +34,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 
 public class SignUpActivity extends BaseActivity {
+
+    private static final String TAG = "SignUpActivity";
 
     private boolean passwordVisible = false;
 
@@ -105,8 +108,10 @@ public class SignUpActivity extends BaseActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     setGoogleLoading(false);
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        GoogleAuthHelper.handleSignInResult(result.getData(),
+                    Log.d(TAG, "Google launcher resultCode=" + result.getResultCode());
+                    Intent data = result.getData();
+                    if (data != null) {
+                        GoogleAuthHelper.handleSignInResult(data,
                                 new GoogleAuthHelper.GoogleSignInCallback() {
                                     @Override
                                     public void onSuccess(String userId) {
@@ -123,6 +128,13 @@ public class SignUpActivity extends BaseActivity {
                                         });
                                     }
                                 });
+                        return;
+                    }
+
+                    if (result.getResultCode() != RESULT_CANCELED) {
+                        Toast.makeText(SignUpActivity.this,
+                                "Google sign-in failed before receiving account data.",
+                                Toast.LENGTH_LONG).show();
                     }
                 });
 

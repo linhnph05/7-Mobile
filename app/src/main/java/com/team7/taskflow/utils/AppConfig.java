@@ -20,22 +20,9 @@ public class AppConfig {
     // ============================================
 
     /**
-     * Các chế độ xác thực hỗ trợ:
-     * - DIRECT_DB : query bảng public.users (email + password_hash plain text)
-     * - SUPABASE_AUTH : gọi Supabase Auth API (password được hash, có token)
+     * Ứng dụng chỉ dùng Supabase Auth cho đăng nhập/đăng ký.
      */
-    public enum AuthMode {
-        DIRECT_DB,
-        SUPABASE_AUTH
-    }
-
-    /**
-     * ⚠️ ĐỔI DÒNG NÀY ĐỂ CHUYỂN CÁCH ĐĂNG NHẬP ⚠️
-     *
-     * DIRECT_DB → so sánh email + password trực tiếp trong DB (dev / demo)
-     * SUPABASE_AUTH → dùng Supabase Auth API, password tự hash (production)
-     */
-    public static final AuthMode AUTH_MODE = AuthMode.DIRECT_DB;
+    public static final boolean USE_SUPABASE_AUTH_ONLY = true;
 
     // ============================================
     // ⚠️ CÁC FLAG NÀY CẦN SET FALSE KHI RELEASE ⚠️
@@ -61,7 +48,7 @@ public class AppConfig {
      *
      * ĐỔI THÀNH false KHI KHÔNG CẦN TEST NỮA
      */
-    public static final boolean CLEAR_SESSION_ON_START = true;
+    public static final boolean CLEAR_SESSION_ON_START = false;
 
     /**
      * Sử dụng mock data (dữ liệu giả thay vì gọi API)

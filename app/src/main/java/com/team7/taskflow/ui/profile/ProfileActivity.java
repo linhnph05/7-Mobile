@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.profile;
 
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.repository.UserRepository;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.auth.LoginActivity;
@@ -37,6 +38,9 @@ public class ProfileActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        // Khởi tạo SessionManager từ nhánh master
+        SessionManager.init(this);
 
         initViews();
         setupThemeSwitch();
@@ -90,13 +94,18 @@ public class ProfileActivity extends BaseActivity {
     }
 
     private void setupLogout() {
-        btnLogout.setOnClickListener(v -> {
-            SessionManager.clearSession();
-            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        });
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> {
+                SessionManager.clearSession();
+                // Tích hợp xóa token Supabase từ nhánh master
+                SupabaseClient.getInstance().clearAccessToken();
+
+                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            });
+        }
     }
 
     private void setupSaveButton() {
@@ -105,7 +114,7 @@ public class ProfileActivity extends BaseActivity {
             String bio = etBio.getText().toString().trim();
             String userId = SessionManager.getUserId();
 
-            if (userId.isEmpty()) return;
+            if (userId == null || userId.isEmpty()) return;
 
             btnSave.setEnabled(false);
             btnSave.setText("...");
@@ -135,7 +144,7 @@ public class ProfileActivity extends BaseActivity {
 
     private void loadUserProfile() {
         String userId = SessionManager.getUserId();
-        if (userId.isEmpty()) {
+        if (userId == null || userId.isEmpty()) {
             Toast.makeText(this, "Session expired, please login again.", Toast.LENGTH_SHORT).show();
             return;
         }

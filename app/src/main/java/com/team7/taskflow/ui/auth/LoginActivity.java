@@ -6,6 +6,7 @@ import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.auth.LoginCallback;
 import com.team7.taskflow.auth.LoginStrategy;
 import com.team7.taskflow.auth.LoginStrategyFactory;
+import com.team7.taskflow.utils.AppConfig;
 import com.team7.taskflow.utils.SessionManager;
 
 import com.team7.taskflow.ui.profile.ProfileActivity;
@@ -64,7 +65,7 @@ public class LoginActivity extends BaseActivity {
         SessionManager.init(this);
 
         // [DEV] Xóa session mỗi lần mở app để test login
-        if (com.team7.taskflow.utils.AppConfig.CLEAR_SESSION_ON_START) {
+        if (AppConfig.CLEAR_SESSION_ON_START) {
             SessionManager.clearSession();
         }
 
@@ -119,8 +120,10 @@ public class LoginActivity extends BaseActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     setGoogleLoading(false);
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        GoogleAuthHelper.handleSignInResult(result.getData(),
+                    Log.d(TAG, "Google launcher resultCode=" + result.getResultCode());
+                    Intent data = result.getData();
+                    if (data != null) {
+                        GoogleAuthHelper.handleSignInResult(data,
                                 new GoogleAuthHelper.GoogleSignInCallback() {
                                     @Override
                                     public void onSuccess(String userId) {
@@ -137,6 +140,13 @@ public class LoginActivity extends BaseActivity {
                                         });
                                     }
                                 });
+                        return;
+                    }
+
+                    if (result.getResultCode() != RESULT_CANCELED) {
+                        Toast.makeText(LoginActivity.this,
+                                "Google sign-in failed before receiving account data.",
+                                Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -208,7 +218,11 @@ public class LoginActivity extends BaseActivity {
             public void onSuccess(String userId, String displayName) {
                 runOnUiThread(() -> {
                     setLoading(false);
-                    SessionManager.saveSession("", "", userId, displayName);
+                    SessionManager.saveSession(
+                            SessionManager.getAccessToken(),
+                            SessionManager.getRefreshToken(),
+                            userId,
+                            displayName);
                     Toast.makeText(LoginActivity.this,
                             "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                     goToMain();

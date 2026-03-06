@@ -38,7 +38,6 @@ public final class GoogleAuthHelper {
             return null;
         }
         GoogleSignInClient client = buildClient(context);
-        client.signOut();
         return client.getSignInIntent();
     }
 
