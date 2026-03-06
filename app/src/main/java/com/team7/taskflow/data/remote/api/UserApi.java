@@ -3,9 +3,12 @@ package com.team7.taskflow.data.remote.api;
 import com.team7.taskflow.domain.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.PATCH;
 import retrofit2.http.Query;
 
 /**
@@ -43,5 +46,14 @@ public interface UserApi {
             @Query("limit") int limit,
             @Query("select") String select
     );
-}
 
+    /**
+     * Update user data
+     * Supabase query: PATCH /users?user_id=eq.{userId}
+     */
+    @PATCH("users")
+    Call<Void> updateUser(
+            @Query("user_id") String userIdFilter,
+            @Body Map<String, Object> updates
+    );
+}
