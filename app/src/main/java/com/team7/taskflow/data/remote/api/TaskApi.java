@@ -3,6 +3,7 @@ package com.team7.taskflow.data.remote.api;
 import com.team7.taskflow.domain.model.Task;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -65,17 +66,17 @@ public interface TaskApi {
     );
 
     /**
-     * Update task
+     * Update task fields (using Map for dynamic updates like soft delete or drag-drop position)
      */
     @PATCH("tasks")
-    Call<List<Task>> updateTask(
+    Call<List<Task>> updateTaskFields(
             @Query("task_id") String taskIdFilter,
-            @Body Task task,
+            @Body Map<String, Object> updates,
             @Header("Prefer") String prefer
     );
 
     /**
-     * Update task status
+     * Update task status (for drag & drop in Kanban)
      */
     @PATCH("tasks")
     Call<Void> updateTaskStatus(
@@ -84,7 +85,7 @@ public interface TaskApi {
     );
 
     /**
-     * Delete task
+     * Delete task (hard delete)
      */
     @DELETE("tasks")
     Call<Void> deleteTask(
@@ -102,4 +103,3 @@ public interface TaskApi {
         }
     }
 }
-

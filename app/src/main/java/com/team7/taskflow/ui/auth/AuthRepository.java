@@ -21,9 +21,6 @@ import com.team7.taskflow.utils.SessionManager;
 
 /**
  * Repository that calls the Supabase Auth REST API.
- *
- * Docs: https://supabase.com/docs/reference/javascript/auth-signup
- * POST /auth/v1/signup
  */
 public class AuthRepository {
 
@@ -31,19 +28,16 @@ public class AuthRepository {
 
     public interface AuthCallback {
         void onSuccess(String userId);
-
         void onError(String message);
     }
 
     public interface ActionCallback {
         void onSuccess();
-
         void onError(String message);
     }
 
     public interface TokenCallback {
         void onSuccess(String accessToken, String refreshToken);
-
         void onError(String message);
     }
 
@@ -53,10 +47,6 @@ public class AuthRepository {
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .build();
-
-    // ─────────────────────────────────────────────────────────────
-    // Sign Up
-    // ─────────────────────────────────────────────────────────────
 
     public static void signUp(String fullName, String email, String password, AuthCallback callback) {
         try {
@@ -107,10 +97,6 @@ public class AuthRepository {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Sign In (email + password)
-    // ─────────────────────────────────────────────────────────────
-
     public static void signIn(String email, String password, AuthCallback callback) {
         try {
             JSONObject data = new JSONObject();
@@ -126,53 +112,38 @@ public class AuthRepository {
                     .addHeader("Content-Type", "application/json")
                     .build();
 
-            Log.d(TAG, "signIn request url=" + request.url());
-
             HTTP_CLIENT.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    Log.e(TAG, "signIn onFailure: " + e.getMessage(), e);
                     callback.onError("Network error: " + e.getMessage());
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     String responseBody = response.body() != null ? response.body().string() : "";
-                    Log.d(TAG, "signIn onResponse code=" + response.code() + " body=" + responseBody);
-
                     try {
                         JSONObject json = new JSONObject(responseBody);
 
                         if (response.isSuccessful()) {
                             String accessToken = json.optString("access_token", "");
                             String refreshToken = json.optString("refresh_token", "");
-                            String userId = json.optJSONObject("user") != null
-                                    ? json.optJSONObject("user").optString("id", "")
-                                    : "";
+                            
+                            JSONObject userJson = json.optJSONObject("user");
+                            String userId = userJson != null ? userJson.optString("id", "") : "";
+                            String userEmail = userJson != null ? userJson.optString("email", "") : email;
+                            
+                            // Extract display name from metadata if available
+                            String displayName = null;
+                            if (userJson != null && userJson.optJSONObject("user_metadata") != null) {
+                                displayName = userJson.optJSONObject("user_metadata").optString("full_name", null);
+                            }
 
-                            SessionManager.saveSession(accessToken, refreshToken, userId);
+                            SessionManager.saveSession(accessToken, refreshToken, userId, userEmail, displayName);
                             callback.onSuccess(userId);
                         } else {
-                            String rawMsg = json.optString("error_description",
+                            String msg = json.optString("error_description",
                                     json.optString("msg",
-                                            json.optString("message", "")));
-                            Log.e(TAG, "signIn error response: code=" + response.code()
-                                    + " error=" + json.optString("error")
-                                    + " desc=" + rawMsg);
-
-                            String msg;
-                            if (rawMsg.toLowerCase().contains("invalid login credentials")) {
-                                msg = "Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.";
-                            } else if (rawMsg.toLowerCase().contains("email not confirmed")) {
-                                msg = "Email chưa được xác nhận. Vui lòng kiểm tra hộp thư để xác nhận.";
-                            } else if (rawMsg.toLowerCase().contains("too many requests")
-                                    || response.code() == 429) {
-                                msg = "Quá nhiều lần thử. Vui lòng đợi một lát rồi thử lại.";
-                            } else if (!rawMsg.isEmpty()) {
-                                msg = rawMsg;
-                            } else {
-                                msg = "Đăng nhập thất bại. Vui lòng thử lại.";
-                            }
+                                            json.optString("message", "Đăng nhập thất bại.")));
                             callback.onError(msg);
                         }
                     } catch (Exception e) {
@@ -182,14 +153,9 @@ public class AuthRepository {
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "signIn build request error: " + e.getMessage(), e);
             callback.onError("Failed to build request: " + e.getMessage());
         }
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Sign In with Google (ID-token grant)
-    // ─────────────────────────────────────────────────────────────
 
     public static void signInWithGoogle(String idToken, AuthCallback callback) {
         try {
@@ -220,10 +186,17 @@ public class AuthRepository {
                         if (response.isSuccessful()) {
                             String accessToken = json.optString("access_token", "");
                             String refreshToken = json.optString("refresh_token", "");
-                            String userId = json.optJSONObject("user") != null
-                                    ? json.optJSONObject("user").optString("id", "")
-                                    : "";
-                            SessionManager.saveSession(accessToken, refreshToken, userId);
+                            
+                            JSONObject userJson = json.optJSONObject("user");
+                            String userId = userJson != null ? userJson.optString("id", "") : "";
+                            String userEmail = userJson != null ? userJson.optString("email", "") : "";
+                            
+                            String displayName = null;
+                            if (userJson != null && userJson.optJSONObject("user_metadata") != null) {
+                                displayName = userJson.optJSONObject("user_metadata").optString("full_name", null);
+                            }
+
+                            SessionManager.saveSession(accessToken, refreshToken, userId, userEmail, displayName);
                             callback.onSuccess(userId);
                         } else {
                             String msg = json.optString("error_description",
@@ -241,10 +214,6 @@ public class AuthRepository {
             callback.onError("Failed to build request: " + e.getMessage());
         }
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Forgot / Reset Password
-    // ─────────────────────────────────────────────────────────────
 
     public static void requestPasswordReset(String email, String redirectTo, ActionCallback callback) {
         try {

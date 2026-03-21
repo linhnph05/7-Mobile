@@ -218,10 +218,12 @@ public class LoginActivity extends BaseActivity {
             public void onSuccess(String userId, String displayName) {
                 runOnUiThread(() -> {
                     setLoading(false);
+                    // FIXED: Thêm đối số email vào saveSession
                     SessionManager.saveSession(
                             SessionManager.getAccessToken(),
                             SessionManager.getRefreshToken(),
                             userId,
+                            email,
                             displayName);
                     Toast.makeText(LoginActivity.this,
                             "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
