@@ -8,7 +8,9 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.PATCH;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 /**
@@ -19,7 +21,6 @@ public interface UserApi {
 
     /**
      * Get user by email
-     * Supabase query: /users?email=eq.{email}
      */
     @GET("users")
     Call<List<User>> getUserByEmail(
@@ -29,7 +30,6 @@ public interface UserApi {
 
     /**
      * Get user by ID
-     * Supabase query: /users?user_id=eq.{userId}
      */
     @GET("users")
     Call<List<User>> getUserById(
@@ -38,22 +38,21 @@ public interface UserApi {
     );
 
     /**
-     * Get all users (for testing)
-     * Supabase query: /users?limit=1
-     */
-    @GET("users")
-    Call<List<User>> getUsers(
-            @Query("limit") int limit,
-            @Query("select") String select
-    );
-
-    /**
      * Update user data
-     * Supabase query: PATCH /users?user_id=eq.{userId}
      */
     @PATCH("users")
     Call<Void> updateUser(
             @Query("user_id") String userIdFilter,
             @Body Map<String, Object> updates
+    );
+
+    /**
+     * Upsert user profile (Insert or Update)
+     * Header Prefer: resolution=merge-duplicates makes it an upsert
+     */
+    @POST("users")
+    Call<Void> upsertUser(
+            @Body Map<String, Object> userData,
+            @Header("Prefer") String prefer
     );
 }
