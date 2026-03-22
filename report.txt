@@ -1,0 +1,28 @@
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: D:\Nghiaaaa\Android Studio\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 80:03:AE:38:0D:BF:86:48:7D:B1:5D:92:8F:25:26:99
+SHA1: 89:E3:C8:CF:B6:2F:99:68:8B:01:1C:FD:5F:7A:10:40:94:79:2C:0A
+SHA-256: 51:0B:DA:32:7F:BA:E4:D3:FB:07:08:E4:BA:E2:32:18:C3:90:5D:87:7E:BE:8A:E9:3B:0C:79:DC:57:01:4E:B5
+Valid until: Wednesday, February 23, 2056
+----------
+Variant: release
+Config: null
+Store: null
+Alias: null
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: D:\Nghiaaaa\Android Studio\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 80:03:AE:38:0D:BF:86:48:7D:B1:5D:92:8F:25:26:99
+SHA1: 89:E3:C8:CF:B6:2F:99:68:8B:01:1C:FD:5F:7A:10:40:94:79:2C:0A
+SHA-256: 51:0B:DA:32:7F:BA:E4:D3:FB:07:08:E4:BA:E2:32:18:C3:90:5D:87:7E:BE:8A:E9:3B:0C:79:DC:57:01:4E:B5
+Valid until: Wednesday, February 23, 2056
+----------
+
+BUILD SUCCESSFUL in 1s
+1 actionable task: 1 executed

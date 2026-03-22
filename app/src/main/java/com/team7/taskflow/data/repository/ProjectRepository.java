@@ -96,6 +96,7 @@ public class ProjectRepository {
      * 
      * @deprecated Use getAllUserProjects to get both owned and member projects
      */
+    @Deprecated
     public void getProjects(String userId, ProjectCallback<List<Project>> callback) {
         projectApi.getOwnedProjects(
                 "eq." + userId,

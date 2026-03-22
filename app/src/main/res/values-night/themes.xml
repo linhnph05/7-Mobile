@@ -14,5 +14,8 @@
         <!-- Status Bar Colors -->
         <item name="android:statusBarColor">@color/theme_background</item>
         <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Page Transition Animation -->
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 </resources>

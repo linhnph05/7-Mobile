@@ -59,6 +59,11 @@
         <!-- Project -->
         <activity android:name=".ui.project.CreateProjectActivity" />
         <activity
+            android:name=".ui.ai.AiCreateActivity"
+            android:theme="@style/Theme.TaskFlow.Translucent"
+            android:windowSoftInputMode="adjustResize|stateVisible"
+            android:exported="false" />
+        <activity
             android:name=".ui.project.ProjectBoardActivity"
             android:exported="false" />
         <activity

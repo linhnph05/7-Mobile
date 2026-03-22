@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.team7.taskflow.app-mergeDebugResources-2:/values-v25/values-v25.xml",
+            "map": [
+                {
+                    "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\caches\\8.13\\transforms\\39d5f771dafd8b998f0b3803b386a949\\transformed\\appcompat-1.7.1\\res\\values-v25\\values-v25.xml",
+                    "from": {
+                        "startLines": "2,3,4,6",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,126,209,308",
+                        "endLines": "2,3,5,7",
+                        "endColumns": "70,82,12,12",
+                        "endOffsets": "121,204,303,414"
+                    }
+                }
+            ]
+        }
+    ]
+}

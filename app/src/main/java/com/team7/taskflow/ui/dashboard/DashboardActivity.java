@@ -135,6 +135,8 @@ public class DashboardActivity extends BaseActivity {
             Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
             intent.putExtra("project_id", project.getId());
             intent.putExtra("project_name", project.getName());
+            intent.putExtra("project_key", project.getProjectKey());
+            intent.putExtra("project_desc", project.getDescription());
             startActivity(intent);
         });
 
