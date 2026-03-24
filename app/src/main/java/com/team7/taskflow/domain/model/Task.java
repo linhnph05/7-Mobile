@@ -23,7 +23,7 @@ public class Task {
     private String priority;
 
     @SerializedName("position")
-    private double position;
+    private Double position; // Đã sửa đổi
 
     @SerializedName("due_date")
     private String dueDate;
@@ -73,8 +73,8 @@ public class Task {
     public String getPriority() { return priority; }
     public void setPriority(String priority) { this.priority = priority; }
 
-    public double getPosition() { return position; }
-    public void setPosition(double position) { this.position = position; }
+    public Double getPosition() { return position; } // Đã sửa đổi
+    public void setPosition(Double position) { this.position = position; } // Đã sửa đổi
 
     public String getDueDate() { return dueDate; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }
