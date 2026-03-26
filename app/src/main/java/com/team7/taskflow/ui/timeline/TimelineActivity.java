@@ -3,14 +3,18 @@ package com.team7.taskflow.ui.timeline;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.ui.project.CalendarActivity;
+import com.team7.taskflow.ui.project.ProjectBoardActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -87,6 +91,36 @@ public class TimelineActivity extends BaseActivity {
         tabDay.setOnClickListener(tabClick);
         tabWeek.setOnClickListener(tabClick);
         tabMonth.setOnClickListener(tabClick);
+
+        // Calendar Button
+        ImageButton btnCalendar = findViewById(R.id.btnCalendar);
+        if (btnCalendar != null) {
+            btnCalendar.setOnClickListener(v -> {
+                Intent intent = new Intent(TimelineActivity.this, CalendarActivity.class);
+                // Truyền project_id hiện tại (nếu có)
+                long projectId = getIntent().getLongExtra("project_id", -1);
+                intent.putExtra("project_id", projectId);
+                startActivity(intent);
+            });
+        }
+        ImageButton btnKanban = findViewById(R.id.btnKanban);
+
+        if (btnKanban != null) {
+            btnKanban.setOnClickListener(v -> {
+                // Lấy project_id hiện tại từ Intent của TimelineActivity
+                long projectId = getIntent().getLongExtra("project_id", -1);
+                String projectName = getIntent().getStringExtra("project_name");
+
+                // Chuyển sang ProjectBoardActivity (Kanban Board)
+                Intent intent = new Intent(TimelineActivity.this, ProjectBoardActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", projectName);
+                startActivity(intent);
+
+                // (Tùy chọn) Đóng TimelineActivity nếu bạn không muốn quay lại bằng nút Back
+                // finish();
+            });
+        }
     }
 
     /**

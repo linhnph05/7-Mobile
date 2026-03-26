@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Task {
 
     @SerializedName("task_id")
-    private long id;
+    private Long id;
 
     @SerializedName("project_id")
     private long projectId;
@@ -23,7 +23,7 @@ public class Task {
     private String priority;
 
     @SerializedName("position")
-    private Double position; // Đã sửa đổi
+    private Double position;
 
     @SerializedName("due_date")
     private String dueDate;
@@ -55,8 +55,8 @@ public class Task {
         this.priority = "MEDIUM";
     }
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public long getProjectId() { return projectId; }
     public void setProjectId(long projectId) { this.projectId = projectId; }
@@ -73,8 +73,8 @@ public class Task {
     public String getPriority() { return priority; }
     public void setPriority(String priority) { this.priority = priority; }
 
-    public Double getPosition() { return position; } // Đã sửa đổi
-    public void setPosition(Double position) { this.position = position; } // Đã sửa đổi
+    public Double getPosition() { return position; }
+    public void setPosition(Double position) { this.position = position; }
 
     public String getDueDate() { return dueDate; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }

@@ -130,6 +130,17 @@ public class TaskRepository {
             }
         });
     }
+    public void deleteTask(long taskId, TaskCallback<Void> callback) {
+        taskApi.deleteTask("eq." + taskId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) callback.onSuccess(null);
+                else callback.onError("Delete failed: " + response.code());
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) { callback.onError(t.getMessage()); }
+        });
+    }
 
     // ── History ─────────────────────────────────────────────────────────
 
@@ -179,14 +190,24 @@ public class TaskRepository {
         });
     }
 
+    /**
+     * Get tasks assigned to a specific user
+     */
     public void getMyTasks(String userId, TaskCallback<List<Task>> callback) {
         taskApi.getTasksByAssignee("eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
-                if (response.isSuccessful()) callback.onSuccess(response.body());
-                else callback.onError("Load my tasks failed");
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Load my tasks failed: " + response.code());
+                }
             }
-            @Override public void onFailure(Call<List<Task>> call, Throwable t) { callback.onError(t.getMessage()); }
+
+            @Override
+            public void onFailure(Call<List<Task>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
         });
     }
 }
