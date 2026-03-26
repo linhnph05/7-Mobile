@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Màu nền xám Slate cực nhẹ (F1F5F9) -->
+    <solid android:color="#F1F5F9" />
+
+    <!-- Bo góc tròn hoàn toàn -->
+    <corners android:radius="100dp" />
+
+    <!-- Padding để con số không bị dính vào viền -->
+    <padding
+        android:left="8dp"
+        android:right="8dp"
+        android:top="2dp"
+        android:bottom="2dp" />
+</shape>

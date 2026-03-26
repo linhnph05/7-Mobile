@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <!-- A loop of days. In a production app, these would be dynamic. -->
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MON" android:textSize="10sp" android:textColor="@color/slate_400" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TUE" android:textSize="10sp" android:textColor="@color/primary" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="13" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/primary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WED" android:textSize="10sp" android:textColor="@color/slate_400" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="14" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="THU" android:textSize="10sp" android:textColor="@color/slate_400" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="15" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FRI" android:textSize="10sp" android:textColor="@color/slate_400" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="16" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+    </LinearLayout>
+
+</LinearLayout>
