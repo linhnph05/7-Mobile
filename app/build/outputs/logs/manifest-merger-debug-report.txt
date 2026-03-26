@@ -1,0 +1,469 @@
+-- Merging decision tree log ---
+manifest
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:2:1-86:12
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:2:1-86:12
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:2:1-86:12
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:2:1-86:12
+MERGED from [com.google.android.material:material:1.13.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\001edacf99d30d46acb764140ac33d19\transformed\material-1.13.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\fb36254f581ce21bc02619129e77ccbd\transformed\constraintlayout-2.2.1\AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.appcompat:appcompat-resources:1.7.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3fa0e34ace3e83c30552bc672cd80e2a\transformed\appcompat-resources-1.7.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat:1.7.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\39d5f771dafd8b998f0b3803b386a949\transformed\appcompat-1.7.1\AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:17:1-40:12
+MERGED from [com.github.bumptech.glide:glide:4.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\266fda3a323e22e22e4976211fe0dfca\transformed\glide-4.16.0\AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\94cff78830844ae7f7f479b4c3bbf104\transformed\recyclerview-1.3.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\237b1c27ddf3e488398deb2a790cbd56\transformed\viewpager2-1.1.0-beta02\AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.gms:play-services-auth-api-phone:18.0.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\4177680f9a1954687f2cccf4d3639ec3\transformed\play-services-auth-api-phone-18.0.2\AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.gms:play-services-auth-base:18.0.10] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\7ecb4b9759c66892f620069ecf8dd951\transformed\play-services-auth-base-18.0.10\AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.gms:play-services-fido:20.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a2740e3f3f20f2ec7d52b7426c1132d6\transformed\play-services-fido-20.0.1\AndroidManifest.xml:2:1-10:12
+MERGED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.gms:play-services-tasks:18.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\ea62956923554f8c49dea74fd47d4da0\transformed\play-services-tasks-18.2.0\AndroidManifest.xml:2:1-5:12
+MERGED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.fragment:fragment:1.5.7] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\436621f97bb204ad30190656f23ef09d\transformed\fragment-1.5.7\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.activity:activity:1.12.3] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\e0bf10483a486ab9ca713fad1b1df0b9\transformed\activity-1.12.3\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\614c58550f525c5caf19b024e61f8e94\transformed\coordinatorlayout-1.2.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.cardview:cardview:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3da8bf0044f2a4c88e02454fbeee7760\transformed\cardview-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89a5449d4245acc269a12a71ef19b64e\transformed\customview-poolingcontainer-1.0.0\AndroidManifest.xml:17:1-23:12
+MERGED from [androidx.graphics:graphics-shapes-android:1.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c61072b6c6978e0408ff8d6c1b325f87\transformed\graphics-shapes-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\27c90c9b6ccb3afcc9a819b6860ab73c\transformed\swiperefreshlayout-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c251cd17573a828eed1c32694add2516\transformed\emoji2-views-helper-1.3.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\4c815939e075976fe4232ee3d0cd0f90\transformed\drawerlayout-1.1.1\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\b45c9ef3502bc8ff416e5d41411495da\transformed\transition-1.5.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3b30668294536ddde2f49bb34cfc6d95\transformed\dynamicanimation-1.1.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f28282287f5c698bae2127b4d349a015\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\848832a80f29529a75a1fa2922cf3644\transformed\vectordrawable-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.loader:loader:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\2fd21b69115efe61df6511640d7e7ec0\transformed\loader-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8bdbbf672a806c727dad9b2461d13131\transformed\viewpager-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\bb1abcf8d1bb92af1515456a9547c81d\transformed\customview-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3691dc6808569026e77e09e14bd3de91\transformed\savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c78b9f79c20a7795208f930081d4cc64\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3f476c5de93074b718fc4a0caefc244c\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\be59bbd8ff700f10349f1683b2352f92\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\92841eb8adabccdde30717e4700f0228\transformed\lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a685eccfa64123d168977bff273bcef6\transformed\core-ktx-1.16.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\92af40b5ce018d7fadf1b81f802608f5\transformed\cursoradapter-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\1bd1b2bb13d7de2b5aec35d229a1b94a\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\88885b7115833991cbcb070a2454f899\transformed\gifdecoder-4.16.0\AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\55159b56fa2e721dc330160fc7a25a4b\transformed\exifinterface-1.3.6\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.navigationevent:navigationevent-android:1.0.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f0823efd157e5bebe0aa8e58e1211b5d\transformed\navigationevent\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f528e701d5fdd70f50b4715bd106e39d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.tracing:tracing:1.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\2637c7625eda0bef73d0dd8543df04e5\transformed\tracing-1.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a1aeb04dd5335541507483ca6bd1da18\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-viewtree:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8350c4764ce3c9f210e11902cd5da39d\transformed\core-viewtree-1.0.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3acc85a2db1f7c6724499b1f22776340\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8852fbfe0e85d0b756710a0d40c2432f\transformed\runtime-annotation\AndroidManifest.xml:2:1-7:12
+	package
+		INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+	xmlns:tools
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:3:5-51
+	android:versionCode
+		INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:2:11-69
+uses-permission#android.permission.INTERNET
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:6:5-67
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:6:22-64
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:7:5-79
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:7:22-76
+queries
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:9:5-11:15
+package#com.google.android.gms
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:10:9-58
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:10:18-55
+application
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:13:5-84:19
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:13:5-84:19
+MERGED from [com.google.android.material:material:1.13.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\001edacf99d30d46acb764140ac33d19\transformed\material-1.13.0\AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.13.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\001edacf99d30d46acb764140ac33d19\transformed\material-1.13.0\AndroidManifest.xml:22:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\fb36254f581ce21bc02619129e77ccbd\transformed\constraintlayout-2.2.1\AndroidManifest.xml:7:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\fb36254f581ce21bc02619129e77ccbd\transformed\constraintlayout-2.2.1\AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:22:5-38:19
+MERGED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:22:5-38:19
+MERGED from [com.google.android.gms:play-services-fido:20.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a2740e3f3f20f2ec7d52b7426c1132d6\transformed\play-services-fido-20.0.1\AndroidManifest.xml:7:5-8:19
+MERGED from [com.google.android.gms:play-services-fido:20.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a2740e3f3f20f2ec7d52b7426c1132d6\transformed\play-services-fido-20.0.1\AndroidManifest.xml:7:5-8:19
+MERGED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:4:5-6:19
+MERGED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:4:5-6:19
+MERGED from [com.google.android.gms:play-services-tasks:18.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\ea62956923554f8c49dea74fd47d4da0\transformed\play-services-tasks-18.2.0\AndroidManifest.xml:4:5-20
+MERGED from [com.google.android.gms:play-services-tasks:18.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\ea62956923554f8c49dea74fd47d4da0\transformed\play-services-tasks-18.2.0\AndroidManifest.xml:4:5-20
+MERGED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:5:5-7:19
+MERGED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:5:5-7:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:28:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f528e701d5fdd70f50b4715bd106e39d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f528e701d5fdd70f50b4715bd106e39d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+	android:extractNativeLibs
+		INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:28:18-86
+	android:supportsRtl
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:20:9-35
+	android:label
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:18:9-41
+	android:fullBackupContent
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:16:9-54
+	android:roundIcon
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:19:9-54
+	android:icon
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:17:9-43
+	android:allowBackup
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:14:9-35
+	android:theme
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:21:9-46
+	android:dataExtractionRules
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:15:9-65
+activity#com.team7.taskflow.ui.auth.LoginActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:24:9-31:20
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:26:13-36
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:25:13-50
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:27:13-30:29
+action#android.intent.action.MAIN
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:28:17-69
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:28:25-66
+category#android.intent.category.LAUNCHER
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:29:17-77
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:29:27-74
+activity#com.team7.taskflow.ui.dashboard.DashboardActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:34:9-37:40
+	android:windowSoftInputMode
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:36:13-52
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:37:13-37
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:35:13-59
+activity#com.team7.taskflow.ui.auth.ForgotPasswordActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:40:9-42:40
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:42:13-37
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:41:13-59
+activity#com.team7.taskflow.ui.auth.ResetPasswordActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:43:9-54:20
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:45:13-36
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:44:13-58
+intent-filter#action:name:android.intent.action.VIEW+category:name:android.intent.category.BROWSABLE+category:name:android.intent.category.DEFAULT+data:host:reset-password+data:scheme:taskai
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:46:13-53:29
+action#android.intent.action.VIEW
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:47:17-69
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:47:25-66
+category#android.intent.category.DEFAULT
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:48:17-76
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:48:27-73
+category#android.intent.category.BROWSABLE
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:49:17-78
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:49:27-75
+data
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:50:17-52:47
+	android:host
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:51:21-50
+	android:scheme
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:52:21-44
+activity#com.team7.taskflow.ui.auth.SignUpActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:55:9-57:40
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:57:13-37
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:56:13-51
+activity#com.team7.taskflow.ui.project.CreateProjectActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:60:9-70
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:60:19-67
+activity#com.team7.taskflow.ui.ai.AiCreateActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:61:9-65:40
+	android:windowSoftInputMode
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:64:13-68
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:65:13-37
+	android:theme
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:63:13-62
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:62:13-51
+activity#com.team7.taskflow.ui.project.ProjectBoardActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:66:9-68:40
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:68:13-37
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:67:13-60
+activity#com.team7.taskflow.ui.timeline.TimelineActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:69:9-71:40
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:71:13-37
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:70:13-57
+activity#com.team7.taskflow.ui.notification.NotificationsActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:74:9-75
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:74:19-72
+activity#com.team7.taskflow.ui.profile.ProfileActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:77:9-79:40
+	android:exported
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:79:13-37
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:78:13-55
+activity#com.team7.taskflow.MainActivity
+ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:82:9-50
+	android:name
+		ADDED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml:82:19-47
+uses-sdk
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+MERGED from [com.google.android.material:material:1.13.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\001edacf99d30d46acb764140ac33d19\transformed\material-1.13.0\AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.13.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\001edacf99d30d46acb764140ac33d19\transformed\material-1.13.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\fb36254f581ce21bc02619129e77ccbd\transformed\constraintlayout-2.2.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\fb36254f581ce21bc02619129e77ccbd\transformed\constraintlayout-2.2.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3fa0e34ace3e83c30552bc672cd80e2a\transformed\appcompat-resources-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3fa0e34ace3e83c30552bc672cd80e2a\transformed\appcompat-resources-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\39d5f771dafd8b998f0b3803b386a949\transformed\appcompat-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\39d5f771dafd8b998f0b3803b386a949\transformed\appcompat-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:20:5-44
+MERGED from [com.github.bumptech.glide:glide:4.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\266fda3a323e22e22e4976211fe0dfca\transformed\glide-4.16.0\AndroidManifest.xml:5:5-7:41
+MERGED from [com.github.bumptech.glide:glide:4.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\266fda3a323e22e22e4976211fe0dfca\transformed\glide-4.16.0\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\94cff78830844ae7f7f479b4c3bbf104\transformed\recyclerview-1.3.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\94cff78830844ae7f7f479b4c3bbf104\transformed\recyclerview-1.3.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\237b1c27ddf3e488398deb2a790cbd56\transformed\viewpager2-1.1.0-beta02\AndroidManifest.xml:5:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\237b1c27ddf3e488398deb2a790cbd56\transformed\viewpager2-1.1.0-beta02\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-auth-api-phone:18.0.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\4177680f9a1954687f2cccf4d3639ec3\transformed\play-services-auth-api-phone-18.0.2\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-auth-api-phone:18.0.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\4177680f9a1954687f2cccf4d3639ec3\transformed\play-services-auth-api-phone-18.0.2\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-auth-base:18.0.10] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\7ecb4b9759c66892f620069ecf8dd951\transformed\play-services-auth-base-18.0.10\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-auth-base:18.0.10] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\7ecb4b9759c66892f620069ecf8dd951\transformed\play-services-auth-base-18.0.10\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-fido:20.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a2740e3f3f20f2ec7d52b7426c1132d6\transformed\play-services-fido-20.0.1\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-fido:20.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a2740e3f3f20f2ec7d52b7426c1132d6\transformed\play-services-fido-20.0.1\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:3:5-44
+MERGED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:3:5-44
+MERGED from [com.google.android.gms:play-services-tasks:18.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\ea62956923554f8c49dea74fd47d4da0\transformed\play-services-tasks-18.2.0\AndroidManifest.xml:3:5-44
+MERGED from [com.google.android.gms:play-services-tasks:18.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\ea62956923554f8c49dea74fd47d4da0\transformed\play-services-tasks-18.2.0\AndroidManifest.xml:3:5-44
+MERGED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:3:5-44
+MERGED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:3:5-44
+MERGED from [androidx.fragment:fragment:1.5.7] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\436621f97bb204ad30190656f23ef09d\transformed\fragment-1.5.7\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.5.7] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\436621f97bb204ad30190656f23ef09d\transformed\fragment-1.5.7\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.12.3] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\e0bf10483a486ab9ca713fad1b1df0b9\transformed\activity-1.12.3\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.12.3] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\e0bf10483a486ab9ca713fad1b1df0b9\transformed\activity-1.12.3\AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\614c58550f525c5caf19b024e61f8e94\transformed\coordinatorlayout-1.2.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\614c58550f525c5caf19b024e61f8e94\transformed\coordinatorlayout-1.2.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.cardview:cardview:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3da8bf0044f2a4c88e02454fbeee7760\transformed\cardview-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3da8bf0044f2a4c88e02454fbeee7760\transformed\cardview-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89a5449d4245acc269a12a71ef19b64e\transformed\customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89a5449d4245acc269a12a71ef19b64e\transformed\customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.graphics:graphics-shapes-android:1.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c61072b6c6978e0408ff8d6c1b325f87\transformed\graphics-shapes-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.graphics:graphics-shapes-android:1.0.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c61072b6c6978e0408ff8d6c1b325f87\transformed\graphics-shapes-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\27c90c9b6ccb3afcc9a819b6860ab73c\transformed\swiperefreshlayout-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\27c90c9b6ccb3afcc9a819b6860ab73c\transformed\swiperefreshlayout-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c251cd17573a828eed1c32694add2516\transformed\emoji2-views-helper-1.3.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c251cd17573a828eed1c32694add2516\transformed\emoji2-views-helper-1.3.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\4c815939e075976fe4232ee3d0cd0f90\transformed\drawerlayout-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\4c815939e075976fe4232ee3d0cd0f90\transformed\drawerlayout-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\b45c9ef3502bc8ff416e5d41411495da\transformed\transition-1.5.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.transition:transition:1.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\b45c9ef3502bc8ff416e5d41411495da\transformed\transition-1.5.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3b30668294536ddde2f49bb34cfc6d95\transformed\dynamicanimation-1.1.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3b30668294536ddde2f49bb34cfc6d95\transformed\dynamicanimation-1.1.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f28282287f5c698bae2127b4d349a015\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f28282287f5c698bae2127b4d349a015\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\848832a80f29529a75a1fa2922cf3644\transformed\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\848832a80f29529a75a1fa2922cf3644\transformed\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.loader:loader:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\2fd21b69115efe61df6511640d7e7ec0\transformed\loader-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.loader:loader:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\2fd21b69115efe61df6511640d7e7ec0\transformed\loader-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager:viewpager:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8bdbbf672a806c727dad9b2461d13131\transformed\viewpager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8bdbbf672a806c727dad9b2461d13131\transformed\viewpager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\bb1abcf8d1bb92af1515456a9547c81d\transformed\customview-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\bb1abcf8d1bb92af1515456a9547c81d\transformed\customview-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3691dc6808569026e77e09e14bd3de91\transformed\savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3691dc6808569026e77e09e14bd3de91\transformed\savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c78b9f79c20a7795208f930081d4cc64\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c78b9f79c20a7795208f930081d4cc64\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3f476c5de93074b718fc4a0caefc244c\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3f476c5de93074b718fc4a0caefc244c\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\be59bbd8ff700f10349f1683b2352f92\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\be59bbd8ff700f10349f1683b2352f92\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\92841eb8adabccdde30717e4700f0228\transformed\lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\92841eb8adabccdde30717e4700f0228\transformed\lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a685eccfa64123d168977bff273bcef6\transformed\core-ktx-1.16.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a685eccfa64123d168977bff273bcef6\transformed\core-ktx-1.16.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\92af40b5ce018d7fadf1b81f802608f5\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\92af40b5ce018d7fadf1b81f802608f5\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\1bd1b2bb13d7de2b5aec35d229a1b94a\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\1bd1b2bb13d7de2b5aec35d229a1b94a\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\88885b7115833991cbcb070a2454f899\transformed\gifdecoder-4.16.0\AndroidManifest.xml:5:5-7:41
+MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\88885b7115833991cbcb070a2454f899\transformed\gifdecoder-4.16.0\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\55159b56fa2e721dc330160fc7a25a4b\transformed\exifinterface-1.3.6\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\55159b56fa2e721dc330160fc7a25a4b\transformed\exifinterface-1.3.6\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.navigationevent:navigationevent-android:1.0.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f0823efd157e5bebe0aa8e58e1211b5d\transformed\navigationevent\AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigationevent:navigationevent-android:1.0.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f0823efd157e5bebe0aa8e58e1211b5d\transformed\navigationevent\AndroidManifest.xml:5:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f528e701d5fdd70f50b4715bd106e39d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\f528e701d5fdd70f50b4715bd106e39d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.tracing:tracing:1.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\2637c7625eda0bef73d0dd8543df04e5\transformed\tracing-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\2637c7625eda0bef73d0dd8543df04e5\transformed\tracing-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a1aeb04dd5335541507483ca6bd1da18\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\a1aeb04dd5335541507483ca6bd1da18\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-viewtree:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8350c4764ce3c9f210e11902cd5da39d\transformed\core-viewtree-1.0.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-viewtree:1.0.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8350c4764ce3c9f210e11902cd5da39d\transformed\core-viewtree-1.0.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3acc85a2db1f7c6724499b1f22776340\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\3acc85a2db1f7c6724499b1f22776340\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8852fbfe0e85d0b756710a0d40c2432f\transformed\runtime-annotation\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\8852fbfe0e85d0b756710a0d40c2432f\transformed\runtime-annotation\AndroidManifest.xml:5:5-44
+	android:targetSdkVersion
+		INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from D:\Nghiaaaa\7-Mobile\app\src\main\AndroidManifest.xml
+activity#com.google.android.gms.auth.api.signin.internal.SignInHubActivity
+ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:23:9-27:75
+	android:excludeFromRecents
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:25:13-46
+	android:exported
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:26:13-37
+	android:theme
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:27:13-72
+	android:name
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:24:13-93
+service#com.google.android.gms.auth.api.signin.RevocationBoundService
+ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:33:9-37:51
+	android:exported
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:35:13-36
+	android:visibleToInstantApps
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:37:13-48
+	android:permission
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:36:13-107
+	android:name
+		ADDED from [com.google.android.gms:play-services-auth:21.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\86ae260d7f4fbe4d3273324a8a8a64d3\transformed\play-services-auth-21.3.0\AndroidManifest.xml:34:13-89
+activity#com.google.android.gms.common.api.GoogleApiActivity
+ADDED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+	android:exported
+		ADDED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+	android:theme
+		ADDED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+	android:name
+		ADDED from [com.google.android.gms:play-services-base:18.5.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\6d21176d0490d1267b8d91ac79180e42\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+meta-data#com.google.android.gms.version
+ADDED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+	android:value
+		ADDED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+	android:name
+		ADDED from [com.google.android.gms:play-services-basement:18.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\242732347ea5a13d00408ce2eb53bfa7\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\148748bff37c7ce80d3e8a8768a8707d\transformed\startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+meta-data#androidx.emoji2.text.EmojiCompatInitializer
+ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.3.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\c87dbb0d1cdac5707fa83534c97e1c44\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:23:9-81
+permission#com.team7.taskflow.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:26:22-94
+uses-permission#com.team7.taskflow.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.16.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\57e7211f636e1a064d75cbdab4169fbe\transformed\core-1.16.0\AndroidManifest.xml:26:22-94
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\42b99104c5a3d6aaa6289b3ca58cee1c\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] D:\Nghiaaaa\Android\Gradle_User_Home\caches\8.13\transforms\89c5fe5551fa7f178d2c64e59bec1381\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92

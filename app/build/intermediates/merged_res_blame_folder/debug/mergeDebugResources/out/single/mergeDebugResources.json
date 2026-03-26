@@ -1,0 +1,514 @@
+[
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_layout_project_settings_panel.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\layout_project_settings_panel.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_github.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_github.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\color_chip_text_selector.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\color\\chip_text_selector.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_layout_bottom_sheet_quick_add.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\layout_bottom_sheet_quick_add.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_dialog_datetime_picker.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\dialog_datetime_picker.xml"
+    },
+    {
+        "merged": "com.team7.taskflow.app-debug-4:/layout_activity_ai_create.xml.flat",
+        "source": "com.team7.taskflow.app-main-6:/layout/activity_ai_create.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\color_chip_stroke_selector.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\color\\chip_stroke_selector.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_lock.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_lock.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_img_no_notifications.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\img_no_notifications.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_language.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_language.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_google.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_google.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_item_notification_me.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\item_notification_me.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_extra.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_extra.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-xhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_layout_bottom_nav_fab.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\layout_bottom_nav_fab.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_input.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_input.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_check.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_check.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_blue.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_blue.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_color_circle.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_color_circle.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_bottom_sheet.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_bottom_sheet.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\color_chip_background_selector.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\color\\chip_background_selector.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_search_bar.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_search_bar.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_hero_card.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_hero_card.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-anydpi\\ic_launcher.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_login.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_login.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\xml_data_extraction_rules.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\xml\\data_extraction_rules.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_arrow_upward.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_arrow_upward.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_eye.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_eye.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_launcher_background.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_phone.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_phone.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_main.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_dark_mode.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_dark_mode.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_timer.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_timer.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_tab_inactive.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_tab_inactive.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_add.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_add.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_account_box.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_account_box.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\xml_backup_rules.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_table.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_table.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_person.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_person.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_settings.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_settings.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_chevron_right.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_chevron_right.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_stacked.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_stacked.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_task_item.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_task_item.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_sprint.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_sprint.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_label.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_label.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_nav_settings.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_nav_settings.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_menu.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_menu.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-anydpi\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_orange.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_orange.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_calendar_today.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_calendar_today.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_gantt_bar_purple.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_gantt_bar_purple.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_edit.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_edit.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-hdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_badge_purple.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_badge_purple.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_tab_active.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_tab_active.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_test.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\test.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\anim_slide_in_left.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\anim\\slide_in_left.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_green_bordered.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_green_bordered.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_filter.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_filter.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_lightbulb.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_lightbulb.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_bottom_nav.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_bottom_nav.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_arrow_drop_down.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_arrow_drop_down.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_item_project.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\item_project.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_done_all.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_done_all.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_profile.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_profile.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_chevron_left.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_chevron_left.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_forgot_password.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_forgot_password.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_calendar.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_calendar.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_back.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_back.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_gantt_bar_blue.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_gantt_bar_blue.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-xhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_badge_orange.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_badge_orange.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_nav_home.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_nav_home.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_nav_assistant.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_nav_assistant.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_chat.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_chat.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_view_mock_preview.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\view_mock_preview.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_bordered.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_bordered.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_notifications.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_notifications.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_flag.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_flag.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_badge_red.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_badge_red.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_badge_blue.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_badge_blue.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\anim_slide_out_left.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\anim\\slide_out_left.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_notification.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_notification.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_grey_bordered.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_grey_bordered.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_option_unselected.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_option_unselected.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_item_notification_reminder.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\item_notification_reminder.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_card_white.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_card_white.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_badge_green.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_badge_green.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_tab_icon.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_tab_icon.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-hdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_ai_create.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_ai_create.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_home.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_home.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-xxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_search.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_search.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_public.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_public.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_create_project.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_create_project.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_mail.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_mail.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_item_task.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\item_task.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_circle_blue.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_circle_blue.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_reset_password.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_reset_password.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_project_board.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_project_board.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\anim_slide_in_right.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\anim\\slide_in_right.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_view_column.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_view_column.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\anim_slide_out_right.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\anim\\slide_out_right.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_dashboard.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_dashboard.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_scrim_bottom.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_scrim_bottom.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_signup.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_signup.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_more_vert.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_more_vert.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_timeline.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_timeline.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_calendar.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_calendar.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_task_alt.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_task_alt.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-mdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_arrow_back.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_arrow_back.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_ai_card.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_ai_card.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_layout_add_task_bottom_sheet.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\layout_add_task_bottom_sheet.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\mipmap-mdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_item_notification_invite.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\item_notification_invite.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\layout_activity_notifications.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\layout\\activity_notifications.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_ic_nav_tasks.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\ic_nav_tasks.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_circle_primary.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_circle_primary.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_avatar_orange_bordered.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_avatar_orange_bordered.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\menu_bottom_nav_menu.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\menu\\bottom_nav_menu.xml"
+    },
+    {
+        "merged": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-debug-4:\\drawable_bg_option_selected.xml.flat",
+        "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\daemon\\8.13\\com.team7.taskflow.app-main-6:\\drawable\\bg_option_selected.xml"
+    }
+]

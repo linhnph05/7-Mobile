@@ -8,12 +8,15 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 /**
- * Retrofit interface for Supabase Storage API
+ * Retrofit API interface for Supabase Storage
  */
 public interface StorageApi {
 
-    // Gửi trực tiếp RequestBody thay vì Multipart để tránh lỗi 400
-    @POST("object/{bucket}/{path}")
+    /**
+     * Upload a file to a specific bucket and path
+     * POST /storage/v1/object/{bucket}/{path}
+     */
+    @POST("storage/v1/object/{bucket}/{path}")
     Call<ResponseBody> uploadFile(
             @Path("bucket") String bucket,
             @Path(value = "path", encoded = true) String path,

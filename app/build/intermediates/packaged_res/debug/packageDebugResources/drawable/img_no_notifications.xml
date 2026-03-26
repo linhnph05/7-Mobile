@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Bell shape -->
+    <path
+        android:fillColor="#3A3A3A"
+        android:pathData="M60,20c-16.569,0 -30,13.431 -30,30v20l-5,10h70l-5,-10v-20c0,-16.569 -13.431,-30 -30,-30z"/>
+    <path
+        android:fillColor="#3A3A3A"
+        android:pathData="M60,95c5.523,0 10,-4.477 10,-10h-20c0,5.523 4.477,10 10,10z"/>
+    <!-- Zzz sleep -->
+    <path
+        android:fillColor="#555555"
+        android:strokeWidth="2"
+        android:strokeColor="#555555"
+        android:pathData="M75,25h12l-12,10h12"/>
+    <path
+        android:fillColor="#555555"
+        android:strokeWidth="1.5"
+        android:strokeColor="#555555"
+        android:pathData="M85,15h8l-8,7h8"/>
+</vector>
+

@@ -77,7 +77,21 @@ public class SessionManager {
 
     public static boolean isLoggedIn() {
         ensureInit();
-        return !getUserId().isEmpty();
+        
+        String userId = getUserId();
+        if (userId.isEmpty()) {
+            return false;
+        }
+
+        // Kiểm tra Token đã hết hạn chưa (Supabase Token sống 1 tiếng)
+        long expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0);
+        if (expiresAt > 0 && System.currentTimeMillis() >= expiresAt) {
+            Log.w(TAG, "Access token expired! Auto-clearing session...");
+            clearSession();
+            return false;
+        }
+
+        return true;
     }
 
     public static void clearSession() {

@@ -189,11 +189,15 @@
     <!-- ══════════════════════════════════
          GANTT GRID  (fills remaining height above bottom bar)
          ══════════════════════════════════ -->
-    <HorizontalScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="none">
+        android:layout_weight="1">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
 
         <!-- Fixed-width inner frame: label col + 4 day columns -->
         <LinearLayout
@@ -707,9 +711,25 @@
             <!-- End timeline columns -->
 
         </LinearLayout>
-    </HorizontalScrollView>
+        </HorizontalScrollView>
 
-    <!-- "Today" vertical dashed line overlay is achieved via a custom view drawn in code -->
+        <!-- "Today" vertical dashed line overlay is achieved via a custom view drawn in code -->
+
+        <!-- Nút dấu + (Tạo Task Nhanh AI) lơ lửng trên Gantt Grid -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddAI"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Tạo Task bằng AI"
+            app:backgroundTint="@color/primary"
+            app:tint="@color/white"
+            app:srcCompat="@drawable/ic_add"
+            app:elevation="6dp" />
+
+    </FrameLayout>
 
     <!-- ══════════════════════════════════
          BOTTOM BAR  (stacked avatars  +  New Task button)

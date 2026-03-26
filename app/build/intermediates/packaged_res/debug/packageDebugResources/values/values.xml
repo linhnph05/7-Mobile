@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_dark">#121629</color>
+    <color name="background_light">@color/theme_background</color>
+    <color name="bg_blue_100">@color/theme_icon_blue_bg</color>
+    <color name="bg_orange_100">@color/theme_icon_orange_bg</color>
+    <color name="bg_purple_100">@color/theme_icon_purple_bg</color>
+    <color name="bg_red_50">@color/theme_btn_danger_bg</color>
+    <color name="black">#000000</color>
+    <color name="border_color">@color/theme_border</color>
+    <color name="border_slate_300">@color/theme_border</color>
+    <color name="danger">#EF4444</color>
+    <color name="divider">@color/theme_divider</color>
+    <color name="green_500">#22C55E</color>
+    <color name="indigo_50">#EEF2FF</color>
+    <color name="indigo_500">#6366F1</color>
+    <color name="indigo_600">#4F46E5</color>
+    <color name="info">#00BCD4</color>
+    <color name="input_background">@color/theme_input_bg</color>
+    <color name="notification_read_bg">@color/theme_notification_read</color>
+    <color name="notification_unread_bg">@color/theme_notification_unread</color>
+    <color name="primary">#2945FF</color>
+    <color name="primary_dark">#1E35CC</color>
+    <color name="primary_light">#5C6FFF</color>
+    <color name="priority_high">#EF4444</color>
+    <color name="priority_low">#4CAF50</color>
+    <color name="priority_medium">#FF9800</color>
+    <color name="project_blue">#2945FF</color>
+    <color name="project_cyan">#00BCD4</color>
+    <color name="project_green">#4CAF50</color>
+    <color name="project_orange">#FF5722</color>
+    <color name="project_purple">#9C27B0</color>
+    <color name="red_500">#EF4444</color>
+    <color name="slate_100">#F1F5F9</color>
+    <color name="slate_200">#E2E8F0</color>
+    <color name="slate_300">#CBD5E1</color>
+    <color name="slate_400">#94A3B8</color>
+    <color name="slate_50">#F8FAFC</color>
+    <color name="slate_500">#64748B</color>
+    <color name="slate_600">#475569</color>
+    <color name="slate_700">#334155</color>
+    <color name="slate_800">#1E293B</color>
+    <color name="slate_900">#0F172A</color>
+    <color name="success">#4CAF50</color>
+    <color name="surface_dark">#1A1F36</color>
+    <color name="text_hint">@color/theme_text_hint</color>
+    <color name="text_orange_600">#EA580C</color>
+    <color name="text_primary">@color/theme_text_primary</color>
+    <color name="text_purple_600">#9333EA</color>
+    <color name="text_red_600">@color/theme_btn_danger_text</color>
+    <color name="text_secondary">@color/theme_text_secondary</color>
+    <color name="text_slate_400">#94A3B8</color>
+    <color name="text_slate_500">@color/theme_text_secondary</color>
+    <color name="text_slate_900">@color/theme_text_primary</color>
+    <color name="theme_background">#F6F7F8</color>
+    <color name="theme_border">#CBD5E1</color>
+    <color name="theme_bottom_nav_bg">#FFFFFF</color>
+    <color name="theme_btn_danger_bg">#FEF2F2</color>
+    <color name="theme_btn_danger_text">#DC2626</color>
+    <color name="theme_card">#FFFFFF</color>
+    <color name="theme_divider">#E2E8F0</color>
+    <color name="theme_icon_blue_bg">#DBEAFE</color>
+    <color name="theme_icon_orange_bg">#FFEDD5</color>
+    <color name="theme_icon_purple_bg">#F3E8FF</color>
+    <color name="theme_input_bg">#F1F5F9</color>
+    <color name="theme_notification_read">#FFFFFF</color>
+    <color name="theme_notification_unread">#EEF2FF</color>
+    <color name="theme_surface">#FFFFFF</color>
+    <color name="theme_surface_variant">#F1F5F9</color>
+    <color name="theme_text_hint">#94A3B8</color>
+    <color name="theme_text_primary">#0F172A</color>
+    <color name="theme_text_secondary">#64748B</color>
+    <color name="warning">#FF9800</color>
+    <color name="white">#FFFFFF</color>
+    <dimen name="avatar_lg">80dp</dimen>
+    <dimen name="avatar_md">48dp</dimen>
+    <dimen name="avatar_sm">32dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
+    <dimen name="bottom_nav_padding">80dp</dimen>
+    <dimen name="button_height">50dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="icon_lg">32dp</dimen>
+    <dimen name="icon_md">24dp</dimen>
+    <dimen name="icon_sm">20dp</dimen>
+    <dimen name="input_height">50dp</dimen>
+    <dimen name="padding_card">16dp</dimen>
+    <dimen name="padding_input">12dp</dimen>
+    <dimen name="padding_screen">16dp</dimen>
+    <dimen name="radius_circle">50dp</dimen>
+    <dimen name="radius_lg">16dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_xl">20dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_xl">24dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_xxl">32dp</dimen>
+    <dimen name="text_lg">18sp</dimen>
+    <dimen name="text_md">16sp</dimen>
+    <dimen name="text_sm">14sp</dimen>
+    <dimen name="text_title">28sp</dimen>
+    <dimen name="text_xl">20sp</dimen>
+    <dimen name="text_xs">12sp</dimen>
+    <dimen name="text_xxl">24sp</dimen>
+    <string name="app_name">TaskFlow</string>
+    <string name="auth_email_hint">Enter your email</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_have_account">Already have an account? Login</string>
+    <string name="auth_login_button">Login</string>
+    <string name="auth_login_title">Login</string>
+    <string name="auth_no_account">Don\'t have an account? Register</string>
+    <string name="auth_password_hint">Enter your password</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_register_button">Register</string>
+    <string name="auth_register_title">Register</string>
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="dashboard_focus_desc">AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days.</string>
+    <string name="dashboard_focus_title">Focus for today</string>
+    <string name="dashboard_greeting_afternoon">Good afternoon,</string>
+    <string name="dashboard_greeting_evening">Good evening,</string>
+    <string name="dashboard_greeting_morning">Good morning,</string>
+    <string name="dashboard_search_hint">Search projects or ask AI…</string>
+    <string name="dashboard_tab_ai">✨ AI Insights</string>
+    <string name="dashboard_tab_all">All Projects</string>
+    <string name="dashboard_tab_recent">Recent</string>
+    <string name="delete">Delete</string>
+    <string name="done">Done</string>
+    <string name="edit">Edit</string>
+    <string name="error">Error</string>
+    <string name="error_empty_field">This field is required.</string>
+    <string name="error_network">Network error. Please try again.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    <string name="loading">Loading…</string>
+    <string name="nav_assistant">Assistant</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="project_category_label">Category</string>
+    <string name="project_color_label">Project Color</string>
+    <string name="project_create_button">Create Project</string>
+    <string name="project_create_title">Create Project</string>
+    <string name="project_created_success">Project created successfully!</string>
+    <string name="project_delete_button">Delete Project</string>
+    <string name="project_delete_confirm_message">Are you sure you want to delete this project? All tasks will also be deleted.</string>
+    <string name="project_delete_confirm_title">Delete Project</string>
+    <string name="project_deleted_success">Project deleted!</string>
+    <string name="project_description_hint">Enter project description</string>
+    <string name="project_description_label">Description</string>
+    <string name="project_name_hint">Enter project name</string>
+    <string name="project_name_label">Project Name</string>
+    <string name="project_name_required">Please enter project name</string>
+    <string name="project_owner_label">Space Owner</string>
+    <string name="project_save_button">Save Changes</string>
+    <string name="project_saved_success">Changes saved!</string>
+    <string name="project_setting_title">Project Settings</string>
+    <string name="project_space_key_label">Space Key</string>
+    <string name="save">Save</string>
+    <string name="search">Search</string>
+    <string name="success">Success</string>
+    <string name="task_create_title">Create Task</string>
+    <string name="task_description_hint">Enter task description</string>
+    <string name="task_description_label">Description</string>
+    <string name="task_detail_title">Task Detail</string>
+    <string name="task_due_date_label">Due Date</string>
+    <string name="task_list_title">Tasks</string>
+    <string name="task_priority_high">High</string>
+    <string name="task_priority_label">Priority</string>
+    <string name="task_priority_low">Low</string>
+    <string name="task_priority_medium">Medium</string>
+    <string name="task_status_done">Done</string>
+    <string name="task_status_in_progress">In Progress</string>
+    <string name="task_status_label">Status</string>
+    <string name="task_status_todo">To Do</string>
+    <string name="task_title_hint">Enter task title</string>
+    <string name="task_title_label">Task Title</string>
+    <style name="AppButton_Danger" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:backgroundTint">@color/danger</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="AppButton_Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="AppButton_Secondary" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:backgroundTint">@color/input_background</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="AppCard_Default" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/surface_dark</item>
+        <item name="cardCornerRadius">@dimen/radius_lg</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+    <style name="AppHeader_Back" parent="android:Widget.ImageButton">
+        <item name="android:layout_width">@dimen/icon_lg</item>
+        <item name="android:layout_height">@dimen/icon_lg</item>
+        <item name="android:contentDescription">@string/back</item>
+    </style>
+    <style name="AppInput_Default" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/input_height</item>
+        <item name="android:background">@color/input_background</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="android:padding">@dimen/padding_input</item>
+    </style>
+    <style name="AppInput_MultiLine" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:background">@color/input_background</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="android:padding">@dimen/padding_input</item>
+        <item name="android:gravity">top</item>
+        <item name="android:inputType">textMultiLine</item>
+    </style>
+    <style name="AppText_Body" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_md</item>
+    </style>
+    <style name="AppText_Caption" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/text_sm</item>
+    </style>
+    <style name="AppText_Label" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/text_sm</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_sm</item>
+    </style>
+    <style name="AppText_Subtitle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_lg</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="AppText_Title" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_xl</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Base.Theme.TaskFlow" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:colorBackground">@color/theme_background</item>
+        <item name="colorSurface">@color/theme_surface</item>
+        <item name="colorOnSurface">@color/theme_text_primary</item>
+        <item name="android:windowBackground">@color/theme_background</item>
+        <item name="android:textColorPrimary">@color/theme_text_primary</item>
+        <item name="android:textColorSecondary">@color/theme_text_secondary</item>
+        <item name="android:textColorHint">@color/theme_text_hint</item>
+        
+        
+        <item name="android:statusBarColor">@color/theme_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        
+        
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+    </style>
+    <style name="RoundedChip" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="ShapeAppearanceOverlay.BottomSheet.Rounded" parent="">
+        <item name="cornerSizeTopLeft">24dp</item>
+        <item name="cornerSizeTopRight">24dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+    <style name="ShapeAppearanceOverlay.Fab.Round" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="ShapeAppearanceOverlay.Material3.Corner.Full" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="Theme.TaskFlow" parent="Base.Theme.TaskFlow"/>
+    <style name="Theme.TaskFlow.BottomSheet" parent="Theme.Material3.DayNight.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.TaskFlow.BottomSheet</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+    <style name="Theme.TaskFlow.Translucent" parent="Theme.TaskFlow">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Widget.TaskFlow.BottomSheet" parent="Widget.Material3.BottomSheet">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.BottomSheet.Rounded</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+    <style name="WindowAnimationTransition" parent="@android:style/Animation.Activity">
+        
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
+</resources>

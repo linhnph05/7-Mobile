@@ -23,6 +23,7 @@ import com.team7.taskflow.utils.SessionManager;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.ProjectRepository;
 import com.team7.taskflow.domain.model.Project;
+import com.google.android.material.card.MaterialCardView;
 
 /**
  * Màn hình tạo Project mới
@@ -66,11 +67,11 @@ public class CreateProjectActivity extends BaseActivity {
     private ProjectRepository projectRepository;
     private boolean isPrivate = false;
     private String selectedTemplate = "KANBAN";
-    private String selectedColor = "#2945FF";
+    private String selectedColor = "#6D88FF";
 
     // Colors
     private static final String[] COLORS = {
-            "#2945FF", "#FF5722", "#4CAF50", "#9C27B0", "#00BCD4"
+            "#6D88FF", "#FF9D7E", "#7DD0B3", "#C893EF", "#64DADB"
     };
 
     @Override
@@ -141,18 +142,32 @@ public class CreateProjectActivity extends BaseActivity {
     }
 
     private void selectColor(int index) {
+        int strokePx = (int) (2 * getResources().getDisplayMetrics().density);
+
         // Bỏ chọn tất cả
         for (View v : colorViews) {
             v.setScaleX(1.0f);
             v.setScaleY(1.0f);
-            v.setAlpha(0.6f);
+            v.setAlpha(1.0f);
+            if (v instanceof MaterialCardView) {
+                MaterialCardView card = (MaterialCardView) v;
+                card.setStrokeWidth(0);
+                if (card.getChildCount() > 0) {
+                    card.getChildAt(0).setVisibility(View.GONE);
+                }
+            }
         }
 
         // Chọn màu mới
         selectedColorView = colorViews[index];
-        selectedColorView.setScaleX(1.3f);
-        selectedColorView.setScaleY(1.3f);
-        selectedColorView.setAlpha(1.0f);
+        if (selectedColorView instanceof MaterialCardView) {
+            MaterialCardView card = (MaterialCardView) selectedColorView;
+            card.setStrokeWidth(strokePx);
+            card.setStrokeColor(ContextCompat.getColor(this, R.color.primary));
+            if (card.getChildCount() > 0) {
+                card.getChildAt(0).setVisibility(View.VISIBLE);
+            }
+        }
 
         if (index < COLORS.length) {
             selectedColor = COLORS[index];
@@ -222,42 +237,48 @@ public class CreateProjectActivity extends BaseActivity {
     private void selectVisibility(boolean privateSelected) {
         isPrivate = privateSelected;
 
+        int colorSelected = ContextCompat.getColor(this, R.color.primary);
+        int colorUnselected = ContextCompat.getColor(this, R.color.theme_text_secondary);
+
         if (privateSelected) {
             // Private selected
             btnPrivate.setBackgroundResource(R.drawable.bg_option_selected);
-            icPrivate.setColorFilter(ContextCompat.getColor(this, R.color.primary));
-            tvPrivate.setTextColor(Color.WHITE);
+            icPrivate.setColorFilter(colorSelected);
+            tvPrivate.setTextColor(colorSelected);
 
             btnPublic.setBackgroundResource(R.drawable.bg_option_unselected);
-            icPublic.setColorFilter(Color.parseColor("#606060"));
-            tvPublic.setTextColor(Color.parseColor("#A0A0A0"));
+            icPublic.setColorFilter(colorUnselected);
+            tvPublic.setTextColor(colorUnselected);
         } else {
             // Public selected
             btnPublic.setBackgroundResource(R.drawable.bg_option_selected);
-            icPublic.setColorFilter(ContextCompat.getColor(this, R.color.primary));
-            tvPublic.setTextColor(Color.WHITE);
+            icPublic.setColorFilter(colorSelected);
+            tvPublic.setTextColor(colorSelected);
 
             btnPrivate.setBackgroundResource(R.drawable.bg_option_unselected);
-            icPrivate.setColorFilter(Color.parseColor("#606060"));
-            tvPrivate.setTextColor(Color.parseColor("#A0A0A0"));
+            icPrivate.setColorFilter(colorUnselected);
+            tvPrivate.setTextColor(colorUnselected);
         }
     }
 
     private void selectTemplate(String template) {
         selectedTemplate = template;
 
+        int colorSelected = ContextCompat.getColor(this, R.color.primary);
+        int colorUnselected = ContextCompat.getColor(this, R.color.theme_text_secondary);
+
         // Reset all
         btnKanban.setBackgroundResource(R.drawable.bg_option_unselected);
-        icKanban.setColorFilter(Color.parseColor("#606060"));
-        tvKanban.setTextColor(Color.parseColor("#A0A0A0"));
+        icKanban.setColorFilter(colorUnselected);
+        tvKanban.setTextColor(colorUnselected);
 
         btnScrum.setBackgroundResource(R.drawable.bg_option_unselected);
-        icScrum.setColorFilter(Color.parseColor("#606060"));
-        tvScrum.setTextColor(Color.parseColor("#A0A0A0"));
+        icScrum.setColorFilter(colorUnselected);
+        tvScrum.setTextColor(colorUnselected);
 
         btnTable.setBackgroundResource(R.drawable.bg_option_unselected);
-        icTable.setColorFilter(Color.parseColor("#606060"));
-        tvTable.setTextColor(Color.parseColor("#A0A0A0"));
+        icTable.setColorFilter(colorUnselected);
+        tvTable.setTextColor(colorUnselected);
 
         // Select chosen
         LinearLayout selectedBtn;
@@ -283,8 +304,8 @@ public class CreateProjectActivity extends BaseActivity {
         }
 
         selectedBtn.setBackgroundResource(R.drawable.bg_option_selected);
-        selectedIc.setColorFilter(ContextCompat.getColor(this, R.color.primary));
-        selectedTv.setTextColor(Color.WHITE);
+        selectedIc.setColorFilter(colorSelected);
+        selectedTv.setTextColor(colorSelected);
     }
 
     private void createProject() {

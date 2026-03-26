@@ -36,6 +36,7 @@ public interface ProjectApi {
      * Get all projects for current user (as owner)
      * @deprecated Use getOwnedProjects instead
      */
+    @Deprecated
     @GET("projects")
     Call<List<Project>> getProjects(
             @Query("owner_id") String ownerIdFilter,
@@ -78,6 +79,7 @@ public interface ProjectApi {
      * POST /projects with body
      * @deprecated Use createProjectNew instead
      */
+    @Deprecated
     @POST("projects")
     Call<List<Project>> createProject(
             @Body Project project,

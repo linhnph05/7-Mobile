@@ -57,7 +57,16 @@ public class TimelineActivity extends BaseActivity {
         // 3-dot menu → open Project Settings bottom sheet
         findViewById(R.id.btnMoreOptions).setOnClickListener(v -> showProjectSettingsPanel());
 
-        // New Task button
+        // AI Task creation context button starts new Activity
+        View fabAddAI = findViewById(R.id.fabAddAI);
+        if (fabAddAI != null) {
+            fabAddAI.setOnClickListener(v -> {
+                android.content.Intent aiIntent = new android.content.Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+                startActivity(aiIntent);
+            });
+        }
+
+        // New Task button (Manual creation sheet)
         findViewById(R.id.btnNewTask).setOnClickListener(v -> {
             // TODO: open add-task sheet
         });
@@ -134,12 +143,54 @@ public class TimelineActivity extends BaseActivity {
         }
 
         // Get project info from Intent (passed from Dashboard)
-        String projectName = getIntent().getStringExtra("project_name");
-        if (projectName != null) {
-            TextView tvProjectName = sheetView.findViewById(R.id.tvProjectName);
-            if (tvProjectName != null) {
-                tvProjectName.setText(projectName);
-            }
+        long currentProjectId = getIntent().getLongExtra("project_id", -1);
+        String currentProjectName = getIntent().getStringExtra("project_name");
+        String currentProjectKey = getIntent().getStringExtra("project_key");
+        String currentProjectDesc = getIntent().getStringExtra("project_desc");
+
+        android.widget.EditText etProjectName = sheetView.findViewById(R.id.etProjectName);
+        android.widget.EditText etProjectDesc = sheetView.findViewById(R.id.etProjectDesc);
+        TextView tvProjectKey = sheetView.findViewById(R.id.tvProjectKey);
+        android.widget.ImageView btnSaveProject = sheetView.findViewById(R.id.btnSaveProject);
+
+        if (etProjectName != null && currentProjectName != null) etProjectName.setText(currentProjectName);
+        if (etProjectDesc != null && currentProjectDesc != null) etProjectDesc.setText(currentProjectDesc);
+        if (tvProjectKey != null) {
+            tvProjectKey.setText(currentProjectKey != null ? "KEY: " + currentProjectKey : "N/A");
+        }
+
+        if (btnSaveProject != null) {
+            btnSaveProject.setOnClickListener(v -> {
+                if (currentProjectId == -1) return;
+                String newName = etProjectName.getText().toString().trim();
+                String newDesc = etProjectDesc.getText().toString().trim();
+                if (newName.isEmpty()) {
+                    android.widget.Toast.makeText(this, "Tên dự án không được bỏ trống!", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                com.team7.taskflow.domain.model.Project updateP = new com.team7.taskflow.domain.model.Project();
+                updateP.setName(newName);
+                updateP.setDescription(newDesc);
+
+                com.team7.taskflow.data.repository.ProjectRepository.getInstance().updateProject(
+                        currentProjectId, updateP, new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<com.team7.taskflow.domain.model.Project>() {
+                    @Override
+                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                        runOnUiThread(() -> {
+                            getIntent().putExtra("project_name", newName);
+                            getIntent().putExtra("project_desc", newDesc);
+                            android.widget.Toast.makeText(TimelineActivity.this, "Cập nhật dự án thành công!", android.widget.Toast.LENGTH_SHORT).show();
+                            bottomSheet.dismiss();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> android.widget.Toast.makeText(TimelineActivity.this, error, android.widget.Toast.LENGTH_SHORT).show());
+                    }
+                });
+            });
         }
 
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);

@@ -14,6 +14,19 @@
         <!-- Status Bar Colors -->
         <item name="android:statusBarColor">@color/theme_background</item>
         <item name="android:windowLightStatusBar">true</item>
+        
+        <!-- Page Transition Animation -->
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+    </style>
+
+    <!-- Global Activity Animations -->
+    <style name="WindowAnimationTransition" parent="@android:style/Animation.Activity">
+        <!-- Khi gọi startActivity: Màn hình mới trượt vào từ bên phải, màn hình cũ trượt ra bên trái -->
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <!-- Khi gọi finish (bấm Back): Màn hình cũ trượt vào từ bên trái, màn hình hiện tại trượt ra bên phải -->
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
 
     <style name="Theme.TaskFlow" parent="Base.Theme.TaskFlow" />
@@ -46,5 +59,16 @@
         <item name="cornerSizeTopRight">24dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>
         <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- Translucent Overlay Theme for AI Dialog -->
+    <style name="Theme.TaskFlow.Translucent" parent="Theme.TaskFlow">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 </resources>

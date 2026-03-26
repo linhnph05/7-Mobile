@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/theme_background"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/theme_text_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Activity"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnMarkAllRead"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Mark all as read"
+                android:src="@drawable/ic_done_all"
+                app:tint="@color/theme_text_primary" />
+
+            <ImageButton
+                android:id="@+id/btnNotificationSettings"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Notification settings"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/theme_text_primary" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Filter Dropdown -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <!-- Filter Type Dropdown -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilFilterType"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:boxBackgroundColor="@color/theme_surface_variant"
+            app:boxStrokeColor="@color/theme_border"
+            app:hintTextColor="@color/theme_text_hint">
+
+            <AutoCompleteTextView
+                android:id="@+id/actvFilterType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:text="All types"
+                android:textColor="@color/theme_text_primary"
+                android:textSize="14sp"
+                android:padding="12dp"
+                android:drawableEnd="@drawable/ic_arrow_drop_down"
+                android:drawableTint="@color/theme_text_primary" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Unread Only Toggle -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipUnread"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Unread"
+            android:textColor="@color/chip_text_selector"
+            app:chipBackgroundColor="@color/chip_background_selector"
+            app:chipStrokeColor="@color/chip_stroke_selector"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/chip_text_selector"
+            app:checkedIcon="@drawable/ic_check" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvNotifications"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/layoutEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginBottom="16dp"
+                android:alpha="0.5"
+                android:src="@drawable/img_no_notifications" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="You don't have any notifications that match the selected filters."
+                android:textColor="@color/theme_text_secondary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearFilters"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Clear filters"
+                android:textColor="@color/primary" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

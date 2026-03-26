@@ -1,0 +1,92 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac FAILED
+D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\UserRepository.java:9: error: cannot find symbol
+import com.team7.taskflow.data.remote.api.StorageApi;
+                                         ^
+  symbol:   class StorageApi
+  location: package com.team7.taskflow.data.remote.api
+D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\UserRepository.java:34: error: cannot find symbol
+    private final StorageApi storageApi;
+                  ^
+  symbol:   class StorageApi
+  location: class UserRepository
+D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\remote\api\ProjectApi.java:40: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    Call<List<Project>> getProjects(
+                        ^
+D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\remote\api\ProjectApi.java:82: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    Call<List<Project>> createProject(
+                        ^
+D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\ProjectRepository.java:99: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public void getProjects(String userId, ProjectCallback<List<Project>> callback) {
+                ^
+D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\UserRepository.java:38: error: cannot find symbol
+        this.storageApi = SupabaseClient.getInstance().getStorageService(StorageApi.class);
+                                                                         ^
+  symbol:   class StorageApi
+  location: class UserRepository
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+3 errors
+3 warnings
+
+[Incubating] Problems report is available at: file:///D:/Nghiaaaa/7-Mobile/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\UserRepository.java:9: error: cannot find symbol
+  import com.team7.taskflow.data.remote.api.StorageApi;
+                                           ^
+    symbol:   class StorageApi
+    location: package com.team7.taskflow.data.remote.api
+  D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\UserRepository.java:34: error: cannot find symbol
+      private final StorageApi storageApi;
+                    ^
+    symbol:   class StorageApi
+    location: class UserRepository
+  D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\remote\api\ProjectApi.java:40: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+      Call<List<Project>> getProjects(
+                          ^
+  D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\remote\api\ProjectApi.java:82: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+      Call<List<Project>> createProject(
+                          ^
+  D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\ProjectRepository.java:99: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+      public void getProjects(String userId, ProjectCallback<List<Project>> callback) {
+                  ^
+  D:\Nghiaaaa\7-Mobile\app\src\main\java\com\team7\taskflow\data\repository\UserRepository.java:38: error: cannot find symbol
+          this.storageApi = SupabaseClient.getInstance().getStorageService(StorageApi.class);
+                                                                           ^
+    symbol:   class StorageApi
+    location: class UserRepository
+  Note: Some input files use or override a deprecated API.
+  Note: Recompile with -Xlint:deprecation for details.
+  3 errors
+  3 warnings
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 2s
+18 actionable tasks: 1 executed, 17 up-to-date
