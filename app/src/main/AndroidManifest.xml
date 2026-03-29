@@ -69,7 +69,14 @@
         <activity
             android:name=".ui.timeline.TimelineActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".ui.project.CalendarActivity"
+            android:exported="false" />
+        <!-- Thêm dòng này vào trong thẻ <application> -->
+        <activity
+            android:name=".ui.project.CreateTaskActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <!-- Notification -->
         <activity android:name=".ui.notification.NotificationsActivity" />
 
