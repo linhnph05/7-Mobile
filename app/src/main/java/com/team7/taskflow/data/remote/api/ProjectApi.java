@@ -66,6 +66,16 @@ public interface ProjectApi {
     );
 
     /**
+     * Get all members of a project
+     * Supabase query: /project_members?project_id=eq.{id}&select=*,users(*)
+     */
+    @GET("project_members")
+    Call<List<ProjectMember>> getProjectMembers(
+            @Query("project_id") String projectIdFilter,
+            @Query("select") String selectFields
+    );
+
+    /**
      * Get project by ID
      * Supabase query: /projects?project_id=eq.{id}
      */

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="4dp"
+    android:background="@drawable/bg_chip_neutral"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="10dp"
+    android:paddingVertical="8dp">
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_attach_file"
+        app:tint="@color/theme_text_secondary" />
+
+    <TextView
+        android:id="@+id/tvFileName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="filename.pdf"
+        android:textColor="@color/theme_text_primary"
+        android:textSize="13sp" />
+
+    <ImageView
+        android:id="@+id/btnRemoveFile"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="@color/theme_text_hint" />
+
+</LinearLayout>

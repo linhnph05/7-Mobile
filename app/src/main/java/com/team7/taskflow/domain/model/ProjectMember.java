@@ -25,7 +25,20 @@ public class ProjectMember {
     @SerializedName("projects")
     private Project project;
 
+    // Nested user data
+    @SerializedName("users")
+    private User user;
+
     public ProjectMember() {
+    }
+
+    // Getters and Setters
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     // Getters and Setters

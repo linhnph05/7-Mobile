@@ -62,6 +62,10 @@ public class TimelineActivity extends BaseActivity {
         if (fabAddAI != null) {
             fabAddAI.setOnClickListener(v -> {
                 android.content.Intent aiIntent = new android.content.Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+                String pKey = getIntent().getStringExtra("project_key");
+                if (pKey != null) aiIntent.putExtra("project_key", pKey);
+                long pid = getIntent().getLongExtra("project_id", -1);
+                if (pid != -1) aiIntent.putExtra("project_id", pid);
                 startActivity(aiIntent);
             });
         }

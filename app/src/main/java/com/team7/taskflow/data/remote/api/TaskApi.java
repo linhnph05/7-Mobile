@@ -93,6 +93,15 @@ public interface TaskApi {
     );
 
     /**
+     * Add attachment to task
+     */
+    @POST("attachments")
+    Call<Void> addAttachment(
+            @Body com.team7.taskflow.domain.model.Attachment attachment,
+            @Header("Prefer") String prefer
+    );
+
+    /**
      * Body for status update
      */
     class StatusBody {

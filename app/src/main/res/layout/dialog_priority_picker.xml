@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn mức độ ưu tiên"
+        android:textColor="@color/theme_text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- High -->
+    <LinearLayout
+        android:id="@+id/optHigh"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="4dp"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="12dp"
+            android:background="@color/danger" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Khẩn cấp"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- Medium -->
+    <LinearLayout
+        android:id="@+id/optMedium"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="4dp"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="12dp"
+            android:background="@color/warning" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trung bình"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- Low -->
+    <LinearLayout
+        android:id="@+id/optLow"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="4dp"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="12dp"
+            android:background="@color/success" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thấp"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- None -->
+    <LinearLayout
+        android:id="@+id/optNone"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="4dp"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="12dp"
+            android:background="@color/theme_border" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Không ưu tiên"
+            android:textColor="@color/theme_text_hint"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+</LinearLayout>

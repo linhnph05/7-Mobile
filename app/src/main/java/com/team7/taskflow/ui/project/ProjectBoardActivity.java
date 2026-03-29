@@ -56,8 +56,7 @@ public class ProjectBoardActivity extends BaseActivity {
 
         taskLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                result -> loadTaskCounts()
-        );
+                result -> loadTaskCounts());
 
         setupListeners();
         setupBoards();
@@ -126,7 +125,8 @@ public class ProjectBoardActivity extends BaseActivity {
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
-            public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh, @NonNull RecyclerView.ViewHolder target) {
+            public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
+                    @NonNull RecyclerView.ViewHolder target) {
                 return false; // Không dùng kéo lên xuống
             }
 
@@ -134,7 +134,8 @@ public class ProjectBoardActivity extends BaseActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getBindingAdapterPosition();
                 TaskAdapter currentAdapter = (TaskAdapter) viewHolder.getBindingAdapter();
-                if (currentAdapter == null) return;
+                if (currentAdapter == null)
+                    return;
 
                 Task task = currentAdapter.getTasks().get(position);
                 String currentStatus = task.getStatus().toUpperCase();
@@ -142,12 +143,16 @@ public class ProjectBoardActivity extends BaseActivity {
 
                 if (direction == ItemTouchHelper.RIGHT) {
                     // Vuốt PHẢI: Tiến tới
-                    if (currentStatus.equals("TODO")) nextStatus = "DOING";
-                    else if (currentStatus.equals("DOING")) nextStatus = "DONE";
+                    if (currentStatus.equals("TODO"))
+                        nextStatus = "DOING";
+                    else if (currentStatus.equals("DOING"))
+                        nextStatus = "DONE";
                 } else if (direction == ItemTouchHelper.LEFT) {
                     // Vuốt TRÁI: Quay lui
-                    if (currentStatus.equals("DONE")) nextStatus = "DOING";
-                    else if (currentStatus.equals("DOING")) nextStatus = "TODO";
+                    if (currentStatus.equals("DONE"))
+                        nextStatus = "DOING";
+                    else if (currentStatus.equals("DOING"))
+                        nextStatus = "TODO";
                 }
 
                 if (!nextStatus.equals(currentStatus)) {
@@ -165,6 +170,7 @@ public class ProjectBoardActivity extends BaseActivity {
         new ItemTouchHelper(swipeCallback).attachToRecyclerView(rvDoing);
         new ItemTouchHelper(swipeCallback).attachToRecyclerView(rvDone);
     }
+
     private void initViews() {
         tvProjectName = findViewById(R.id.tvProjectName);
         tvCountTodo = findViewById(R.id.tvCountTodo);
@@ -197,7 +203,8 @@ public class ProjectBoardActivity extends BaseActivity {
     }
 
     private void loadTaskCounts() {
-        if (projectId == -1) return;
+        if (projectId == -1)
+            return;
 
         taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
             @Override
@@ -207,19 +214,29 @@ public class ProjectBoardActivity extends BaseActivity {
                 List<Task> doneList = new ArrayList<>();
 
                 for (Task t : result) {
-                    if (t.getStatus() == null) continue;
+                    if (t.getStatus() == null)
+                        continue;
                     String status = t.getStatus().toUpperCase();
                     switch (status) {
-                        case "TODO": todoList.add(t); break;
-                        case "DOING": doingList.add(t); break;
-                        case "DONE": doneList.add(t); break;
+                        case "TODO":
+                            todoList.add(t);
+                            break;
+                        case "DOING":
+                            doingList.add(t);
+                            break;
+                        case "DONE":
+                            doneList.add(t);
+                            break;
                     }
                 }
 
                 runOnUiThread(() -> {
-                    if (tvCountTodo != null) tvCountTodo.setText(String.valueOf(todoList.size()));
-                    if (tvCountDoing != null) tvCountDoing.setText(String.valueOf(doingList.size()));
-                    if (tvCountDone != null) tvCountDone.setText(String.valueOf(doneList.size()));
+                    if (tvCountTodo != null)
+                        tvCountTodo.setText(String.valueOf(todoList.size()));
+                    if (tvCountDoing != null)
+                        tvCountDoing.setText(String.valueOf(doingList.size()));
+                    if (tvCountDone != null)
+                        tvCountDone.setText(String.valueOf(doneList.size()));
 
                     adapterTodo.setTasks(todoList);
                     adapterDoing.setTasks(doingList);
@@ -233,27 +250,31 @@ public class ProjectBoardActivity extends BaseActivity {
             }
         });
     }
+
     private void updateTaskStatusOnServer(Task task, String newStatus) {
         // Hiển thị loading nhẹ hoặc Toast
-        taskRepository.updateTaskStatus(task.getId(), task.getStatus(), newStatus, new TaskRepository.TaskCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                runOnUiThread(() -> {
-                    Toast.makeText(ProjectBoardActivity.this, "Moved to " + newStatus, Toast.LENGTH_SHORT).show();
-                    // Tải lại toàn bộ để các con số và danh sách được đồng bộ
-                    loadTaskCounts();
-                });
-            }
+        taskRepository.updateTaskStatus(task.getId(), task.getStatus(), newStatus,
+                new TaskRepository.TaskCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(ProjectBoardActivity.this, "Moved to " + newStatus, Toast.LENGTH_SHORT)
+                                    .show();
+                            // Tải lại toàn bộ để các con số và danh sách được đồng bộ
+                            loadTaskCounts();
+                        });
+                    }
 
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    Toast.makeText(ProjectBoardActivity.this, "Failed: " + error, Toast.LENGTH_SHORT).show();
-                    loadTaskCounts(); // Tải lại để đưa Task về vị trí cũ nếu lỗi
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(ProjectBoardActivity.this, "Failed: " + error, Toast.LENGTH_SHORT).show();
+                            loadTaskCounts(); // Tải lại để đưa Task về vị trí cũ nếu lỗi
+                        });
+                    }
                 });
-            }
-        });
     }
+
     private void showTaskMenu(Task task, View view) {
         PopupMenu popup = new PopupMenu(this, view);
         // Thêm các lựa chọn vào menu
@@ -288,6 +309,7 @@ public class ProjectBoardActivity extends BaseActivity {
                     loadTaskCounts(); // Load lại danh sách
                 });
             }
+
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> Toast.makeText(ProjectBoardActivity.this, error, Toast.LENGTH_SHORT).show());

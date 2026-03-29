@@ -27,10 +27,13 @@ public class TaskRepository {
     private static TaskRepository instance;
     private final TaskApi taskApi;
     private final ActivityApi activityApi;
+    private final com.team7.taskflow.data.remote.api.StorageApi storageApi;
 
     private TaskRepository() {
         taskApi = SupabaseClient.getInstance().getService(TaskApi.class);
         activityApi = SupabaseClient.getInstance().getService(ActivityApi.class);
+        storageApi = SupabaseClient.getInstance()
+                .getStorageService(com.team7.taskflow.data.remote.api.StorageApi.class);
     }
 
     public static synchronized TaskRepository getInstance() {
@@ -42,6 +45,7 @@ public class TaskRepository {
 
     public interface TaskCallback<T> {
         void onSuccess(T result);
+
         void onError(String error);
     }
 
@@ -49,48 +53,50 @@ public class TaskRepository {
 
     public void createTask(Task task, TaskCallback<Task> callback) {
         taskApi.createTask(task, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
-            .enqueue(new Callback<List<Task>>() {
-                @Override
-                public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
-                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                        Task created = response.body().get(0);
-                        logActivity(created.getId(), "CREATE", null, created.getTitle());
-                        callback.onSuccess(created);
-                    } else {
-                        callback.onError("Failed to create task: " + response.code());
+                .enqueue(new Callback<List<Task>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            Task created = response.body().get(0);
+                            logActivity(created.getId(), "CREATE", null, created.getTitle());
+                            callback.onSuccess(created);
+                        } else {
+                            callback.onError("Failed to create task: " + response.code());
+                        }
                     }
-                }
-                @Override
-                public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
-                    callback.onError(t.getMessage());
-                }
-            });
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
     }
 
     // ── Update ──────────────────────────────────────────────────────────
 
     public void updateTask(long taskId, Task task, TaskCallback<Task> callback) {
         taskApi.updateTaskFields("eq." + taskId, getTaskMap(task), SupabaseConfig.PREFER_RETURN_REPRESENTATION)
-            .enqueue(new Callback<List<Task>>() {
-                @Override
-                public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
-                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                        callback.onSuccess(response.body().get(0));
-                    } else {
-                        callback.onError("Update failed");
+                .enqueue(new Callback<List<Task>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            callback.onSuccess(response.body().get(0));
+                        } else {
+                            callback.onError("Update failed");
+                        }
                     }
-                }
-                @Override
-                public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
-                    callback.onError(t.getMessage());
-                }
-            });
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
     }
 
     public void updateTaskStatus(long taskId, String oldStatus, String newStatus, TaskCallback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", newStatus);
-        
+
         taskApi.updateTaskFields("eq." + taskId, updates, null).enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
@@ -101,6 +107,7 @@ public class TaskRepository {
                     callback.onError("Failed to update status");
                 }
             }
+
             @Override
             public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
                 callback.onError(t.getMessage());
@@ -113,7 +120,7 @@ public class TaskRepository {
     public void softDeleteTask(long taskId, TaskCallback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", "TRASH"); // Assuming TRASH is a valid status for soft delete
-        
+
         taskApi.updateTaskFields("eq." + taskId, updates, null).enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
@@ -124,22 +131,111 @@ public class TaskRepository {
                     callback.onError("Failed to delete task");
                 }
             }
+
             @Override
             public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
                 callback.onError(t.getMessage());
             }
         });
     }
+
     public void deleteTask(long taskId, TaskCallback<Void> callback) {
         taskApi.deleteTask("eq." + taskId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) callback.onSuccess(null);
-                else callback.onError("Delete failed: " + response.code());
+                if (response.isSuccessful())
+                    callback.onSuccess(null);
+                else
+                    callback.onError("Delete failed: " + response.code());
             }
+
             @Override
-            public void onFailure(Call<Void> call, Throwable t) { callback.onError(t.getMessage()); }
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
         });
+    }
+
+    // ── Attachments ─────────────────────────────────────────────────────
+
+    public void uploadTaskAttachment(long taskId, android.net.Uri fileUri, String fileName, String mimeType,
+            android.content.ContentResolver contentResolver,
+            TaskCallback<com.team7.taskflow.domain.model.Attachment> callback) {
+        try {
+            java.io.InputStream inputStream = contentResolver.openInputStream(fileUri);
+            if (inputStream == null) {
+                callback.onError("Could not open file");
+                return;
+            }
+
+            // Read bytes
+            java.io.ByteArrayOutputStream byteBuffer = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                byteBuffer.write(buffer, 0, len);
+            }
+            byte[] bytes = byteBuffer.toByteArray();
+
+            // Prepare for upload
+            String bucket = "task_attachments";
+            String userId = SessionManager.getUserId();
+            long timestamp = System.currentTimeMillis();
+            
+            // Format: filename_timestamp.extension
+            String finalFileName = fileName;
+            int dotIndex = fileName.lastIndexOf(".");
+            if (dotIndex != -1) {
+                finalFileName = fileName.substring(0, dotIndex) + "_" + timestamp + fileName.substring(dotIndex);
+            } else {
+                finalFileName = fileName + "_" + timestamp;
+            }
+
+            // Path includes userId for RLS compliance
+            String path = userId + "/" + taskId + "/" + finalFileName;
+            okhttp3.RequestBody requestBody = okhttp3.RequestBody.create(bytes,
+                    okhttp3.MediaType.parse(mimeType != null ? mimeType : "application/octet-stream"));
+
+            // Upload to storage with x-upsert=true
+            storageApi.uploadFile(bucket, path, requestBody, "true").enqueue(new Callback<okhttp3.ResponseBody>() {
+                @Override
+                public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        String publicUrl = SupabaseConfig.SUPABASE_URL + "/storage/v1/object/public/" + bucket + "/"
+                                + path;
+
+                        // Insert into attachments table with resolution=merge-duplicates to avoid 409
+                        com.team7.taskflow.domain.model.Attachment attachment = new com.team7.taskflow.domain.model.Attachment(
+                                taskId, SessionManager.getUserId(), publicUrl, fileName, mimeType);
+
+                        taskApi.addAttachment(attachment, "resolution=merge-duplicates").enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                if (response.isSuccessful())
+                                    callback.onSuccess(attachment);
+                                else
+                                    callback.onError("Failed to link attachment to task: " + response.code());
+                            }
+
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                callback.onError(t.getMessage());
+                            }
+                        });
+                    } else {
+                        callback.onError("Upload failed. Make sure bucket '" + bucket + "' exists. " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                    callback.onError("Network error: " + t.getMessage());
+                }
+            });
+
+        } catch (java.io.IOException e) {
+            callback.onError(e.getMessage());
+        }
     }
 
     // ── History ─────────────────────────────────────────────────────────
@@ -148,8 +244,13 @@ public class TaskRepository {
         String userId = SessionManager.getUserId();
         TaskActivity activity = new TaskActivity(taskId, userId, action, oldVal, newVal);
         activityApi.logActivity(activity).enqueue(new Callback<Void>() {
-            @Override public void onResponse(Call<Void> call, Response<Void> response) {}
-            @Override public void onFailure(Call<Void> call, Throwable t) {}
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+            }
         });
     }
 
@@ -157,9 +258,12 @@ public class TaskRepository {
         activityApi.getActivitiesByTask("eq." + taskId, "created_at.desc").enqueue(new Callback<List<TaskActivity>>() {
             @Override
             public void onResponse(Call<List<TaskActivity>> call, Response<List<TaskActivity>> response) {
-                if (response.isSuccessful()) callback.onSuccess(response.body());
-                else callback.onError("Failed to load history");
+                if (response.isSuccessful())
+                    callback.onSuccess(response.body());
+                else
+                    callback.onError("Failed to load history");
             }
+
             @Override
             public void onFailure(Call<List<TaskActivity>> call, Throwable t) {
                 callback.onError(t.getMessage());
@@ -171,11 +275,16 @@ public class TaskRepository {
 
     private Map<String, Object> getTaskMap(Task task) {
         Map<String, Object> map = new HashMap<>();
-        if (task.getTitle() != null) map.put("title", task.getTitle());
-        if (task.getDescription() != null) map.put("description", task.getDescription());
-        if (task.getStatus() != null) map.put("status", task.getStatus());
-        if (task.getPriority() != null) map.put("priority", task.getPriority());
-        if (task.getPosition() != null) map.put("position", task.getPosition());
+        if (task.getTitle() != null)
+            map.put("title", task.getTitle());
+        if (task.getDescription() != null)
+            map.put("description", task.getDescription());
+        if (task.getStatus() != null)
+            map.put("status", task.getStatus());
+        if (task.getPriority() != null)
+            map.put("priority", task.getPriority());
+        if (task.getPosition() != null)
+            map.put("position", task.getPosition());
         return map;
     }
 
@@ -183,10 +292,16 @@ public class TaskRepository {
         taskApi.getTasksByProject("eq." + projectId, "position.asc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
-                if (response.isSuccessful()) callback.onSuccess(response.body());
-                else callback.onError("Load failed");
+                if (response.isSuccessful())
+                    callback.onSuccess(response.body());
+                else
+                    callback.onError("Load failed");
             }
-            @Override public void onFailure(Call<List<Task>> call, Throwable t) { callback.onError(t.getMessage()); }
+
+            @Override
+            public void onFailure(Call<List<Task>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
         });
     }
 
