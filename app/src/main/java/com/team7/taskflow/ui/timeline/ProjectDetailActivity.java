@@ -28,7 +28,7 @@ import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
 
-public class TimelineActivity extends BaseActivity {
+public class ProjectDetailActivity extends BaseActivity {
 
     private long projectId;
     private String projectName;
@@ -38,13 +38,12 @@ public class TimelineActivity extends BaseActivity {
 
     private LinearLayout tabOverview, tabBoard, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
-    private ImageView imgUserAvatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_timeline);
+        setContentView(R.layout.activity_project_detail);
 
         projectId = getIntent().getLongExtra("project_id", -1);
         projectName = getIntent().getStringExtra("project_name");
@@ -76,7 +75,6 @@ public class TimelineActivity extends BaseActivity {
     private void initViews() {
         tvProjectName = findViewById(R.id.tvProjectName);
         tvMonth = findViewById(R.id.tvMonth);
-        imgUserAvatar = findViewById(R.id.imgUserAvatar);
 
         if (tvProjectName != null) tvProjectName.setText(projectName != null ? projectName : "Project");
         
@@ -144,21 +142,12 @@ public class TimelineActivity extends BaseActivity {
                 public void onResponse(@NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.User>> response) {
                     if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                         com.team7.taskflow.domain.model.User user = response.body().get(0);
-                        runOnUiThread(() -> {
-                            if (imgUserAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                                com.bumptech.glide.Glide.with(TimelineActivity.this)
-                                    .load(user.getAvatarUrl())
-                                    .circleCrop()
-                                    .placeholder(R.drawable.bg_avatar_bordered)
-                                    .error(R.drawable.bg_avatar_bordered)
-                                    .into(imgUserAvatar);
-                            }
-                        });
+                        // User info loaded but no longer needed for top bar avatar
                     }
                 }
                 @Override
                 public void onFailure(@NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @NonNull Throwable t) {
-                    Log.e("Timeline", "Load user failed: " + t.getMessage());
+                    Log.e("ProjectDetail", "Load user failed: " + t.getMessage());
                 }
             });
     }
@@ -252,13 +241,13 @@ public class TimelineActivity extends BaseActivity {
                             projectName = newName;
                             projectDesc = newDesc;
                             tvProjectName.setText(newName);
-                            Toast.makeText(TimelineActivity.this, "Cập nhật dự án thành công!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ProjectDetailActivity.this, "Cập nhật dự án thành công!", Toast.LENGTH_SHORT).show();
                             bottomSheet.dismiss();
                         });
                     }
                     @Override
                     public void onError(String error) {
-                        runOnUiThread(() -> Toast.makeText(TimelineActivity.this, error, Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
                     }
                 });
             });
@@ -269,7 +258,7 @@ public class TimelineActivity extends BaseActivity {
             btnManageMembers.setOnClickListener(v -> {
                 bottomSheet.dismiss();
                 com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
-                        new com.team7.taskflow.ui.member.MemberListBottomSheet(projectId);
+                        com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(projectId);
                 sheet.show(getSupportFragmentManager(), "members");
             });
         }

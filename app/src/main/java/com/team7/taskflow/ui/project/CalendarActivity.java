@@ -166,7 +166,7 @@ public class CalendarActivity extends BaseActivity {
         
         if (tabTimeline != null) {
             tabTimeline.setOnClickListener(v -> {
-                android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
+                android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.timeline.ProjectDetailActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
                 intent.putExtra("is_my_tasks", isMyTasksMode);

@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/white"
+            android:background="?attr/colorSurface"
             android:elevation="4dp">
 
             <!-- TOP APP BAR -->
@@ -25,17 +25,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:paddingHorizontal="16dp">
-
-                <ImageView
-                    android:id="@+id/imgUserAvatar"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/bg_avatar_bordered"
-                    android:scaleType="centerCrop"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <ImageButton
                     android:id="@+id/btnBack"
@@ -45,7 +34,7 @@
                     android:contentDescription="Back"
                     android:src="@drawable/ic_arrow_back"
                     app:tint="?attr/colorOnSurface"
-                    app:layout_constraintStart_toEndOf="@id/imgUserAvatar"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -124,7 +113,7 @@
                         android:id="@+id/tvTabOverview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Overview"
+                        android:text="Tổng quan"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -149,7 +138,7 @@
                         android:id="@+id/tvTabBoard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Board"
+                        android:text="Bảng"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -174,7 +163,7 @@
                         android:id="@+id/tvTabTimeline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Timeline"
+                        android:text="Tiến độ"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -199,7 +188,7 @@
                         android:id="@+id/tvTabCalendar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Calendar"
+                        android:text="Lịch"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>

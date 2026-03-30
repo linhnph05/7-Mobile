@@ -62,6 +62,14 @@
                     android:layout_height="match_parent"
                     android:orientation="horizontal" />
 
+                <!-- Today Vertical Line Indicator -->
+                <View
+                    android:id="@+id/viewTodayLine"
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/primary"
+                    android:visibility="gone" />
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

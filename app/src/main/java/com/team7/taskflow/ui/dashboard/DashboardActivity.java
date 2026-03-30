@@ -135,9 +135,9 @@ public class DashboardActivity extends BaseActivity {
     private void setupRecyclerView() {
         projectAdapter = new ProjectAdapter();
 
-        // Click vào project để mở Timeline (Calendar)
+        // Click vào project để mở ProjectDetailActivity
         projectAdapter.setOnProjectClickListener(project -> {
-            Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
+            Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.ProjectDetailActivity.class);
             intent.putExtra("project_id", project.getId());
             intent.putExtra("project_name", project.getName());
             intent.putExtra("project_key", project.getProjectKey());

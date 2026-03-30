@@ -265,7 +265,7 @@ public class ProjectBoardActivity extends BaseActivity {
         
         if (tabTimeline != null) {
             tabTimeline.setOnClickListener(v -> {
-                Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
+                Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.ProjectDetailActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
                 intent.putExtra("is_my_tasks", isMyTasksMode);
