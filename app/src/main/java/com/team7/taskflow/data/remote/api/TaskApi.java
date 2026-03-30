@@ -52,6 +52,7 @@ public interface TaskApi {
      */
     @GET("tasks")
     Call<List<Task>> getTasksByAssignee(
+            @Query("select") String select,
             @Query("assignee_id") String assigneeIdFilter,
             @Query("order") String order
     );

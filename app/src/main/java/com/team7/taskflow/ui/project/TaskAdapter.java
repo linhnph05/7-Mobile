@@ -59,7 +59,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDescription, tvPriority, tvDueDate, tvStatus;
+        TextView tvTitle, tvDescription, tvPriority, tvDueDate, tvStatus, tvProjectBadge;
         ImageView btnMenu, ivAssignee;
 
         public TaskViewHolder(@NonNull View itemView) {
@@ -69,6 +69,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             tvPriority = itemView.findViewById(R.id.tvPriority);
             tvDueDate = itemView.findViewById(R.id.tvDueDate);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvProjectBadge = itemView.findViewById(R.id.tvProjectBadge);
             btnMenu = itemView.findViewById(R.id.btnMenu);
             ivAssignee = itemView.findViewById(R.id.ivAssignee);
         }
@@ -78,6 +79,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             tvTitle.setText(task.getTitle());
             tvDescription.setText(task.getDescription());
             tvPriority.setText(task.getPriority() != null ? task.getPriority() : "LOW");
+
+            // Project name badge
+            String projectName = task.getProjectName();
+            if (projectName != null && !projectName.isEmpty()) {
+                tvProjectBadge.setVisibility(View.VISIBLE);
+                tvProjectBadge.setText(projectName);
+            } else {
+                tvProjectBadge.setVisibility(View.GONE);
+            }
 
             // 2. Logic dải ngày (Start Date - Due Date)
 

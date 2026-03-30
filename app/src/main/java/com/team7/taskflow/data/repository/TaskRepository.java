@@ -383,7 +383,28 @@ public class TaskRepository {
      * Get tasks assigned to a specific user
      */
     public void getMyTasks(String userId, TaskCallback<List<Task>> callback) {
-        taskApi.getTasksByAssignee("eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
+        taskApi.getTasksByAssignee("*", "eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Load my tasks failed: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Task>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Get tasks assigned to a specific user, joining with project to load project name
+     */
+    public void getMyTasksWithProjectName(String userId, TaskCallback<List<Task>> callback) {
+        taskApi.getTasksByAssignee("*", "eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful()) {

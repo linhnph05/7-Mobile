@@ -11,8 +11,17 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.view.Gravity;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.activity.EdgeToEdge;
@@ -21,7 +30,32 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 public class TimelineActivity extends BaseActivity {
+
+    private LinearLayout containerTaskLabels;
+    private LinearLayout containerGanttBars;
+    private LinearLayout containerGanttMonths;
+    private LinearLayout containerGanttDays;
+    private LinearLayout containerGanttGrid;
+    private HorizontalScrollView ganttScrollView;
+    private TaskRepository taskRepository;
+    private long projectId;
+    private boolean isMyTasksMode = false;
+    private String currentUserId;
+    private ImageView imgUserAvatar;
+    private final Map<String, String> assigneeAvatarUrlMap = new HashMap<>();
+    private final int COLUMN_WIDTH_DP = 40; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +63,7 @@ public class TimelineActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_timeline);
 
+        // Xử lý viền màn hình (WindowInsets)
         View rootLayout = findViewById(R.id.rootLayout);
         View bottomBar = findViewById(R.id.bottomBar);
 
@@ -49,17 +84,303 @@ public class TimelineActivity extends BaseActivity {
             });
         }
 
-        // Back button
-        View btnBack = findViewById(R.id.btnBack);
-        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+        // Khởi tạo dữ liệu
+        taskRepository = TaskRepository.getInstance();
+        projectId = getIntent().getLongExtra("project_id", -1);
+        String projectName = getIntent().getStringExtra("project_name");
+        isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
 
-        // 3-dot menu → open Project Settings bottom sheet
+        com.team7.taskflow.utils.SessionManager.init(this);
+        currentUserId = com.team7.taskflow.utils.SessionManager.getUserId();
+
+        initViews();
+
+        if (isMyTasksMode) {
+            TextView tvProjectName = findViewById(R.id.tvProjectName);
+            if (tvProjectName != null) tvProjectName.setText("My Assigned Tasks");
+
+            View btnBack = findViewById(R.id.btnBack);
+            if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
+            
+            View layoutRightIcons = findViewById(R.id.layoutRightIcons);
+            if (layoutRightIcons != null) layoutRightIcons.setVisibility(View.INVISIBLE);
+            
+            View fabAddAI = findViewById(R.id.fabAddAI);
+            if (fabAddAI != null) fabAddAI.setVisibility(View.GONE);
+        } else if (projectName != null) {
+            TextView tvProjectName = findViewById(R.id.tvProjectName);
+            if (tvProjectName != null) tvProjectName.setText(projectName);
+            
+            TextView tvMonth = findViewById(R.id.tvMonth);
+            if (tvMonth != null) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
+                tvMonth.setText(sdf.format(java.util.Calendar.getInstance().getTime()));
+            }
+        }
+
+        setupClickListeners();
+
+        // Load dữ liệu
+        loadTimelineData();
+    }
+
+    private void initViews() {
+        containerTaskLabels = findViewById(R.id.containerTaskLabels);
+        containerGanttBars = findViewById(R.id.containerGanttBars);
+        containerGanttMonths = findViewById(R.id.containerGanttMonths);
+        containerGanttDays = findViewById(R.id.containerGanttDays);
+        containerGanttGrid = findViewById(R.id.containerGanttGrid);
+        ganttScrollView = findViewById(R.id.ganttScrollView);
+        imgUserAvatar = findViewById(R.id.imgUserAvatar);
+        
+        loadUserInfo();
+    }
+
+    private void loadUserInfo() {
+        if (currentUserId == null || currentUserId.isEmpty()) return;
+        
+        com.team7.taskflow.data.remote.SupabaseClient.getInstance()
+            .getService(com.team7.taskflow.data.remote.api.UserApi.class)
+            .getUserById("eq." + currentUserId, "*")
+            .enqueue(new retrofit2.Callback<List<com.team7.taskflow.domain.model.User>>() {
+                @Override
+                public void onResponse(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @androidx.annotation.NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.User>> response) {
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        com.team7.taskflow.domain.model.User user = response.body().get(0);
+                        runOnUiThread(() -> {
+                            if (imgUserAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                                com.bumptech.glide.Glide.with(TimelineActivity.this)
+                                    .load(user.getAvatarUrl())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.bg_avatar_bordered)
+                                    .error(R.drawable.bg_avatar_bordered)
+                                    .into(imgUserAvatar);
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onFailure(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @androidx.annotation.NonNull Throwable t) {
+                    Log.e("Timeline", "Load user failed: " + t.getMessage());
+                }
+            });
+    }
+
+    private void loadTimelineData() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
+            @Override
+            public void onSuccess(List<Task> tasks) {
+                fetchAssigneeAvatars(tasks, () -> runOnUiThread(() -> renderTasks(tasks)));
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(TimelineActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show());
+            }
+        };
+
+        if (isMyTasksMode) {
+            taskRepository.getMyTasksWithProjectName(currentUserId, callback);
+        } else if (projectId != -1) {
+            taskRepository.getTasksByProject(projectId, callback);
+        }
+    }
+
+    private void fetchAssigneeAvatars(List<Task> tasks, Runnable onDone) {
+        assigneeAvatarUrlMap.clear();
+        if (tasks == null || tasks.isEmpty()) {
+            onDone.run();
+            return;
+        }
+
+        Set<String> assigneeIds = new HashSet<>();
+        for (Task task : tasks) {
+            if (task == null) continue;
+            String assigneeId = task.getAssigneeId();
+            if (assigneeId != null && !assigneeId.trim().isEmpty()) {
+                assigneeIds.add(assigneeId);
+            }
+        }
+
+        if (assigneeIds.isEmpty()) {
+            onDone.run();
+            return;
+        }
+
+        String idsFilter = "in.(" + android.text.TextUtils.join(",", assigneeIds) + ")";
+
+        com.team7.taskflow.data.remote.SupabaseClient.getInstance()
+                .getService(com.team7.taskflow.data.remote.api.UserApi.class)
+                .getUsersByIds(idsFilter, "user_id,avatar_url")
+                .enqueue(new retrofit2.Callback<List<com.team7.taskflow.domain.model.User>>() {
+                    @Override
+                    public void onResponse(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call,
+                                           @androidx.annotation.NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.User>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            for (com.team7.taskflow.domain.model.User user : response.body()) {
+                                if (user.getUserId() != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                                    assigneeAvatarUrlMap.put(user.getUserId(), user.getAvatarUrl());
+                                }
+                            }
+                        }
+                        onDone.run();
+                    }
+
+                    @Override
+                    public void onFailure(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call,
+                                          @androidx.annotation.NonNull Throwable t) {
+                        Log.e("Timeline", "Load assignee avatars failed: " + t.getMessage());
+                        onDone.run();
+                    }
+                });
+    }
+
+    private void renderTasks(List<Task> tasks) {
+        if (containerTaskLabels == null || containerGanttBars == null) return;
+
+        containerTaskLabels.removeAllViews();
+        containerGanttBars.removeAllViews();
+        if (containerGanttMonths != null) containerGanttMonths.removeAllViews();
+        if (containerGanttDays != null) containerGanttDays.removeAllViews();
+        if (containerGanttGrid != null) containerGanttGrid.removeAllViews();
+
+        float density = getResources().getDisplayMetrics().density;
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        Calendar minCal = Calendar.getInstance();
+        Calendar maxCal = Calendar.getInstance();
+
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0); today.set(Calendar.MINUTE, 0); today.set(Calendar.SECOND, 0); today.set(Calendar.MILLISECOND, 0);
+
+        // Render Tasks
+        int minMarginStart = Integer.MAX_VALUE;
+        long minTime = minCal.getTimeInMillis(); 
+
+        for (Task task : tasks) {
+            View labelView = getLayoutInflater().inflate(R.layout.item_timeline_label, containerTaskLabels, false);
+            TextView tvName = labelView.findViewById(R.id.tvTaskName);
+            ImageView imgAssigneeAvatar = labelView.findViewById(R.id.imgAssigneeAvatar);
+            
+            String labelText = task.getTitle();
+            if (isMyTasksMode) {
+                String pName = task.getProjectName();
+                if (pName != null) {
+                    labelText = "[" + pName + "] " + labelText;
+                }
+            }
+            tvName.setText(labelText);
+
+            String assigneeId = task.getAssigneeId();
+            String assigneeAvatarUrl = assigneeId != null ? assigneeAvatarUrlMap.get(assigneeId) : null;
+            if (imgAssigneeAvatar != null) {
+                if (assigneeAvatarUrl != null && !assigneeAvatarUrl.isEmpty()) {
+                    imgAssigneeAvatar.setVisibility(View.VISIBLE);
+                    com.bumptech.glide.Glide.with(TimelineActivity.this)
+                            .load(assigneeAvatarUrl)
+                            .circleCrop()
+                            .placeholder(R.drawable.bg_avatar_bordered)
+                            .error(R.drawable.bg_avatar_bordered)
+                            .into(imgAssigneeAvatar);
+                } else {
+                    imgAssigneeAvatar.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            containerTaskLabels.addView(labelView);
+            
+            View barView = getLayoutInflater().inflate(R.layout.item_timeline_bar, containerGanttBars, false);
+            View taskBar = barView.findViewById(R.id.taskBar);
+            TextView tvBarLabel = barView.findViewById(R.id.tvBarLabel);
+            
+            String barLabelText = (task.getStatus() != null ? task.getStatus() : "TODO") + " - " + task.getTitle();
+            if (isMyTasksMode) {
+                String pName = task.getProjectName();
+                if (pName != null) {
+                    barLabelText = "[" + pName + "] " + barLabelText;
+                }
+            }
+            tvBarLabel.setText(barLabelText);
+            
+            // Tính toán offset & độ dài của bar
+            long startT = minTime; 
+            long dueT = minTime;
+            try {
+                if (task.getStartDate() != null && task.getStartDate().length() >= 10) {
+                    Date d = sdf.parse(task.getStartDate().substring(0, 10));
+                    if (d != null) startT = d.getTime();
+                }
+                if (task.getDueDate() != null && task.getDueDate().length() >= 10) {
+                    Date d = sdf.parse(task.getDueDate().substring(0, 10));
+                    if (d != null) dueT = d.getTime();
+                } else {
+                    dueT = startT; 
+                }
+                if (startT > dueT) dueT = startT; 
+            } catch (Exception ignored) {}
+            
+            int offsetDays = Math.max(0, (int) ((startT - minTime + 12L*3600*1000) / (24L*3600*1000)));
+            int durationDays = Math.max(1, (int) ((dueT - startT + 12L*3600*1000) / (24L*3600*1000)) + 1);
+            
+            int marginStart = (int)(offsetDays * COLUMN_WIDTH_DP * density);
+            int barWidth = (int)(durationDays * COLUMN_WIDTH_DP * density);
+            
+            if (marginStart < minMarginStart) minMarginStart = marginStart;
+            
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) taskBar.getLayoutParams();
+            lp.setMarginStart(marginStart);
+            lp.width = barWidth;
+            taskBar.setLayoutParams(lp);
+
+            if ("HIGH".equals(task.getPriority())) {
+                taskBar.setBackgroundResource(R.drawable.bg_timeline_bar_high);
+            } else if ("DONE".equals(task.getStatus())) {
+                taskBar.setBackgroundResource(R.drawable.bg_timeline_bar_done);
+            } else {
+                taskBar.setBackgroundResource(R.drawable.bg_timeline_bar_default);
+            }
+            
+            containerGanttBars.addView(barView);
+        }
+
+        // Vị trí Today Line
+        View viewTodayLine = findViewById(R.id.viewTodayLine);
+        if (viewTodayLine != null) {
+            long todayOffsetDays = (today.getTimeInMillis() - minTime + 12L*3600*1000) / (24L*3600*1000);
+            int todayMarginStart = (int) (todayOffsetDays * COLUMN_WIDTH_DP * density);
+            
+            FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(
+                (int)(2 * density), ViewGroup.LayoutParams.MATCH_PARENT);
+            tlp.setMarginStart(todayMarginStart);
+            viewTodayLine.setLayoutParams(tlp);
+            viewTodayLine.setVisibility(View.VISIBLE);
+            
+            // Tự động cuộn đến task gần nhất hoặc ngày hiện tại
+            int scrollTarget = todayMarginStart - (int)(1 * COLUMN_WIDTH_DP * density);
+            if (minMarginStart != Integer.MAX_VALUE && minMarginStart < todayMarginStart) {
+                scrollTarget = minMarginStart - (int)(1 * COLUMN_WIDTH_DP * density);
+            }
+            final int finalScroll = Math.max(0, scrollTarget);
+            ganttScrollView.post(() -> ganttScrollView.scrollTo(finalScroll, 0));
+        } else if (minMarginStart != Integer.MAX_VALUE && ganttScrollView != null) {
+            final int finalScroll = Math.max(0, minMarginStart - (int)(1 * COLUMN_WIDTH_DP * density)); 
+            ganttScrollView.post(() -> ganttScrollView.scrollTo(finalScroll, 0));
+        }
+    }
+
+    private void setupClickListeners() {
+        // Xử lý nút Back 
+        View btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null && !isMyTasksMode) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         View btnMoreOptions = findViewById(R.id.btnMoreOptions);
         if (btnMoreOptions != null) {
             btnMoreOptions.setOnClickListener(v -> showProjectSettingsPanel());
         }
 
-        // AI Task creation
+        // Mở màn hình tạo Task Assistant
         View fabAddAI = findViewById(R.id.fabAddAI);
         if (fabAddAI != null) {
             fabAddAI.setOnClickListener(v -> {
@@ -68,7 +389,7 @@ public class TimelineActivity extends BaseActivity {
             });
         }
 
-        // Tab switching - dùng ID mới từ layout đồng đội
+        // Tab switching
         TextView tabTimeline = findViewById(R.id.tabTimeline);
         TextView tabBoard    = findViewById(R.id.tabBoard);
         TextView tabCalendar = findViewById(R.id.tabCalendar);
@@ -88,6 +409,8 @@ public class TimelineActivity extends BaseActivity {
             tabBoard.setOnClickListener(tabClick);
             tabCalendar.setOnClickListener(tabClick);
         }
+        
+        setupTabs(); 
     }
 
     private void showProjectSettingsPanel() {
@@ -161,7 +484,7 @@ public class TimelineActivity extends BaseActivity {
             });
         }
 
-        // Kết nối nút Manage Members
+        // Các nút chức năng quản lý
         View btnManageMembers = sheetView.findViewById(R.id.btnManageMembers);
         if (btnManageMembers != null) {
             btnManageMembers.setOnClickListener(v -> {
@@ -189,7 +512,38 @@ public class TimelineActivity extends BaseActivity {
         bottomSheet.show();
     }
 
-    // ── Custom view: vertical dashed "today" line ──────────────────────────
+    private void setupTabs() {
+        TextView tabBoard = findViewById(R.id.tabBoard);
+        TextView tabCalendar = findViewById(R.id.tabCalendar);
+        
+        if (tabBoard != null) {
+            tabBoard.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ProjectBoardActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.putExtra("is_my_tasks", isMyTasksMode);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+            });
+        }
+        
+        if (tabCalendar != null) {
+            tabCalendar.setOnClickListener(v -> {
+                Intent intent = new Intent(this, CalendarActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.putExtra("is_my_tasks", isMyTasksMode);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+            });
+        }
+    }
+
+    // Custom view: vertical dashed "today" line 
     public static class TodayLineView extends View {
 
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
