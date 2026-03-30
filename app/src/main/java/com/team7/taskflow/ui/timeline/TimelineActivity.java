@@ -30,7 +30,7 @@ public class TimelineActivity extends BaseActivity {
         setContentView(R.layout.activity_timeline);
 
         View rootLayout = findViewById(R.id.rootLayout);
-        View bottomBar = findViewById(R.id.bottomBar);
+        View bottomBar  = findViewById(R.id.bottomBar);
 
         if (rootLayout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
@@ -68,7 +68,7 @@ public class TimelineActivity extends BaseActivity {
             });
         }
 
-        // Tab switching - dùng ID mới từ layout đồng đội
+        // Tab switching
         TextView tabTimeline = findViewById(R.id.tabTimeline);
         TextView tabBoard    = findViewById(R.id.tabBoard);
         TextView tabCalendar = findViewById(R.id.tabCalendar);
@@ -104,14 +104,14 @@ public class TimelineActivity extends BaseActivity {
             behavior.setSkipCollapsed(true);
         }
 
-        long currentProjectId = getIntent().getLongExtra("project_id", -1);
+        long currentProjectId     = getIntent().getLongExtra("project_id", -1);
         String currentProjectName = getIntent().getStringExtra("project_name");
         String currentProjectKey  = getIntent().getStringExtra("project_key");
         String currentProjectDesc = getIntent().getStringExtra("project_desc");
 
         android.widget.EditText etProjectName = sheetView.findViewById(R.id.etProjectName);
         android.widget.EditText etProjectDesc = sheetView.findViewById(R.id.etProjectDesc);
-        TextView tvProjectKey = sheetView.findViewById(R.id.tvProjectKey);
+        TextView tvProjectKey                 = sheetView.findViewById(R.id.tvProjectKey);
         android.widget.ImageView btnSaveProject = sheetView.findViewById(R.id.btnSaveProject);
 
         if (etProjectName != null && currentProjectName != null)
@@ -128,7 +128,8 @@ public class TimelineActivity extends BaseActivity {
                 String newDesc = etProjectDesc.getText().toString().trim();
                 if (newName.isEmpty()) {
                     android.widget.Toast.makeText(this,
-                            "Tên dự án không được bỏ trống!", android.widget.Toast.LENGTH_SHORT).show();
+                            "Tên dự án không được bỏ trống!",
+                            android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 com.team7.taskflow.domain.model.Project updateP =
@@ -140,34 +141,34 @@ public class TimelineActivity extends BaseActivity {
                         currentProjectId, updateP,
                         new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<
                                 com.team7.taskflow.domain.model.Project>() {
-                    @Override
-                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
-                        runOnUiThread(() -> {
-                            getIntent().putExtra("project_name", newName);
-                            getIntent().putExtra("project_desc", newDesc);
-                            android.widget.Toast.makeText(TimelineActivity.this,
-                                    "Cập nhật dự án thành công!",
-                                    android.widget.Toast.LENGTH_SHORT).show();
-                            bottomSheet.dismiss();
+                            @Override
+                            public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                                runOnUiThread(() -> {
+                                    getIntent().putExtra("project_name", newName);
+                                    getIntent().putExtra("project_desc", newDesc);
+                                    android.widget.Toast.makeText(TimelineActivity.this,
+                                            "Cập nhật dự án thành công!",
+                                            android.widget.Toast.LENGTH_SHORT).show();
+                                    bottomSheet.dismiss();
+                                });
+                            }
+                            @Override
+                            public void onError(String error) {
+                                runOnUiThread(() -> android.widget.Toast.makeText(
+                                        TimelineActivity.this, error,
+                                        android.widget.Toast.LENGTH_SHORT).show());
+                            }
                         });
-                    }
-                    @Override
-                    public void onError(String error) {
-                        runOnUiThread(() -> android.widget.Toast.makeText(
-                                TimelineActivity.this, error,
-                                android.widget.Toast.LENGTH_SHORT).show());
-                    }
-                });
             });
         }
 
-        // Kết nối nút Manage Members
+        // ✅ FIX: Bỏ từ khóa "new" — newInstance() là static method
         View btnManageMembers = sheetView.findViewById(R.id.btnManageMembers);
         if (btnManageMembers != null) {
             btnManageMembers.setOnClickListener(v -> {
                 bottomSheet.dismiss();
                 com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
-                        new com.team7.taskflow.ui.member.MemberListBottomSheet(currentProjectId);
+                        com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(currentProjectId);
                 sheet.show(getSupportFragmentManager(), "members");
             });
         }

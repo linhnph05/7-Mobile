@@ -23,13 +23,23 @@ import java.util.List;
 
 public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
 
-    private final long projectId;
+    private static final String ARG_PROJECT_ID = "project_id";
+
+    // ✅ FIX #1: newInstance() thay vì constructor có argument
+    public static InviteMemberBottomSheet newInstance(long projectId) {
+        InviteMemberBottomSheet sheet = new InviteMemberBottomSheet();
+        Bundle args = new Bundle();
+        args.putLong(ARG_PROJECT_ID, projectId);
+        sheet.setArguments(args);
+        return sheet;
+    }
+
+    // Constructor rỗng bắt buộc cho Fragment
+    public InviteMemberBottomSheet() {}
+
+    private long projectId;
     private MemberRepository repository;
     private String foundUserId;
-
-    public InviteMemberBottomSheet(long projectId) {
-        this.projectId = projectId;
-    }
 
     @Nullable
     @Override
@@ -43,15 +53,24 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        EditText etEmail         = view.findViewById(R.id.et_email);
-        TextView tvResultName    = view.findViewById(R.id.tv_result_name);
-        TextView tvResultEmail   = view.findViewById(R.id.tv_result_email);
-        TextView tvAvatar        = view.findViewById(R.id.tv_avatar);
-        TextView tvError         = view.findViewById(R.id.tv_error);
-        CardView cardResult      = view.findViewById(R.id.card_result);
-        RadioGroup rgRole        = view.findViewById(R.id.rg_role);
-        Button btnSearch         = view.findViewById(R.id.btn_search);
-        Button btnAddMember      = view.findViewById(R.id.btn_add_member);
+        // Lấy projectId từ arguments
+        if (getArguments() != null) {
+            projectId = getArguments().getLong(ARG_PROJECT_ID, -1);
+        }
+        if (projectId == -1) {
+            dismiss();
+            return;
+        }
+
+        EditText etEmail       = view.findViewById(R.id.et_email);
+        TextView tvResultName  = view.findViewById(R.id.tv_result_name);
+        TextView tvResultEmail = view.findViewById(R.id.tv_result_email);
+        TextView tvAvatar      = view.findViewById(R.id.tv_avatar);
+        TextView tvError       = view.findViewById(R.id.tv_error);
+        CardView cardResult    = view.findViewById(R.id.card_result);
+        RadioGroup rgRole      = view.findViewById(R.id.rg_role);
+        Button btnSearch       = view.findViewById(R.id.btn_search);
+        Button btnAddMember    = view.findViewById(R.id.btn_add_member);
 
         repository = new MemberRepository();
 
@@ -64,9 +83,13 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
             }
             tvError.setVisibility(View.GONE);
             cardResult.setVisibility(View.GONE);
+            foundUserId = null;
 
             repository.searchUserByEmail(email, new MemberRepository.ResultCallback<List<User>>() {
-                @Override public void onSuccess(List<User> data) {
+                @Override
+                public void onSuccess(List<User> data) {
+                    // ✅ FIX #2: isAdded() check trước khi dùng requireActivity()
+                    if (!isAdded()) return;
                     requireActivity().runOnUiThread(() -> {
                         User user = data.get(0);
                         foundUserId = user.getUserId();
@@ -78,7 +101,10 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
                         cardResult.setVisibility(View.VISIBLE);
                     });
                 }
-                @Override public void onError(String message) {
+
+                @Override
+                public void onError(String message) {
+                    if (!isAdded()) return;
                     requireActivity().runOnUiThread(() -> {
                         tvError.setText(message);
                         tvError.setVisibility(View.VISIBLE);
@@ -88,23 +114,33 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         });
 
         btnAddMember.setOnClickListener(v -> {
-            if (foundUserId == null) return;
-            int id = rgRole.getCheckedRadioButtonId();
+            if (foundUserId == null) {
+                tvError.setText("Vui lòng tìm kiếm user trước");
+                tvError.setVisibility(View.VISIBLE);
+                return;
+            }
+
+            int checkedId = rgRole.getCheckedRadioButtonId();
             String role = "MEMBER";
-            if (id == R.id.rb_admin)  role = "ADMIN";
-            if (id == R.id.rb_viewer) role = "VIEWER";
+            if (checkedId == R.id.rb_admin)  role = "ADMIN";
+            if (checkedId == R.id.rb_viewer) role = "VIEWER";
 
             final String finalRole = role;
             repository.addMember(projectId, foundUserId, finalRole,
                     new MemberRepository.ResultCallback<Void>() {
-                        @Override public void onSuccess(Void data) {
+                        @Override
+                        public void onSuccess(Void data) {
+                            if (!isAdded()) return;
                             requireActivity().runOnUiThread(() -> {
                                 Toast.makeText(requireContext(),
                                         "Đã thêm thành viên!", Toast.LENGTH_SHORT).show();
                                 dismiss();
                             });
                         }
-                        @Override public void onError(String message) {
+
+                        @Override
+                        public void onError(String message) {
+                            if (!isAdded()) return;
                             requireActivity().runOnUiThread(() -> {
                                 tvError.setText("Lỗi: " + message);
                                 tvError.setVisibility(View.VISIBLE);

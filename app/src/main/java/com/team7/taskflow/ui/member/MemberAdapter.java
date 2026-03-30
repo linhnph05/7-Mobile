@@ -26,14 +26,21 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     private final Context context;
     private final List<ProjectMember> members;
     private final OnMemberActionListener listener;
-    private final boolean isOwnerOrAdmin; // chỉ owner/admin mới thấy nút xóa/đổi role
+
+    // ✅ FIX #1: Bỏ final để setAdminMode() có thể cập nhật
+    private boolean isOwnerOrAdmin;
 
     public MemberAdapter(Context context, List<ProjectMember> members,
                          boolean isOwnerOrAdmin, OnMemberActionListener listener) {
-        this.context = context;
-        this.members = members;
+        this.context        = context;
+        this.members        = members;
         this.isOwnerOrAdmin = isOwnerOrAdmin;
-        this.listener = listener;
+        this.listener       = listener;
+    }
+
+    // ✅ FIX #2: Thêm setter để MemberListActivity cập nhật sau khi reload
+    public void setAdminMode(boolean isAdmin) {
+        this.isOwnerOrAdmin = isAdmin;
     }
 
     @NonNull
@@ -59,45 +66,44 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
 
         // Màu role
         switch (role.toUpperCase()) {
-            case "OWNER":
-                holder.tvRole.setTextColor(0xFFFFD700); // vàng
-                break;
-            case "ADMIN":
-                holder.tvRole.setTextColor(0xFF2945FF); // xanh
-                break;
-            case "VIEWER":
-                holder.tvRole.setTextColor(0xFFA0A0A0); // xám
-                break;
-            default:
-                holder.tvRole.setTextColor(0xFF4CAF50); // xanh lá = member
+            case "OWNER":  holder.tvRole.setTextColor(0xFFFFD700); break; // vàng
+            case "ADMIN":  holder.tvRole.setTextColor(0xFF2945FF); break; // xanh dương
+            case "VIEWER": holder.tvRole.setTextColor(0xFFA0A0A0); break; // xám
+            default:       holder.tvRole.setTextColor(0xFF4CAF50); break; // xanh lá = MEMBER
         }
 
-        // Nút xóa: chỉ hiện nếu là owner/admin VÀ không phải chính owner
-        if (isOwnerOrAdmin && !"OWNER".equalsIgnoreCase(role)) {
-            holder.btnRemove.setVisibility(View.VISIBLE);
-            holder.btnRemove.setOnClickListener(v -> {
-                new AlertDialog.Builder(context)
-                        .setTitle("Xóa thành viên")
-                        .setMessage("Bạn có chắc muốn xóa " + name + " khỏi dự án?")
-                        .setPositiveButton("Xóa", (d, w) -> listener.onRemoveMember(member))
-                        .setNegativeButton("Hủy", null)
-                        .show();
-            });
+        // ✅ FIX #3: Phân quyền đúng — Admin/Owner thấy nút xóa & đổi role
+        // OWNER không được xóa chính mình
+        boolean canManageThisMember = isOwnerOrAdmin && !"OWNER".equalsIgnoreCase(role);
 
-            // Nhấn vào role để đổi
+        if (canManageThisMember) {
+            // Hiện nút xóa
+            holder.btnRemove.setVisibility(View.VISIBLE);
+            holder.btnRemove.setOnClickListener(v ->
+                    new AlertDialog.Builder(context)
+                            .setTitle("Xóa thành viên")
+                            .setMessage("Bạn có chắc muốn xóa " + name + " khỏi dự án?")
+                            .setPositiveButton("Xóa", (d, w) -> listener.onRemoveMember(member))
+                            .setNegativeButton("Hủy", null)
+                            .show());
+
+            // Click vào role badge để đổi quyền
             holder.tvRole.setOnClickListener(v -> showRoleDialog(member));
+
         } else {
+            // ✅ FIX #4: Clear listener cũ để tránh RecyclerView tái sử dụng ViewHolder bị sót
             holder.btnRemove.setVisibility(View.GONE);
+            holder.btnRemove.setOnClickListener(null);
+            holder.tvRole.setOnClickListener(null);
         }
     }
 
     private void showRoleDialog(ProjectMember member) {
+        // OWNER không thể bị hạ cấp — chỉ cho chọn ADMIN / MEMBER / VIEWER
         String[] roles = {"ADMIN", "MEMBER", "VIEWER"};
         new AlertDialog.Builder(context)
                 .setTitle("Đổi quyền cho " + member.getDisplayName())
-                .setItems(roles, (dialog, which) -> {
-                    listener.onChangeRole(member, roles[which]);
-                })
+                .setItems(roles, (dialog, which) -> listener.onChangeRole(member, roles[which]))
                 .show();
     }
 
@@ -105,7 +111,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     public int getItemCount() { return members.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvAvatar, tvName, tvEmail, tvRole;
+        TextView    tvAvatar, tvName, tvEmail, tvRole;
         ImageButton btnRemove;
 
         ViewHolder(@NonNull View itemView) {
