@@ -2,11 +2,7 @@ package com.team7.taskflow.ui.timeline;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
-import com.team7.taskflow.data.repository.TaskRepository;
-import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.ui.base.BaseActivity;
-import com.team7.taskflow.ui.project.CalendarActivity;
-import com.team7.taskflow.ui.project.ProjectBoardActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,14 +20,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.Gravity;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.activity.EdgeToEdge;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import androidx.core.view.WindowInsetsCompat;
 
 import java.text.SimpleDateFormat;
@@ -44,8 +40,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import android.view.Gravity;
-import android.view.ViewGroup;
 
 public class TimelineActivity extends BaseActivity {
 
@@ -61,7 +55,7 @@ public class TimelineActivity extends BaseActivity {
     private String currentUserId;
     private ImageView imgUserAvatar;
     private final Map<String, String> assigneeAvatarUrlMap = new HashMap<>();
-    private final int COLUMN_WIDTH_DP = 40; // Dense column width
+    private final int COLUMN_WIDTH_DP = 40; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +63,28 @@ public class TimelineActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_timeline);
 
-        // 1. Khởi tạo
+        // Xử lý viền màn hình (WindowInsets)
+        View rootLayout = findViewById(R.id.rootLayout);
+        View bottomBar = findViewById(R.id.bottomBar);
+
+        if (rootLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(0, systemBars.top, 0, 0);
+                return insets;
+            });
+        }
+
+        if (bottomBar != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(),
+                        v.getPaddingRight(), systemBars.bottom);
+                return insets;
+            });
+        }
+
+        // Khởi tạo dữ liệu
         taskRepository = TaskRepository.getInstance();
         projectId = getIntent().getLongExtra("project_id", -1);
         String projectName = getIntent().getStringExtra("project_name");
@@ -88,7 +103,6 @@ public class TimelineActivity extends BaseActivity {
             if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
             
             View layoutRightIcons = findViewById(R.id.layoutRightIcons);
-            // Keep right-side space to keep title alignment consistent with Board/Calendar.
             if (layoutRightIcons != null) layoutRightIcons.setVisibility(View.INVISIBLE);
             
             View fabAddAI = findViewById(R.id.fabAddAI);
@@ -104,10 +118,9 @@ public class TimelineActivity extends BaseActivity {
             }
         }
 
-        setupWindowInsets();
         setupClickListeners();
 
-        // 2. Load dữ liệu ngay lập tức
+        // Load dữ liệu
         loadTimelineData();
     }
 
@@ -240,115 +253,10 @@ public class TimelineActivity extends BaseActivity {
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0); today.set(Calendar.MINUTE, 0); today.set(Calendar.SECOND, 0); today.set(Calendar.MILLISECOND, 0);
 
-        Calendar earliestTaskDate = null;
-        Calendar latestTaskDate = null;
-
-        // Find date range
-        for (Task t : tasks) {
-            try {
-                if (t.getStartDate() != null && t.getStartDate().length() >= 10) {
-                    Date d = sdf.parse(t.getStartDate().substring(0, 10));
-                    if (earliestTaskDate == null || d.before(earliestTaskDate.getTime())) { earliestTaskDate = Calendar.getInstance(); earliestTaskDate.setTime(d); }
-                    if (latestTaskDate == null || d.after(latestTaskDate.getTime())) { latestTaskDate = Calendar.getInstance(); latestTaskDate.setTime(d); }
-                }
-                if (t.getDueDate() != null && t.getDueDate().length() >= 10) {
-                    Date d = sdf.parse(t.getDueDate().substring(0, 10));
-                    if (earliestTaskDate == null || d.before(earliestTaskDate.getTime())) { earliestTaskDate = Calendar.getInstance(); earliestTaskDate.setTime(d); }
-                    if (latestTaskDate == null || d.after(latestTaskDate.getTime())) { latestTaskDate = Calendar.getInstance(); latestTaskDate.setTime(d); }
-                }
-            } catch (Exception ignored) {}
-        }
-        
-        if (earliestTaskDate == null) {
-            // Không có task nào có ngày
-            minCal.setTime(today.getTime());
-            maxCal.setTime(today.getTime());
-        } else {
-            // Nếu có task trước ngày hiện tại thì lấy ngày task đó, nếu không thì lấy ngày hiện tại
-            if (earliestTaskDate.before(today)) {
-                minCal.setTime(earliestTaskDate.getTime());
-            } else {
-                minCal.setTime(today.getTime());
-            }
-            
-            // Tương tự cho maxCal
-            if (latestTaskDate.after(today)) {
-                maxCal.setTime(latestTaskDate.getTime());
-            } else {
-                maxCal.setTime(today.getTime());
-            }
-        }
-        
-        minCal.add(Calendar.DAY_OF_YEAR, -2); // padding trước 2 ngày
-        maxCal.add(Calendar.DAY_OF_YEAR, 10); // padding sau 10 ngày
-        
-        // Zero out time
-        minCal.set(Calendar.HOUR_OF_DAY, 0); minCal.set(Calendar.MINUTE, 0); minCal.set(Calendar.SECOND, 0); minCal.set(Calendar.MILLISECOND, 0);
-        maxCal.set(Calendar.HOUR_OF_DAY, 0); maxCal.set(Calendar.MINUTE, 0); maxCal.set(Calendar.SECOND, 0); maxCal.set(Calendar.MILLISECOND, 0);
-        
-        long minTime = minCal.getTimeInMillis();
-        int totalDays = Math.max(1, (int) ((maxCal.getTimeInMillis() - minTime + 12L*3600*1000) / (24L*3600*1000)) + 1);
-
-        // Render Headers & Grid
-        Calendar iterCal = (Calendar) minCal.clone();
-        String currentMonth = "";
-        int currentMonthDays = 0;
-        
-        for (int i = 0; i < totalDays; i++) {
-            // Day header
-            TextView tvDay = new TextView(this);
-            tvDay.setText(String.valueOf(iterCal.get(Calendar.DAY_OF_MONTH)));
-            tvDay.setLayoutParams(new LinearLayout.LayoutParams((int)(COLUMN_WIDTH_DP * density), ViewGroup.LayoutParams.WRAP_CONTENT));
-            tvDay.setGravity(Gravity.CENTER);
-            tvDay.setTextSize(12f);
-            tvDay.setTextColor(ContextCompat.getColor(this, R.color.slate_500));
-            if (containerGanttDays != null) containerGanttDays.addView(tvDay);
-            
-            // Grid line
-            View gridLine = new View(this);
-            LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(1, ViewGroup.LayoutParams.MATCH_PARENT);
-            glp.setMargins((int)(COLUMN_WIDTH_DP * density) - 1, 0, 0, 0);
-            gridLine.setLayoutParams(glp);
-            gridLine.setBackgroundColor(ContextCompat.getColor(this, R.color.slate_200));
-            if (containerGanttGrid != null) containerGanttGrid.addView(gridLine);
-            
-            // Month grouping
-            SimpleDateFormat monthFormat = new SimpleDateFormat("MMM", Locale.US);
-            String mName = monthFormat.format(iterCal.getTime());
-            if (currentMonth.equals(mName)) {
-                currentMonthDays++;
-            } else {
-                if (currentMonthDays > 0) {
-                    TextView tvMonth = new TextView(this);
-                    tvMonth.setText(currentMonth);
-                    tvMonth.setLayoutParams(new LinearLayout.LayoutParams((int)(currentMonthDays * COLUMN_WIDTH_DP * density), ViewGroup.LayoutParams.WRAP_CONTENT));
-                    tvMonth.setPadding(32, 0, 0, 0);
-                    tvMonth.setTextSize(13f);
-                    tvMonth.setTypeface(null, android.graphics.Typeface.BOLD);
-                    tvMonth.setTextColor(ContextCompat.getColor(this, R.color.slate_900));
-                    if (containerGanttMonths != null) containerGanttMonths.addView(tvMonth);
-                }
-                currentMonth = mName;
-                currentMonthDays = 1;
-            }
-            
-            iterCal.add(Calendar.DAY_OF_YEAR, 1);
-        }
-        
-        // Add final month
-        if (currentMonthDays > 0 && containerGanttMonths != null) {
-            TextView tvMonth = new TextView(this);
-            tvMonth.setText(currentMonth);
-            tvMonth.setLayoutParams(new LinearLayout.LayoutParams((int)(currentMonthDays * COLUMN_WIDTH_DP * density), ViewGroup.LayoutParams.WRAP_CONTENT));
-            tvMonth.setPadding(32, 0, 0, 0);
-            tvMonth.setTextSize(13f);
-            tvMonth.setTypeface(null, android.graphics.Typeface.BOLD);
-            tvMonth.setTextColor(ContextCompat.getColor(this, R.color.slate_900));
-            containerGanttMonths.addView(tvMonth);
-        }
-
         // Render Tasks
         int minMarginStart = Integer.MAX_VALUE;
+        long minTime = minCal.getTimeInMillis(); 
+
         for (Task task : tasks) {
             View labelView = getLayoutInflater().inflate(R.layout.item_timeline_label, containerTaskLabels, false);
             TextView tvName = labelView.findViewById(R.id.tvTaskName);
@@ -394,7 +302,7 @@ public class TimelineActivity extends BaseActivity {
             }
             tvBarLabel.setText(barLabelText);
             
-            // Calc offset & width
+            // Tính toán offset & độ dài của bar
             long startT = minTime; 
             long dueT = minTime;
             try {
@@ -435,7 +343,7 @@ public class TimelineActivity extends BaseActivity {
             containerGanttBars.addView(barView);
         }
 
-        // Today Line positioning
+        // Vị trí Today Line
         View viewTodayLine = findViewById(R.id.viewTodayLine);
         if (viewTodayLine != null) {
             long todayOffsetDays = (today.getTimeInMillis() - minTime + 12L*3600*1000) / (24L*3600*1000);
@@ -447,7 +355,7 @@ public class TimelineActivity extends BaseActivity {
             viewTodayLine.setLayoutParams(tlp);
             viewTodayLine.setVisibility(View.VISIBLE);
             
-            // Intelligent scroll: If today is coming up or active, show it
+            // Tự động cuộn đến task gần nhất hoặc ngày hiện tại
             int scrollTarget = todayMarginStart - (int)(1 * COLUMN_WIDTH_DP * density);
             if (minMarginStart != Integer.MAX_VALUE && minMarginStart < todayMarginStart) {
                 scrollTarget = minMarginStart - (int)(1 * COLUMN_WIDTH_DP * density);
@@ -461,22 +369,48 @@ public class TimelineActivity extends BaseActivity {
     }
 
     private void setupClickListeners() {
+        // Xử lý nút Back 
         View btnBack = findViewById(R.id.btnBack);
         if (btnBack != null && !isMyTasksMode) {
             btnBack.setOnClickListener(v -> finish());
         }
-        findViewById(R.id.btnMoreOptions).setOnClickListener(v -> showProjectSettingsPanel());
 
+        View btnMoreOptions = findViewById(R.id.btnMoreOptions);
+        if (btnMoreOptions != null) {
+            btnMoreOptions.setOnClickListener(v -> showProjectSettingsPanel());
+        }
+
+        // Mở màn hình tạo Task Assistant
         View fabAddAI = findViewById(R.id.fabAddAI);
         if (fabAddAI != null) {
             fabAddAI.setOnClickListener(v -> {
-                Intent intent = new Intent(TimelineActivity.this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
-                intent.putExtra("project_id", projectId);
-                startActivity(intent);
+                Intent aiIntent = new Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+                startActivity(aiIntent);
             });
         }
 
-        setupTabs();
+        // Tab switching
+        TextView tabTimeline = findViewById(R.id.tabTimeline);
+        TextView tabBoard    = findViewById(R.id.tabBoard);
+        TextView tabCalendar = findViewById(R.id.tabCalendar);
+
+        if (tabTimeline != null && tabBoard != null && tabCalendar != null) {
+            View.OnClickListener tabClick = v -> {
+                tabTimeline.setBackgroundResource(R.drawable.bg_tab_inactive);
+                tabBoard.setBackgroundResource(R.drawable.bg_tab_inactive);
+                tabCalendar.setBackgroundResource(R.drawable.bg_tab_inactive);
+                tabTimeline.setTextColor(ContextCompat.getColor(this, R.color.slate_600));
+                tabBoard.setTextColor(ContextCompat.getColor(this, R.color.slate_600));
+                tabCalendar.setTextColor(ContextCompat.getColor(this, R.color.slate_600));
+                v.setBackgroundResource(R.drawable.bg_tab_active);
+                ((TextView) v).setTextColor(ContextCompat.getColor(this, R.color.white));
+            };
+            tabTimeline.setOnClickListener(tabClick);
+            tabBoard.setOnClickListener(tabClick);
+            tabCalendar.setOnClickListener(tabClick);
+        }
+        
+        setupTabs(); 
     }
 
     private void showProjectSettingsPanel() {
@@ -484,31 +418,98 @@ public class TimelineActivity extends BaseActivity {
         View sheetView = getLayoutInflater().inflate(R.layout.layout_project_settings_panel, null);
         bottomSheet.setContentView(sheetView);
 
-        // SỬA LỖI R: Sử dụng ID trực tiếp
-        View bottomSheetLayout = bottomSheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        android.widget.FrameLayout bottomSheetLayout = bottomSheet
+                .findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (bottomSheetLayout != null) {
-            com.google.android.material.bottomsheet.BottomSheetBehavior behavior =
+            com.google.android.material.bottomsheet.BottomSheetBehavior<android.widget.FrameLayout> behavior =
                     com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheetLayout);
             behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+            behavior.setSkipCollapsed(true);
+        }
+
+        long currentProjectId = getIntent().getLongExtra("project_id", -1);
+        String currentProjectName = getIntent().getStringExtra("project_name");
+        String currentProjectKey  = getIntent().getStringExtra("project_key");
+        String currentProjectDesc = getIntent().getStringExtra("project_desc");
+
+        android.widget.EditText etProjectName = sheetView.findViewById(R.id.etProjectName);
+        android.widget.EditText etProjectDesc = sheetView.findViewById(R.id.etProjectDesc);
+        TextView tvProjectKey = sheetView.findViewById(R.id.tvProjectKey);
+        android.widget.ImageView btnSaveProject = sheetView.findViewById(R.id.btnSaveProject);
+
+        if (etProjectName != null && currentProjectName != null)
+            etProjectName.setText(currentProjectName);
+        if (etProjectDesc != null && currentProjectDesc != null)
+            etProjectDesc.setText(currentProjectDesc);
+        if (tvProjectKey != null)
+            tvProjectKey.setText(currentProjectKey != null ? "KEY: " + currentProjectKey : "N/A");
+
+        if (btnSaveProject != null) {
+            btnSaveProject.setOnClickListener(v -> {
+                if (currentProjectId == -1) return;
+                String newName = etProjectName.getText().toString().trim();
+                String newDesc = etProjectDesc.getText().toString().trim();
+                if (newName.isEmpty()) {
+                    android.widget.Toast.makeText(this,
+                            "Tên dự án không được bỏ trống!", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                com.team7.taskflow.domain.model.Project updateP =
+                        new com.team7.taskflow.domain.model.Project();
+                updateP.setName(newName);
+                updateP.setDescription(newDesc);
+
+                com.team7.taskflow.data.repository.ProjectRepository.getInstance().updateProject(
+                        currentProjectId, updateP,
+                        new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<
+                                com.team7.taskflow.domain.model.Project>() {
+                    @Override
+                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                        runOnUiThread(() -> {
+                            getIntent().putExtra("project_name", newName);
+                            getIntent().putExtra("project_desc", newDesc);
+                            android.widget.Toast.makeText(TimelineActivity.this,
+                                    "Cập nhật dự án thành công!",
+                                    android.widget.Toast.LENGTH_SHORT).show();
+                            bottomSheet.dismiss();
+                        });
+                    }
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> android.widget.Toast.makeText(
+                                TimelineActivity.this, error,
+                                android.widget.Toast.LENGTH_SHORT).show());
+                    }
+                });
+            });
+        }
+
+        // Các nút chức năng quản lý
+        View btnManageMembers = sheetView.findViewById(R.id.btnManageMembers);
+        if (btnManageMembers != null) {
+            btnManageMembers.setOnClickListener(v -> {
+                bottomSheet.dismiss();
+                com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
+                        new com.team7.taskflow.ui.member.MemberListBottomSheet(currentProjectId);
+                sheet.show(getSupportFragmentManager(), "members");
+            });
+        }
+
+        View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
+        if (btnCollapse != null) {
+            btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
+        }
+
+        View btnDeleteProject = sheetView.findViewById(R.id.btnDeleteProject);
+        if (btnDeleteProject != null) {
+            btnDeleteProject.setOnClickListener(v -> {
+                bottomSheet.dismiss();
+                android.widget.Toast.makeText(this,
+                        "Delete project tapped", android.widget.Toast.LENGTH_SHORT).show();
+            });
         }
 
         bottomSheet.show();
-    }
-
-    // Các hàm setupWindowInsets, setupTabs, TodayLineView giữ nguyên như cũ...
-    private void setupWindowInsets() {
-        View rootLayout = findViewById(R.id.rootLayout);
-        View bottomBar = findViewById(R.id.bottomBar);
-        ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, systemBars.top, 0, 0);
-            return insets;
-        });
-        ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-            return insets;
-        });
     }
 
     private void setupTabs() {
@@ -542,17 +543,34 @@ public class TimelineActivity extends BaseActivity {
         }
     }
 
+    // Custom view: vertical dashed "today" line 
     public static class TodayLineView extends View {
+
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        public TodayLineView(Context ctx) { super(ctx); init(); }
-        public TodayLineView(Context ctx, AttributeSet attrs) { super(ctx, attrs); init(); }
+
+        public TodayLineView(Context ctx) {
+            super(ctx);
+            init();
+        }
+
+        public TodayLineView(Context ctx, AttributeSet attrs) {
+            super(ctx, attrs);
+            init();
+        }
+
+        public TodayLineView(Context ctx, AttributeSet attrs, int defStyle) {
+            super(ctx, attrs, defStyle);
+            init();
+        }
+
         private void init() {
             paint.setColor(0xFF136DEC);
             paint.setStrokeWidth(2f * getResources().getDisplayMetrics().density);
             paint.setStyle(Paint.Style.STROKE);
             float dash = 8f * getResources().getDisplayMetrics().density;
-            paint.setPathEffect(new DashPathEffect(new float[] { dash, dash }, 0));
+            paint.setPathEffect(new DashPathEffect(new float[]{dash, dash}, 0));
         }
+
         @Override
         protected void onDraw(@NonNull Canvas canvas) {
             super.onDraw(canvas);
