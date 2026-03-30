@@ -26,10 +26,10 @@ import retrofit2.Response;
 
 public class UserRepository {
     private static final String TAG = "DEBUG_UPLOAD";
-    
+
     // Tên Bucket trong Supabase Storage (BẠN PHẢI TẠO BUCKET NÀY TRÊN DASHBOARD)
-    private static final String STORAGE_BUCKET = "avatars"; 
-    
+    private static final String STORAGE_BUCKET = "avatars";
+
     private final UserApi userApi;
     private final StorageApi storageApi;
 
@@ -48,6 +48,7 @@ public class UserRepository {
                     callback.onError("Profile not found");
                 }
             }
+
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
                 callback.onError(t.getMessage());
@@ -55,17 +56,21 @@ public class UserRepository {
         });
     }
 
-    public void updateUserProfile(String userId, String email, String displayName, String bio, String avatarUrl, UpdateCallback callback) {
+    public void updateUserProfile(String userId, String email, String displayName, String bio, String avatarUrl,
+            UpdateCallback callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("user_id", userId);
         updates.put("email", email);
-        if (displayName != null) updates.put("display_name", displayName);
-        if (bio != null) updates.put("bio", bio);
-        
+        if (displayName != null)
+            updates.put("display_name", displayName);
+        if (bio != null)
+            updates.put("bio", bio);
+
         // Cập nhật link ảnh vào cột avatar_url trong database
-        if (avatarUrl != null) updates.put("avatar_url", avatarUrl);
-        
-        updates.put("password_hash", "auth_managed"); 
+        if (avatarUrl != null)
+            updates.put("avatar_url", avatarUrl);
+
+        updates.put("password_hash", "auth_managed");
 
         userApi.upsertUser(updates, "resolution=merge-duplicates").enqueue(new Callback<Void>() {
             @Override
@@ -76,6 +81,7 @@ public class UserRepository {
                     callback.onError("Database update failed: " + response.code());
                 }
             }
+
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 callback.onError(t.getMessage());
@@ -99,25 +105,29 @@ public class UserRepository {
 
             RequestBody requestBody = RequestBody.create(bytes, MediaType.parse("image/jpeg"));
 
-            // Gọi API upload
-            storageApi.uploadFile(STORAGE_BUCKET, path, requestBody).enqueue(new Callback<ResponseBody>() {
+            // Gọi API upload với x-upsert=true để tránh lỗi 409 nếu file đã tồn tại
+            storageApi.uploadFile(STORAGE_BUCKET, path, requestBody, "true").enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.isSuccessful()) {
                         // Tạo Public URL để lưu vào database
-                        String publicUrl = SupabaseConfig.SUPABASE_URL + "/storage/v1/object/public/" + STORAGE_BUCKET + "/" + path;
+                        String publicUrl = SupabaseConfig.SUPABASE_URL + "/storage/v1/object/public/" + STORAGE_BUCKET
+                                + "/" + path;
                         Log.d(TAG, "Upload THÀNH CÔNG. Public URL: " + publicUrl);
                         callback.onSuccess(publicUrl);
                     } else {
                         try {
-                            String error = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                            String error = response.errorBody() != null ? response.errorBody().string()
+                                    : "Unknown error";
                             Log.e(TAG, "LỖI SERVER: " + error);
-                            callback.onError("Lỗi server: " + response.code() + ". Hãy đảm bảo đã tạo bucket '" + STORAGE_BUCKET + "'");
+                            callback.onError("Lỗi server: " + response.code() + ". Hãy đảm bảo đã tạo bucket '"
+                                    + STORAGE_BUCKET + "'");
                         } catch (Exception e) {
                             callback.onError("Upload failed: " + response.code());
                         }
                     }
                 }
+
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Log.e(TAG, "Lỗi kết nối: " + t.getMessage());
@@ -143,14 +153,19 @@ public class UserRepository {
 
     public interface UserCallback {
         void onSuccess(User user);
+
         void onError(String message);
     }
+
     public interface UpdateCallback {
         void onSuccess();
+
         void onError(String message);
     }
+
     public interface UploadCallback {
         void onSuccess(String publicUrl);
+
         void onError(String message);
     }
 }

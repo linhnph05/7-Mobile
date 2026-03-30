@@ -37,6 +37,7 @@ android {
         buildConfigField("String", "SUPABASE_URL",         "\"${env("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY",    "\"${env("SUPABASE_ANON_KEY")}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${env("GOOGLE_WEB_CLIENT_ID")}\"")
+        buildConfigField("String", "GEMINI_API_KEY",       "\"${env("GEMINI_API_KEY")}\"")
     }
 
     buildFeatures {
@@ -68,6 +69,7 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.core.ktx)
     implementation(libs.swiperefreshlayout)
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
 
     // Supabase REST API
     implementation(libs.retrofit)

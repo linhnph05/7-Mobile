@@ -93,6 +93,31 @@ public interface TaskApi {
     );
 
     /**
+     * Add attachment to task
+     */
+    @POST("attachments")
+    Call<Void> addAttachment(
+            @Body com.team7.taskflow.domain.model.Attachment attachment,
+            @Header("Prefer") String prefer
+    );
+
+    /**
+     * Get attachments by task ID
+     */
+    @GET("attachments")
+    Call<List<com.team7.taskflow.domain.model.Attachment>> getAttachmentsByTask(
+            @Query("task_id") String taskIdFilter
+    );
+
+    /**
+     * Delete attachment by ID
+     */
+    @DELETE("attachments")
+    Call<Void> deleteAttachment(
+            @Query("attachment_id") String attachmentIdFilter
+    );
+
+    /**
      * Body for status update
      */
     class StatusBody {

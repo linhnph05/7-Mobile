@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Day 1 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MON" android:textSize="10sp" android:textColor="@color/slate_400" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+        </LinearLayout>
+        <!-- Vertical Grid Line -->
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+    <!-- Day 2 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TUE" android:textSize="10sp" android:textColor="@color/primary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="13" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/primary" />
+        </LinearLayout>
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+    <!-- Day 3 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WED" android:textSize="10sp" android:textColor="@color/slate_400" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="14" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+        </LinearLayout>
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+    <!-- Day 4 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="THU" android:textSize="10sp" android:textColor="@color/slate_400" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="15" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+        </LinearLayout>
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+    <!-- Day 5 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FRI" android:textSize="10sp" android:textColor="@color/slate_400" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="16" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+        </LinearLayout>
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+    <!-- Day 6 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SAT" android:textSize="10sp" android:textColor="@color/slate_400" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="17" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+        </LinearLayout>
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+    <!-- Day 7 -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SUN" android:textSize="10sp" android:textColor="@color/slate_400" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="18" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/slate_900" />
+        </LinearLayout>
+        <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
+    </FrameLayout>
+
+</merge>

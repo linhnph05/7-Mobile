@@ -3,21 +3,33 @@ package com.team7.taskflow.ui.project;
 import android.app.DatePickerDialog;
 import android.content.Intent; // Thêm import này
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
+import androidx.core.content.ContextCompat;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
+import android.view.LayoutInflater;
+import android.widget.LinearLayout;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -25,14 +37,31 @@ import java.util.Locale;
 public class CreateTaskActivity extends BaseActivity {
 
     private EditText etTitle, etDescription;
-    private Spinner spinnerPriority, spinnerStatus;
+    private TextView tvPriority, tvStatus, tvAssignee;
+    private ImageView ivPriority, ivStatus, ivAssignee;
+    private View cardPriority, cardStatus, cardAssignee, cardAttachment;
+    private TextView tvAttachment;
+    private ImageView ivAttachment;
+    private LinearLayout containerAttachments;
+    private ActivityResultLauncher<Intent> filePickerLauncher;
+    private List<Uri> attachedFileUris = new ArrayList<>();
+    private List<com.team7.taskflow.domain.model.Attachment> existingAttachments = new ArrayList<>();
+    private int uploadSuccessCount = 0;
+
+    private String selectedPriority = "MEDIUM";
+    private String selectedStatus = "TODO";
+    private String selectedAssigneeName = null;
+
     private TextView tvStartDate, tvDueDate, btnSave, tvToolbarTitle;
     private ProgressBar progressBar;
     private TaskRepository taskRepository;
+    private List<User> projectMembers = new ArrayList<>();
+    private ArrayAdapter<String> assigneeAdapter;
     private long projectId;
 
     // SỬA TẠI ĐÂY: Để null mặc định để phân biệt Create/Update
     private Long taskId = null;
+    private String currentAssigneeId = null;
 
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar = Calendar.getInstance();
@@ -57,8 +86,10 @@ public class CreateTaskActivity extends BaseActivity {
         }
 
         initViews();
-        setupSpinners();
+        initFilePickerLauncher();
+        setupPickers();
         setupDatePickers();
+        loadProjectMembers();
 
         // LOGIC PHÂN BIỆT GIAO DIỆN
         if (taskId != null) {
@@ -77,8 +108,19 @@ public class CreateTaskActivity extends BaseActivity {
     private void initViews() {
         etTitle = findViewById(R.id.etTaskTitle);
         etDescription = findViewById(R.id.etTaskDescription);
-        spinnerPriority = findViewById(R.id.spinnerPriority);
-        spinnerStatus = findViewById(R.id.spinnerStatus);
+        tvPriority = findViewById(R.id.tvPriority);
+        tvStatus = findViewById(R.id.tvStatus);
+        tvAssignee = findViewById(R.id.tvAssignee);
+        ivPriority = findViewById(R.id.ivPriority);
+        ivStatus = findViewById(R.id.ivStatus);
+        ivAssignee = findViewById(R.id.ivAssignee);
+        cardPriority = findViewById(R.id.cardPriority);
+        cardStatus = findViewById(R.id.cardStatus);
+        cardAssignee = findViewById(R.id.cardAssignee);
+        cardAttachment = findViewById(R.id.cardAttachment);
+        tvAttachment = findViewById(R.id.tvAttachment);
+        ivAttachment = findViewById(R.id.ivAttachment);
+        containerAttachments = findViewById(R.id.containerAttachments);
         tvStartDate = findViewById(R.id.tvStartDate);
         tvDueDate = findViewById(R.id.tvDueDate);
         btnSave = findViewById(R.id.btnSave);
@@ -94,14 +136,19 @@ public class CreateTaskActivity extends BaseActivity {
             public void onSuccess(List<Task> result) {
                 for (Task t : result) {
                     if (taskId != null && taskId.equals(t.getId())) {
+                        currentAssigneeId = t.getAssigneeId();
                         runOnUiThread(() -> {
                             etTitle.setText(t.getTitle());
                             etDescription.setText(t.getDescription());
-                            setSpinnerValue(spinnerPriority, t.getPriority());
-                            setSpinnerValue(spinnerStatus, t.getStatus());
+                            setPriority(t.getPriority());
+                            setStatus(t.getStatus());
                             if (t.getStartDate() != null) tvStartDate.setText(t.getStartDate());
                             if (t.getDueDate() != null) tvDueDate.setText(t.getDueDate());
+                            if (currentAssigneeId != null) {
+                                setAssigneeById(currentAssigneeId);
+                            }
                             setLoading(false);
+                            loadAttachments();
                         });
                         break;
                     }
@@ -114,6 +161,41 @@ public class CreateTaskActivity extends BaseActivity {
         });
     }
 
+    private void loadAttachments() {
+        if (taskId == null) return;
+        taskRepository.getTaskAttachments(taskId, new TaskRepository.TaskCallback<List<com.team7.taskflow.domain.model.Attachment>>() {
+            @Override
+            public void onSuccess(List<com.team7.taskflow.domain.model.Attachment> result) {
+                runOnUiThread(() -> {
+                    existingAttachments = result;
+                    updateAttachmentUi();
+                });
+            }
+            @Override
+            public void onError(String error) {
+                // Ignore silent fail
+            }
+        });
+    }
+
+    private void loadProjectMembers() {
+        taskRepository.getProjectMembers(projectId, new TaskRepository.TaskCallback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> members) {
+                projectMembers = members;
+                runOnUiThread(() -> {
+                    // Nếu đang ở chế độ Edit, hãy chọn đúng người sau khi load xong list
+                    if (taskId != null && currentAssigneeId != null) {
+                        setAssigneeById(currentAssigneeId);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("MEMBER_LOAD", error);            }
+        });
+    }
     private void saveTask() {
         String title = etTitle.getText().toString().trim();
         if (title.isEmpty()) {
@@ -124,13 +206,15 @@ public class CreateTaskActivity extends BaseActivity {
         setLoading(true);
         Task task = new Task(projectId, title);
 
+        // Xử lý lấy Assignee ID
+        task.setAssigneeId(selectedAssigneeName != null ? currentAssigneeId : null);
+
         // Gán các thông tin khác
         task.setDescription(etDescription.getText().toString().trim());
-        task.setPriority(spinnerPriority.getSelectedItem().toString());
-        task.setStatus(spinnerStatus.getSelectedItem().toString());
+        task.setPriority(selectedPriority);
+        task.setStatus(selectedStatus);
         task.setStartDate(tvStartDate.getText().toString().contains("-") ? tvStartDate.getText().toString() : null);
         task.setDueDate(tvDueDate.getText().toString().contains("-") ? tvDueDate.getText().toString() : null);
-        task.setAssigneeId(SessionManager.getUserId());
 
         // QUAN TRỌNG: Kiểm tra taskId để quyết định gọi hàm nào
         if (taskId == null) {
@@ -148,10 +232,16 @@ public class CreateTaskActivity extends BaseActivity {
             @Override
             public void onSuccess(Task result) {
                 runOnUiThread(() -> {
-                    setLoading(false);
-                    Toast.makeText(CreateTaskActivity.this, taskId == null ? "Task Created" : "Task Updated", Toast.LENGTH_SHORT).show();
-                    setResult(RESULT_OK);
-                    finish();
+                    String msg = taskId == null ? "Task Created" : "Task Updated";
+                    if (!attachedFileUris.isEmpty()) {
+                        uploadSuccessCount = 0;
+                        uploadNextAttachment(0, result.getId(), msg);
+                    } else {
+                        setLoading(false);
+                        Toast.makeText(CreateTaskActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    }
                 });
             }
             @Override
@@ -163,34 +253,171 @@ public class CreateTaskActivity extends BaseActivity {
             }
         };
     }
-
+    private void setAssigneeById(String assigneeId) {
+        if (assigneeId == null) {
+            setAssignee(null, null);
+            return;
+        }
+        for (int i = 0; i < projectMembers.size(); i++) {
+            if (projectMembers.get(i).getUserId().equals(assigneeId)) {
+                setAssignee(assigneeId, projectMembers.get(i).getDisplayName());
+                break;
+            }
+        }
+    }
     private void setLoading(boolean loading) {
         if (progressBar != null) progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         if (btnSave != null) btnSave.setEnabled(!loading);
     }
 
-    // Các hàm setupSpinners, setupDatePickers, setSpinnerValue giữ nguyên như cũ của bạn
-    private void setSpinnerValue(Spinner spinner, String value) {
-        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
-        if (value != null) {
-            int pos = adapter.getPosition(value.toUpperCase());
-            if (pos >= 0) spinner.setSelection(pos);
+    private void setupPickers() {
+        cardPriority.setOnClickListener(v -> showPriorityPicker());
+        cardStatus.setOnClickListener(v -> showStatusPicker());
+        cardAssignee.setOnClickListener(v -> showAssigneePicker());
+        cardAttachment.setOnClickListener(v -> openFilePicker());
+
+        // Default
+        setPriority("MEDIUM");
+        setStatus("TODO");
+        setAssignee(null, null);
+    }
+
+    private void showPriorityPicker() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        View view = getLayoutInflater().inflate(R.layout.dialog_priority_picker, null);
+        dialog.setContentView(view);
+        view.findViewById(R.id.optHigh).setOnClickListener(v -> { setPriority("HIGH"); dialog.dismiss(); });
+        view.findViewById(R.id.optMedium).setOnClickListener(v -> { setPriority("MEDIUM"); dialog.dismiss(); });
+        view.findViewById(R.id.optLow).setOnClickListener(v -> { setPriority("LOW"); dialog.dismiss(); });
+        view.findViewById(R.id.optNone).setOnClickListener(v -> { setPriority("MEDIUM"); dialog.dismiss(); });
+        dialog.show();
+    }
+
+    private void setPriority(String priority) {
+        if (priority == null) priority = "MEDIUM";
+        selectedPriority = priority;
+        String label = "Medium";
+        int colorRes = R.color.slate_900;
+        if ("HIGH".equals(priority)) { label = "High"; colorRes = R.color.priority_high; }
+        else if ("MEDIUM".equals(priority)) { label = "Medium"; colorRes = R.color.priority_medium; }
+        else if ("LOW".equals(priority)) { label = "Low"; colorRes = R.color.priority_low; }
+
+        tvPriority.setText(label);
+        setActive(cardPriority, tvPriority, ivPriority, colorRes);
+    }
+
+    private void showStatusPicker() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int padY = (int) (24 * getResources().getDisplayMetrics().density);
+        container.setPadding(0, padY, 0, padY);
+
+        String[] statuses = {"TODO", "DOING", "DONE"};
+        for (String status : statuses) {
+            container.addView(createPickerItem(status, v -> {
+                setStatus(status);
+                dialog.dismiss();
+            }, R.color.slate_900));
+        }
+        dialog.setContentView(container);
+        dialog.show();
+    }
+
+    private void setStatus(String status) {
+        if (status == null) status = "TODO";
+        selectedStatus = status;
+        tvStatus.setText(status);
+        int colorRes = R.color.primary;
+        if ("DONE".equals(status)) colorRes = R.color.slate_500;
+        setActive(cardStatus, tvStatus, ivStatus, colorRes);
+    }
+
+    private void showAssigneePicker() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        View view = getLayoutInflater().inflate(R.layout.dialog_assignee_picker, null);
+        dialog.setContentView(view);
+        android.widget.LinearLayout container = view.findViewById(R.id.containerMembers);
+
+        for (User member : projectMembers) {
+            String name = member.getDisplayName();
+            container.addView(createPickerItem(name, v -> {
+                setAssignee(member.getUserId(), name);
+                dialog.dismiss();
+            }, R.color.slate_900));
+        }
+
+        container.addView(createPickerItem("Bỏ chọn", v -> {
+            setAssignee(null, null);
+            dialog.dismiss();
+        }, R.color.slate_500));
+
+        dialog.show();
+    }
+
+    private void setAssignee(String id, String name) {
+        selectedAssigneeName = name;
+        currentAssigneeId = id; // use the class variable!
+        if (name != null) {
+            tvAssignee.setText("@" + name);
+            setActive(cardAssignee, tvAssignee, ivAssignee, R.color.primary); 
+        } else {
+            tvAssignee.setText("Phân công");
+            setDefault(cardAssignee, tvAssignee, ivAssignee);
         }
     }
 
-    private void setupSpinners() {
-        String[] priorities = {"LOW", "MEDIUM", "HIGH"};
-        ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, priorities);
-        spinnerPriority.setAdapter(priorityAdapter);
+    private void setActive(View container, TextView tv, ImageView icon, int tintColorRes) {
+        int color = ContextCompat.getColor(this, tintColorRes);
+        tv.setTextColor(color);
+        if (icon != null) icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+        if (container != null) {
+            android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+            gd.setColor(androidx.core.graphics.ColorUtils.setAlphaComponent(color, 25)); // 10% opacity
+            gd.setCornerRadius(14 * getResources().getDisplayMetrics().density); // Match the layout's CornerRadius
+            gd.setStroke((int) (1 * getResources().getDisplayMetrics().density), androidx.core.graphics.ColorUtils.setAlphaComponent(color, 76));
+            container.setBackground(gd); // apply over CardView inside LinearLayout
+        }
+    }
 
-        String[] statuses = {"TODO", "DOING", "DONE"};
-        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, statuses);
-        spinnerStatus.setAdapter(statusAdapter);
+    private void setDefault(View container, TextView tv, ImageView icon) {
+        int color = ContextCompat.getColor(this, R.color.slate_500);
+        tv.setTextColor(color);
+        if (icon != null) icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+        if (container != null) {
+            container.setBackground(null); // remove GradientDrawable if any
+        }
+    }
+
+    private TextView createPickerItem(String label, View.OnClickListener listener, int colorRes) {
+        TextView tv = new TextView(this);
+        tv.setText(label);
+        tv.setTextSize(16);
+        tv.setTextColor(ContextCompat.getColor(this, colorRes));
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        tv.setPadding(pad, pad, pad, pad);
+        
+        int[] attrs = {android.R.attr.selectableItemBackground};
+        android.content.res.TypedArray ta = obtainStyledAttributes(attrs);
+        tv.setBackground(ta.getDrawable(0));
+        ta.recycle();
+        
+        tv.setOnClickListener(listener);
+        return tv;
     }
 
     private void setupDatePickers() {
-        tvStartDate.setOnClickListener(v -> showDatePicker(startCalendar, tvStartDate));
-        tvDueDate.setOnClickListener(v -> showDatePicker(dueCalendar, tvDueDate));
+        // Click vào card chứa (area lớn hơn) để mở DatePicker
+        View cardStart = findViewById(R.id.cardStartDate);
+        View cardDue = findViewById(R.id.cardDueDate);
+        if (cardStart != null) cardStart.setOnClickListener(v -> showDatePicker(startCalendar, tvStartDate));
+        if (cardDue != null) cardDue.setOnClickListener(v -> showDatePicker(dueCalendar, tvDueDate));
+        // Fallback: click trực tiếp vào TextView cũng hoạt động
+        if (tvStartDate != null) tvStartDate.setOnClickListener(v -> showDatePicker(startCalendar, tvStartDate));
+        if (tvDueDate != null) tvDueDate.setOnClickListener(v -> showDatePicker(dueCalendar, tvDueDate));
     }
 
     private void showDatePicker(Calendar cal, TextView tv) {
@@ -200,5 +427,164 @@ public class CreateTaskActivity extends BaseActivity {
             cal.set(Calendar.DAY_OF_MONTH, day);
             tv.setText(dateFormat.format(cal.getTime()));
         }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void initFilePickerLauncher() {
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        if (data.getClipData() != null) {
+                            int count = data.getClipData().getItemCount();
+                            for (int i = 0; i < count; i++) {
+                                attachedFileUris.add(data.getClipData().getItemAt(i).getUri());
+                            }
+                        } else if (data.getData() != null) {
+                            attachedFileUris.add(data.getData());
+                        }
+                        updateAttachmentUi();
+                    }
+                }
+        );
+    }
+
+    private void openFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        filePickerLauncher.launch(Intent.createChooser(intent, "Chọn file đính kèm"));
+    }
+
+    private void updateAttachmentUi() {
+        containerAttachments.removeAllViews();
+        if (attachedFileUris.isEmpty() && existingAttachments.isEmpty()) {
+            containerAttachments.setVisibility(View.GONE);
+            tvAttachment.setText("Đính kèm");
+            setDefault(cardAttachment, tvAttachment, ivAttachment);
+            return;
+        }
+
+        containerAttachments.setVisibility(View.VISIBLE);
+        int count = attachedFileUris.size() + existingAttachments.size();
+        tvAttachment.setText(count + " file");
+        setActive(cardAttachment, tvAttachment, ivAttachment, R.color.slate_900);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        
+        // Render existing attachments
+        for (int i = 0; i < existingAttachments.size(); i++) {
+            com.team7.taskflow.domain.model.Attachment attachment = existingAttachments.get(i);
+            View itemView = inflater.inflate(R.layout.item_attachment_chip, containerAttachments, false);
+            TextView tvName = itemView.findViewById(R.id.tvFileName);
+            ImageView btnRemove = itemView.findViewById(R.id.btnRemoveFile);
+            
+            tvName.setText(attachment.getFileName());
+            
+            itemView.setOnClickListener(v -> {
+                try {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachment.getFileUrl()));
+                    startActivity(browserIntent);
+                } catch(Exception e){}
+            });
+
+            btnRemove.setOnClickListener(v -> {
+                if (attachment.getId() != null) {
+                    Toast.makeText(CreateTaskActivity.this, "Đang xoá...", Toast.LENGTH_SHORT).show();
+                    TaskRepository.getInstance().deleteTaskAttachment(attachment.getId(), new TaskRepository.TaskCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            runOnUiThread(() -> {
+                                existingAttachments.remove(attachment);
+                                updateAttachmentUi();
+                            });
+                        }
+                        @Override
+                        public void onError(String error) {
+                            runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, "Xoá lỗi: " + error, Toast.LENGTH_SHORT).show());
+                        }
+                    });
+                }
+            });
+            containerAttachments.addView(itemView);
+        }
+
+        // Render newly added files
+        for (int i = 0; i < attachedFileUris.size(); i++) {
+            Uri uri = attachedFileUris.get(i);
+            View itemView = inflater.inflate(R.layout.item_attachment_chip, containerAttachments, false);
+            
+            TextView tvName = itemView.findViewById(R.id.tvFileName);
+            ImageView btnRemove = itemView.findViewById(R.id.btnRemoveFile);
+            
+            tvName.setText(getFileNameFromUri(uri));
+            btnRemove.setOnClickListener(v -> {
+                attachedFileUris.remove(uri);
+                updateAttachmentUi();
+            });
+            
+            containerAttachments.addView(itemView);
+        }
+    }
+
+    private void uploadNextAttachment(int index, long targetTaskId, String baseMsg) {
+        if (index >= attachedFileUris.size()) {
+            String finalMsg = baseMsg;
+            if (uploadSuccessCount > 0) {
+                finalMsg += " (Kèm " + uploadSuccessCount + " file)";
+            }
+            Toast.makeText(this, finalMsg, Toast.LENGTH_LONG).show();
+            setResult(RESULT_OK);
+            finish();
+            return;
+        }
+
+        Uri uri = attachedFileUris.get(index);
+        tvToolbarTitle.setText("⏳ Đang tải file " + (index + 1) + "/" + attachedFileUris.size());
+
+        String mimeType = getContentResolver().getType(uri);
+        String fileName = getFileNameFromUri(uri);
+
+        TaskRepository.getInstance().uploadTaskAttachment(
+                targetTaskId,
+                uri,
+                fileName,
+                mimeType,
+                getContentResolver(),
+                new TaskRepository.TaskCallback<com.team7.taskflow.domain.model.Attachment>() {
+                    @Override
+                    public void onSuccess(com.team7.taskflow.domain.model.Attachment result) {
+                        uploadSuccessCount++;
+                        runOnUiThread(() -> uploadNextAttachment(index + 1, targetTaskId, baseMsg));
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(CreateTaskActivity.this, "Lỗi file " + (index + 1) + ": " + error, Toast.LENGTH_LONG).show();
+                            uploadNextAttachment(index + 1, targetTaskId, baseMsg);
+                        });
+                    }
+                }
+        );
+    }
+
+    private String getFileNameFromUri(Uri uri) {
+        String result = "file";
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (idx >= 0) result = cursor.getString(idx);
+                }
+            }
+        }
+        if ("file".equals(result) && uri.getPath() != null) {
+            String path = uri.getPath();
+            int cut = path.lastIndexOf('/');
+            if (cut != -1) result = path.substring(cut + 1);
+        }
+        return result;
     }
 }

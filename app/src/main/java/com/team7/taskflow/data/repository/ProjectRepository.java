@@ -266,4 +266,28 @@ public class ProjectRepository {
                     }
                 });
     }
+
+    /**
+     * Get all members of a specific project (with nested User info)
+     */
+    public void getProjectMembers(long projectId, ProjectCallback<List<ProjectMember>> callback) {
+        projectApi.getProjectMembers(
+                "eq." + projectId,
+                "*,users(*)").enqueue(new Callback<List<ProjectMember>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectMember>> call,
+                            @NonNull Response<List<ProjectMember>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            callback.onSuccess(response.body());
+                        } else {
+                            callback.onError("Failed to load members: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
+                        callback.onError("Network error: " + t.getMessage());
+                    }
+                });
+    }
 }

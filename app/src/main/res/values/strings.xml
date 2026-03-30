@@ -106,4 +106,20 @@
     <string name="error_network">Network error. Please try again.</string>
     <string name="error_unknown">Something went wrong.</string>
     <string name="error_empty_field">This field is required.</string>
+
+    <!-- ==================== -->
+    <!-- AI CREATE TASK       -->
+    <!-- ==================== -->
+    <string name="ai_create_prompt_hint">Add a task (e.g.: Message Đức at 3pm tomorrow…)</string>
+    <string name="ai_create_title_hint">Task name</string>
+    <string name="ai_create_desc_hint">Task description (optional)</string>
+    <string name="ai_parsing">AI is analyzing…</string>
+    <string name="ai_parse_failed">AI unavailable, using local parsing</string>
+    <string name="task_assignee_label">Assignee</string>
+    <string name="task_tag_label">Tag</string>
+    <string name="task_attach_label">Attach</string>
+    <string name="task_attach_chooser">Choose file to attach</string>
+    <string name="task_start_date_label">Start</string>
+    <string name="ai_task_due_date_label">Due</string>
+    <string name="task_saved_success">Task saved!</string>
 </resources>

@@ -29,8 +29,9 @@
                 android:id="@+id/imgAvatar"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:scaleType="centerCrop"
                 android:contentDescription="Avatar"
-                android:background="@android:drawable/sym_def_app_icon"
+                android:src="@drawable/ic_person"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 

@@ -36,6 +36,14 @@ public interface UserApi {
             @Query("user_id") String userIdFilter,
             @Query("select") String select
     );
+    /**
+     * Get user by Project
+     */
+    @GET("profiles")
+    Call<List<User>> getUsersByProject(
+            @Query("project_id") String projectId
+    );
+
 
     /**
      * Update user data
