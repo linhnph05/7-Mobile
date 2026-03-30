@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Attachment {
     @SerializedName("attachment_id")
-    private transient Long id;
+    private Long id;
 
     @SerializedName("task_id")
     private long taskId;

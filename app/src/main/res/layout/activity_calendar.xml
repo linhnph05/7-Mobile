@@ -9,79 +9,135 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Toolbar -->
-        <RelativeLayout
+        <!-- TOP APP BAR (Brought over from Timeline) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="8dp">
+            android:layout_height="56dp"
+            android:paddingHorizontal="16dp">
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_bottom_sheet"
-                android:backgroundTint="@color/slate_200"
-                android:padding="8dp"
-                android:src="@drawable/ic_back"
-                app:tint="@color/slate_600" />
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Back"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/theme_text_primary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center"
+                app:layout_constraintStart_toEndOf="@id/btnBack"
+                app:layout_constraintEnd_toStartOf="@id/layoutRightIcons"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:id="@+id/tvProjectName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Project Name"
+                    android:textColor="@color/theme_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvMonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/theme_text_hint"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutRightIcons"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <ImageButton
+                    android:id="@+id/btnMoreOptions"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Options"
+                    android:src="@drawable/ic_more_vert"
+                    app:tint="@color/theme_text_secondary" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- VIEW TOGGLE (Timeline/Board/Calendar) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <!-- Timeline -->
+            <TextView
+                android:id="@+id/tabTimeline"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_tab_inactive"
+                android:gravity="center"
+                android:paddingHorizontal="18dp"
+                android:text="Timeline"
+                android:textColor="@color/theme_text_secondary"
+                android:textSize="13sp" />
+
+            <!-- Board -->
+            <TextView
+                android:id="@+id/tabBoard"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_tab_inactive"
+                android:gravity="center"
+                android:paddingHorizontal="18dp"
+                android:text="Board"
+                android:textColor="@color/theme_text_secondary"
+                android:textSize="13sp" />
+
+            <!-- Calendar (active in this view) -->
+            <TextView
+                android:id="@+id/tabCalendar"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_tab_active"
+                android:gravity="center"
+                android:paddingHorizontal="18dp"
                 android:text="Calendar"
-                android:textColor="@color/slate_900"
-                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
+            <!-- Spacer để đẩy Nút Today sát lề phải -->
+            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+
+            <!-- Nút Today (góc phải dưới top bar) -->
             <TextView
                 android:id="@+id/btnToday"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:paddingHorizontal="12dp"
+                android:layout_height="wrap_content"
                 android:text="Today"
+                android:textSize="14sp"
+                android:textStyle="bold"
                 android:textColor="@color/primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <!-- Selector Month/Week -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="8dp"
-            android:background="@drawable/bg_bottom_sheet"
-            android:backgroundTint="@color/slate_200"
-            android:padding="4dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/bg_bottom_sheet"
-                android:gravity="center"
-                android:text="Month"
-                android:textColor="@color/primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Week"
-                android:textColor="@color/slate_500"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
         </LinearLayout>
 
         <!-- Month Navigator (Nơi hiển thị tháng hiện tại) -->

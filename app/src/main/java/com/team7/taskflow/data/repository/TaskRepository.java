@@ -5,9 +5,12 @@ import androidx.annotation.NonNull;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.SupabaseConfig;
 import com.team7.taskflow.data.remote.api.ActivityApi;
+import com.team7.taskflow.data.remote.api.ProjectApi;
 import com.team7.taskflow.data.remote.api.TaskApi;
+import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.TaskActivity;
+import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.HashMap;
@@ -27,11 +30,13 @@ public class TaskRepository {
     private static TaskRepository instance;
     private final TaskApi taskApi;
     private final ActivityApi activityApi;
+    private final ProjectApi projectApi;
     private final com.team7.taskflow.data.remote.api.StorageApi storageApi;
 
     private TaskRepository() {
         taskApi = SupabaseClient.getInstance().getService(TaskApi.class);
         activityApi = SupabaseClient.getInstance().getService(ActivityApi.class);
+        projectApi = SupabaseClient.getInstance().getService(ProjectApi.class);
         storageApi = SupabaseClient.getInstance()
                 .getStorageService(com.team7.taskflow.data.remote.api.StorageApi.class);
     }
@@ -238,6 +243,40 @@ public class TaskRepository {
         }
     }
 
+    public void getTaskAttachments(long taskId, TaskCallback<List<com.team7.taskflow.domain.model.Attachment>> callback) {
+        taskApi.getAttachmentsByTask("eq." + taskId).enqueue(new Callback<List<com.team7.taskflow.domain.model.Attachment>>() {
+            @Override
+            public void onResponse(Call<List<com.team7.taskflow.domain.model.Attachment>> call, Response<List<com.team7.taskflow.domain.model.Attachment>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Failed to load attachments: " + response.code());
+                }
+            }
+            @Override
+            public void onFailure(Call<List<com.team7.taskflow.domain.model.Attachment>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void deleteTaskAttachment(long attachmentId, TaskCallback<Void> callback) {
+        taskApi.deleteAttachment("eq." + attachmentId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Failed to delete attachment: " + response.code());
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     // ── History ─────────────────────────────────────────────────────────
 
     private void logActivity(long taskId, String action, String oldVal, String newVal) {
@@ -253,7 +292,43 @@ public class TaskRepository {
             }
         });
     }
+    public void getProjectMembers(long projectId, TaskCallback<List<User>> callback) {
+        // Query: /project_members?project_id=eq.{id}&select=*,users(*)
+        projectApi.getProjectMembers("eq." + projectId, "*,users(*)")
+                .enqueue(new retrofit2.Callback<List<ProjectMember>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectMember>> call,
+                                           @NonNull retrofit2.Response<List<ProjectMember>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<User> users = new java.util.ArrayList<>();
+                            for (ProjectMember pm : response.body()) {
+                                if (pm.getUser() != null) {
+                                    // Đảm bảo userId được lấy từ project_member nếu nested user không có
+                                    User u = pm.getUser();
+                                    if (u.getUserId() == null) {
+                                        u.setUserId(pm.getUserId());
+                                    }
+                                    users.add(u);
+                                } else {
+                                    // Fallback: tạo User tối giản chỉ từ userId
+                                    User fallback = new User();
+                                    fallback.setUserId(pm.getUserId());
+                                    fallback.setDisplayName(pm.getUserId());
+                                    users.add(fallback);
+                                }
+                            }
+                            callback.onSuccess(users);
+                        } else {
+                            callback.onError("Failed to load members: " + response.code());
+                        }
+                    }
 
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
+    }
     public void getTaskHistory(long taskId, TaskCallback<List<TaskActivity>> callback) {
         activityApi.getActivitiesByTask("eq." + taskId, "created_at.desc").enqueue(new Callback<List<TaskActivity>>() {
             @Override

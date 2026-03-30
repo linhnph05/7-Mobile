@@ -41,7 +41,7 @@ public class ProjectBoardActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+
         setContentView(R.layout.activity_project_board);
 
         taskRepository = TaskRepository.getInstance();
@@ -52,6 +52,12 @@ public class ProjectBoardActivity extends BaseActivity {
 
         if (tvProjectName != null) {
             tvProjectName.setText(projectName != null ? projectName : "Project Board");
+        }
+        
+        TextView tvMonth = findViewById(R.id.tvMonth);
+        if (tvMonth != null) {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
+            tvMonth.setText(sdf.format(java.util.Calendar.getInstance().getTime()));
         }
 
         taskLauncher = registerForActivityResult(
@@ -87,11 +93,8 @@ public class ProjectBoardActivity extends BaseActivity {
         TaskAdapter.OnTaskClickListener listener = new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                // Khi nhấn vào cả cái thẻ Task -> Cũng mở trang Edit
-                Intent intent = new Intent(ProjectBoardActivity.this, CreateTaskActivity.class);
-                intent.putExtra("project_id", projectId);
-                intent.putExtra("task_id", task.getId());
-                taskLauncher.launch(intent);
+                // Nhấn vào thẻ Task: không làm gì cả.
+                // Chỉ nhấn nút 3 chấm → Edit Task mới mở màn hình chỉnh sửa.
             }
 
             @Override
@@ -189,15 +192,46 @@ public class ProjectBoardActivity extends BaseActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
+        setupTabs();
+
         if (fabAddTask != null) {
             fabAddTask.setOnClickListener(v -> {
                 if (projectId == -1) {
                     Toast.makeText(this, "Project not found", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Intent intent = new Intent(this, CreateTaskActivity.class);
+                Intent intent = new Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
                 intent.putExtra("project_id", projectId);
                 taskLauncher.launch(intent);
+            });
+        }
+    }
+
+    private void setupTabs() {
+        TextView tabTimeline = findViewById(R.id.tabTimeline);
+        TextView tabCalendar = findViewById(R.id.tabCalendar);
+        
+        if (tabTimeline != null) {
+            tabTimeline.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+            });
+        }
+        
+        if (tabCalendar != null) {
+            tabCalendar.setOnClickListener(v -> {
+                Intent intent = new Intent(this, CalendarActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
             });
         }
     }
