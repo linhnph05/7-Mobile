@@ -302,20 +302,19 @@ public class TaskRepository {
                         if (response.isSuccessful() && response.body() != null) {
                             List<User> users = new java.util.ArrayList<>();
                             for (ProjectMember pm : response.body()) {
-                                if (pm.getUser() != null) {
-                                    // Đảm bảo userId được lấy từ project_member nếu nested user không có
-                                    User u = pm.getUser();
-                                    if (u.getUserId() == null) {
-                                        u.setUserId(pm.getUserId());
-                                    }
-                                    users.add(u);
+                                User u = new User();
+                                if (pm.getUserInfo() != null) {
+                                    ProjectMember.UserInfo info = pm.getUserInfo();
+                                    u.setUserId(info.userId != null ? info.userId : pm.getUserId());
+                                    u.setDisplayName(info.displayName);
+                                    u.setEmail(info.email);
+                                    u.setAvatarUrl(info.avatarUrl);
                                 } else {
                                     // Fallback: tạo User tối giản chỉ từ userId
-                                    User fallback = new User();
-                                    fallback.setUserId(pm.getUserId());
-                                    fallback.setDisplayName(pm.getUserId());
-                                    users.add(fallback);
+                                    u.setUserId(pm.getUserId());
+                                    u.setDisplayName(pm.getUserId());
                                 }
+                                users.add(u);
                             }
                             callback.onSuccess(users);
                         } else {

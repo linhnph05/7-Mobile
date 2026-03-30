@@ -16,15 +16,12 @@ public class ProjectMember {
     @SerializedName("joined_at")
     private String joinedAt;
 
-    // JOIN với bảng projects (khi query select=*,projects(*))
     @SerializedName("projects")
     private Project project;
 
-    // JOIN với bảng users (khi query select=*,users(*))
     @SerializedName("users")
     private UserInfo userInfo;
 
-    // Class lồng để nhận dữ liệu từ bảng users
     public static class UserInfo {
         @SerializedName("user_id")
         public String userId;
@@ -37,6 +34,19 @@ public class ProjectMember {
 
         @SerializedName("avatar_url")
         public String avatarUrl;
+
+        // Tương thích với AiCreateActivity
+        public String getDisplayNameOrEmail() {
+            if (displayName != null && !displayName.isEmpty()) return displayName;
+            if (email != null && !email.isEmpty()) return email;
+            return "Unknown";
+        }
+
+        // Tương thích với code dùng getUserId() trên UserInfo
+        public String getUserId() { return userId; }
+
+        // Tương thích với code dùng setUserId() trên UserInfo
+        public void setUserId(String userId) { this.userId = userId; }
     }
 
     public ProjectMember() {}
@@ -59,6 +69,9 @@ public class ProjectMember {
 
     public UserInfo getUserInfo() { return userInfo; }
     public void setUserInfo(UserInfo userInfo) { this.userInfo = userInfo; }
+
+    // Tương thích với code đồng đội dùng getUser()
+    public UserInfo getUser() { return userInfo; }
 
     // ── Helper methods ─────────────────────────────────────────
     public String getDisplayName() {
