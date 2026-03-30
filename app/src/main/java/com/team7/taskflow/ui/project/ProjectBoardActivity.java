@@ -43,8 +43,17 @@ public class ProjectBoardActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_project_board);
+
+        View rootLayout = findViewById(R.id.rootLayout);
+        if (rootLayout != null) {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
+                androidx.core.graphics.Insets systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
 
         taskRepository = TaskRepository.getInstance();
         projectId = getIntent().getLongExtra("project_id", -1);

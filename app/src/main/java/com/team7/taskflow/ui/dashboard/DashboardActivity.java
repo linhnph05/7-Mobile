@@ -124,6 +124,9 @@ public class DashboardActivity extends BaseActivity {
         tvWorkspaceName = findViewById(R.id.tvWorkspaceName);
         rvProjects = findViewById(R.id.projectRecyclerView);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setItemIconTintList(null);
+        }
     }
 
     /**

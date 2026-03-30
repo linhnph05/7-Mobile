@@ -116,6 +116,9 @@ public class ProfileActivity extends BaseActivity {
     private void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
+            bottomNav.setItemIconTintList(null);
+        }
+        if (bottomNav != null) {
             bottomNav.setSelectedItemId(R.id.nav_settings);
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();

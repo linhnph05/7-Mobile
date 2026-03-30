@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/white">
+    app:cardCornerRadius="@dimen/radius_sm"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@color/theme_card"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/theme_border">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,7 +32,8 @@
                 android:paddingVertical="2dp"
                 android:text="MEDIUM"
                 android:textColor="#C2410C"
-                android:textSize="10sp"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-black"
                 android:textStyle="bold" />
 
             <TextView
@@ -44,7 +47,8 @@
                 android:paddingVertical="2dp"
                 android:text="TODO"
                 android:textColor="#64748B"
-                android:textSize="10sp"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-black"
                 android:textStyle="bold" />
 
             <TextView
@@ -68,10 +72,10 @@
 
             <ImageView
                 android:id="@+id/btnMenu"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_more_vert"
-                app:tint="@color/slate_400" />
+                app:tint="?attr/android:textColorSecondary" />
         </LinearLayout>
 
         <TextView
@@ -80,39 +84,39 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Task Title"
-            android:textColor="@color/slate_900"
-            android:textSize="15sp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:ellipsize="end"
-            android:maxLines="2"
+            android:maxLines="1"
             android:text="Task description goes here..."
-            android:textColor="@color/slate_500"
-            android:textSize="13sp" />
+            android:textColor="?attr/android:textColorSecondary"
+            android:textSize="12sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="12dp"
-            android:background="@color/slate_100" />
+            android:layout_marginTop="10dp"
+            android:background="@color/theme_border" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
                 android:src="@drawable/ic_calendar"
-                app:tint="@color/slate_400" />
+                app:tint="?attr/android:textColorHint" />
 
             <TextView
                 android:id="@+id/tvDueDate"
@@ -120,15 +124,16 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="Oct 24"
-                android:textColor="@color/slate_500"
-                android:textSize="11sp" />
+                android:text="No date"
+                android:textColor="?attr/android:textColorSecondary"
+                android:textSize="10sp" />
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivAssignee"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@mipmap/ic_launcher_round" />
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@mipmap/ic_launcher_round"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
         </LinearLayout>
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

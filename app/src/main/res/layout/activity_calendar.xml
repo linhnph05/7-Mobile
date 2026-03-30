@@ -1,5 +1,6 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_light">
@@ -213,16 +214,25 @@
             android:clipToPadding="false" />
     </LinearLayout>
 
+    <!-- Include shared bottom bar layout (Direct child with gravity to match Dashboard) -->
+    <include
+        android:id="@+id/includeBottomBar"
+        layout="@layout/layout_bottom_nav_project"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnNewTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:backgroundTint="@color/primary"
+        app:layout_anchor="@id/includeBottomBar"
+        app:layout_anchorGravity="top|center"
         android:src="@drawable/ic_add"
+        app:backgroundTint="@color/primary"
         app:tint="@color/white"
-        app:borderWidth="0dp"
-        app:elevation="6dp" />
+        app:elevation="16dp"
+        android:layout_marginBottom="16dp"
+        app:borderWidth="0dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

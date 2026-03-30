@@ -85,12 +85,25 @@
     <string name="task_due_date_label">Due Date</string>
     <string name="task_priority_label">Priority</string>
     <string name="task_status_label">Status</string>
-    <string name="task_status_todo">To Do</string>
-    <string name="task_status_in_progress">In Progress</string>
-    <string name="task_status_done">Done</string>
-    <string name="task_priority_low">Low</string>
-    <string name="task_priority_medium">Medium</string>
-    <string name="task_priority_high">High</string>
+    <string name="task_status_todo">Cần làm</string>
+    <string name="task_status_in_progress">Đang làm</string>
+    <string name="task_status_done">Hoàn thành</string>
+    <string name="task_priority_low">Thấp</string>
+    <string name="task_priority_medium">Trung bình</string>
+    <string name="task_priority_high">Cao</string>
+
+    <!-- ==================== -->
+    <!-- OVERVIEW             -->
+    <!-- ==================== -->
+    <string name="overview_summary">Tổng quan dự án</string>
+    <string name="overview_total">Tổng số</string>
+    <string name="overview_done">Xong</string>
+    <string name="overview_overdue">Quá hạn</string>
+    <string name="overview_status_analysis">Phân tích trạng thái</string>
+    <string name="overview_priority_analysis">Phân tích mức độ ưu tiên</string>
+    <string name="overview_upcoming">Hạn chót sắp tới</string>
+    <string name="overview_no_tasks">Chưa có công việc nào</string>
+    <string name="overview_no_tasks_desc">Hãy nhấn nút AI để tạo công việc đầu tiên!</string>
 
     <!-- ==================== -->
     <!-- BOTTOM NAV           -->

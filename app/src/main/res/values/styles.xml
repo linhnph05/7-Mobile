@@ -118,6 +118,11 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+    <!-- Ẩn Active Indicator (M3) đi để dùng itemBackground (dành cho chuyển đổi tức thì, size lớn) -->
+    <style name="BottomNavIndicator_Transparent" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@android:color/transparent</item>
+    </style>
 </resources>
 
 

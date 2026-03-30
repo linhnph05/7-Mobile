@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Khi item được chọn: Hiển thị ngay khung màu xanh dương nhạt (không có animation) -->
+    <item android:state_checked="true">
+        <layer-list>
+            <item android:gravity="center" android:width="72dp" android:height="48dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="#DBEAFE" /> <!-- @color/theme_icon_blue_bg -->
+                    <corners android:radius="24dp" /> <!-- Bo tròn hai đầu -->
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <!-- Các item khác trong suốt -->
+    <item android:drawable="@android:color/transparent" />
+</selector>

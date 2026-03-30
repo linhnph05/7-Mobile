@@ -1,6 +1,8 @@
 package com.team7.taskflow.ui.project;
 
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Task;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
@@ -49,8 +54,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        Task task = tasks.get(position);
-        holder.bind(task, listener);
+        holder.bind(tasks.get(position), listener);
     }
 
     @Override
@@ -75,10 +79,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
 
         public void bind(Task task, OnTaskClickListener listener) {
-            // 1. Gán nội dung văn bản
             tvTitle.setText(task.getTitle());
             tvDescription.setText(task.getDescription());
-            tvPriority.setText(task.getPriority() != null ? task.getPriority() : "LOW");
 
             // Project name badge
             String projectName = task.getProjectName();
@@ -89,63 +91,56 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 tvProjectBadge.setVisibility(View.GONE);
             }
 
-            // 2. Logic dải ngày (Start Date - Due Date)
+            // Format date: yyyy-MM-dd -> MMM dd, yyyy
+            String formattedDate = formatDate(task.getDueDate());
+            tvDueDate.setText(formattedDate);
 
-            String start = task.getStartDate();
-            String due = task.getDueDate();
-            if (start != null && !start.isEmpty() && due != null && !due.isEmpty()) {
-                tvDueDate.setText(start + " - " + due);
-            } else {
-                tvDueDate.setText(due != null && !due.isEmpty() ? due : "No date");
-            }
+            itemView.setOnClickListener(v -> { if (listener != null) listener.onTaskClick(task); });
+            btnMenu.setOnClickListener(v -> { if (listener != null) listener.onTaskMenuClick(task, v); });
 
-            // 3. Sự kiện Click
-            itemView.setOnClickListener(v -> {
-                if (listener != null) listener.onTaskClick(task);
-            });
-
-            btnMenu.setOnClickListener(v -> {
-                if (listener != null) listener.onTaskMenuClick(task, v);
-            });
-
-            // 4. Đổ màu cho thẻ Priority
+            // Priority Colors
             String priority = task.getPriority() != null ? task.getPriority().toUpperCase() : "LOW";
             switch (priority) {
                 case "HIGH":
                     tvPriority.setBackgroundResource(R.drawable.bg_badge_red);
-                    tvPriority.setTextColor(0xFFDC2626);
+                    tvPriority.setTextColor(0xFFEF4444); // Bright Red
                     break;
                 case "MEDIUM":
                     tvPriority.setBackgroundResource(R.drawable.bg_badge_orange);
-                    tvPriority.setTextColor(0xFFC2410C);
+                    tvPriority.setTextColor(0xFFF59E0B); // Amber/Orange
                     break;
-                default: // LOW
+                default: 
                     tvPriority.setBackgroundResource(R.drawable.bg_badge_blue);
-                    tvPriority.setTextColor(0xFF0369A1);
+                    tvPriority.setTextColor(0xFF3B82F6); // Blue
                     break;
             }
 
-            // 5. Đổ màu cho thẻ Status
-            if (task.getStatus() != null) {
-                String status = task.getStatus().toUpperCase();
-                tvStatus.setText(status);
+            // Status Colors
+            String status = task.getStatus() != null ? task.getStatus().toUpperCase() : "TODO";
+            tvStatus.setText(status);
+            Drawable statusBg = tvStatus.getBackground().mutate();
+            
+            if (status.contains("DONE")) {
+                statusBg.setTint(0x332ECC71); // 20% Emerald
+                tvStatus.setTextColor(0xFF2ECC71);
+            } else if (status.contains("DOING") || status.contains("PROGRESS")) {
+                statusBg.setTint(0x333498DB); // 20% Sky Blue
+                tvStatus.setTextColor(0xFF3498DB);
+            } else {
+                statusBg.setTint(0x3394A3B8); // 20% Slate
+                tvStatus.setTextColor(0xFF94A3B8);
+            }
+        }
 
-                Drawable statusBg = tvStatus.getBackground().mutate();
-
-                switch (status) {
-                    case "TODO":
-                        statusBg.setTint(0xFFF1F5F9); // Xám nhạt
-                        tvStatus.setTextColor(0xFF64748B); // Chữ xám đậm
-                        break;
-                    case "DOING":
-                        statusBg.setTint(0xFFDBEAFE); // Xanh dương nhạt
-                        tvStatus.setTextColor(0xFF1E40AF); // Chữ xanh dương đậm
-                        break;
-                    case "DONE":
-                        statusBg.setTint(0xFFDCFCE7); // Xanh lá nhạt
-                        tvStatus.setTextColor(0xFF166534); // Chữ xanh lá đậm
-                        break;
-                }
+        private String formatDate(String rawDate) {
+            if (rawDate == null || rawDate.isEmpty()) return "No date";
+            try {
+                SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
+                Date date = parser.parse(rawDate.substring(0, 10)); // Handle full ISO dates
+                return date != null ? formatter.format(date) : rawDate;
+            } catch (Exception e) {
+                return rawDate;
             }
         }
     }
