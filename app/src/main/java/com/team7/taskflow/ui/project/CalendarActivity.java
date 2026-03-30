@@ -1,15 +1,17 @@
 package com.team7.taskflow.ui.project;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,7 +27,7 @@ import com.team7.taskflow.utils.SessionManager;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date; // Dùng java.util.Date
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,11 +42,21 @@ public class CalendarActivity extends BaseActivity {
     private TaskAdapter adapter;
     private TaskRepository taskRepository;
     private long projectId;
+    private ActivityResultLauncher<Intent> taskLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
+        // 0. Register launcher để reload sau khi Edit Task xong
+        taskLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        loadTasks(); // Tải lại task để phản ánh thay đổi
+                    }
+                });
 
         // 1. Khởi tạo Repository
         taskRepository = TaskRepository.getInstance();
@@ -68,6 +80,8 @@ public class CalendarActivity extends BaseActivity {
         // 5. Nút quay lại
         View btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+
+        setupTabs();
 
         // 6. Nút Today (Về ngày hiện tại)
         View btnToday = findViewById(R.id.btnToday);
@@ -104,7 +118,9 @@ public class CalendarActivity extends BaseActivity {
                 if (projectId == -1) {
                     Toast.makeText(this, "Select a project first", Toast.LENGTH_SHORT).show();
                 } else {
-                    showQuickAddSheet();
+                    android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+                    intent.putExtra("project_id", projectId);
+                    startActivity(intent);
                 }
             });
         }
@@ -115,12 +131,54 @@ public class CalendarActivity extends BaseActivity {
         updateUI();
     }
 
+    private void setupTabs() {
+        TextView tabTimeline = findViewById(R.id.tabTimeline);
+        TextView tabBoard = findViewById(R.id.tabBoard);
+        
+        if (tabTimeline != null) {
+            tabTimeline.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+            });
+        }
+        
+        if (tabBoard != null) {
+            tabBoard.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.project.ProjectBoardActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+            });
+        }
+    }
+
     private void updateUI() {
-        // Cập nhật tiêu đề Tháng Năm
+        // Cập nhật tiêu đề Tháng Năm (ở Top App Bar)
+        TextView tvMonth = findViewById(R.id.tvMonth);
+        if (tvMonth != null) {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
+            tvMonth.setText(sdf.format(currentCalendar.getTime()));
+        }
+
+        // Cập nhật tiêu đề Tháng Năm (ở Month Navigator bên trong nội dung Calendar)
         TextView tvMonthYear = findViewById(R.id.tvMonthYear);
         if (tvMonthYear != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
             tvMonthYear.setText(sdf.format(currentCalendar.getTime()));
+        }
+        
+        TextView tvProjectName = findViewById(R.id.tvProjectName);
+        if (tvProjectName != null) {
+            String pName = getIntent().getStringExtra("project_name");
+            tvProjectName.setText(pName != null ? pName : "Calendar");
         }
 
         // Vẽ lại các con số ngày
@@ -189,9 +247,22 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void setupRecyclerView() {
-        adapter = new TaskAdapter(); // Đảm bảo bạn đã có class TaskAdapter
+        adapter = new TaskAdapter();
         rvTasks.setLayoutManager(new LinearLayoutManager(this));
         rvTasks.setAdapter(adapter);
+
+        // Gắn listener nút 3 chấm cho từng task trong calendar
+        adapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
+            @Override
+            public void onTaskClick(Task task) {
+                // Nhấn vào thẻ task: không làm gì
+            }
+
+            @Override
+            public void onTaskMenuClick(Task task, View view) {
+                showTaskMenu(task, view);
+            }
+        });
     }
 
     private void loadTasks() {
@@ -268,7 +339,7 @@ public class CalendarActivity extends BaseActivity {
                 public void onSuccess(Task result) {
                     runOnUiThread(() -> {
                         dialog.dismiss();
-                        loadTasks(); // Tải lại danh sách sau khi thêm
+                        loadTasks();
                         Toast.makeText(CalendarActivity.this, "Task created!", Toast.LENGTH_SHORT).show();
                     });
                 }
@@ -279,5 +350,45 @@ public class CalendarActivity extends BaseActivity {
             });
         });
         dialog.show();
+    }
+
+    private void showTaskMenu(Task task, View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        popup.getMenu().add(0, 1, 0, "Edit Task");
+        popup.getMenu().add(0, 2, 1, "Delete Task");
+
+        popup.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1: // Edit
+                    Intent intent = new Intent(CalendarActivity.this, CreateTaskActivity.class);
+                    intent.putExtra("project_id", projectId);
+                    intent.putExtra("task_id", task.getId());
+                    taskLauncher.launch(intent);
+                    return true;
+                case 2: // Delete
+                    deleteTask(task);
+                    return true;
+                default:
+                    return false;
+            }
+        });
+        popup.show();
+    }
+
+    private void deleteTask(Task task) {
+        taskRepository.deleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                runOnUiThread(() -> {
+                    Toast.makeText(CalendarActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+                    loadTasks();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(CalendarActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 }

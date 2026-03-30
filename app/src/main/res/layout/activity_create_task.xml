@@ -4,19 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light">
+    android:background="#F0F2F5">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Toolbar -->
+        <!-- ── TOP APP BAR ─────────────────────────────── -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="@color/white"
-            android:paddingHorizontal="16dp">
+            android:paddingHorizontal="8dp">
 
             <ImageButton
                 android:id="@+id/btnBack"
@@ -24,10 +24,10 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="@color/slate_900"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/slate_900" />
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <TextView
                 android:id="@+id/tvToolbarTitle"
@@ -35,12 +35,12 @@
                 android:layout_height="wrap_content"
                 android:text="Create New Task"
                 android:textColor="@color/slate_900"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <TextView
                 android:id="@+id/btnSave"
@@ -50,188 +50,384 @@
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:paddingHorizontal="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- ── SCROLLABLE CONTENT ──────────────────────── -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
-                <TextView
+                <!-- CARD: Title + Description -->
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Task Title"
-                    android:textColor="@color/slate_900"
-                    android:textStyle="bold" />
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/white">
 
-                <EditText
-                    android:id="@+id/etTaskTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_input"
-                    android:hint="e.g. Design Login Screen"
-                    android:padding="12dp"
-                    android:textColor="@color/slate_900"
-                    android:textSize="15sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="4dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Description"
-                    android:textColor="@color/slate_900"
-                    android:textStyle="bold" />
+                        <EditText
+                            android:id="@+id/etTaskTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="52dp"
+                            android:background="@null"
+                            android:hint="Tên tác vụ"
+                            android:paddingHorizontal="16dp"
+                            android:textColor="@color/slate_900"
+                            android:textColorHint="@color/slate_400"
+                            android:textSize="15sp"
+                            android:inputType="textCapSentences"
+                            android:imeOptions="actionNext" />
 
-                <EditText
-                    android:id="@+id/etTaskDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_input"
-                    android:gravity="top"
-                    android:hint="Describe the task details..."
-                    android:minLines="4"
-                    android:padding="12dp"
-                    android:textColor="@color/slate_900"
-                    android:textSize="14sp" />
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#EEF0F3"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp" />
 
+                        <EditText
+                            android:id="@+id/etTaskDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:gravity="top"
+                            android:hint="Mô tả tác vụ (tùy chọn)"
+                            android:minLines="3"
+                            android:maxLines="6"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/slate_700"
+                            android:textColorHint="@color/slate_400"
+                            android:textSize="14sp"
+                            android:inputType="textMultiLine|textCapSentences" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- LABELS: Bắt đầu / Kết thúc -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="4dp"
                     android:orientation="horizontal">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:text="Bắt đầu"
+                        android:textColor="@color/slate_500"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:paddingStart="4dp" />
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Priority"
-                            android:textColor="@color/slate_900"
-                            android:textStyle="bold" />
-
-                        <Spinner
-                            android:id="@+id/spinnerPriority"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_input" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="1px" />
-
-                    <LinearLayout
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Status"
-                            android:textColor="@color/slate_900"
-                            android:textStyle="bold" />
-
-                        <Spinner
-                            android:id="@+id/spinnerStatus"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_input" />
-                    </LinearLayout>
+                        android:text="Kết thúc"
+                        android:textColor="@color/slate_500"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:paddingStart="4dp" />
                 </LinearLayout>
 
+                <!-- ROW 1: Start Date / Due Date -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="8dp"
                     android:orientation="horizontal">
 
-                    <LinearLayout
+                    <!-- Start Date -->
+                    <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginEnd="6dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
 
-                        <TextView
+                        <LinearLayout
+                            android:id="@+id/cardStartDate"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Start Date"
-                            android:textColor="@color/slate_900"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvStartDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_input"
+                            android:layout_height="56dp"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="12dp"
-                            android:text="Select Date"
-                            android:textColor="@color/slate_500"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp"
+                            android:background="?attr/selectableItemBackground">
 
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="1px" />
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_calendar"
+                                app:tint="@color/slate_500" />
 
-                    <LinearLayout
+                            <TextView
+                                android:id="@+id/tvStartDate"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="10dp"
+                                android:text="Chọn ngày"
+                                android:textColor="@color/slate_500"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Due Date -->
+                    <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginStart="6dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
 
-                        <TextView
+                        <LinearLayout
+                            android:id="@+id/cardDueDate"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Due Date"
-                            android:textColor="@color/slate_900"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvDueDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_input"
+                            android:layout_height="56dp"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="12dp"
-                            android:text="Select Date"
-                            android:textColor="@color/slate_500"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp"
+                            android:background="?attr/selectableItemBackground">
+
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_calendar"
+                                app:tint="@color/slate_500" />
+
+                            <TextView
+                                android:id="@+id/tvDueDate"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="10dp"
+                                android:text="Chọn ngày"
+                                android:textColor="@color/slate_500"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
+                <!-- ROW 2: Priority / Assignee -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <!-- Priority -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardPriority"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp">
+
+                            <ImageView
+                                android:id="@+id/ivPriority"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_flag"
+                                app:tint="@color/slate_500" />
+
+                            <TextView
+                                android:id="@+id/tvPriority"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                android:text="Ưu tiên"
+                                android:textColor="@color/slate_500"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Assignee -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardAssignee"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp">
+
+                            <ImageView
+                                android:id="@+id/ivAssignee"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_person"
+                                app:tint="@color/slate_500" />
+
+                            <TextView
+                                android:id="@+id/tvAssignee"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                android:text="Phân công"
+                                android:textColor="@color/slate_500"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <!-- ROW 3: Status / Label -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <!-- Status -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardStatus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp">
+
+                            <ImageView
+                                android:id="@+id/ivStatus"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_task_alt"
+                                app:tint="@color/slate_500" />
+
+                            <TextView
+                                android:id="@+id/tvStatus"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                android:text="Trạng thái"
+                                android:textColor="@color/slate_500"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Đính kèm -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardAttachment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp">
+
+                            <ImageView
+                                android:id="@+id/ivAttachment"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_attach_file"
+                                app:tint="@color/slate_500" />
+
+                            <TextView
+                                android:id="@+id/tvAttachment"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:text="Đính kèm"
+                                android:textColor="@color/slate_500"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <!-- Attachment Container -->
+                <LinearLayout
+                    android:id="@+id/containerAttachments"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical"
+                    android:visibility="gone" />
+
+                <!-- Delete button (Edit mode only) -->
                 <Button
                     android:id="@+id/btnDelete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="24dp"
                     android:backgroundTint="@color/bg_red_50"
-                    android:text="Move to Trash"
+                    android:text="Chuyển vào Thùng rác"
                     android:textAllCaps="false"
                     android:textColor="@color/text_red_600"
                     android:visibility="gone"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="14dp" />
 
             </LinearLayout>
         </ScrollView>

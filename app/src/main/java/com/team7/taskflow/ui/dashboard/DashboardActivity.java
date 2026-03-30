@@ -53,6 +53,7 @@ public class DashboardActivity extends BaseActivity {
     // Views
     private FloatingActionButton fabAdd;
     private ImageView btnNotification;
+    private ImageView imgAvatar;
     private TextView tvWorkspaceName;
     private RecyclerView rvProjects;
     private BottomNavigationView bottomNavigationView;
@@ -119,6 +120,7 @@ public class DashboardActivity extends BaseActivity {
     private void initViews() {
         fabAdd = findViewById(R.id.fabAdd); // defined only in dashboard layout include
         btnNotification = findViewById(R.id.btnNotification);
+        imgAvatar = findViewById(R.id.imgAvatar);
         tvWorkspaceName = findViewById(R.id.tvWorkspaceName);
         rvProjects = findViewById(R.id.projectRecyclerView);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -224,6 +226,14 @@ public class DashboardActivity extends BaseActivity {
                         String displayName = user.getDisplayNameOrEmail();
                         if (tvWorkspaceName != null) {
                             tvWorkspaceName.setText("Hello, " + displayName);
+                        }
+
+                        if (imgAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                            com.bumptech.glide.Glide.with(DashboardActivity.this)
+                                    .load(user.getAvatarUrl())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_person)
+                                    .into(imgAvatar);
                         }
 
                         Log.d(TAG, "Loaded user: " + user.getEmail() + ", ID: " + currentUserId);
