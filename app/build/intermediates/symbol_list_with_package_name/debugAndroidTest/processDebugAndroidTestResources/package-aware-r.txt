@@ -1,3 +1,0 @@
-com.team7.taskflow.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
