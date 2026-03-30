@@ -2,7 +2,11 @@ package com.team7.taskflow.ui.timeline;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.ui.project.CalendarActivity;
+import com.team7.taskflow.ui.project.ProjectBoardActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -253,9 +257,134 @@ public class TimelineActivity extends BaseActivity {
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0); today.set(Calendar.MINUTE, 0); today.set(Calendar.SECOND, 0); today.set(Calendar.MILLISECOND, 0);
 
+        Calendar earliestTaskDate = null;
+        Calendar latestTaskDate = null;
+
+        if (tasks == null) {
+            tasks = java.util.Collections.emptyList();
+        }
+
+        // Find date range from task start/due dates.
+        for (Task t : tasks) {
+            try {
+                if (t.getStartDate() != null && t.getStartDate().length() >= 10) {
+                    Date d = sdf.parse(t.getStartDate().substring(0, 10));
+                    if (d != null) {
+                        if (earliestTaskDate == null || d.before(earliestTaskDate.getTime())) {
+                            earliestTaskDate = Calendar.getInstance();
+                            earliestTaskDate.setTime(d);
+                        }
+                        if (latestTaskDate == null || d.after(latestTaskDate.getTime())) {
+                            latestTaskDate = Calendar.getInstance();
+                            latestTaskDate.setTime(d);
+                        }
+                    }
+                }
+                if (t.getDueDate() != null && t.getDueDate().length() >= 10) {
+                    Date d = sdf.parse(t.getDueDate().substring(0, 10));
+                    if (d != null) {
+                        if (earliestTaskDate == null || d.before(earliestTaskDate.getTime())) {
+                            earliestTaskDate = Calendar.getInstance();
+                            earliestTaskDate.setTime(d);
+                        }
+                        if (latestTaskDate == null || d.after(latestTaskDate.getTime())) {
+                            latestTaskDate = Calendar.getInstance();
+                            latestTaskDate.setTime(d);
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (earliestTaskDate == null) {
+            minCal.setTime(today.getTime());
+            maxCal.setTime(today.getTime());
+        } else {
+            if (earliestTaskDate.before(today)) {
+                minCal.setTime(earliestTaskDate.getTime());
+            } else {
+                minCal.setTime(today.getTime());
+            }
+
+            if (latestTaskDate != null && latestTaskDate.after(today)) {
+                maxCal.setTime(latestTaskDate.getTime());
+            } else {
+                maxCal.setTime(today.getTime());
+            }
+        }
+
+        minCal.add(Calendar.DAY_OF_YEAR, -2);
+        maxCal.add(Calendar.DAY_OF_YEAR, 10);
+
+        minCal.set(Calendar.HOUR_OF_DAY, 0);
+        minCal.set(Calendar.MINUTE, 0);
+        minCal.set(Calendar.SECOND, 0);
+        minCal.set(Calendar.MILLISECOND, 0);
+        maxCal.set(Calendar.HOUR_OF_DAY, 0);
+        maxCal.set(Calendar.MINUTE, 0);
+        maxCal.set(Calendar.SECOND, 0);
+        maxCal.set(Calendar.MILLISECOND, 0);
+
+        long minTime = minCal.getTimeInMillis();
+        int totalDays = Math.max(1,
+                (int) ((maxCal.getTimeInMillis() - minTime + 12L * 3600 * 1000) / (24L * 3600 * 1000)) + 1);
+
+        // Render day headers, month headers and vertical grid lines.
+        Calendar iterCal = (Calendar) minCal.clone();
+        String currentMonth = "";
+        int currentMonthDays = 0;
+
+        for (int i = 0; i < totalDays; i++) {
+            TextView tvDay = new TextView(this);
+            tvDay.setText(String.valueOf(iterCal.get(Calendar.DAY_OF_MONTH)));
+            tvDay.setLayoutParams(new LinearLayout.LayoutParams((int) (COLUMN_WIDTH_DP * density), ViewGroup.LayoutParams.WRAP_CONTENT));
+            tvDay.setGravity(Gravity.CENTER);
+            tvDay.setTextSize(12f);
+            tvDay.setTextColor(ContextCompat.getColor(this, R.color.slate_500));
+            if (containerGanttDays != null) containerGanttDays.addView(tvDay);
+
+            View gridLine = new View(this);
+            LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(1, ViewGroup.LayoutParams.MATCH_PARENT);
+            glp.setMargins((int) (COLUMN_WIDTH_DP * density) - 1, 0, 0, 0);
+            gridLine.setLayoutParams(glp);
+            gridLine.setBackgroundColor(ContextCompat.getColor(this, R.color.slate_200));
+            if (containerGanttGrid != null) containerGanttGrid.addView(gridLine);
+
+            String mName = new SimpleDateFormat("MMM", Locale.US).format(iterCal.getTime());
+            if (currentMonth.equals(mName)) {
+                currentMonthDays++;
+            } else {
+                if (currentMonthDays > 0) {
+                    TextView tvMonth = new TextView(this);
+                    tvMonth.setText(currentMonth);
+                    tvMonth.setLayoutParams(new LinearLayout.LayoutParams((int) (currentMonthDays * COLUMN_WIDTH_DP * density), ViewGroup.LayoutParams.WRAP_CONTENT));
+                    tvMonth.setPadding(32, 0, 0, 0);
+                    tvMonth.setTextSize(13f);
+                    tvMonth.setTypeface(null, android.graphics.Typeface.BOLD);
+                    tvMonth.setTextColor(ContextCompat.getColor(this, R.color.slate_900));
+                    if (containerGanttMonths != null) containerGanttMonths.addView(tvMonth);
+                }
+                currentMonth = mName;
+                currentMonthDays = 1;
+            }
+
+            iterCal.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        if (currentMonthDays > 0 && containerGanttMonths != null) {
+            TextView tvMonth = new TextView(this);
+            tvMonth.setText(currentMonth);
+            tvMonth.setLayoutParams(new LinearLayout.LayoutParams((int) (currentMonthDays * COLUMN_WIDTH_DP * density), ViewGroup.LayoutParams.WRAP_CONTENT));
+            tvMonth.setPadding(32, 0, 0, 0);
+            tvMonth.setTextSize(13f);
+            tvMonth.setTypeface(null, android.graphics.Typeface.BOLD);
+            tvMonth.setTextColor(ContextCompat.getColor(this, R.color.slate_900));
+            containerGanttMonths.addView(tvMonth);
+        }
+
         // Render Tasks
         int minMarginStart = Integer.MAX_VALUE;
-        long minTime = minCal.getTimeInMillis(); 
 
         for (Task task : tasks) {
             View labelView = getLayoutInflater().inflate(R.layout.item_timeline_label, containerTaskLabels, false);
