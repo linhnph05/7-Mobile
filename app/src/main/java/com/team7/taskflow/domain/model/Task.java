@@ -43,6 +43,9 @@ public class Task {
     @SerializedName("created_at")
     private String createdAt;
 
+    @SerializedName("projects")
+    private Project projectInfo;
+
     public Task() {
         this.status = "TODO";
         this.priority = "MEDIUM";
@@ -93,4 +96,14 @@ public class Task {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public Project getProjectInfo() { return projectInfo; }
+    public void setProjectInfo(Project projectInfo) { this.projectInfo = projectInfo; }
+
+    public String getProjectName() {
+        if (projectInfo != null) {
+            return projectInfo.getName();
+        }
+        return null;
+    }
 }

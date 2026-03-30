@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,9 @@ public class CalendarActivity extends BaseActivity {
     private TaskAdapter adapter;
     private TaskRepository taskRepository;
     private long projectId;
+    private boolean isMyTasksMode = false;
+    private String currentUserId;
+    private ImageView imgUserAvatar;
     private ActivityResultLauncher<Intent> taskLauncher;
 
     @Override
@@ -61,25 +65,36 @@ public class CalendarActivity extends BaseActivity {
         // 1. Khởi tạo Repository
         taskRepository = TaskRepository.getInstance();
         projectId = getIntent().getLongExtra("project_id", -1);
+        isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
+        
+        com.team7.taskflow.utils.SessionManager.init(this);
+        currentUserId = com.team7.taskflow.utils.SessionManager.getUserId();
 
         // 2. Ánh xạ các View chính
         glCalendar = findViewById(R.id.glCalendar);
         rvTasks = findViewById(R.id.rvTasks);
+        imgUserAvatar = findViewById(R.id.imgUserAvatar);
+        View btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null) {
+            if (isMyTasksMode) {
+                btnBack.setVisibility(View.INVISIBLE);
+            } else {
+                btnBack.setOnClickListener(v -> finish());
+            }
+        }
+        
+        loadUserInfo();
 
         // 3. Thiết lập RecyclerView
         if (rvTasks != null) {
             setupRecyclerView();
-            if (projectId != -1) loadTasks();
+            loadTasks();
         }
 
         // 4. Khởi tạo giao diện lịch ban đầu
         if (glCalendar != null) {
             updateUI(); // Hàm này sẽ lo việc hiện "October 2023" và các con số
         }
-
-        // 5. Nút quay lại
-        View btnBack = findViewById(R.id.btnBack);
-        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
         setupTabs();
 
@@ -114,15 +129,19 @@ public class CalendarActivity extends BaseActivity {
         // 8. Nút thêm task
         View btnNewTask = findViewById(R.id.btnNewTask);
         if (btnNewTask != null) {
-            btnNewTask.setOnClickListener(v -> {
-                if (projectId == -1) {
-                    Toast.makeText(this, "Select a project first", Toast.LENGTH_SHORT).show();
-                } else {
-                    android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
-                    intent.putExtra("project_id", projectId);
-                    startActivity(intent);
-                }
-            });
+            if (isMyTasksMode) {
+                btnNewTask.setVisibility(View.GONE);
+            } else {
+                btnNewTask.setOnClickListener(v -> {
+                    if (projectId == -1) {
+                        Toast.makeText(this, "Select a project first", Toast.LENGTH_SHORT).show();
+                    } else {
+                        android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+                        intent.putExtra("project_id", projectId);
+                        startActivity(intent);
+                    }
+                });
+            }
         }
         selectedDateStr = dateFormat.format(Calendar.getInstance().getTime());
 
@@ -140,6 +159,7 @@ public class CalendarActivity extends BaseActivity {
                 android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.putExtra("is_my_tasks", isMyTasksMode);
                 intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
@@ -152,6 +172,7 @@ public class CalendarActivity extends BaseActivity {
                 android.content.Intent intent = new android.content.Intent(this, com.team7.taskflow.ui.project.ProjectBoardActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.putExtra("is_my_tasks", isMyTasksMode);
                 intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
@@ -177,8 +198,12 @@ public class CalendarActivity extends BaseActivity {
         
         TextView tvProjectName = findViewById(R.id.tvProjectName);
         if (tvProjectName != null) {
-            String pName = getIntent().getStringExtra("project_name");
-            tvProjectName.setText(pName != null ? pName : "Calendar");
+            if (isMyTasksMode) {
+                tvProjectName.setText("My Assigned Tasks");
+            } else {
+                String pName = getIntent().getStringExtra("project_name");
+                tvProjectName.setText(pName != null ? pName : "Calendar");
+            }
         }
 
         // Vẽ lại các con số ngày
@@ -266,18 +291,53 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void loadTasks() {
-        if (projectId == -1) return;
-        taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> result) {
-                allProjectTasks = result; // Lưu lại toàn bộ task của dự án
-                filterTasksBySelectedDate(); // Lọc task cho ngày đang được chọn
+                allProjectTasks = result;
+                filterTasksBySelectedDate();
             }
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> Toast.makeText(CalendarActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show());
             }
-        });
+        };
+
+        if (isMyTasksMode) {
+            taskRepository.getMyTasksWithProjectName(currentUserId, callback);
+        } else if (projectId != -1) {
+            taskRepository.getTasksByProject(projectId, callback);
+        }
+    }
+
+    private void loadUserInfo() {
+        if (currentUserId == null || currentUserId.isEmpty()) return;
+        
+        com.team7.taskflow.data.remote.SupabaseClient.getInstance()
+            .getService(com.team7.taskflow.data.remote.api.UserApi.class)
+            .getUserById("eq." + currentUserId, "*")
+            .enqueue(new retrofit2.Callback<List<com.team7.taskflow.domain.model.User>>() {
+                @Override
+                public void onResponse(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @androidx.annotation.NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.User>> response) {
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        com.team7.taskflow.domain.model.User user = response.body().get(0);
+                        runOnUiThread(() -> {
+                            if (imgUserAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                                com.bumptech.glide.Glide.with(CalendarActivity.this)
+                                    .load(user.getAvatarUrl())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.bg_avatar_bordered)
+                                    .error(R.drawable.bg_avatar_bordered)
+                                    .into(imgUserAvatar);
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onFailure(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @androidx.annotation.NonNull Throwable t) {
+                    Log.e("Calendar", "Load user failed: " + t.getMessage());
+                }
+            });
     }
 
     private void filterTasksBySelectedDate() {
@@ -361,7 +421,7 @@ public class CalendarActivity extends BaseActivity {
             switch (item.getItemId()) {
                 case 1: // Edit
                     Intent intent = new Intent(CalendarActivity.this, CreateTaskActivity.class);
-                    intent.putExtra("project_id", projectId);
+                    intent.putExtra("project_id", task.getProjectId());
                     intent.putExtra("task_id", task.getId());
                     taskLauncher.launch(intent);
                     return true;

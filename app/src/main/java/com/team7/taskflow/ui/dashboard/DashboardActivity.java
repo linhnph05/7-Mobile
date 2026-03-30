@@ -174,8 +174,13 @@ public class DashboardActivity extends BaseActivity {
                 } else if (id == R.id.nav_home) {
                     // Already on home
                     return true;
+                } else if (id == R.id.nav_tasks) {
+                    Intent intent = new Intent(this, com.team7.taskflow.ui.project.ProjectBoardActivity.class);
+                    intent.putExtra("is_my_tasks", true);
+                    startActivity(intent);
+                    return true;
                 }
-                // TODO: Handle nav_tasks, nav_assistant
+                // TODO: Handle nav_assistant
                 return false;
             });
         }

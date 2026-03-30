@@ -29,9 +29,11 @@ public class ProjectBoardActivity extends BaseActivity {
 
     private TaskRepository taskRepository;
     private long projectId;
+    private boolean isMyTasksMode = false;
+    private String currentUserId;
 
     private TextView tvProjectName, tvCountTodo, tvCountDoing, tvCountDone;
-    private ImageView btnBack;
+    private ImageView btnBack, imgUserAvatar;
     private RecyclerView rvTodo, rvDoing, rvDone;
     private TaskAdapter adapterTodo, adapterDoing, adapterDone;
     private View fabAddTask;
@@ -47,12 +49,22 @@ public class ProjectBoardActivity extends BaseActivity {
         taskRepository = TaskRepository.getInstance();
         projectId = getIntent().getLongExtra("project_id", -1);
         String projectName = getIntent().getStringExtra("project_name");
+        isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
+        
+        com.team7.taskflow.utils.SessionManager.init(this);
+        currentUserId = com.team7.taskflow.utils.SessionManager.getUserId();
 
         initViews();
 
-        if (tvProjectName != null) {
+        if (isMyTasksMode) {
+            if (tvProjectName != null) tvProjectName.setText("My Assigned Tasks");
+            if (fabAddTask != null) fabAddTask.setVisibility(View.GONE);
+            if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
+        } else if (tvProjectName != null) {
             tvProjectName.setText(projectName != null ? projectName : "Project Board");
         }
+        
+        loadUserInfo();
         
         TextView tvMonth = findViewById(R.id.tvMonth);
         if (tvMonth != null) {
@@ -180,6 +192,7 @@ public class ProjectBoardActivity extends BaseActivity {
         tvCountDoing = findViewById(R.id.tvCountDoing);
         tvCountDone = findViewById(R.id.tvCountDone);
         btnBack = findViewById(R.id.btnBack);
+        imgUserAvatar = findViewById(R.id.imgUserAvatar);
         fabAddTask = findViewById(R.id.fabAddTask);
 
         rvTodo = findViewById(R.id.rvTodo);
@@ -187,8 +200,38 @@ public class ProjectBoardActivity extends BaseActivity {
         rvDone = findViewById(R.id.rvDone);
     }
 
+    private void loadUserInfo() {
+        if (currentUserId == null || currentUserId.isEmpty()) return;
+        
+        com.team7.taskflow.data.remote.SupabaseClient.getInstance()
+            .getService(com.team7.taskflow.data.remote.api.UserApi.class)
+            .getUserById("eq." + currentUserId, "*")
+            .enqueue(new retrofit2.Callback<List<com.team7.taskflow.domain.model.User>>() {
+                @Override
+                public void onResponse(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @androidx.annotation.NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.User>> response) {
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        com.team7.taskflow.domain.model.User user = response.body().get(0);
+                        runOnUiThread(() -> {
+                            if (imgUserAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                                com.bumptech.glide.Glide.with(ProjectBoardActivity.this)
+                                    .load(user.getAvatarUrl())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.bg_avatar_bordered)
+                                    .error(R.drawable.bg_avatar_bordered)
+                                    .into(imgUserAvatar);
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onFailure(@androidx.annotation.NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @androidx.annotation.NonNull Throwable t) {
+                    Log.e("ProjectBoard", "Load user failed: " + t.getMessage());
+                }
+            });
+    }
+
     private void setupListeners() {
-        if (btnBack != null) {
+        if (btnBack != null && !isMyTasksMode) {
             btnBack.setOnClickListener(v -> finish());
         }
 
@@ -216,6 +259,7 @@ public class ProjectBoardActivity extends BaseActivity {
                 Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.TimelineActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.putExtra("is_my_tasks", isMyTasksMode);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
@@ -228,6 +272,7 @@ public class ProjectBoardActivity extends BaseActivity {
                 Intent intent = new Intent(this, CalendarActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", getIntent().getStringExtra("project_name"));
+                intent.putExtra("is_my_tasks", isMyTasksMode);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
@@ -237,51 +282,48 @@ public class ProjectBoardActivity extends BaseActivity {
     }
 
     private void loadTaskCounts() {
-        if (projectId == -1)
-            return;
-
-        taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> result) {
-                List<Task> todoList = new ArrayList<>();
-                List<Task> doingList = new ArrayList<>();
-                List<Task> doneList = new ArrayList<>();
-
-                for (Task t : result) {
-                    if (t.getStatus() == null)
-                        continue;
-                    String status = t.getStatus().toUpperCase();
-                    switch (status) {
-                        case "TODO":
-                            todoList.add(t);
-                            break;
-                        case "DOING":
-                            doingList.add(t);
-                            break;
-                        case "DONE":
-                            doneList.add(t);
-                            break;
-                    }
-                }
-
-                runOnUiThread(() -> {
-                    if (tvCountTodo != null)
-                        tvCountTodo.setText(String.valueOf(todoList.size()));
-                    if (tvCountDoing != null)
-                        tvCountDoing.setText(String.valueOf(doingList.size()));
-                    if (tvCountDone != null)
-                        tvCountDone.setText(String.valueOf(doneList.size()));
-
-                    adapterTodo.setTasks(todoList);
-                    adapterDoing.setTasks(doingList);
-                    adapterDone.setTasks(doneList);
-                });
+                processTasks(result);
             }
 
             @Override
             public void onError(String error) {
                 Log.e("ProjectBoard", "Load failed: " + error);
             }
+        };
+
+        if (isMyTasksMode) {
+            taskRepository.getMyTasksWithProjectName(currentUserId, callback);
+        } else if (projectId != -1) {
+            taskRepository.getTasksByProject(projectId, callback);
+        }
+    }
+
+    private void processTasks(List<Task> result) {
+        List<Task> todoList = new ArrayList<>();
+        List<Task> doingList = new ArrayList<>();
+        List<Task> doneList = new ArrayList<>();
+
+        for (Task t : result) {
+            if (t.getStatus() == null) continue;
+            String status = t.getStatus().toUpperCase();
+            switch (status) {
+                case "TODO": todoList.add(t); break;
+                case "DOING": doingList.add(t); break;
+                case "DONE": doneList.add(t); break;
+            }
+        }
+
+        runOnUiThread(() -> {
+            if (tvCountTodo != null) tvCountTodo.setText(String.valueOf(todoList.size()));
+            if (tvCountDoing != null) tvCountDoing.setText(String.valueOf(doingList.size()));
+            if (tvCountDone != null) tvCountDone.setText(String.valueOf(doneList.size()));
+
+            adapterTodo.setTasks(todoList);
+            adapterDoing.setTasks(doingList);
+            adapterDone.setTasks(doneList);
         });
     }
 
@@ -319,8 +361,9 @@ public class ProjectBoardActivity extends BaseActivity {
             switch (item.getItemId()) {
                 case 1: // Edit Task
                     Intent intent = new Intent(ProjectBoardActivity.this, CreateTaskActivity.class);
-                    intent.putExtra("project_id", projectId);
-                    intent.putExtra("task_id", task.getId()); // Truyền ID để trang Create biết là đang Edit
+                    // Dùng projectId của chính task đó thay vì projectId của Activity (vì global mode có nhiều projects)
+                    intent.putExtra("project_id", task.getProjectId());
+                    intent.putExtra("task_id", task.getId());
                     taskLauncher.launch(intent);
                     return true;
                 case 2: // Delete Task

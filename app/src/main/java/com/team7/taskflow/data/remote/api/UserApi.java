@@ -36,6 +36,15 @@ public interface UserApi {
             @Query("user_id") String userIdFilter,
             @Query("select") String select
     );
+
+    /**
+     * Get users by a list of IDs, ex: in.(uuid1,uuid2)
+     */
+    @GET("users")
+    Call<List<User>> getUsersByIds(
+            @Query("user_id") String userIdsFilter,
+            @Query("select") String select
+    );
     /**
      * Get user by Project
      */
