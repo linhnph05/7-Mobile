@@ -88,7 +88,14 @@
         <activity
             android:name="com.team7.taskflow.ui.timeline.TimelineActivity"
             android:exported="false" />
-
+        <activity
+            android:name="com.team7.taskflow.ui.project.CalendarActivity"
+            android:exported="false" />
+        <!-- Thêm dòng này vào trong thẻ <application> -->
+        <activity
+            android:name="com.team7.taskflow.ui.project.CreateTaskActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <!-- Notification -->
         <activity android:name="com.team7.taskflow.ui.notification.NotificationsActivity" />
 
@@ -96,6 +103,10 @@
         <activity
             android:name="com.team7.taskflow.ui.profile.ProfileActivity"
             android:exported="false" />
+
+        <!-- Member -->
+        <activity android:name="com.team7.taskflow.ui.member.MemberListActivity" />
+        <activity android:name="com.team7.taskflow.ui.member.InviteMemberActivity" />
 
         <!-- MainActivity cũ -->
         <activity android:name="com.team7.taskflow.MainActivity" />

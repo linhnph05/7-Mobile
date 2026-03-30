@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.team7.taskflow.app-mergeDebugResources-2:/values-h720dp-v13/values-h720dp-v13.xml",
+            "outputFile": "com.team7.taskflow.app-mergeDebugResources-40:/values-h720dp-v13/values-h720dp-v13.xml",
             "map": [
                 {
-                    "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\caches\\8.13\\transforms\\39d5f771dafd8b998f0b3803b386a949\\transformed\\appcompat-1.7.1\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
+                    "source": "D:\\Android\\.gradle\\caches\\9.1.0\\transforms\\3ccd5c36a0f9d911f801fe07a6aef33c\\workspace\\transformed\\appcompat-1.7.1\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

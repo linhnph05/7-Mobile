@@ -158,6 +158,7 @@
     <string name="project_saved_success">Changes saved!</string>
     <string name="project_setting_title">Project Settings</string>
     <string name="project_space_key_label">Space Key</string>
+    <string name="remove_member">Remove member</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="success">Success</string>

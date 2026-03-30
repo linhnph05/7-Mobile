@@ -85,6 +85,10 @@
             android:name=".ui.profile.ProfileActivity"
             android:exported="false" />
 
+        <!-- Member -->
+        <activity android:name=".ui.member.MemberListActivity" />
+        <activity android:name=".ui.member.InviteMemberActivity" />
+
         <!-- MainActivity cũ -->
         <activity android:name=".MainActivity" />
 

@@ -2,10 +2,6 @@ package com.team7.taskflow.domain.model;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Model class đại diện cho Project Member
- * Mapping với bảng project_members trong Supabase
- */
 public class ProjectMember {
 
     @SerializedName("project_id")
@@ -15,78 +11,75 @@ public class ProjectMember {
     private String userId;
 
     @SerializedName("role")
-    private String role; // OWNER, ADMIN, MEMBER
+    private String role; // OWNER, ADMIN, MEMBER, VIEWER
 
     @SerializedName("joined_at")
     private String joinedAt;
 
-    // Nested project data (khi dùng select với foreign key)
-    // Supabase trả về key = tên bảng "projects", không phải "project"
+    // JOIN với bảng projects (khi query select=*,projects(*))
     @SerializedName("projects")
     private Project project;
 
-    public ProjectMember() {
+    // JOIN với bảng users (khi query select=*,users(*))
+    @SerializedName("users")
+    private UserInfo userInfo;
+
+    // Class lồng để nhận dữ liệu từ bảng users
+    public static class UserInfo {
+        @SerializedName("user_id")
+        public String userId;
+
+        @SerializedName("display_name")
+        public String displayName;
+
+        @SerializedName("email")
+        public String email;
+
+        @SerializedName("avatar_url")
+        public String avatarUrl;
     }
 
-    // Getters and Setters
-    public long getProjectId() {
-        return projectId;
+    public ProjectMember() {}
+
+    // ── Getters & Setters ──────────────────────────────────────
+    public long getProjectId() { return projectId; }
+    public void setProjectId(long projectId) { this.projectId = projectId; }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public String getJoinedAt() { return joinedAt; }
+    public void setJoinedAt(String joinedAt) { this.joinedAt = joinedAt; }
+
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
+
+    public UserInfo getUserInfo() { return userInfo; }
+    public void setUserInfo(UserInfo userInfo) { this.userInfo = userInfo; }
+
+    // ── Helper methods ─────────────────────────────────────────
+    public String getDisplayName() {
+        if (userInfo != null && userInfo.displayName != null) return userInfo.displayName;
+        if (userInfo != null && userInfo.email != null) return userInfo.email;
+        return "Unknown";
     }
 
-    public void setProjectId(long projectId) {
-        this.projectId = projectId;
+    public String getEmail() {
+        if (userInfo != null) return userInfo.email;
+        return "";
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAvatarUrl() {
+        if (userInfo != null) return userInfo.avatarUrl;
+        return null;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getJoinedAt() {
-        return joinedAt;
-    }
-
-    public void setJoinedAt(String joinedAt) {
-        this.joinedAt = joinedAt;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    /**
-     * Check if user is owner
-     */
-    public boolean isOwner() {
-        return "OWNER".equalsIgnoreCase(role);
-    }
-
-    /**
-     * Check if user is admin
-     */
-    public boolean isAdmin() {
-        return "ADMIN".equalsIgnoreCase(role);
-    }
-
-    /**
-     * Check if user can edit project
-     */
-    public boolean canEdit() {
-        return isOwner() || isAdmin();
-    }
+    public boolean isOwner() { return "OWNER".equalsIgnoreCase(role); }
+    public boolean isAdmin() { return "ADMIN".equalsIgnoreCase(role); }
+    public boolean isMember() { return "MEMBER".equalsIgnoreCase(role); }
+    public boolean isViewer() { return "VIEWER".equalsIgnoreCase(role); }
+    public boolean canEdit() { return isOwner() || isAdmin(); }
 }

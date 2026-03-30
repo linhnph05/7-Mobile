@@ -132,6 +132,7 @@ attr alertDialogButtonGroupStyle
 attr alertDialogCenterButtons
 attr alertDialogStyle
 attr alertDialogTheme
+attr alignmentMode
 attr allowStacking
 attr alpha
 attr alphabeticModifiers
@@ -404,6 +405,8 @@ attr colorTertiary
 attr colorTertiaryContainer
 attr colorTertiaryFixed
 attr colorTertiaryFixedDim
+attr columnCount
+attr columnOrderPreserved
 attr commitIcon
 attr compatShadowEnabled
 attr constraintRotate
@@ -799,6 +802,9 @@ attr layout_anchorGravity
 attr layout_behavior
 attr layout_collapseMode
 attr layout_collapseParallaxMultiplier
+attr layout_column
+attr layout_columnSpan
+attr layout_columnWeight
 attr layout_constrainedHeight
 attr layout_constrainedWidth
 attr layout_constraintBaseline_creator
@@ -855,10 +861,14 @@ attr layout_goneMarginLeft
 attr layout_goneMarginRight
 attr layout_goneMarginStart
 attr layout_goneMarginTop
+attr layout_gravity
 attr layout_insetEdge
 attr layout_keyline
 attr layout_marginBaseline
 attr layout_optimizationLevel
+attr layout_row
+attr layout_rowSpan
+attr layout_rowWeight
 attr layout_scrollEffect
 attr layout_scrollFlags
 attr layout_scrollInterpolator
@@ -1051,6 +1061,7 @@ attr onShow
 attr onStateTransition
 attr onTouchUp
 attr opticalCenterEnabled
+attr orientation
 attr overlapAnchor
 attr overlay
 attr paddingBottomNoButtons
@@ -1120,6 +1131,8 @@ attr rippleColor
 attr rotationCenterId
 attr round
 attr roundPercent
+attr rowCount
+attr rowOrderPreserved
 attr saturation
 attr scaleFromTextSize
 attr scopeUris
@@ -1453,6 +1466,7 @@ attr triggerSlack
 attr ttcIndex
 attr upDuration
 attr useCompatPadding
+attr useDefaultMargins
 attr useDrawerArrowDrawable
 attr useMaterialThemeColors
 attr values
@@ -2624,6 +2638,7 @@ dimen compat_control_corner_material
 dimen compat_notification_large_icon_max_height
 dimen compat_notification_large_icon_max_width
 dimen def_drawer_elevation
+dimen default_gap
 dimen default_navigation_active_text_size
 dimen default_navigation_text_size
 dimen design_appbar_elevation
@@ -3700,6 +3715,7 @@ drawable bg_search_bar
 drawable bg_tab_active
 drawable bg_tab_icon
 drawable bg_tab_inactive
+drawable bg_tag
 drawable bg_task_item
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
@@ -3766,6 +3782,7 @@ drawable ic_filter
 drawable ic_flag
 drawable ic_github
 drawable ic_google
+drawable ic_grid_view
 drawable ic_home
 drawable ic_keyboard_black_24dp
 drawable ic_label
@@ -3779,6 +3796,7 @@ drawable ic_m3_chip_checked_circle
 drawable ic_m3_chip_close
 drawable ic_mail
 drawable ic_menu
+drawable ic_more_horiz
 drawable ic_more_vert
 drawable ic_mtrl_arrow_circle
 drawable ic_mtrl_checked_circle
@@ -3794,6 +3812,7 @@ drawable ic_notifications
 drawable ic_person
 drawable ic_phone
 drawable ic_public
+drawable ic_schedule
 drawable ic_search
 drawable ic_search_black_24
 drawable ic_settings
@@ -3957,6 +3976,8 @@ id adjust_height
 id adjust_width
 id advance
 id alertTitle
+id alignBounds
+id alignMargins
 id aligned
 id all
 id allStates
@@ -4009,6 +4030,7 @@ id btnCollapse
 id btnCreate
 id btnCreateProject
 id btnCreateTask
+id btnDelete
 id btnDeleteProject
 id btnEditLabels
 id btnFilter
@@ -4023,11 +4045,12 @@ id btnMarkAllRead
 id btnMenu
 id btnMoreOptions
 id btnNewTask
+id btnNextMonth
 id btnNotification
 id btnNotificationSettings
 id btnOptions
+id btnPrevMonth
 id btnPrivate
-id btnProfile
 id btnPublic
 id btnResetContainer
 id btnResetPassword
@@ -4036,7 +4059,6 @@ id btnSaveDateTime
 id btnSaveProject
 id btnSaveTask
 id btnScrum
-id btnSearch
 id btnSendContainer
 id btnSendReset
 id btnSetDate
@@ -4048,26 +4070,27 @@ id btnToday
 id btnTogglePassword
 id btnViewArchived
 id btn_accept
+id btn_add_member
 id btn_decline
+id btn_invite
+id btn_remove
+id btn_search
 id buttonPanel
 id cache_measures
 id calendarView
 id callMeasure
 id cancel_button
-id cardAnalysis
 id cardAssignee
 id cardDueDate
-id cardHero
-id cardIconSet
+id cardGanttBar
 id cardKanban
 id cardPriority
 id cardProject
 id cardStartDate
 id cardTable
 id cardTag
+id card_result
 id carryVelocity
-id cb1
-id cb2
 id center
 id centerCrop
 id centerInside
@@ -4079,7 +4102,11 @@ id chains
 id checkbox
 id checked
 id chipDeadline
+id chipDoing
+id chipDone
+id chipGroupStatus
 id chipPriority
+id chipTodo
 id chipUnread
 id chronometer
 id circle_center
@@ -4173,11 +4200,13 @@ id etPrompt
 id etTaskDescription
 id etTaskInput
 id etTaskTitle
+id et_email
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
 id fabAdd
 id fabAddAI
+id fabAddTask
 id fade
 id fill
 id fill_horizontal
@@ -4198,6 +4227,7 @@ id frost
 id fullscreen_header
 id ghost_view
 id ghost_view_holder
+id glCalendar
 id glide_custom_view_target_tag
 id gone
 id graph
@@ -4241,7 +4271,9 @@ id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
 id ivAssignee
+id ivAssigneeMini
 id ivAvatar
+id ivBarIcon
 id ivParsedAssignee
 id ivParsedDueDate
 id ivParsedStartDate
@@ -4271,8 +4303,6 @@ id line3
 id linear
 id listMode
 id list_item
-id llTag1
-id llTag2
 id logoBg
 id m3_side_sheet
 id main
@@ -4334,10 +4364,6 @@ id mtrl_picker_text_input_range_start
 id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
-id navAiChat
-id navHome
-id navSettings
-id navTasks
 id nav_assistant
 id nav_home
 id nav_placeholder
@@ -4405,15 +4431,20 @@ id position
 id postLayout
 id pressed
 id progressBar
+id progress_bar
 id progress_circular
 id progress_horizontal
 id projectRecyclerView
 id radio
 id ratio
+id rb_admin
+id rb_member
+id rb_viewer
 id rectangles
 id report_drawn
 id retreat
 id reverseSawtooth
+id rg_role
 id right
 id rightToLeft
 id right_icon
@@ -4421,7 +4452,12 @@ id right_side
 id rootLayout
 id rounded
 id row_index_key
+id rvDoing
+id rvDone
 id rvNotifications
+id rvTasks
+id rvTodo
+id rv_members
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -4464,6 +4500,8 @@ id socialLayout
 id south
 id spacer
 id special_effects_controller_view_tag
+id spinnerPriority
+id spinnerStatus
 id spline
 id split_action_bar
 id spread
@@ -4486,6 +4524,7 @@ id stretch
 id submenuarrow
 id submit_area
 id supportScrollUp
+id swipeRefresh
 id switchDarkMode
 id tabDay
 id tabDoing
@@ -4527,7 +4566,9 @@ id textinput_placeholder
 id textinput_prefix_text
 id textinput_suffix_text
 id tilFilterType
+id tilTitle
 id time
+id timelineGridArea
 id title
 id titleDividerNoCustom
 id title_template
@@ -4547,15 +4588,22 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
+id tvBarTitle
 id tvCommentCount
+id tvCountDoing
+id tvCountDone
+id tvCountTodo
 id tvDaysLeft
 id tvDescription
 id tvDialogTitle
+id tvDoingTitle
+id tvDoneTitle
 id tvDueDate
 id tvForgotPassword
 id tvKanban
 id tvLogin
 id tvMonth
+id tvMonthYear
 id tvParsedAssignee
 id tvParsedDueDate
 id tvParsedPriority
@@ -4571,20 +4619,32 @@ id tvProjectKey
 id tvProjectMetadata
 id tvProjectName
 id tvProjectTag
-id tvProjectTitle
 id tvPublic
 id tvScrum
 id tvSelectedTime
 id tvSignUp
+id tvStartDate
+id tvStatus
 id tvSubtitle
 id tvTable
+id tvTaskDuration
+id tvTaskName
 id tvTerms
 id tvTitle
+id tvTodoTitle
+id tvToolbarTitle
 id tvTopTitle
 id tvWelcome
 id tvWorkspaceName
+id tv_avatar
 id tv_content
 id tv_context
+id tv_error
+id tv_member_email
+id tv_member_name
+id tv_result_email
+id tv_result_name
+id tv_role
 id tv_time
 id unchecked
 id uniform
@@ -4735,15 +4795,19 @@ layout abc_tooltip
 layout activity_ai_create
 layout activity_calendar
 layout activity_create_project
+layout activity_create_task
 layout activity_dashboard
 layout activity_forgot_password
+layout activity_invite_member
 layout activity_login
 layout activity_main
+layout activity_member_list
 layout activity_notifications
 layout activity_profile
 layout activity_project_board
 layout activity_reset_password
 layout activity_signup
+layout activity_task_list
 layout activity_timeline
 layout custom_dialog
 layout design_bottom_navigation_item
@@ -4764,15 +4828,18 @@ layout design_text_input_start_icon
 layout dialog_datetime_picker
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
+layout item_member
 layout item_notification_invite
 layout item_notification_me
 layout item_notification_reminder
 layout item_project
 layout item_task
+layout item_timeline_row
 layout layout_add_task_bottom_sheet
 layout layout_bottom_nav_fab
 layout layout_bottom_sheet_quick_add
 layout layout_project_settings_panel
+layout layout_quick_add_task
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
@@ -4837,6 +4904,7 @@ layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
 layout view_mock_preview
+layout view_timeline_header_days
 menu bottom_nav_menu
 mipmap ic_launcher
 mipmap ic_launcher_round
@@ -5078,6 +5146,7 @@ string project_save_button
 string project_saved_success
 string project_setting_title
 string project_space_key_label
+string remove_member
 string save
 string search
 string search_menu_title
@@ -6419,6 +6488,8 @@ styleable FragmentContainerView android_name android_tag
 styleable GradientColor android_startColor android_endColor android_type android_centerX android_centerY android_gradientRadius android_tileMode android_centerColor android_startX android_startY android_endX android_endY
 styleable GradientColorItem android_color android_offset
 styleable Grid grid_columnWeights grid_columns grid_horizontalGaps grid_orientation grid_rowWeights grid_rows grid_skips grid_spans grid_useRtl grid_validateInputs grid_verticalGaps
+styleable GridLayout alignmentMode columnCount columnOrderPreserved orientation rowCount rowOrderPreserved useDefaultMargins
+styleable GridLayout_Layout android_layout_width android_layout_height android_layout_margin android_layout_marginLeft android_layout_marginTop android_layout_marginRight android_layout_marginBottom layout_column layout_columnSpan layout_columnWeight layout_gravity layout_row layout_rowSpan layout_rowWeight
 styleable ImageFilterView altSrc blendSrc brightness contrast crossfade imagePanX imagePanY imageRotate imageZoom overlay round roundPercent saturation warmth
 styleable Insets marginBottomSystemWindowInsets marginLeftSystemWindowInsets marginRightSystemWindowInsets marginTopSystemWindowInsets paddingBottomSystemWindowInsets paddingLeftSystemWindowInsets paddingRightSystemWindowInsets paddingStartSystemWindowInsets paddingTopSystemWindowInsets
 styleable KeyAttribute android_alpha android_transformPivotX android_transformPivotY android_translationX android_translationY android_scaleX android_scaleY android_rotation android_rotationX android_rotationY android_translationZ android_elevation curveFit framePosition motionProgress motionTarget transformPivotTarget transitionEasing transitionPathRotate

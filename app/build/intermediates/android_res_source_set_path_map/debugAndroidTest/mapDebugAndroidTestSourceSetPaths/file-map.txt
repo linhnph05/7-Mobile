@@ -1,0 +1,7 @@
+com.team7.taskflow.test.app-tracing-1.2.0-0 D:\Android\.gradle\caches\9.1.0\transforms\62f2f84af3aba43f15e5bd97ba329754\workspace\transformed\tracing-1.2.0\res
+com.team7.taskflow.test.app-core-1.7.0-1 D:\Android\.gradle\caches\9.1.0\transforms\d6ca0252ed96b30516dc8a8ae6020880\workspace\transformed\core-1.7.0\res
+com.team7.taskflow.test.app-androidTest-2 D:\Project_Android\7-Mobile\app\build\generated\res\resValues\androidTest\debug
+com.team7.taskflow.test.app-updated_navigation_xml-3 D:\Project_Android\7-Mobile\app\build\generated\updated_navigation_xml\debugAndroidTest
+com.team7.taskflow.test.app-mergeDebugAndroidTestResources-4 D:\Project_Android\7-Mobile\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.team7.taskflow.test.app-mergeDebugAndroidTestResources-5 D:\Project_Android\7-Mobile\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.team7.taskflow.test.app-debugAndroidTest-6 D:\Project_Android\7-Mobile\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

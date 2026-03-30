@@ -192,6 +192,16 @@ public class TimelineActivity extends BaseActivity {
                 });
             });
         }
+        // Kết nối nút Manage Members → mở MemberListActivity
+        View btnManageMembers = sheetView.findViewById(R.id.btnManageMembers);
+        if (btnManageMembers != null) {
+            btnManageMembers.setOnClickListener(v -> {
+                bottomSheet.dismiss();
+                com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
+                        new com.team7.taskflow.ui.member.MemberListBottomSheet(currentProjectId);
+                sheet.show(getSupportFragmentManager(), "members");
+            });
+        }
 
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
         if (btnCollapse != null) {

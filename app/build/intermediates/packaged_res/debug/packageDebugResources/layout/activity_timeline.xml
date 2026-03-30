@@ -75,6 +75,14 @@
                 android:contentDescription="Calendar"
                 android:src="@drawable/ic_calendar"
                 app:tint="@color/theme_text_secondary" />
+            <ImageButton
+                android:id="@+id/btnKanban"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Kanban Board"
+                android:src="@drawable/ic_grid_view"
+                app:tint="@color/theme_text_secondary" />
 
             <ImageButton
                 android:id="@+id/btnMoreOptions"

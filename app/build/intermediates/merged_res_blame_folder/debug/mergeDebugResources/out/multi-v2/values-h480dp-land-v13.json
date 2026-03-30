@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.team7.taskflow.app-mergeDebugResources-2:/values-h480dp-land-v13/values-h480dp-land-v13.xml",
+            "outputFile": "com.team7.taskflow.app-mergeDebugResources-40:/values-h480dp-land-v13/values-h480dp-land-v13.xml",
             "map": [
                 {
-                    "source": "D:\\Nghiaaaa\\Android\\Gradle_User_Home\\caches\\8.13\\transforms\\001edacf99d30d46acb764140ac33d19\\transformed\\material-1.13.0\\res\\values-h480dp-land-v13\\values-h480dp-land-v13.xml",
+                    "source": "D:\\Android\\.gradle\\caches\\9.1.0\\transforms\\54e6c790d1f639790aba6337c076ecb6\\workspace\\transformed\\material-1.13.0\\res\\values-h480dp-land-v13\\values-h480dp-land-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10",
                         "startColumns": "4,4,4,4,4,4,4,4,4",
