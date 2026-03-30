@@ -15,15 +15,26 @@
             android:layout_height="56dp"
             android:paddingHorizontal="16dp">
 
+            <ImageView
+                android:id="@+id/imgUserAvatar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/bg_avatar_bordered"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
             <ImageButton
                 android:id="@+id/btnBack"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
+                android:layout_marginStart="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Back"
-                android:src="@drawable/ic_arrow_back"
+                android:src="@drawable/ic_chevron_left"
                 app:tint="@color/theme_text_primary"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/imgUserAvatar"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 

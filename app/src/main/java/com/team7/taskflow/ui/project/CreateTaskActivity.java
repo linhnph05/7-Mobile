@@ -62,6 +62,9 @@ public class CreateTaskActivity extends BaseActivity {
     // SỬA TẠI ĐÂY: Để null mặc định để phân biệt Create/Update
     private Long taskId = null;
     private String currentAssigneeId = null;
+    private String selectedTag = null; // Thêm hỗ trợ tag nếu cần
+
+    private static final int COLOR_DEFAULT = R.color.slate_500;
 
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar = Calendar.getInstance();
@@ -276,7 +279,7 @@ public class CreateTaskActivity extends BaseActivity {
         cardAssignee.setOnClickListener(v -> showAssigneePicker());
         cardAttachment.setOnClickListener(v -> openFilePicker());
 
-        // Default
+        // Default UI states
         setPriority("MEDIUM");
         setStatus("TODO");
         setAssignee(null, null);
@@ -298,9 +301,8 @@ public class CreateTaskActivity extends BaseActivity {
         if (priority == null) priority = "MEDIUM";
         selectedPriority = priority;
         String label = "Medium";
-        int colorRes = R.color.slate_900;
+        int colorRes = R.color.priority_medium;
         if ("HIGH".equals(priority)) { label = "High"; colorRes = R.color.priority_high; }
-        else if ("MEDIUM".equals(priority)) { label = "Medium"; colorRes = R.color.priority_medium; }
         else if ("LOW".equals(priority)) { label = "Low"; colorRes = R.color.priority_low; }
 
         tvPriority.setText(label);
@@ -309,10 +311,10 @@ public class CreateTaskActivity extends BaseActivity {
 
     private void showStatusPicker() {
         com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
-        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
-        container.setOrientation(android.widget.LinearLayout.VERTICAL);
-        int padY = (int) (24 * getResources().getDisplayMetrics().density);
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int padY = (int) (16 * getResources().getDisplayMetrics().density);
         container.setPadding(0, padY, 0, padY);
 
         String[] statuses = {"TODO", "DOING", "DONE"};
@@ -331,7 +333,16 @@ public class CreateTaskActivity extends BaseActivity {
         selectedStatus = status;
         tvStatus.setText(status);
         int colorRes = R.color.primary;
-        if ("DONE".equals(status)) colorRes = R.color.slate_500;
+        if ("DONE".equals(status)) {
+            colorRes = R.color.success;
+            tvStatus.setText("Done");
+        } else if ("DOING".equals(status)) {
+            colorRes = R.color.warning;
+            tvStatus.setText("Doing");
+        } else {
+            colorRes = R.color.slate_400;
+            tvStatus.setText("To Do");
+        }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
     }
 
@@ -360,10 +371,10 @@ public class CreateTaskActivity extends BaseActivity {
 
     private void setAssignee(String id, String name) {
         selectedAssigneeName = name;
-        currentAssigneeId = id; // use the class variable!
+        currentAssigneeId = id; 
         if (name != null) {
             tvAssignee.setText("@" + name);
-            setActive(cardAssignee, tvAssignee, ivAssignee, R.color.primary); 
+            setActive(cardAssignee, tvAssignee, ivAssignee, R.color.project_purple); 
         } else {
             tvAssignee.setText("Phân công");
             setDefault(cardAssignee, tvAssignee, ivAssignee);
@@ -377,18 +388,18 @@ public class CreateTaskActivity extends BaseActivity {
         if (container != null) {
             android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
             gd.setColor(androidx.core.graphics.ColorUtils.setAlphaComponent(color, 25)); // 10% opacity
-            gd.setCornerRadius(14 * getResources().getDisplayMetrics().density); // Match the layout's CornerRadius
+            gd.setCornerRadius(10 * getResources().getDisplayMetrics().density); 
             gd.setStroke((int) (1 * getResources().getDisplayMetrics().density), androidx.core.graphics.ColorUtils.setAlphaComponent(color, 76));
-            container.setBackground(gd); // apply over CardView inside LinearLayout
+            container.setBackground(gd); 
         }
     }
 
     private void setDefault(View container, TextView tv, ImageView icon) {
-        int color = ContextCompat.getColor(this, R.color.slate_500);
+        int color = ContextCompat.getColor(this, COLOR_DEFAULT);
         tv.setTextColor(color);
         if (icon != null) icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
         if (container != null) {
-            container.setBackground(null); // remove GradientDrawable if any
+            container.setBackgroundResource(R.drawable.bg_chip_neutral);
         }
     }
 
