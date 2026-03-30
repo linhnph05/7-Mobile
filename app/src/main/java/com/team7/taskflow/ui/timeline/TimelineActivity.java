@@ -619,7 +619,7 @@ public class TimelineActivity extends BaseActivity {
             btnManageMembers.setOnClickListener(v -> {
                 bottomSheet.dismiss();
                 com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
-                        new com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(currentProjectId);
+                        com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(currentProjectId);
                 sheet.show(getSupportFragmentManager(), "members");
             });
         }
