@@ -52,6 +52,8 @@ public class ProjectDetailActivity extends BaseActivity {
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
     private BottomNavigationView bottomNavigationView;
+    private View btnTrash;
+    private View btnMore;
     private int currentTabIndex = -1;
 
     @Override
@@ -111,6 +113,8 @@ public class ProjectDetailActivity extends BaseActivity {
         tabTimeline = findViewById(R.id.tabTimeline);
         tabCalendar = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        btnTrash = findViewById(R.id.btnTrash);
+        btnMore = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
         View bottomBar = findViewById(R.id.includeBottomBar);
@@ -130,7 +134,6 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         View btnBack = findViewById(R.id.btnBack);
-        View btnMore = findViewById(R.id.btnMoreOptions);
         if (isMyTasksMode) {
             if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
             if (btnMore != null) btnMore.setVisibility(View.GONE);
@@ -138,6 +141,25 @@ public class ProjectDetailActivity extends BaseActivity {
             if (btnBack != null) btnBack.setOnClickListener(v -> finish());
             if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
         }
+
+        if (btnTrash != null) {
+            btnTrash.setOnClickListener(v -> {
+                Fragment listFragment = getSupportFragmentManager().findFragmentByTag("LIST");
+                if (listFragment instanceof TaskListFragment) {
+                    ((TaskListFragment) listFragment).openTrashFromHeader();
+                } else {
+                    openTab(TAB_LIST);
+                    findViewById(R.id.fragment_container).post(() -> {
+                        Fragment readyFragment = getSupportFragmentManager().findFragmentByTag("LIST");
+                        if (readyFragment instanceof TaskListFragment) {
+                            ((TaskListFragment) readyFragment).openTrashFromHeader();
+                        }
+                    });
+                }
+            });
+        }
+
+        updateHeaderActionsForTab(TAB_OVERVIEW);
     }
 
     private void setupNavigation() {
@@ -259,11 +281,27 @@ public class ProjectDetailActivity extends BaseActivity {
 
         if (targetTabIndex == currentTabIndex) {
             updateTabUI(activeTab);
+            updateHeaderActionsForTab(targetTabIndex);
             return;
         }
 
         switchFragment(fragment, tag, targetTabIndex);
         updateTabUI(activeTab);
+        updateHeaderActionsForTab(targetTabIndex);
+    }
+
+    private void updateHeaderActionsForTab(int tabIndex) {
+        boolean showTrash = true;
+        if (btnTrash != null) {
+            btnTrash.setVisibility(showTrash ? View.VISIBLE : View.GONE);
+        }
+        if (btnMore != null) {
+            if (isMyTasksMode) {
+                btnMore.setVisibility(View.GONE);
+            } else {
+                btnMore.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private void switchFragment(Fragment fragment, String tag, int targetTabIndex) {

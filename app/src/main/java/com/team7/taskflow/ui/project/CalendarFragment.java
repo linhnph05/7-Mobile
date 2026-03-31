@@ -5,7 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,8 +20,10 @@ import androidx.gridlayout.widget.GridLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.Task;
 
 import java.text.SimpleDateFormat;
@@ -147,34 +150,45 @@ public class CalendarFragment extends Fragment {
     }
 
     private void showTaskMenu(Task task, View anchor) {
-        PopupMenu popup = new PopupMenu(requireContext(), anchor);
-        popup.getMenu().add(0, 1, 0, "Edit Task");
-        popup.getMenu().add(0, 2, 1, "Delete Task");
+        if (task == null || task.getId() == null || !isAdded()) return;
+        View sheetView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_bottom_sheet_task_actions, null);
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext(), R.style.Theme_TaskFlow_BottomSheet);
+        sheet.setContentView(sheetView);
 
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == 1) {
-                Intent intent = new Intent(requireContext(), CreateTaskActivity.class);
-                intent.putExtra("project_id", task.getProjectId());
-                intent.putExtra("task_id", task.getId());
-                taskLauncher.launch(intent);
-                return true;
-            }
-            if (item.getItemId() == 2) {
-                deleteTask(task);
-                return true;
-            }
-            return false;
-        });
-        popup.show();
+        TextView tvTitle = sheetView.findViewById(R.id.tvSheetTitle);
+        TextView btnHistory = sheetView.findViewById(R.id.btnActionHistory);
+        TextView btnTrash = sheetView.findViewById(R.id.btnActionTrash);
+        TextView btnCancel = sheetView.findViewById(R.id.btnActionCancel);
+
+        if (tvTitle != null) {
+            tvTitle.setText(task.getTitle() != null ? task.getTitle() : "Task Actions");
+        }
+        if (btnHistory != null) {
+            btnHistory.setOnClickListener(v -> {
+                sheet.dismiss();
+                showTaskHistory(task.getId());
+            });
+        }
+        if (btnTrash != null) {
+            btnTrash.setOnClickListener(v -> {
+                sheet.dismiss();
+                moveTaskToTrash(task);
+            });
+        }
+        if (btnCancel != null) {
+            btnCancel.setOnClickListener(v -> sheet.dismiss());
+        }
+
+        sheet.show();
     }
 
-    private void deleteTask(Task task) {
-        taskRepository.deleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+    private void moveTaskToTrash(Task task) {
+        taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Task deleted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Đã chuyển task vào thùng rác", Toast.LENGTH_SHORT).show();
                     loadTasks();
                 });
             }
@@ -185,6 +199,65 @@ public class CalendarFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    private void showTaskHistory(long taskId) {
+        taskRepository.getTaskHistory(taskId, new TaskRepository.TaskCallback<List<TaskActivity>>() {
+            @Override
+            public void onSuccess(List<TaskActivity> result) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> {
+                    List<String> rows = new ArrayList<>();
+                    if (result != null) {
+                        for (TaskActivity activity : result) {
+                            rows.add(formatHistoryRow(activity));
+                        }
+                    }
+                    if (rows.isEmpty()) {
+                        rows.add("Chưa có lịch sử thay đổi");
+                    }
+
+                    View sheetView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_bottom_sheet_history, null);
+                    BottomSheetDialog sheet = new BottomSheetDialog(requireContext(), R.style.Theme_TaskFlow_BottomSheet);
+                    sheet.setContentView(sheetView);
+
+                    ListView listHistory = sheetView.findViewById(R.id.listHistory);
+                    TextView btnClose = sheetView.findViewById(R.id.btnCloseHistory);
+
+                    if (listHistory != null) {
+                        listHistory.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, rows));
+                    }
+                    if (btnClose != null) {
+                        btnClose.setOnClickListener(v -> sheet.dismiss());
+                    }
+
+                    sheet.show();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private String formatHistoryRow(TaskActivity activity) {
+        String action = activity.getActionType() != null ? activity.getActionType() : "UPDATE";
+        String oldVal = activity.getOldValue() != null ? activity.getOldValue() : "";
+        String newVal = activity.getNewValue() != null ? activity.getNewValue() : "";
+        return formatTimestamp(activity.getCreatedAt()) + " - " + action + " (" + oldVal + " -> " + newVal + ")";
+    }
+
+    private String formatTimestamp(String raw) {
+        if (raw == null || raw.isEmpty()) return "Vừa xong";
+        try {
+            java.time.Instant instant = java.time.OffsetDateTime.parse(raw).toInstant();
+            return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(java.util.Date.from(instant));
+        } catch (Exception e) {
+            return raw;
+        }
     }
 
     private void loadTasks() {

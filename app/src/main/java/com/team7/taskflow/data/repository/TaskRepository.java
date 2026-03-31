@@ -142,14 +142,29 @@ public class TaskRepository {
     // ── Delete ──────────────────────────────────────────────────────────
 
     public void softDeleteTask(long taskId, TaskCallback<Void> callback) {
+        getTaskById(taskId, new TaskCallback<Task>() {
+            @Override
+            public void onSuccess(Task task) {
+                String previousStatus = task != null && task.getStatus() != null ? task.getStatus().toUpperCase() : "TODO";
+                performSoftDelete(taskId, previousStatus, callback);
+            }
+
+            @Override
+            public void onError(String error) {
+                performSoftDelete(taskId, "TODO", callback);
+            }
+        });
+    }
+
+    private void performSoftDelete(long taskId, String previousStatus, TaskCallback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "TRASH"); // Assuming TRASH is a valid status for soft delete
+        updates.put("status", "TRASH");
 
         taskApi.updateTaskFields("eq." + taskId, updates, null).enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
-                    logActivity(taskId, "DELETE", "ACTIVE", "TRASH");
+                    logActivity(taskId, "DELETE", previousStatus, "TRASH");
                     callback.onSuccess(null);
                 } else {
                     callback.onError("Failed to delete task");
@@ -178,6 +193,60 @@ public class TaskRepository {
                 callback.onError(t.getMessage());
             }
         });
+    }
+
+    public void restoreTask(long taskId, TaskCallback<Void> callback) {
+        getTaskHistory(taskId, new TaskCallback<List<TaskActivity>>() {
+            @Override
+            public void onSuccess(List<TaskActivity> history) {
+                String restoreStatus = "TODO";
+                if (history != null) {
+                    for (TaskActivity activity : history) {
+                        String action = activity.getActionType() != null ? activity.getActionType().toUpperCase() : "";
+                        String newValue = activity.getNewValue() != null ? activity.getNewValue().toUpperCase() : "";
+                        String oldValue = activity.getOldValue() != null ? activity.getOldValue().toUpperCase() : "";
+                        if ("DELETE".equals(action) && "TRASH".equals(newValue)
+                                && ("TODO".equals(oldValue) || "DOING".equals(oldValue) || "DONE".equals(oldValue))) {
+                            restoreStatus = oldValue;
+                            break;
+                        }
+                    }
+                }
+                applyRestore(taskId, restoreStatus, callback);
+            }
+
+            @Override
+            public void onError(String error) {
+                applyRestore(taskId, "TODO", callback);
+            }
+        });
+    }
+
+    private void applyRestore(long taskId, String restoreStatus, TaskCallback<Void> callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", restoreStatus);
+
+        taskApi.updateTaskFields("eq." + taskId, updates, null).enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                if (response.isSuccessful()) {
+                    logActivity(taskId, "RESTORE", "TRASH", restoreStatus);
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Failed to restore task");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void permanentlyDeleteTask(long taskId, TaskCallback<Void> callback) {
+        logActivity(taskId, "EMPTY", "TRASH", "DELETED");
+        deleteTask(taskId, callback);
     }
 
     // ── Attachments ─────────────────────────────────────────────────────
@@ -550,6 +619,24 @@ public class TaskRepository {
         });
     }
 
+    public void getTasksByProjectAndStatus(long projectId, String status, TaskCallback<List<Task>> callback) {
+        taskApi.getTasksByStatus("eq." + projectId, "eq." + status, "position.asc").enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Load tasks by status failed: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Task>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     /**
      * Get tasks assigned to a specific user
      */
@@ -591,5 +678,27 @@ public class TaskRepository {
                 callback.onError(t.getMessage());
             }
         });
+    }
+
+    public void getMyTasksWithProjectNameByStatus(String userId, String status, TaskCallback<List<Task>> callback) {
+        taskApi.getTasksByAssigneeAndStatus(
+                "*,projects(*)",
+                "eq." + userId,
+                "eq." + status,
+                "due_date.asc").enqueue(new Callback<List<Task>>() {
+                    @Override
+                    public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
+                        if (response.isSuccessful()) {
+                            callback.onSuccess(response.body());
+                        } else {
+                            callback.onError("Load my tasks by status failed: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Task>> call, Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
     }
 }

@@ -51,7 +51,8 @@
 
     <style name="Widget.TaskFlow.BottomSheet" parent="Widget.Material3.BottomSheet">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.BottomSheet.Rounded</item>
-        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTint">@color/theme_surface</item>
+        <item name="android:background">@drawable/bg_bottom_sheet_surface</item>
     </style>
 
     <style name="ShapeAppearanceOverlay.BottomSheet.Rounded" parent="">
