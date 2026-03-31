@@ -242,23 +242,59 @@ public class CreateTaskActivity extends BaseActivity {
 
     private void showEditCommentDialog(Comment comment) {
         if (comment == null || comment.getId() == null) return;
-        EditText input = new EditText(this);
-        input.setText(comment.getContent());
-        input.setSelection(input.getText().length());
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        input.setPadding(pad, pad, pad, pad);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_comment, null);
+        com.google.android.material.textfield.TextInputLayout tilInput =
+                dialogView.findViewById(R.id.tilEditComment);
+        com.google.android.material.textfield.TextInputEditText etInput =
+                dialogView.findViewById(R.id.etEditComment);
 
-        new AlertDialog.Builder(this)
+        if (etInput != null) {
+            etInput.setText(comment.getContent());
+            if (etInput.getText() != null) {
+                etInput.setSelection(etInput.getText().length());
+            }
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Chỉnh sửa bình luận")
-                .setView(input)
-                .setPositiveButton("Lưu", (dialog, which) -> {
-                    String content = input.getText().toString().trim();
-                    if (content.isEmpty()) return;
+                .setView(dialogView)
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Lưu", null)
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            android.widget.Button btnNegative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            android.widget.Button btnPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+            if (btnNegative != null) {
+                btnNegative.setAllCaps(false);
+                btnNegative.setTextColor(ContextCompat.getColor(this, R.color.slate_500));
+            }
+            if (btnPositive != null) {
+                btnPositive.setAllCaps(false);
+                btnPositive.setTextColor(ContextCompat.getColor(this, R.color.indigo_600));
+                btnPositive.setOnClickListener(v -> {
+                    String content = etInput != null && etInput.getText() != null
+                            ? etInput.getText().toString().trim() : "";
+                    if (content.isEmpty()) {
+                        if (tilInput != null) {
+                            tilInput.setError("Bình luận không được để trống");
+                        }
+                        return;
+                    }
+
+                    if (tilInput != null) {
+                        tilInput.setError(null);
+                    }
+
                     taskRepository.updateTaskComment(comment.getId(), currentUserId, content,
                             new TaskRepository.TaskCallback<Comment>() {
                                 @Override
                                 public void onSuccess(Comment result) {
-                                    runOnUiThread(CreateTaskActivity.this::loadComments);
+                                    runOnUiThread(() -> {
+                                        dialog.dismiss();
+                                        loadComments();
+                                    });
                                 }
 
                                 @Override
@@ -266,9 +302,11 @@ public class CreateTaskActivity extends BaseActivity {
                                     runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
                                 }
                             });
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
+                });
+            }
+        });
+
+        dialog.show();
     }
 
     private void deleteComment(Comment comment) {
