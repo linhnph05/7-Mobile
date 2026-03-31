@@ -114,8 +114,11 @@ public class ProjectBoardActivity extends BaseActivity {
         TaskAdapter.OnTaskClickListener listener = new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                // Nhấn vào thẻ Task: không làm gì cả.
-                // Chỉ nhấn nút 3 chấm → Edit Task mới mở màn hình chỉnh sửa.
+                // Nhấn vào thẻ Task: mở màn hình chi tiết/chỉnh sửa
+                Intent intent = new Intent(ProjectBoardActivity.this, CreateTaskActivity.class);
+                intent.putExtra("project_id", task.getProjectId());
+                intent.putExtra("task_id", task.getId());
+                taskLauncher.launch(intent);
             }
 
             @Override

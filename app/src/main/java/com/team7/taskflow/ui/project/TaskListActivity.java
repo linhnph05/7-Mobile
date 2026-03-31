@@ -81,7 +81,11 @@ public class TaskListActivity extends BaseActivity {
         adapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                // Future: showEditTaskSheet(task);
+                // Mở màn hình chi tiết/chỉnh sửa khi nhấn vào task
+                Intent intent = new Intent(TaskListActivity.this, CreateTaskActivity.class);
+                intent.putExtra("project_id", task.getProjectId());
+                intent.putExtra("task_id", task.getId());
+                startActivity(intent);
             }
 
             @Override

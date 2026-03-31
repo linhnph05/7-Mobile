@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.project;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent; // Thêm import này
 import android.os.Bundle;
 import android.util.Log;
@@ -37,9 +38,9 @@ import java.util.Locale;
 public class CreateTaskActivity extends BaseActivity {
 
     private EditText etTitle, etDescription;
-    private TextView tvPriority, tvStatus, tvAssignee;
-    private ImageView ivPriority, ivStatus, ivAssignee;
-    private View cardPriority, cardStatus, cardAssignee, cardAttachment;
+    private TextView tvPriority, tvStatus, tvAssignee, tvTag, tvDependency;
+    private ImageView ivPriority, ivStatus, ivAssignee, ivTag, ivDependency;
+    private View cardPriority, cardStatus, cardAssignee, cardAttachment, cardTag, cardDependency;
     private TextView tvAttachment;
     private ImageView ivAttachment;
     private LinearLayout containerAttachments;
@@ -52,7 +53,7 @@ public class CreateTaskActivity extends BaseActivity {
     private String selectedStatus = "TODO";
     private String selectedAssigneeName = null;
 
-    private TextView tvStartDate, tvDueDate, btnSave, tvToolbarTitle;
+    private TextView tvStartDate, tvDueDate, tvStartTime, tvDueTime, btnSave, tvToolbarTitle;
     private ProgressBar progressBar;
     private TaskRepository taskRepository;
     private List<User> projectMembers = new ArrayList<>();
@@ -62,13 +63,15 @@ public class CreateTaskActivity extends BaseActivity {
     // SỬA TẠI ĐÂY: Để null mặc định để phân biệt Create/Update
     private Long taskId = null;
     private String currentAssigneeId = null;
-    private String selectedTag = null; // Thêm hỗ trợ tag nếu cần
+    private String selectedTag = null; // Label/Tag
+    private Long selectedParentTaskId = null; // Linked task dependency
 
     private static final int COLOR_DEFAULT = R.color.slate_500;
 
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private android.widget.Button btnToggleComplete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,9 +102,16 @@ public class CreateTaskActivity extends BaseActivity {
             tvToolbarTitle.setText("Edit Task");
             btnSave.setText("Update"); // Đổi chữ nút cho rõ ràng
             loadTaskDetails();
+            if (btnToggleComplete != null) {
+                btnToggleComplete.setVisibility(View.VISIBLE);
+                btnToggleComplete.setOnClickListener(v -> toggleCompleteStatus());
+            }
         } else {
             tvToolbarTitle.setText("Create Task");
             btnSave.setText("Create");
+            if (btnToggleComplete != null) {
+                btnToggleComplete.setVisibility(View.GONE);
+            }
         }
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -121,14 +131,23 @@ public class CreateTaskActivity extends BaseActivity {
         cardStatus = findViewById(R.id.cardStatus);
         cardAssignee = findViewById(R.id.cardAssignee);
         cardAttachment = findViewById(R.id.cardAttachment);
+        cardTag = findViewById(R.id.cardTag);
+        cardDependency = findViewById(R.id.cardDependency);
+        ivTag = findViewById(R.id.ivTag);
+        ivDependency = findViewById(R.id.ivDependency);
+        tvTag = findViewById(R.id.tvTag);
+        tvDependency = findViewById(R.id.tvDependency);
         tvAttachment = findViewById(R.id.tvAttachment);
         ivAttachment = findViewById(R.id.ivAttachment);
         containerAttachments = findViewById(R.id.containerAttachments);
         tvStartDate = findViewById(R.id.tvStartDate);
         tvDueDate = findViewById(R.id.tvDueDate);
+        tvStartTime = findViewById(R.id.tvStartTime);
+        tvDueTime = findViewById(R.id.tvDueTime);
         btnSave = findViewById(R.id.btnSave);
         tvToolbarTitle = findViewById(R.id.tvToolbarTitle);
         progressBar = findViewById(R.id.progressBar);
+        btnToggleComplete = findViewById(R.id.btnToggleComplete);
     }
 
     private void loadTaskDetails() {
@@ -145,8 +164,38 @@ public class CreateTaskActivity extends BaseActivity {
                             etDescription.setText(t.getDescription());
                             setPriority(t.getPriority());
                             setStatus(t.getStatus());
-                            if (t.getStartDate() != null) tvStartDate.setText(t.getStartDate());
-                            if (t.getDueDate() != null) tvDueDate.setText(t.getDueDate());
+                            if (t.getStartDate() != null) {
+                                String rawStart = t.getStartDate();
+                                String startDatePart = rawStart.length() >= 10 ? rawStart.substring(0, 10) : rawStart;
+                                tvStartDate.setText(startDatePart);
+                                if (tvStartTime != null && rawStart.length() > 11) {
+                                    String startTimePart = rawStart.substring(11);
+                                    tvStartTime.setText(startTimePart);
+                                }
+                            }
+                            if (t.getDueDate() != null) {
+                                String raw = t.getDueDate();
+                                String datePart = raw.length() >= 10 ? raw.substring(0, 10) : raw;
+                                tvDueDate.setText(datePart);
+                                if (tvDueTime != null && raw.length() > 11) {
+                                    String timePart = raw.substring(11);
+                                    tvDueTime.setText(timePart);
+                                }
+                            }
+                            // Tag/label
+                            selectedTag = t.getTag();
+                            if (selectedTag != null && tvTag != null) {
+                                tvTag.setText(selectedTag);
+                            }
+                            // Dependency
+                            selectedParentTaskId = t.getParentTaskId();
+                            if (selectedParentTaskId != null && tvDependency != null) {
+                                tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
+                            }
+                            // Update complete button label
+                            if (btnToggleComplete != null) {
+                                updateCompleteButtonLabel();
+                            }
                             if (currentAssigneeId != null) {
                                 setAssigneeById(currentAssigneeId);
                             }
@@ -216,8 +265,32 @@ public class CreateTaskActivity extends BaseActivity {
         task.setDescription(etDescription.getText().toString().trim());
         task.setPriority(selectedPriority);
         task.setStatus(selectedStatus);
-        task.setStartDate(tvStartDate.getText().toString().contains("-") ? tvStartDate.getText().toString() : null);
-        task.setDueDate(tvDueDate.getText().toString().contains("-") ? tvDueDate.getText().toString() : null);
+
+        String startDateText = tvStartDate.getText().toString();
+        String startTimeText = tvStartTime != null ? tvStartTime.getText().toString() : null;
+        String startCombined = null;
+        if (startDateText != null && startDateText.contains("-")) {
+            if (startTimeText != null && startTimeText.matches("\\d{2}:\\d{2}")) {
+                startCombined = startDateText + " " + startTimeText;
+            } else {
+                startCombined = startDateText;
+            }
+        }
+        task.setStartDate(startCombined);
+
+        String dueDateText = tvDueDate.getText().toString();
+        String dueTimeText = tvDueTime != null ? tvDueTime.getText().toString() : null;
+        String dueCombined = null;
+        if (dueDateText != null && dueDateText.contains("-")) {
+            if (dueTimeText != null && dueTimeText.matches("\\d{2}:\\d{2}")) {
+                dueCombined = dueDateText + " " + dueTimeText;
+            } else {
+                dueCombined = dueDateText;
+            }
+        }
+        task.setDueDate(dueCombined);
+        task.setTag(selectedTag);
+        task.setParentTaskId(selectedParentTaskId);
 
         // QUAN TRỌNG: Kiểm tra taskId để quyết định gọi hàm nào
         if (taskId == null) {
@@ -279,6 +352,13 @@ public class CreateTaskActivity extends BaseActivity {
         cardAssignee.setOnClickListener(v -> showAssigneePicker());
         cardAttachment.setOnClickListener(v -> openFilePicker());
 
+        if (cardTag != null) {
+            cardTag.setOnClickListener(v -> showTagPicker());
+        }
+        if (cardDependency != null) {
+            cardDependency.setOnClickListener(v -> showDependencyPicker());
+        }
+
         // Default UI states
         setPriority("MEDIUM");
         setStatus("TODO");
@@ -310,21 +390,40 @@ public class CreateTaskActivity extends BaseActivity {
     }
 
     private void showStatusPicker() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        int padY = (int) (16 * getResources().getDisplayMetrics().density);
-        container.setPadding(0, padY, 0, padY);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_simple_list, null);
+        TextView tvTitle = view.findViewById(R.id.tvTitle);
+        LinearLayout container = view.findViewById(R.id.containerItems);
+        if (tvTitle != null) tvTitle.setText("Chọn trạng thái");
 
         String[] statuses = {"TODO", "DOING", "DONE"};
         for (String status : statuses) {
-            container.addView(createPickerItem(status, v -> {
-                setStatus(status);
+            String label;
+            int color;
+            switch (status) {
+                case "DONE":
+                    label = "Hoàn thành";
+                    color = R.color.success;
+                    break;
+                case "DOING":
+                    label = "Đang làm";
+                    color = R.color.warning;
+                    break;
+                default:
+                    label = "Cần làm";
+                    color = R.color.slate_700;
+                    break;
+            }
+            TextView item = createPickerItem(label, v -> {
+                attemptSetStatus(status);
                 dialog.dismiss();
-            }, R.color.slate_900));
+            }, color);
+            container.addView(item);
         }
-        dialog.setContentView(container);
+
+        dialog.setContentView(view);
         dialog.show();
     }
 
@@ -369,6 +468,43 @@ public class CreateTaskActivity extends BaseActivity {
         dialog.show();
     }
 
+    private void showTagPicker() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_simple_list, null);
+        TextView tvTitle = view.findViewById(R.id.tvTitle);
+        LinearLayout container = view.findViewById(R.id.containerItems);
+
+        if (tvTitle != null) tvTitle.setText("Chọn nhãn");
+
+        String[] tags = {"Design", "Dev", "Study", "Bug", "Review"};
+        for (String tag : tags) {
+            TextView item = createPickerItem(tag, v -> {
+                selectedTag = tag;
+                if (tvTag != null) {
+                    tvTag.setText(tag);
+                    setActive(cardTag, tvTag, ivTag, R.color.project_blue);
+                }
+                dialog.dismiss();
+            }, R.color.slate_900);
+            container.addView(item);
+        }
+
+        TextView clearItem = createPickerItem("Bỏ chọn nhãn", v -> {
+            selectedTag = null;
+            if (tvTag != null) {
+                tvTag.setText("Nhãn");
+                setDefault(cardTag, tvTag, ivTag);
+            }
+            dialog.dismiss();
+        }, R.color.slate_500);
+        container.addView(clearItem);
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
     private void setAssignee(String id, String name) {
         selectedAssigneeName = name;
         currentAssigneeId = id; 
@@ -379,6 +515,97 @@ public class CreateTaskActivity extends BaseActivity {
             tvAssignee.setText("Phân công");
             setDefault(cardAssignee, tvAssignee, ivAssignee);
         }
+    }
+
+    /**
+     * Apply business rule: if this task depends on another task, that linked
+     * task must be DONE before this one can be marked DONE.
+     */
+    private void attemptSetStatus(String targetStatus) {
+        // Only guard transitions TO DONE
+        if (!"DONE".equalsIgnoreCase(targetStatus) || selectedParentTaskId == null) {
+            setStatus(targetStatus);
+            updateCompleteButtonLabel();
+            return;
+        }
+
+        setLoading(true);
+        taskRepository.getTaskById(selectedParentTaskId, new TaskRepository.TaskCallback<Task>() {
+            @Override
+            public void onSuccess(Task depTask) {
+                runOnUiThread(() -> {
+                    setLoading(false);
+                    if (depTask != null && "DONE".equalsIgnoreCase(depTask.getStatus())) {
+                        setStatus("DONE");
+                        updateCompleteButtonLabel();
+                    } else {
+                        Toast.makeText(CreateTaskActivity.this,
+                                "Task liên kết phải hoàn thành trước khi đóng task này",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    setLoading(false);
+                    Toast.makeText(CreateTaskActivity.this,
+                            "Không kiểm tra được trạng thái task liên kết",
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private void showDependencyPicker() {
+        if (projectId <= 0) return;
+
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        View view = getLayoutInflater().inflate(R.layout.dialog_simple_list, null);
+        TextView tvTitle = view.findViewById(R.id.tvTitle);
+        LinearLayout container = view.findViewById(R.id.containerItems);
+        if (tvTitle != null) tvTitle.setText("Liên kết tác vụ");
+
+        taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
+            @Override
+            public void onSuccess(List<Task> tasks) {
+                runOnUiThread(() -> {
+                    for (Task t : tasks) {
+                        if (taskId != null && taskId.equals(t.getId())) continue; // don't depend on itself
+                        String label = "#" + t.getId() + " • " + t.getTitle();
+                        TextView item = createPickerItem(label, v -> {
+                            selectedParentTaskId = t.getId();
+                            if (tvDependency != null) {
+                                tvDependency.setText("Phụ thuộc: " + label);
+                                setActive(cardDependency, tvDependency, ivDependency, R.color.project_green);
+                            }
+                            dialog.dismiss();
+                        }, R.color.slate_900);
+                        container.addView(item);
+                    }
+
+                    TextView clearItem = createPickerItem("Không liên kết", v -> {
+                        selectedParentTaskId = null;
+                        if (tvDependency != null) {
+                            tvDependency.setText("Không liên kết");
+                            setDefault(cardDependency, tvDependency, ivDependency);
+                        }
+                        dialog.dismiss();
+                    }, R.color.slate_500);
+                    container.addView(clearItem);
+
+                    dialog.setContentView(view);
+                    dialog.show();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, "Không tải được danh sách task", Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     private void setActive(View container, TextView tv, ImageView icon, int tintColorRes) {
@@ -421,14 +648,20 @@ public class CreateTaskActivity extends BaseActivity {
     }
 
     private void setupDatePickers() {
-        // Click vào card chứa (area lớn hơn) để mở DatePicker
+        // Click vào card chứa (area lớn hơn) để mở Date/Time Picker
         View cardStart = findViewById(R.id.cardStartDate);
         View cardDue = findViewById(R.id.cardDueDate);
+        View cardStartTime = findViewById(R.id.cardStartTime);
+        View cardDueTime = findViewById(R.id.cardDueTime);
         if (cardStart != null) cardStart.setOnClickListener(v -> showDatePicker(startCalendar, tvStartDate));
         if (cardDue != null) cardDue.setOnClickListener(v -> showDatePicker(dueCalendar, tvDueDate));
+        if (cardStartTime != null) cardStartTime.setOnClickListener(v -> showTimePicker(startCalendar, tvStartTime));
+        if (cardDueTime != null) cardDueTime.setOnClickListener(v -> showTimePicker(dueCalendar, tvDueTime));
         // Fallback: click trực tiếp vào TextView cũng hoạt động
         if (tvStartDate != null) tvStartDate.setOnClickListener(v -> showDatePicker(startCalendar, tvStartDate));
         if (tvDueDate != null) tvDueDate.setOnClickListener(v -> showDatePicker(dueCalendar, tvDueDate));
+        if (tvStartTime != null) tvStartTime.setOnClickListener(v -> showTimePicker(startCalendar, tvStartTime));
+        if (tvDueTime != null) tvDueTime.setOnClickListener(v -> showTimePicker(dueCalendar, tvDueTime));
     }
 
     private void showDatePicker(Calendar cal, TextView tv) {
@@ -438,6 +671,17 @@ public class CreateTaskActivity extends BaseActivity {
             cal.set(Calendar.DAY_OF_MONTH, day);
             tv.setText(dateFormat.format(cal.getTime()));
         }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void showTimePicker(Calendar cal, TextView tv) {
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        int minute = cal.get(Calendar.MINUTE);
+
+        new TimePickerDialog(this, (view, selectedHour, selectedMinute) -> {
+            cal.set(Calendar.HOUR_OF_DAY, selectedHour);
+            cal.set(Calendar.MINUTE, selectedMinute);
+            tv.setText(String.format(Locale.US, "%02d:%02d", selectedHour, selectedMinute));
+        }, hour, minute, true).show();
     }
 
     private void initFilePickerLauncher() {
@@ -597,5 +841,22 @@ public class CreateTaskActivity extends BaseActivity {
             if (cut != -1) result = path.substring(cut + 1);
         }
         return result;
+    }
+
+    private void toggleCompleteStatus() {
+        if ("DONE".equals(selectedStatus)) {
+            attemptSetStatus("TODO");
+        } else {
+            attemptSetStatus("DONE");
+        }
+    }
+
+    private void updateCompleteButtonLabel() {
+        if (btnToggleComplete == null) return;
+        if ("DONE".equals(selectedStatus)) {
+            btnToggleComplete.setText("Mở lại tác vụ");
+        } else {
+            btnToggleComplete.setText("Đánh dấu hoàn thành");
+        }
     }
 }

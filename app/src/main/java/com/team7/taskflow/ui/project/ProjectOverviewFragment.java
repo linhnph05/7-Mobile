@@ -119,6 +119,22 @@ public class ProjectOverviewFragment extends Fragment {
         rvUpcomingTasks.setLayoutManager(new LinearLayoutManager(getContext()));
         rvUpcomingTasks.setAdapter(taskAdapter);
         rvUpcomingTasks.setNestedScrollingEnabled(false);
+
+        taskAdapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
+            @Override
+            public void onTaskClick(Task task) {
+                if (getContext() == null) return;
+                android.content.Intent intent = new android.content.Intent(getContext(), CreateTaskActivity.class);
+                intent.putExtra("project_id", task.getProjectId());
+                intent.putExtra("task_id", task.getId());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onTaskMenuClick(Task task, View view) {
+                // No menu on overview upcoming list for now
+            }
+        });
     }
 
     private void setupPieChart() {

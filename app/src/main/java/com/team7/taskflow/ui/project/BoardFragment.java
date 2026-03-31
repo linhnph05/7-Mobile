@@ -86,6 +86,26 @@ public class BoardFragment extends Fragment {
 
         rvDone.setLayoutManager(new LinearLayoutManager(getContext()));
         rvDone.setAdapter(adapterDone);
+
+        TaskAdapter.OnTaskClickListener listener = new TaskAdapter.OnTaskClickListener() {
+            @Override
+            public void onTaskClick(Task task) {
+                if (getContext() == null) return;
+                android.content.Intent intent = new android.content.Intent(getContext(), CreateTaskActivity.class);
+                intent.putExtra("project_id", task.getProjectId());
+                intent.putExtra("task_id", task.getId());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onTaskMenuClick(Task task, View view) {
+                // BoardFragment currently shows counts only; no per-task menu.
+            }
+        };
+
+        adapterTodo.setOnTaskClickListener(listener);
+        adapterDoing.setOnTaskClickListener(listener);
+        adapterDone.setOnTaskClickListener(listener);
     }
 
     private void loadTaskCounts() {

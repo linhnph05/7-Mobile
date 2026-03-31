@@ -290,7 +290,11 @@ public class CalendarActivity extends BaseActivity {
         adapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                // Nhấn vào thẻ task: không làm gì
+                // Nhấn vào thẻ task: mở màn hình chi tiết/chỉnh sửa
+                Intent intent = new Intent(CalendarActivity.this, CreateTaskActivity.class);
+                intent.putExtra("project_id", task.getProjectId());
+                intent.putExtra("task_id", task.getId());
+                taskLauncher.launch(intent);
             }
 
             @Override
@@ -356,8 +360,18 @@ public class CalendarActivity extends BaseActivity {
         List<Task> filteredList = new ArrayList<>();
 
         for (Task t : allProjectTasks) {
-            String start = t.getStartDate() != null ? t.getStartDate().substring(0, 10) : null;
-            String due = t.getDueDate();
+            String start = null;
+            if (t.getStartDate() != null && !t.getStartDate().isEmpty()) {
+                start = t.getStartDate().length() >= 10
+                        ? t.getStartDate().substring(0, 10)
+                        : t.getStartDate();
+            }
+            String due = null;
+            if (t.getDueDate() != null && !t.getDueDate().isEmpty()) {
+                due = t.getDueDate().length() >= 10
+                        ? t.getDueDate().substring(0, 10)
+                        : t.getDueDate();
+            }
 
             if (start != null && !start.isEmpty() && due != null && !due.isEmpty()) {
                 boolean isAfterOrEqualStart = selectedDateStr.compareTo(start) >= 0;

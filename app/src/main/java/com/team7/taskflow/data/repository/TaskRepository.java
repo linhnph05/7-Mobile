@@ -98,6 +98,24 @@ public class TaskRepository {
                 });
     }
 
+    public void getTaskById(long taskId, TaskCallback<Task> callback) {
+        taskApi.getTaskById("eq." + taskId).enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onSuccess(response.body().get(0));
+                } else {
+                    callback.onError("Task not found");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     public void updateTaskStatus(long taskId, String oldStatus, String newStatus, TaskCallback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", newStatus);
@@ -359,6 +377,13 @@ public class TaskRepository {
             map.put("priority", task.getPriority());
         if (task.getPosition() != null)
             map.put("position", task.getPosition());
+        // Optional fields used by detail/edit screens – always send them so
+        // clearing values (null) is reflected in Supabase
+        map.put("due_date", task.getDueDate());
+        map.put("start_date", task.getStartDate());
+        map.put("assignee_id", task.getAssigneeId());
+        map.put("tag", task.getTag());
+        map.put("parent_task_id", task.getParentTaskId());
         return map;
     }
 

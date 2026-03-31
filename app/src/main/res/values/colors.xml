@@ -104,4 +104,5 @@
     <color name="text_purple_600">#9333EA</color>
     <color name="bg_orange_100">@color/theme_icon_orange_bg</color>
     <color name="text_orange_600">#EA580C</color>
+     <color name="bg_green_50">#ECFDF3</color>
 </resources>
