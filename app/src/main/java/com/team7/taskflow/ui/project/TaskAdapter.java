@@ -26,14 +26,23 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     private List<Task> tasks = new ArrayList<>();
     private OnTaskClickListener listener;
+    private OnTaskLongPressListener longPressListener;
 
     public interface OnTaskClickListener {
         void onTaskClick(Task task);
         void onTaskMenuClick(Task task, View view);
     }
 
+    public interface OnTaskLongPressListener {
+        void onTaskLongPress(Task task, View itemView);
+    }
+
     public void setOnTaskClickListener(OnTaskClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnTaskLongPressListener(OnTaskLongPressListener longPressListener) {
+        this.longPressListener = longPressListener;
     }
 
     public void setTasks(List<Task> tasks) {
@@ -54,7 +63,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        holder.bind(tasks.get(position), listener);
+        holder.bind(tasks.get(position), listener, longPressListener);
     }
 
     @Override
@@ -78,7 +87,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             ivAssignee = itemView.findViewById(R.id.ivAssignee);
         }
 
-        public void bind(Task task, OnTaskClickListener listener) {
+        public void bind(Task task, OnTaskClickListener listener, OnTaskLongPressListener longPressListener) {
             tvTitle.setText(task.getTitle());
             tvDescription.setText(task.getDescription());
 
@@ -97,6 +106,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             itemView.setOnClickListener(v -> { if (listener != null) listener.onTaskClick(task); });
             btnMenu.setOnClickListener(v -> { if (listener != null) listener.onTaskMenuClick(task, v); });
+            itemView.setOnLongClickListener(v -> {
+                if (longPressListener != null) {
+                    longPressListener.onTaskLongPress(task, v);
+                    return true;
+                }
+                return false;
+            });
 
             // Priority Colors
             String priority = task.getPriority() != null ? task.getPriority().toUpperCase() : "LOW";

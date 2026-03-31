@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -26,10 +27,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.utils.SessionManager;
@@ -83,6 +86,7 @@ public class CreateTaskActivity extends BaseActivity {
     private Calendar dueCalendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private Button btnToggleComplete;
+    private Button btnActivityHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,11 +124,18 @@ public class CreateTaskActivity extends BaseActivity {
                 btnToggleComplete.setVisibility(View.VISIBLE);
                 btnToggleComplete.setOnClickListener(v -> toggleCompleteStatus());
             }
+            if (btnActivityHistory != null) {
+                btnActivityHistory.setVisibility(View.VISIBLE);
+                btnActivityHistory.setOnClickListener(v -> showTaskActivityHistory());
+            }
         } else {
             tvToolbarTitle.setText("Create Task");
             btnSave.setText("Create");
             if (btnToggleComplete != null) {
                 btnToggleComplete.setVisibility(View.GONE);
+            }
+            if (btnActivityHistory != null) {
+                btnActivityHistory.setVisibility(View.GONE);
             }
             if (layoutCommentsSection != null) {
                 layoutCommentsSection.setVisibility(View.GONE);
@@ -165,6 +176,7 @@ public class CreateTaskActivity extends BaseActivity {
         tvToolbarTitle = findViewById(R.id.tvToolbarTitle);
         progressBar = findViewById(R.id.progressBar);
         btnToggleComplete = findViewById(R.id.btnToggleComplete);
+        btnActivityHistory = findViewById(R.id.btnActivityHistory);
         layoutCommentsSection = findViewById(R.id.layoutCommentsSection);
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
@@ -338,6 +350,65 @@ public class CreateTaskActivity extends BaseActivity {
                         runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
                     }
                 });
+    }
+
+    private void showTaskActivityHistory() {
+        if (taskId == null) return;
+        taskRepository.getTaskHistory(taskId, new TaskRepository.TaskCallback<List<TaskActivity>>() {
+            @Override
+            public void onSuccess(List<TaskActivity> result) {
+                runOnUiThread(() -> {
+                    List<String> rows = new ArrayList<>();
+                    if (result != null) {
+                        for (TaskActivity activity : result) {
+                            rows.add(formatActivityRow(activity));
+                        }
+                    }
+                    if (rows.isEmpty()) {
+                        rows.add("Chưa có lịch sử thay đổi");
+                    }
+
+                    View sheetView = LayoutInflater.from(CreateTaskActivity.this)
+                            .inflate(R.layout.layout_bottom_sheet_history, null);
+                    BottomSheetDialog sheet = new BottomSheetDialog(CreateTaskActivity.this, R.style.Theme_TaskFlow_BottomSheet);
+                    sheet.setContentView(sheetView);
+
+                    ListView listHistory = sheetView.findViewById(R.id.listHistory);
+                    TextView btnClose = sheetView.findViewById(R.id.btnCloseHistory);
+
+                    if (listHistory != null) {
+                        listHistory.setAdapter(new ArrayAdapter<>(CreateTaskActivity.this, android.R.layout.simple_list_item_1, rows));
+                    }
+                    if (btnClose != null) {
+                        btnClose.setOnClickListener(v -> sheet.dismiss());
+                    }
+
+                    sheet.show();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private String formatActivityRow(TaskActivity activity) {
+        String action = activity.getActionType() != null ? activity.getActionType() : "UPDATE";
+        String oldValue = activity.getOldValue() != null ? activity.getOldValue() : "";
+        String newValue = activity.getNewValue() != null ? activity.getNewValue() : "";
+        return formatActivityTime(activity.getCreatedAt()) + " - " + action + " (" + oldValue + " -> " + newValue + ")";
+    }
+
+    private String formatActivityTime(String raw) {
+        if (raw == null || raw.isEmpty()) return "Vừa xong";
+        try {
+            java.time.Instant instant = java.time.OffsetDateTime.parse(raw).toInstant();
+            return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(java.util.Date.from(instant));
+        } catch (Exception e) {
+            return raw;
+        }
     }
 
     private void loadTaskDetails() {

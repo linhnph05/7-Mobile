@@ -1,10 +1,13 @@
 package com.team7.taskflow.ui.project;
 
+import android.content.ClipData;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,12 +17,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.Task;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Fragment hiển thị bảng Kanban (Board).
@@ -107,13 +115,190 @@ public class BoardFragment extends Fragment {
 
             @Override
             public void onTaskMenuClick(Task task, View view) {
-                // BoardFragment currently shows counts only; no per-task menu.
+                showTaskMenu(task, view);
             }
         };
 
         adapterTodo.setOnTaskClickListener(listener);
         adapterDoing.setOnTaskClickListener(listener);
         adapterDone.setOnTaskClickListener(listener);
+
+        TaskAdapter.OnTaskLongPressListener longPressListener = (task, itemView) -> startLaneDrag(task, itemView);
+        adapterTodo.setOnTaskLongPressListener(longPressListener);
+        adapterDoing.setOnTaskLongPressListener(longPressListener);
+        adapterDone.setOnTaskLongPressListener(longPressListener);
+
+        setupLaneDragTargets();
+    }
+
+    private void startLaneDrag(Task task, View itemView) {
+        if (task == null || task.getId() == null || itemView == null) return;
+        ClipData clipData = ClipData.newPlainText("task_id", String.valueOf(task.getId()));
+        itemView.startDragAndDrop(clipData, new View.DragShadowBuilder(itemView), task, 0);
+    }
+
+    private void setupLaneDragTargets() {
+        if (rvTodo != null) {
+            rvTodo.setOnDragListener((v, event) -> handleLaneDrag(event, "TODO", rvTodo));
+        }
+        if (rvDoing != null) {
+            rvDoing.setOnDragListener((v, event) -> handleLaneDrag(event, "DOING", rvDoing));
+        }
+        if (rvDone != null) {
+            rvDone.setOnDragListener((v, event) -> handleLaneDrag(event, "DONE", rvDone));
+        }
+    }
+
+    private boolean handleLaneDrag(android.view.DragEvent event, String targetStatus, RecyclerView targetView) {
+        switch (event.getAction()) {
+            case android.view.DragEvent.ACTION_DRAG_STARTED:
+                return event.getLocalState() instanceof Task;
+            case android.view.DragEvent.ACTION_DRAG_ENTERED:
+                targetView.setAlpha(0.85f);
+                return true;
+            case android.view.DragEvent.ACTION_DRAG_EXITED:
+                targetView.setAlpha(1f);
+                return true;
+            case android.view.DragEvent.ACTION_DROP:
+                targetView.setAlpha(1f);
+                if (!(event.getLocalState() instanceof Task)) return false;
+                Task draggedTask = (Task) event.getLocalState();
+                String currentStatus = draggedTask.getStatus() != null ? draggedTask.getStatus().toUpperCase() : "TODO";
+                if (targetStatus.equals(currentStatus)) return true;
+                taskRepository.updateTaskStatus(draggedTask.getId(), currentStatus, targetStatus,
+                        new TaskRepository.TaskCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                if (!isAdded()) return;
+                                requireActivity().runOnUiThread(() -> {
+                                    Toast.makeText(getContext(), "Đã chuyển task sang " + targetStatus, Toast.LENGTH_SHORT).show();
+                                    loadTaskCounts();
+                                });
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                if (!isAdded()) return;
+                                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show());
+                            }
+                        });
+                return true;
+            case android.view.DragEvent.ACTION_DRAG_ENDED:
+                targetView.setAlpha(1f);
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    private void showTaskMenu(Task task, View anchor) {
+        if (getContext() == null || task == null || task.getId() == null) return;
+        View sheetView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_bottom_sheet_task_actions, null);
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext(), R.style.Theme_TaskFlow_BottomSheet);
+        sheet.setContentView(sheetView);
+
+        TextView tvTitle = sheetView.findViewById(R.id.tvSheetTitle);
+        TextView btnHistory = sheetView.findViewById(R.id.btnActionHistory);
+        TextView btnTrash = sheetView.findViewById(R.id.btnActionTrash);
+        TextView btnCancel = sheetView.findViewById(R.id.btnActionCancel);
+
+        if (tvTitle != null) {
+            tvTitle.setText(task.getTitle() != null ? task.getTitle() : "Task Actions");
+        }
+
+        if (btnHistory != null) {
+            btnHistory.setOnClickListener(v -> {
+                sheet.dismiss();
+                showTaskHistory(task.getId());
+            });
+        }
+
+        if (btnTrash != null) {
+            btnTrash.setOnClickListener(v -> {
+                sheet.dismiss();
+                taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "Đã chuyển task vào thùng rác", Toast.LENGTH_SHORT).show();
+                            loadTaskCounts();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show());
+                    }
+                });
+            });
+        }
+
+        if (btnCancel != null) {
+            btnCancel.setOnClickListener(v -> sheet.dismiss());
+        }
+
+        sheet.show();
+    }
+
+    private void showTaskHistory(long taskId) {
+        taskRepository.getTaskHistory(taskId, new TaskRepository.TaskCallback<List<TaskActivity>>() {
+            @Override
+            public void onSuccess(List<TaskActivity> result) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> {
+                    List<String> rows = new ArrayList<>();
+                    if (result != null) {
+                        for (TaskActivity activity : result) {
+                            rows.add(formatHistoryRow(activity));
+                        }
+                    }
+                    if (rows.isEmpty()) {
+                        rows.add("Chưa có lịch sử thay đổi");
+                    }
+
+                    View sheetView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_bottom_sheet_history, null);
+                    BottomSheetDialog sheet = new BottomSheetDialog(requireContext(), R.style.Theme_TaskFlow_BottomSheet);
+                    sheet.setContentView(sheetView);
+
+                    ListView listHistory = sheetView.findViewById(R.id.listHistory);
+                    TextView btnClose = sheetView.findViewById(R.id.btnCloseHistory);
+
+                    if (listHistory != null) {
+                        listHistory.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, rows));
+                    }
+                    if (btnClose != null) {
+                        btnClose.setOnClickListener(v -> sheet.dismiss());
+                    }
+
+                    sheet.show();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private String formatHistoryRow(TaskActivity activity) {
+        String action = activity.getActionType() != null ? activity.getActionType() : "UPDATE";
+        String oldVal = activity.getOldValue() != null ? activity.getOldValue() : "";
+        String newVal = activity.getNewValue() != null ? activity.getNewValue() : "";
+        return formatTimestamp(activity.getCreatedAt()) + " - " + action + " (" + oldVal + " -> " + newVal + ")";
+    }
+
+    private String formatTimestamp(String raw) {
+        if (raw == null || raw.isEmpty()) return "Vừa xong";
+        try {
+            Date date = java.util.Date.from(java.time.OffsetDateTime.parse(raw).toInstant());
+            return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(date);
+        } catch (Exception e) {
+            return raw;
+        }
     }
 
     private void loadTaskCounts() {
