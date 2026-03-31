@@ -56,8 +56,12 @@ import java.util.Map;
 public class ProjectOverviewFragment extends Fragment {
 
     private static final String ARG_PROJECT_ID = "project_id";
+    private static final String ARG_IS_MY_TASKS = "is_my_tasks";
+    private static final String ARG_USER_ID = "user_id";
 
     private long projectId;
+    private boolean isMyTasksMode;
+    private String currentUserId;
     private TaskRepository taskRepository;
     private MemberRepository memberRepository;
     private TaskAdapter taskAdapter;
@@ -68,13 +72,16 @@ public class ProjectOverviewFragment extends Fragment {
     private BarChart barChartProductivity;
     private RecyclerView rvUpcomingTasks;
     private LinearLayout layoutEmptyState, layoutCharts;
+    private View cardBarChart;
     
     private Map<String, String> memberNames = new HashMap<>();
 
-    public static ProjectOverviewFragment newInstance(long projectId) {
+    public static ProjectOverviewFragment newInstance(long projectId, boolean isMyTasksMode, String userId) {
         ProjectOverviewFragment fragment = new ProjectOverviewFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_PROJECT_ID, projectId);
+        args.putBoolean(ARG_IS_MY_TASKS, isMyTasksMode);
+        args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -84,6 +91,8 @@ public class ProjectOverviewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             projectId = getArguments().getLong(ARG_PROJECT_ID);
+            isMyTasksMode = getArguments().getBoolean(ARG_IS_MY_TASKS, false);
+            currentUserId = getArguments().getString(ARG_USER_ID);
         }
         taskRepository = TaskRepository.getInstance();
         memberRepository = new MemberRepository();
@@ -106,12 +115,19 @@ public class ProjectOverviewFragment extends Fragment {
         tvOverdueTasks = view.findViewById(R.id.tvOverdueTasks);
         pieChartStatus = view.findViewById(R.id.pieChartStatus);
         barChartProductivity = view.findViewById(R.id.barChartProductivity);
+        cardBarChart = view.findViewById(R.id.cardBarChart);
         rvUpcomingTasks = view.findViewById(R.id.rvUpcomingTasks);
         layoutEmptyState = view.findViewById(R.id.layoutEmptyState);
         layoutCharts = view.findViewById(R.id.layoutCharts);
 
+        if (isMyTasksMode && cardBarChart != null) {
+            cardBarChart.setVisibility(View.GONE);
+        }
+
         setupPieChart();
-        setupBarChart();
+        if (!isMyTasksMode) {
+            setupBarChart();
+        }
     }
 
     private void setupRecyclerView() {
@@ -201,6 +217,10 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void loadProjectData() {
+        if (isMyTasksMode) {
+            loadTasks();
+            return;
+        }
         memberRepository.getMembers(projectId, new MemberRepository.ResultCallback<List<ProjectMember>>() {
             @Override
             public void onSuccess(List<ProjectMember> members) {
@@ -219,7 +239,7 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void loadTasks() {
-        taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> tasks) {
                 if (tasks == null || tasks.isEmpty()) {
@@ -235,7 +255,13 @@ public class ProjectOverviewFragment extends Fragment {
             public void onError(String error) {
                 if (isAdded()) Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+
+        if (isMyTasksMode) {
+            taskRepository.getMyTasksWithProjectName(currentUserId, callback);
+        } else {
+            taskRepository.getTasksByProject(projectId, callback);
+        }
     }
 
     private void showEmptyState(boolean isEmpty) {
@@ -275,7 +301,9 @@ public class ProjectOverviewFragment extends Fragment {
         tvOverdueTasks.setText(String.valueOf(overdue));
 
         updatePieChart(todo, in_progress, done);
-        updateBarChart(tasks);
+        if (!isMyTasksMode) {
+            updateBarChart(tasks);
+        }
     }
 
     private void updatePieChart(int todo, int in_progress, int done) {

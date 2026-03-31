@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.project;
 
 import android.app.DatePickerDialog;
+import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent; // Thêm import này
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -21,9 +23,12 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.base.BaseActivity;
@@ -55,6 +60,12 @@ public class CreateTaskActivity extends BaseActivity {
 
     private TextView tvStartDate, tvDueDate, tvStartTime, tvDueTime, btnSave, tvToolbarTitle;
     private ProgressBar progressBar;
+    private View layoutCommentsSection;
+    private RecyclerView rvComments;
+    private EditText etCommentInput;
+    private ImageView btnSendComment;
+    private TaskCommentAdapter commentAdapter;
+    private String currentUserId;
     private TaskRepository taskRepository;
     private List<User> projectMembers = new ArrayList<>();
     private ArrayAdapter<String> assigneeAdapter;
@@ -71,7 +82,7 @@ public class CreateTaskActivity extends BaseActivity {
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-    private android.widget.Button btnToggleComplete;
+    private Button btnToggleComplete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +90,8 @@ public class CreateTaskActivity extends BaseActivity {
         setContentView(R.layout.activity_create_task);
 
         taskRepository = TaskRepository.getInstance();
+        SessionManager.init(this);
+        currentUserId = SessionManager.getUserId();
 
         // Lấy dữ liệu từ Intent an toàn
         projectId = getIntent().getLongExtra("project_id", -1);
@@ -102,6 +115,7 @@ public class CreateTaskActivity extends BaseActivity {
             tvToolbarTitle.setText("Edit Task");
             btnSave.setText("Update"); // Đổi chữ nút cho rõ ràng
             loadTaskDetails();
+            setupCommentsSection();
             if (btnToggleComplete != null) {
                 btnToggleComplete.setVisibility(View.VISIBLE);
                 btnToggleComplete.setOnClickListener(v -> toggleCompleteStatus());
@@ -111,6 +125,9 @@ public class CreateTaskActivity extends BaseActivity {
             btnSave.setText("Create");
             if (btnToggleComplete != null) {
                 btnToggleComplete.setVisibility(View.GONE);
+            }
+            if (layoutCommentsSection != null) {
+                layoutCommentsSection.setVisibility(View.GONE);
             }
         }
 
@@ -148,6 +165,141 @@ public class CreateTaskActivity extends BaseActivity {
         tvToolbarTitle = findViewById(R.id.tvToolbarTitle);
         progressBar = findViewById(R.id.progressBar);
         btnToggleComplete = findViewById(R.id.btnToggleComplete);
+        layoutCommentsSection = findViewById(R.id.layoutCommentsSection);
+        rvComments = findViewById(R.id.rvComments);
+        etCommentInput = findViewById(R.id.etCommentInput);
+        btnSendComment = findViewById(R.id.btnSendComment);
+    }
+
+    private void setupCommentsSection() {
+        if (layoutCommentsSection == null || rvComments == null) return;
+
+        layoutCommentsSection.setVisibility(View.VISIBLE);
+        commentAdapter = new TaskCommentAdapter(currentUserId, new TaskCommentAdapter.Listener() {
+            @Override
+            public void onEdit(Comment comment) {
+                showEditCommentDialog(comment);
+            }
+
+            @Override
+            public void onDelete(Comment comment) {
+                deleteComment(comment);
+            }
+
+            @Override
+            public void onReact(Comment comment, String reactionType) {
+                toggleReaction(comment, reactionType);
+            }
+        });
+
+        rvComments.setLayoutManager(new LinearLayoutManager(this));
+        rvComments.setAdapter(commentAdapter);
+        rvComments.setNestedScrollingEnabled(false);
+
+        if (btnSendComment != null) {
+            btnSendComment.setOnClickListener(v -> createComment());
+        }
+
+        loadComments();
+    }
+
+    private void loadComments() {
+        if (taskId == null || commentAdapter == null) return;
+
+        taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
+            @Override
+            public void onSuccess(List<Comment> result) {
+                runOnUiThread(() -> commentAdapter.setComments(result));
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void createComment() {
+        if (taskId == null || etCommentInput == null) return;
+        String content = etCommentInput.getText().toString().trim();
+        if (content.isEmpty()) return;
+
+        taskRepository.createTaskComment(taskId, currentUserId, content, new TaskRepository.TaskCallback<Comment>() {
+            @Override
+            public void onSuccess(Comment result) {
+                runOnUiThread(() -> {
+                    etCommentInput.setText("");
+                    loadComments();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void showEditCommentDialog(Comment comment) {
+        if (comment == null || comment.getId() == null) return;
+        EditText input = new EditText(this);
+        input.setText(comment.getContent());
+        input.setSelection(input.getText().length());
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        input.setPadding(pad, pad, pad, pad);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Chỉnh sửa bình luận")
+                .setView(input)
+                .setPositiveButton("Lưu", (dialog, which) -> {
+                    String content = input.getText().toString().trim();
+                    if (content.isEmpty()) return;
+                    taskRepository.updateTaskComment(comment.getId(), currentUserId, content,
+                            new TaskRepository.TaskCallback<Comment>() {
+                                @Override
+                                public void onSuccess(Comment result) {
+                                    runOnUiThread(CreateTaskActivity.this::loadComments);
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                    runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+                                }
+                            });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void deleteComment(Comment comment) {
+        if (comment == null || comment.getId() == null) return;
+        taskRepository.deleteTaskComment(comment.getId(), currentUserId, new TaskRepository.TaskCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                runOnUiThread(CreateTaskActivity.this::loadComments);
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void toggleReaction(Comment comment, String reactionType) {
+        if (comment == null || comment.getId() == null) return;
+        taskRepository.toggleCommentReaction(comment.getId(), currentUserId, reactionType,
+                new TaskRepository.TaskCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        runOnUiThread(CreateTaskActivity.this::loadComments);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+                    }
+                });
     }
 
     private void loadTaskDetails() {

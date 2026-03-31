@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:paddingHorizontal="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
     android:scrollbars="none">
 
     <LinearLayout
@@ -17,19 +19,23 @@
             android:layout_width="280dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_board_lane"
             android:orientation="vertical">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="4dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:id="@+id/tvTodoTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="To Do"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -39,11 +45,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_toEndOf="@id/tvTodoTitle"
-                    android:background="@drawable/bg_tag"
+                    android:background="@drawable/bg_board_count_badge"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="2dp"
                     android:text="0"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/theme_text_primary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </RelativeLayout>
@@ -51,7 +57,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvTodo"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:paddingHorizontal="8dp"
+                android:clipToPadding="false" />
         </LinearLayout>
 
         <!-- Cột Doing -->
@@ -59,19 +67,23 @@
             android:layout_width="280dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_board_lane"
             android:orientation="vertical">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="4dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:id="@+id/tvDoingTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Doing"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -81,11 +93,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_toEndOf="@id/tvDoingTitle"
-                    android:background="@drawable/bg_tag"
+                    android:background="@drawable/bg_board_count_badge"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="2dp"
                     android:text="0"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/theme_text_primary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </RelativeLayout>
@@ -93,26 +105,32 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvDoing"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:paddingHorizontal="8dp"
+                android:clipToPadding="false" />
         </LinearLayout>
 
         <!-- Cột Done -->
         <LinearLayout
             android:layout_width="280dp"
             android:layout_height="match_parent"
+            android:background="@drawable/bg_board_lane"
             android:orientation="vertical">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="4dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:id="@+id/tvDoneTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Done"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -122,11 +140,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_toEndOf="@id/tvDoneTitle"
-                    android:background="@drawable/bg_tag"
+                    android:background="@drawable/bg_board_count_badge"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="2dp"
                     android:text="0"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/theme_text_primary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </RelativeLayout>
@@ -134,7 +152,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvDone"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:paddingHorizontal="8dp"
+                android:clipToPadding="false" />
         </LinearLayout>
     </LinearLayout>
 </HorizontalScrollView>

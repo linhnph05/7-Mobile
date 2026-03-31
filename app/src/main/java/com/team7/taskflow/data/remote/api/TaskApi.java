@@ -1,6 +1,8 @@
 package com.team7.taskflow.data.remote.api;
 
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.Comment;
+import com.team7.taskflow.domain.model.CommentReaction;
 
 import java.util.List;
 import java.util.Map;
@@ -116,6 +118,64 @@ public interface TaskApi {
     @DELETE("attachments")
     Call<Void> deleteAttachment(
             @Query("attachment_id") String attachmentIdFilter
+    );
+
+    @GET("comments")
+    Call<List<Comment>> getCommentsByTask(
+            @Query("task_id") String taskIdFilter,
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
+    @POST("comments")
+    Call<List<Comment>> createComment(
+            @Body Map<String, Object> body,
+            @Header("Prefer") String prefer
+    );
+
+    @PATCH("comments")
+    Call<List<Comment>> updateComment(
+            @Query("comment_id") String commentIdFilter,
+            @Query("user_id") String userIdFilter,
+            @Body Map<String, Object> body,
+            @Header("Prefer") String prefer
+    );
+
+    @GET("comments")
+    Call<List<Comment>> getCommentById(
+            @Query("comment_id") String commentIdFilter,
+            @Query("select") String select
+    );
+
+    @PATCH("comments")
+    Call<List<Comment>> updateCommentById(
+            @Query("comment_id") String commentIdFilter,
+            @Body Map<String, Object> body,
+            @Header("Prefer") String prefer
+    );
+
+    @DELETE("comments")
+    Call<Void> deleteComment(
+            @Query("comment_id") String commentIdFilter,
+            @Query("user_id") String userIdFilter
+    );
+
+    @GET("comment_reactions")
+    Call<List<CommentReaction>> getCommentReactions(
+            @Query("comment_id") String commentIdFilter,
+            @Query("user_id") String userIdFilter,
+            @Query("reaction_type") String reactionTypeFilter
+    );
+
+    @POST("comment_reactions")
+    Call<List<CommentReaction>> createCommentReaction(
+            @Body Map<String, Object> body,
+            @Header("Prefer") String prefer
+    );
+
+    @DELETE("comment_reactions")
+    Call<Void> deleteCommentReaction(
+            @Query("reaction_id") String reactionIdFilter
     );
 
     /**

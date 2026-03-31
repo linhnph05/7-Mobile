@@ -224,11 +224,8 @@ public class CalendarActivity extends BaseActivity {
 
 
     private void renderCalendar() {
-        // 1. Xóa các con số cũ (nhưng giữ lại 7 cái tiêu đề thứ)
-        int childCount = glCalendar.getChildCount();
-        if (childCount > 7) {
-            glCalendar.removeViews(7, childCount - 7);
-        }
+        glCalendar.removeAllViews();
+        addWeekdayHeaders();
 
         Calendar cal = (Calendar) currentCalendar.clone();
         cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -236,11 +233,14 @@ public class CalendarActivity extends BaseActivity {
 
         // 2. Thêm các ô trống
         for (int i = 0; i < emptySlots; i++) {
-            View space = new View(this);
-            glCalendar.addView(space, new androidx.gridlayout.widget.GridLayout.LayoutParams(
-                    androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f),
-                    androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f)
-            ));
+            TextView space = new TextView(this);
+            space.setText(" ");
+            space.setMinHeight(dp(36));
+            space.setGravity(android.view.Gravity.CENTER);
+            androidx.gridlayout.widget.GridLayout.LayoutParams params = new androidx.gridlayout.widget.GridLayout.LayoutParams();
+            params.width = 0;
+            params.columnSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f);
+            glCalendar.addView(space, params);
         }
 
         // 3. Thêm các ô ngày
@@ -249,7 +249,8 @@ public class CalendarActivity extends BaseActivity {
             TextView tv = new TextView(this);
             tv.setText(String.valueOf(day));
             tv.setGravity(android.view.Gravity.CENTER);
-            tv.setPadding(0, 20, 0, 20);
+            tv.setMinHeight(dp(36));
+            tv.setPadding(0, dp(6), 0, dp(6));
 
             // Tính toán ngày thực tế của ô này
             Calendar cellCal = (Calendar) cal.clone();
@@ -279,6 +280,27 @@ public class CalendarActivity extends BaseActivity {
             params.columnSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f);
             glCalendar.addView(tv, params);
         }
+    }
+
+    private void addWeekdayHeaders() {
+        String[] days = {"S", "M", "T", "W", "T", "F", "S"};
+        for (String day : days) {
+            TextView tv = new TextView(this);
+            tv.setText(day);
+            tv.setGravity(android.view.Gravity.CENTER);
+            tv.setTextSize(11f);
+            tv.setTextColor(ContextCompat.getColor(this, R.color.slate_400));
+            tv.setMinHeight(dp(24));
+
+            androidx.gridlayout.widget.GridLayout.LayoutParams params = new androidx.gridlayout.widget.GridLayout.LayoutParams();
+            params.width = 0;
+            params.columnSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f);
+            glCalendar.addView(tv, params);
+        }
+    }
+
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density);
     }
 
     private void setupRecyclerView() {

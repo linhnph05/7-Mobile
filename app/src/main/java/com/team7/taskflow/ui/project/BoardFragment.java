@@ -28,17 +28,23 @@ import java.util.List;
 public class BoardFragment extends Fragment {
 
     private static final String ARG_PROJECT_ID = "project_id";
+    private static final String ARG_IS_MY_TASKS = "is_my_tasks";
+    private static final String ARG_USER_ID = "user_id";
     private long projectId;
     private TaskRepository taskRepository;
+    private boolean isMyTasksMode;
+    private String currentUserId;
 
     private TextView tvCountTodo, tvCountDoing, tvCountDone;
     private RecyclerView rvTodo, rvDoing, rvDone;
     private TaskAdapter adapterTodo, adapterDoing, adapterDone;
 
-    public static BoardFragment newInstance(long projectId) {
+    public static BoardFragment newInstance(long projectId, boolean isMyTasksMode, String userId) {
         BoardFragment fragment = new BoardFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_PROJECT_ID, projectId);
+        args.putBoolean(ARG_IS_MY_TASKS, isMyTasksMode);
+        args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,6 +54,8 @@ public class BoardFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             projectId = getArguments().getLong(ARG_PROJECT_ID);
+            isMyTasksMode = getArguments().getBoolean(ARG_IS_MY_TASKS, false);
+            currentUserId = getArguments().getString(ARG_USER_ID);
         }
         taskRepository = TaskRepository.getInstance();
     }
@@ -109,9 +117,9 @@ public class BoardFragment extends Fragment {
     }
 
     private void loadTaskCounts() {
-        if (projectId == -1) return;
+        if (!isMyTasksMode && projectId == -1) return;
 
-        taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> result) {
                 List<Task> todoList = new ArrayList<>();
@@ -145,6 +153,12 @@ public class BoardFragment extends Fragment {
             public void onError(String error) {
                 Log.e("BoardFragment", "Load failed: " + error);
             }
-        });
+        };
+
+        if (isMyTasksMode) {
+            taskRepository.getMyTasksWithProjectName(currentUserId, callback);
+        } else {
+            taskRepository.getTasksByProject(projectId, callback);
+        }
     }
 }
