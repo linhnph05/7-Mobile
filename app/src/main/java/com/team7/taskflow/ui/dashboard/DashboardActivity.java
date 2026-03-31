@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.utils.SessionManager;
+import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.api.UserApi;
@@ -172,15 +173,17 @@ public class DashboardActivity extends BaseActivity {
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
                 if (id == R.id.nav_settings) {
-                    startActivity(new Intent(this, ProfileActivity.class));
+                    Intent intent = new Intent(this, ProfileActivity.class);
+                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_SETTINGS);
                     return true;
                 } else if (id == R.id.nav_home) {
                     // Already on home
                     return true;
                 } else if (id == R.id.nav_tasks) {
-                    Intent intent = new Intent(this, com.team7.taskflow.ui.project.ProjectBoardActivity.class);
+                    Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.ProjectDetailActivity.class);
                     intent.putExtra("is_my_tasks", true);
-                    startActivity(intent);
+                    intent.putExtra("project_name", "My Assigned Tasks");
+                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
                     return true;
                 }
                 // TODO: Handle nav_assistant

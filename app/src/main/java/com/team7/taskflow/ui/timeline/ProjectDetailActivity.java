@@ -17,27 +17,42 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.ui.dashboard.DashboardActivity;
+import com.team7.taskflow.ui.profile.ProfileActivity;
 import com.team7.taskflow.ui.project.BoardFragment;
+import com.team7.taskflow.ui.project.CalendarFragment;
 import com.team7.taskflow.ui.project.ProjectOverviewFragment;
+import com.team7.taskflow.ui.project.TaskListFragment;
 import com.team7.taskflow.ui.project.TimelineFragment;
 import com.team7.taskflow.utils.SessionManager;
+import com.team7.taskflow.utils.NavigationUtils;
 
 import java.util.List;
 
 public class ProjectDetailActivity extends BaseActivity {
+
+    private static final int TAB_OVERVIEW = 0;
+    private static final int TAB_BOARD = 1;
+    private static final int TAB_LIST = 2;
+    private static final int TAB_TIMELINE = 3;
+    private static final int TAB_CALENDAR = 4;
 
     private long projectId;
     private String projectName;
     private String projectKey;
     private String projectDesc;
     private String currentUserId;
+    private boolean isMyTasksMode;
 
-    private LinearLayout tabOverview, tabBoard, tabTimeline, tabCalendar;
+    private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
+    private BottomNavigationView bottomNavigationView;
+    private int currentTabIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +64,14 @@ public class ProjectDetailActivity extends BaseActivity {
         projectName = getIntent().getStringExtra("project_name");
         projectKey = getIntent().getStringExtra("project_key");
         projectDesc = getIntent().getStringExtra("project_desc");
+        isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
 
         SessionManager.init(this);
         currentUserId = SessionManager.getUserId();
 
         initViews();
         setupNavigation();
+        setupBottomNavigation();
         loadUserInfo();
 
         // Handle insets for status bar extension
@@ -67,16 +84,21 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        // Mặc định mở Overview
-        switchFragment(ProjectOverviewFragment.newInstance(projectId), "OVERVIEW");
-        updateTabUI(tabOverview);
+        // Always open Overview tab first (both for projects and My Assigned Tasks)
+        openTab(TAB_OVERVIEW);
     }
 
     private void initViews() {
         tvProjectName = findViewById(R.id.tvProjectName);
         tvMonth = findViewById(R.id.tvMonth);
 
-        if (tvProjectName != null) tvProjectName.setText(projectName != null ? projectName : "Project");
+        if (tvProjectName != null) {
+            if (isMyTasksMode) {
+                tvProjectName.setText("My Assigned Tasks");
+            } else {
+                tvProjectName.setText(projectName != null ? projectName : "Project");
+            }
+        }
         
         if (tvMonth != null) {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
@@ -85,50 +107,94 @@ public class ProjectDetailActivity extends BaseActivity {
 
         tabOverview = findViewById(R.id.tabOverview);
         tabBoard = findViewById(R.id.tabBoard);
+        tabList = findViewById(R.id.tabList);
         tabTimeline = findViewById(R.id.tabTimeline);
         tabCalendar = findViewById(R.id.tabCalendar);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnMoreOptions).setOnClickListener(v -> showProjectSettingsPanel());
+        View fragmentContainer = findViewById(R.id.fragment_container);
+        View bottomBar = findViewById(R.id.includeBottomBar);
+        if (bottomBar != null) {
+            bottomBar.setVisibility(isMyTasksMode ? View.VISIBLE : View.GONE);
+        }
+
+        if (fragmentContainer != null && isMyTasksMode) {
+            fragmentContainer.post(() -> {
+                int bottomInset = bottomBar != null ? bottomBar.getHeight() : 0;
+                fragmentContainer.setPadding(
+                        fragmentContainer.getPaddingLeft(),
+                        fragmentContainer.getPaddingTop(),
+                        fragmentContainer.getPaddingRight(),
+                        bottomInset);
+            });
+        }
+
+        View btnBack = findViewById(R.id.btnBack);
+        View btnMore = findViewById(R.id.btnMoreOptions);
+        if (isMyTasksMode) {
+            if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
+            if (btnMore != null) btnMore.setVisibility(View.GONE);
+        } else {
+            if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+            if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
+        }
     }
 
     private void setupNavigation() {
         if (tabOverview != null) {
-            tabOverview.setOnClickListener(v -> {
-                switchFragment(ProjectOverviewFragment.newInstance(projectId), "OVERVIEW");
-                updateTabUI(tabOverview);
-            });
+            tabOverview.setOnClickListener(v -> openTab(TAB_OVERVIEW));
         }
 
         if (tabBoard != null) {
-            tabBoard.setOnClickListener(v -> {
-                switchFragment(BoardFragment.newInstance(projectId), "BOARD");
-                updateTabUI(tabBoard);
-            });
+            tabBoard.setOnClickListener(v -> openTab(TAB_BOARD));
+        }
+
+        if (tabList != null) {
+            tabList.setOnClickListener(v -> openTab(TAB_LIST));
         }
 
         if (tabTimeline != null) {
-            tabTimeline.setOnClickListener(v -> {
-                switchFragment(TimelineFragment.newInstance(projectId), "TIMELINE");
-                updateTabUI(tabTimeline);
-            });
+            tabTimeline.setOnClickListener(v -> openTab(TAB_TIMELINE));
         }
 
         if (tabCalendar != null) {
-            tabCalendar.setOnClickListener(v -> {
-                Toast.makeText(this, "Calendar coming soon", Toast.LENGTH_SHORT).show();
-                updateTabUI(tabCalendar);
-            });
+            tabCalendar.setOnClickListener(v -> openTab(TAB_CALENDAR));
         }
 
         View fabAddAI = findViewById(R.id.fabAddAI);
         if (fabAddAI != null) {
+            fabAddAI.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
             fabAddAI.setOnClickListener(v -> {
                 Intent aiIntent = new Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
                 aiIntent.putExtra("project_id", projectId);
                 startActivity(aiIntent);
             });
         }
+    }
+
+    private void setupBottomNavigation() {
+        if (!isMyTasksMode || bottomNavigationView == null) return;
+        bottomNavigationView.setItemIconTintList(null);
+        bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_tasks) {
+                return true;
+            }
+            if (id == R.id.nav_home) {
+                Intent intent = new Intent(this, DashboardActivity.class);
+                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                finish();
+                return true;
+            }
+            if (id == R.id.nav_settings) {
+                Intent intent = new Intent(this, ProfileActivity.class);
+                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                finish();
+                return true;
+            }
+            return id == R.id.nav_assistant;
+        });
     }
 
     private void loadUserInfo() {
@@ -152,16 +218,73 @@ public class ProjectDetailActivity extends BaseActivity {
             });
     }
 
-    private void switchFragment(Fragment fragment, String tag) {
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                .replace(R.id.fragment_container, fragment, tag)
-                .commit();
+    private void openTab(int targetTabIndex) {
+        if (targetTabIndex == TAB_OVERVIEW && isMyTasksMode && tabOverview == null) {
+            return;
+        }
+
+        Fragment fragment;
+        String tag;
+        LinearLayout activeTab;
+
+        switch (targetTabIndex) {
+            case TAB_OVERVIEW:
+                fragment = ProjectOverviewFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "OVERVIEW";
+                activeTab = tabOverview;
+                break;
+            case TAB_BOARD:
+                fragment = BoardFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "BOARD";
+                activeTab = tabBoard;
+                break;
+            case TAB_LIST:
+                fragment = TaskListFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "LIST";
+                activeTab = tabList;
+                break;
+            case TAB_TIMELINE:
+                fragment = TimelineFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "TIMELINE";
+                activeTab = tabTimeline;
+                break;
+            case TAB_CALENDAR:
+                fragment = CalendarFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "CALENDAR";
+                activeTab = tabCalendar;
+                break;
+            default:
+                return;
+        }
+
+        if (targetTabIndex == currentTabIndex) {
+            updateTabUI(activeTab);
+            return;
+        }
+
+        switchFragment(fragment, tag, targetTabIndex);
+        updateTabUI(activeTab);
+    }
+
+    private void switchFragment(Fragment fragment, String tag, int targetTabIndex) {
+        androidx.fragment.app.FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
+
+        if (currentTabIndex != -1) {
+            if (targetTabIndex > currentTabIndex) {
+                tx.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
+            } else {
+                tx.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+        }
+
+        tx.replace(R.id.fragment_container, fragment, tag).commit();
+        currentTabIndex = targetTabIndex;
     }
 
     private void updateTabUI(LinearLayout activeTab) {
         resetTab(tabOverview);
         resetTab(tabBoard);
+        resetTab(tabList);
         resetTab(tabTimeline);
         resetTab(tabCalendar);
 

@@ -9,6 +9,7 @@ import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.utils.SessionManager;
+import com.team7.taskflow.utils.NavigationUtils;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -125,7 +126,8 @@ public class ProfileActivity extends BaseActivity {
                 if (id == R.id.nav_settings) {
                     return true;
                 } else if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, DashboardActivity.class));
+                    Intent intent = new Intent(this, DashboardActivity.class);
+                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
                     finish();
                     return true;
                 }

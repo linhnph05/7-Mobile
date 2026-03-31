@@ -41,8 +41,12 @@ import java.util.Set;
 public class TimelineFragment extends Fragment {
 
     private static final String ARG_PROJECT_ID = "project_id";
+    private static final String ARG_IS_MY_TASKS = "is_my_tasks";
+    private static final String ARG_USER_ID = "user_id";
     private long projectId;
     private TaskRepository taskRepository;
+    private boolean isMyTasksMode;
+    private String currentUserId;
 
     private LinearLayout containerTaskLabels;
     private LinearLayout containerGanttBars;
@@ -50,15 +54,18 @@ public class TimelineFragment extends Fragment {
     private LinearLayout containerGanttDays;
     private LinearLayout containerGanttGrid;
     private HorizontalScrollView ganttScrollView;
+    private View viewPastOverlay;
     private View viewTodayLine;
 
     private final Map<String, String> assigneeAvatarUrlMap = new HashMap<>();
     private final int COLUMN_WIDTH_DP = 40;
 
-    public static TimelineFragment newInstance(long projectId) {
+    public static TimelineFragment newInstance(long projectId, boolean isMyTasksMode, String userId) {
         TimelineFragment fragment = new TimelineFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_PROJECT_ID, projectId);
+        args.putBoolean(ARG_IS_MY_TASKS, isMyTasksMode);
+        args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -68,6 +75,8 @@ public class TimelineFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             projectId = getArguments().getLong(ARG_PROJECT_ID);
+            isMyTasksMode = getArguments().getBoolean(ARG_IS_MY_TASKS, false);
+            currentUserId = getArguments().getString(ARG_USER_ID);
         }
         taskRepository = TaskRepository.getInstance();
     }
@@ -88,11 +97,12 @@ public class TimelineFragment extends Fragment {
         containerGanttDays = view.findViewById(R.id.containerGanttDays);
         containerGanttGrid = view.findViewById(R.id.containerGanttGrid);
         ganttScrollView = view.findViewById(R.id.ganttScrollView);
+        viewPastOverlay = view.findViewById(R.id.viewPastOverlay);
         viewTodayLine = view.findViewById(R.id.viewTodayLine);
     }
 
     private void loadTimelineData() {
-        taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> tasks) {
                 if (!isAdded()) return;
@@ -109,7 +119,13 @@ public class TimelineFragment extends Fragment {
                     Toast.makeText(getContext(), "Lỗi: " + error, Toast.LENGTH_SHORT).show();
                 }
             }
-        });
+        };
+
+        if (isMyTasksMode) {
+            taskRepository.getMyTasksWithProjectName(currentUserId, callback);
+        } else {
+            taskRepository.getTasksByProject(projectId, callback);
+        }
     }
 
     private void fetchAssigneeAvatars(List<Task> tasks, Runnable onDone) {
@@ -174,32 +190,32 @@ public class TimelineFragment extends Fragment {
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0); today.set(Calendar.MINUTE, 0); today.set(Calendar.SECOND, 0); today.set(Calendar.MILLISECOND, 0);
 
-        Calendar earliest = null, latest = null;
+        Calendar earliestStart = null, latest = null;
 
         for (Task t : tasks) {
             try {
                 if (t.getStartDate() != null && t.getStartDate().length() >= 10) {
                     Date d = sdf.parse(t.getStartDate().substring(0, 10));
-                    if (earliest == null || d.before(earliest.getTime())) { earliest = Calendar.getInstance(); earliest.setTime(d); }
+                    if (earliestStart == null || d.before(earliestStart.getTime())) { earliestStart = Calendar.getInstance(); earliestStart.setTime(d); }
                     if (latest == null || d.after(latest.getTime())) { latest = Calendar.getInstance(); latest.setTime(d); }
                 }
                 if (t.getDueDate() != null && t.getDueDate().length() >= 10) {
                     Date d = sdf.parse(t.getDueDate().substring(0, 10));
-                    if (earliest == null || d.before(earliest.getTime())) { earliest = Calendar.getInstance(); earliest.setTime(d); }
+                    if (earliestStart == null) { earliestStart = Calendar.getInstance(); earliestStart.setTime(d); }
                     if (latest == null || d.after(latest.getTime())) { latest = Calendar.getInstance(); latest.setTime(d); }
                 }
             } catch (Exception ignored) {}
         }
 
-        if (earliest == null) {
+        if (earliestStart == null) {
             minCal.setTime(today.getTime());
             maxCal.setTime(today.getTime());
         } else {
-            minCal.setTime(earliest.before(today) ? earliest.getTime() : today.getTime());
+            minCal.setTime(earliestStart.before(today) ? earliestStart.getTime() : today.getTime());
             maxCal.setTime(latest != null && latest.after(today) ? latest.getTime() : today.getTime());
         }
 
-        minCal.add(Calendar.DAY_OF_YEAR, -5);
+        minCal.add(Calendar.DAY_OF_YEAR, -2);
         maxCal.add(Calendar.DAY_OF_YEAR, 15);
         minCal.set(Calendar.HOUR_OF_DAY, 0); minCal.set(Calendar.MINUTE, 0); minCal.set(Calendar.SECOND, 0);
         maxCal.set(Calendar.HOUR_OF_DAY, 0); maxCal.set(Calendar.MINUTE, 0); maxCal.set(Calendar.SECOND, 0);
@@ -239,7 +255,6 @@ public class TimelineFragment extends Fragment {
         addMonthHeader(currentMonth, monthDays, density);
 
         // Bars
-        int minMargin = Integer.MAX_VALUE;
         for (Task t : tasks) {
             View labelView = getLayoutInflater().inflate(R.layout.item_timeline_label, containerTaskLabels, false);
             ((TextView)labelView.findViewById(R.id.tvTaskName)).setText(t.getTitle());
@@ -263,7 +278,6 @@ public class TimelineFragment extends Fragment {
             int offset = Math.max(0, (int)((start - minTime)/(24L*3600*1000)));
             int duration = Math.max(1, (int)((due - start)/(24L*3600*1000)) + 1);
             int mStart = (int)(offset * COLUMN_WIDTH_DP * density);
-            if (mStart < minMargin) minMargin = mStart;
 
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) bar.getLayoutParams();
             lp.setMarginStart(mStart);
@@ -280,13 +294,20 @@ public class TimelineFragment extends Fragment {
         // Today Line
         if (viewTodayLine != null) {
             int todayMargin = (int)(((today.getTimeInMillis() - minTime)/(24L*3600*1000)) * COLUMN_WIDTH_DP * density);
+
+            if (viewPastOverlay != null) {
+                FrameLayout.LayoutParams pastLp = (FrameLayout.LayoutParams) viewPastOverlay.getLayoutParams();
+                pastLp.width = Math.max(0, todayMargin);
+                pastLp.setMarginStart(0);
+                viewPastOverlay.setLayoutParams(pastLp);
+                viewPastOverlay.setVisibility(todayMargin > 0 ? View.VISIBLE : View.GONE);
+            }
+
             FrameLayout.LayoutParams tlp = (FrameLayout.LayoutParams) viewTodayLine.getLayoutParams();
             tlp.setMarginStart(todayMargin);
             viewTodayLine.setLayoutParams(tlp);
             viewTodayLine.setVisibility(View.VISIBLE);
-            
-            int scroll = Math.min(todayMargin, minMargin) - (int)(2 * COLUMN_WIDTH_DP * density);
-            ganttScrollView.post(() -> ganttScrollView.scrollTo(Math.max(0, scroll), 0));
+            ganttScrollView.post(() -> ganttScrollView.scrollTo(0, 0));
         }
     }
 

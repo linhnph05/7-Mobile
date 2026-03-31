@@ -144,6 +144,31 @@
                         android:fontFamily="sans-serif-medium"/>
                 </LinearLayout>
 
+                <!-- Task List -->
+                <LinearLayout
+                    android:id="@+id/tabList"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/ivTabList"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_nav_tasks"
+                        app:tint="?attr/android:textColorSecondary" />
+                    <TextView
+                        android:id="@+id/tvTabList"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Danh sách"
+                        android:textColor="?attr/android:textColorSecondary"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif-medium"/>
+                </LinearLayout>
+
                 <!-- Timeline -->
                 <LinearLayout
                     android:id="@+id/tabTimeline"
@@ -217,4 +242,11 @@
                 app:borderWidth="0dp" />
         </FrameLayout>
     </LinearLayout>
+
+    <include
+        android:id="@+id/includeBottomBar"
+        layout="@layout/layout_bottom_nav_fab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

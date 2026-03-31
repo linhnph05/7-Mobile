@@ -11,6 +11,7 @@ import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.HashMap;
@@ -363,6 +364,151 @@ public class TaskRepository {
         });
     }
 
+    public void getTaskComments(long taskId, TaskCallback<List<Comment>> callback) {
+        String select = "comment_id,task_id,user_id,content,created_at,like,heart,congrats,"
+            + "users(user_id,display_name,avatar_url)";
+        taskApi.getCommentsByTask("eq." + taskId, select, "created_at.asc").enqueue(new Callback<List<Comment>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Failed to load comments: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void createTaskComment(long taskId, String userId, String content, TaskCallback<Comment> callback) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("task_id", taskId);
+        body.put("user_id", userId);
+        body.put("content", content);
+        body.put("like", 0);
+        body.put("heart", 0);
+        body.put("congrats", 0);
+
+        taskApi.createComment(body, SupabaseConfig.PREFER_RETURN_REPRESENTATION).enqueue(new Callback<List<Comment>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onSuccess(response.body().get(0));
+                } else {
+                    callback.onError("Failed to create comment: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void updateTaskComment(long commentId, String userId, String content, TaskCallback<Comment> callback) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("content", content);
+
+        taskApi.updateComment(
+                "eq." + commentId,
+                "eq." + userId,
+                body,
+                SupabaseConfig.PREFER_RETURN_REPRESENTATION).enqueue(new Callback<List<Comment>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            callback.onSuccess(response.body().get(0));
+                        } else {
+                            callback.onError("Failed to update comment: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
+    }
+
+    public void deleteTaskComment(long commentId, String userId, TaskCallback<Void> callback) {
+        taskApi.deleteComment("eq." + commentId, "eq." + userId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Failed to delete comment: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void toggleCommentReaction(long commentId, String userId, String reactionType, TaskCallback<Void> callback) {
+        String select = "comment_id,like,heart,congrats";
+        taskApi.getCommentById("eq." + commentId, select).enqueue(new Callback<List<Comment>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                    callback.onError("Failed to load comment reaction counters: " + response.code());
+                    return;
+                }
+
+                Comment comment = response.body().get(0);
+                int like = comment.getLikeCount();
+                int heart = comment.getHeartCount();
+                int congrats = comment.getCongratsCount();
+
+                if ("LIKE".equalsIgnoreCase(reactionType)) {
+                    like += 1;
+                } else if ("LOVE".equalsIgnoreCase(reactionType)) {
+                    heart += 1;
+                } else if ("CELEBRATE".equalsIgnoreCase(reactionType)) {
+                    congrats += 1;
+                } else {
+                    callback.onError("Invalid reaction type");
+                    return;
+                }
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("like", like);
+                body.put("heart", heart);
+                body.put("congrats", congrats);
+
+                taskApi.updateCommentById("eq." + commentId, body, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
+                        .enqueue(new Callback<List<Comment>>() {
+                            @Override
+                            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                                if (response.isSuccessful()) {
+                                    callback.onSuccess(null);
+                                } else {
+                                    callback.onError("Failed to update reaction counters: " + response.code());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                                callback.onError(t.getMessage());
+                            }
+                        });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────
 
     private Map<String, Object> getTaskMap(Task task) {
@@ -429,7 +575,8 @@ public class TaskRepository {
      * Get tasks assigned to a specific user, joining with project to load project name
      */
     public void getMyTasksWithProjectName(String userId, TaskCallback<List<Task>> callback) {
-        taskApi.getTasksByAssignee("*", "eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
+        // Use Supabase PostgREST syntax: *,projects(*) to include related project data
+        taskApi.getTasksByAssignee("*,projects(*)", "eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful()) {
