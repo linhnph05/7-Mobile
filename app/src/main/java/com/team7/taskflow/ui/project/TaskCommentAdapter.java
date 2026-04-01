@@ -1,14 +1,18 @@
 package com.team7.taskflow.ui.project;
 
 import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Comment;
 
@@ -31,6 +35,7 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
     private final String currentUserId;
     private final Listener listener;
     private final List<Comment> comments = new ArrayList<>();
+    private boolean allowManageActions = true;
 
     public TaskCommentAdapter(String currentUserId, Listener listener) {
         this.currentUserId = currentUserId;
@@ -43,6 +48,10 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             comments.addAll(items);
         }
         notifyDataSetChanged();
+    }
+
+    public void setAllowManageActions(boolean allowManageActions) {
+        this.allowManageActions = allowManageActions;
     }
 
     @NonNull
@@ -71,6 +80,10 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
         private final TextView btnLike;
         private final TextView btnLove;
         private final TextView btnCelebrate;
+        private final LinearLayout layoutCommentRow;
+        private final MaterialCardView cardCommentBubble;
+        private final LinearLayout layoutReactionRow;
+        private final LinearLayout layoutManageRow;
 
         CommentViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -82,6 +95,10 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             btnLike = itemView.findViewById(R.id.btnReactionLike);
             btnLove = itemView.findViewById(R.id.btnReactionLove);
             btnCelebrate = itemView.findViewById(R.id.btnReactionCelebrate);
+            layoutCommentRow = itemView.findViewById(R.id.layoutCommentRow);
+            cardCommentBubble = itemView.findViewById(R.id.cardCommentBubble);
+            layoutReactionRow = itemView.findViewById(R.id.layoutReactionRow);
+            layoutManageRow = itemView.findViewById(R.id.layoutManageRow);
         }
 
         void bind(Comment comment) {
@@ -97,8 +114,14 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             tvContent.setText(comment.getContent());
 
             boolean isOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
+            applyBubbleAlignment(isOwner);
             btnEdit.setVisibility(isOwner ? View.VISIBLE : View.GONE);
             btnDelete.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+
+            if (!allowManageActions) {
+                btnEdit.setVisibility(View.GONE);
+                btnDelete.setVisibility(View.GONE);
+            }
 
             btnEdit.setOnClickListener(v -> {
                 if (listener != null) listener.onEdit(comment);
@@ -110,6 +133,34 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             bindReaction(btnLike, comment, "LIKE", "👍");
             bindReaction(btnLove, comment, "LOVE", "❤️");
             bindReaction(btnCelebrate, comment, "CELEBRATE", "🎉");
+        }
+
+        private void applyBubbleAlignment(boolean isOwner) {
+            if (cardCommentBubble != null) {
+                LinearLayout.LayoutParams bubbleLp = (LinearLayout.LayoutParams) cardCommentBubble.getLayoutParams();
+                bubbleLp.gravity = isOwner ? Gravity.END : Gravity.START;
+                cardCommentBubble.setLayoutParams(bubbleLp);
+
+                int bubbleColor = ContextCompat.getColor(itemView.getContext(),
+                        isOwner ? R.color.indigo_50 : R.color.theme_card);
+                cardCommentBubble.setCardBackgroundColor(bubbleColor);
+                cardCommentBubble.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.theme_border));
+            }
+
+            if (layoutReactionRow != null) {
+                LinearLayout.LayoutParams reactionLp = (LinearLayout.LayoutParams) layoutReactionRow.getLayoutParams();
+                reactionLp.gravity = isOwner ? Gravity.END : Gravity.START;
+                layoutReactionRow.setLayoutParams(reactionLp);
+            }
+
+            if (layoutManageRow != null) {
+                LinearLayout.LayoutParams manageLp = (LinearLayout.LayoutParams) layoutManageRow.getLayoutParams();
+                manageLp.gravity = isOwner ? Gravity.END : Gravity.START;
+                layoutManageRow.setLayoutParams(manageLp);
+            }
+
+            tvAuthor.setVisibility(isOwner ? View.GONE : View.VISIBLE);
+            tvContent.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.theme_text_primary));
         }
 
         private void bindReaction(TextView button, Comment comment, String type, String emoji) {

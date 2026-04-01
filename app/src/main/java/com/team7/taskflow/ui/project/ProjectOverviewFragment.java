@@ -132,6 +132,7 @@ public class ProjectOverviewFragment extends Fragment {
 
     private void setupRecyclerView() {
         taskAdapter = new TaskAdapter();
+        taskAdapter.setInlineCommentsEnabled(true, currentUserId);
         rvUpcomingTasks.setLayoutManager(new LinearLayoutManager(getContext()));
         rvUpcomingTasks.setAdapter(taskAdapter);
         rvUpcomingTasks.setNestedScrollingEnabled(false);

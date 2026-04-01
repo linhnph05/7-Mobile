@@ -135,4 +135,7 @@
     <string name="task_start_date_label">Start</string>
     <string name="ai_task_due_date_label">Due</string>
     <string name="task_saved_success">Task saved!</string>
+
+    <string name="task_history_empty">Chưa có lịch sử thay đổi</string>
+    <string name="task_history_time_just_now">Vừa xong</string>
 </resources>

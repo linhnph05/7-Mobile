@@ -221,7 +221,10 @@ public class CreateTaskActivity extends BaseActivity {
         taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
             @Override
             public void onSuccess(List<Comment> result) {
-                runOnUiThread(() -> commentAdapter.setComments(result));
+                runOnUiThread(() -> {
+                    commentAdapter.setComments(result);
+                    scrollCommentsToLatest();
+                });
             }
 
             @Override
@@ -229,6 +232,21 @@ public class CreateTaskActivity extends BaseActivity {
                 runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    private void scrollCommentsToLatest() {
+        if (rvComments == null || commentAdapter == null) return;
+        int count = commentAdapter.getItemCount();
+        if (count <= 0) return;
+        rvComments.post(() -> rvComments.scrollToPosition(count - 1));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (taskId != null && commentAdapter != null) {
+            loadComments();
+        }
     }
 
     private void createComment() {
@@ -365,7 +383,7 @@ public class CreateTaskActivity extends BaseActivity {
                         }
                     }
                     if (rows.isEmpty()) {
-                        rows.add("Chưa có lịch sử thay đổi");
+                        rows.add(getString(R.string.task_history_empty));
                     }
 
                     View sheetView = LayoutInflater.from(CreateTaskActivity.this)
@@ -377,7 +395,7 @@ public class CreateTaskActivity extends BaseActivity {
                     TextView btnClose = sheetView.findViewById(R.id.btnCloseHistory);
 
                     if (listHistory != null) {
-                        listHistory.setAdapter(new ArrayAdapter<>(CreateTaskActivity.this, android.R.layout.simple_list_item_1, rows));
+                        listHistory.setAdapter(new HistoryEventAdapter(CreateTaskActivity.this, rows));
                     }
                     if (btnClose != null) {
                         btnClose.setOnClickListener(v -> sheet.dismiss());
@@ -402,7 +420,7 @@ public class CreateTaskActivity extends BaseActivity {
     }
 
     private String formatActivityTime(String raw) {
-        if (raw == null || raw.isEmpty()) return "Vừa xong";
+        if (raw == null || raw.isEmpty()) return getString(R.string.task_history_time_just_now);
         try {
             java.time.Instant instant = java.time.OffsetDateTime.parse(raw).toInstant();
             return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(java.util.Date.from(instant));

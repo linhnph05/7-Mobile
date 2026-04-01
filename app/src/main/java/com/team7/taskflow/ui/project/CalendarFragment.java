@@ -130,6 +130,7 @@ public class CalendarFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new TaskAdapter();
+        adapter.setInlineCommentsEnabled(true, currentUserId);
         rvTasks.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvTasks.setAdapter(adapter);
 
@@ -225,7 +226,7 @@ public class CalendarFragment extends Fragment {
                     TextView btnClose = sheetView.findViewById(R.id.btnCloseHistory);
 
                     if (listHistory != null) {
-                        listHistory.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, rows));
+                        listHistory.setAdapter(new HistoryEventAdapter(requireContext(), rows));
                     }
                     if (btnClose != null) {
                         btnClose.setOnClickListener(v -> sheet.dismiss());
