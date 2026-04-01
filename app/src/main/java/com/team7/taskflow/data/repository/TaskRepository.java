@@ -63,9 +63,7 @@ public class TaskRepository {
                     @Override
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                            Task created = response.body().get(0);
-                            logActivity(created.getId(), "CREATE", null, created.getTitle());
-                            callback.onSuccess(created);
+                            callback.onSuccess(response.body().get(0));
                         } else {
                             callback.onError("Failed to create task: " + response.code());
                         }
@@ -125,7 +123,6 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
-                    logActivity(taskId, "UPDATE_STATUS", oldStatus, newStatus);
                     callback.onSuccess(null);
                 } else {
                     callback.onError("Failed to update status");
@@ -164,7 +161,6 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
-                    logActivity(taskId, "DELETE", previousStatus, "TRASH");
                     callback.onSuccess(null);
                 } else {
                     callback.onError("Failed to delete task");
@@ -230,7 +226,6 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
-                    logActivity(taskId, "RESTORE", "TRASH", restoreStatus);
                     callback.onSuccess(null);
                 } else {
                     callback.onError("Failed to restore task");
@@ -245,7 +240,6 @@ public class TaskRepository {
     }
 
     public void permanentlyDeleteTask(long taskId, TaskCallback<Void> callback) {
-        logActivity(taskId, "EMPTY", "TRASH", "DELETED");
         deleteTask(taskId, callback);
     }
 
@@ -366,20 +360,6 @@ public class TaskRepository {
     }
 
     // ── History ─────────────────────────────────────────────────────────
-
-    private void logActivity(long taskId, String action, String oldVal, String newVal) {
-        String userId = SessionManager.getUserId();
-        TaskActivity activity = new TaskActivity(taskId, userId, action, oldVal, newVal);
-        activityApi.logActivity(activity).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-            }
-        });
-    }
     public void getProjectMembers(long projectId, TaskCallback<List<User>> callback) {
         // Query: /project_members?project_id=eq.{id}&select=*,users(*)
         projectApi.getProjectMembers("eq." + projectId, "*,users(*)")
@@ -488,20 +468,20 @@ public class TaskRepository {
                 "eq." + userId,
                 body,
                 SupabaseConfig.PREFER_RETURN_REPRESENTATION).enqueue(new Callback<List<Comment>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
-                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                            callback.onSuccess(response.body().get(0));
-                        } else {
-                            callback.onError("Failed to update comment: " + response.code());
-                        }
-                    }
+            @Override
+            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onSuccess(response.body().get(0));
+                } else {
+                    callback.onError("Failed to update comment: " + response.code());
+                }
+            }
 
-                    @Override
-                    public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
-                        callback.onError(t.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
     }
 
     public void deleteTaskComment(long commentId, String userId, TaskCallback<Void> callback) {

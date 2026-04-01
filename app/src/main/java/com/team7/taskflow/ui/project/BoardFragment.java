@@ -94,6 +94,10 @@ public class BoardFragment extends Fragment {
         adapterDoing = new TaskAdapter();
         adapterDone = new TaskAdapter();
 
+        adapterTodo.setInlineCommentsEnabled(true, currentUserId);
+        adapterDoing.setInlineCommentsEnabled(true, currentUserId);
+        adapterDone.setInlineCommentsEnabled(true, currentUserId);
+
         rvTodo.setLayoutManager(new LinearLayoutManager(getContext()));
         rvTodo.setAdapter(adapterTodo);
 
@@ -266,7 +270,7 @@ public class BoardFragment extends Fragment {
                     TextView btnClose = sheetView.findViewById(R.id.btnCloseHistory);
 
                     if (listHistory != null) {
-                        listHistory.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, rows));
+                        listHistory.setAdapter(new HistoryEventAdapter(requireContext(), rows));
                     }
                     if (btnClose != null) {
                         btnClose.setOnClickListener(v -> sheet.dismiss());

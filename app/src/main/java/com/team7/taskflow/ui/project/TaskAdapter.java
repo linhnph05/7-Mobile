@@ -2,31 +2,47 @@ package com.team7.taskflow.ui.project;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
     private List<Task> tasks = new ArrayList<>();
     private OnTaskClickListener listener;
     private OnTaskLongPressListener longPressListener;
+    private final Map<Long, Boolean> expandedComments = new HashMap<>();
+    private final Map<Long, List<Comment>> commentsCache = new HashMap<>();
+    private final Map<Long, TaskCommentAdapter> inlineCommentAdapters = new HashMap<>();
+    private final Set<Long> loadingComments = new HashSet<>();
+    private final TaskRepository taskRepository = TaskRepository.getInstance();
+    private boolean inlineCommentsEnabled = false;
+    private String inlineCommentUserId;
 
     public interface OnTaskClickListener {
         void onTaskClick(Task task);
@@ -43,6 +59,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     public void setOnTaskLongPressListener(OnTaskLongPressListener longPressListener) {
         this.longPressListener = longPressListener;
+    }
+
+    public void setInlineCommentsEnabled(boolean enabled, String currentUserId) {
+        inlineCommentsEnabled = enabled;
+        inlineCommentUserId = currentUserId;
+        notifyDataSetChanged();
     }
 
     public void setTasks(List<Task> tasks) {
@@ -71,9 +93,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         return tasks.size();
     }
 
-    static class TaskViewHolder extends RecyclerView.ViewHolder {
+    class TaskViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvDescription, tvPriority, tvDueDate, tvStatus, tvProjectBadge;
         ImageView btnMenu, ivAssignee;
+        ImageView btnToggleComments, btnSendInlineComment;
+        TextView tvInlineCommentLabel;
+        EditText etInlineComment;
+        RecyclerView rvInlineComments;
+        View layoutCommentToggle, layoutInlineComments;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -85,6 +112,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             tvProjectBadge = itemView.findViewById(R.id.tvProjectBadge);
             btnMenu = itemView.findViewById(R.id.btnMenu);
             ivAssignee = itemView.findViewById(R.id.ivAssignee);
+            btnToggleComments = itemView.findViewById(R.id.btnToggleComments);
+            btnSendInlineComment = itemView.findViewById(R.id.btnSendInlineComment);
+            tvInlineCommentLabel = itemView.findViewById(R.id.tvInlineCommentLabel);
+            etInlineComment = itemView.findViewById(R.id.etInlineComment);
+            rvInlineComments = itemView.findViewById(R.id.rvInlineComments);
+            layoutCommentToggle = itemView.findViewById(R.id.layoutCommentToggle);
+            layoutInlineComments = itemView.findViewById(R.id.layoutInlineComments);
         }
 
         public void bind(Task task, OnTaskClickListener listener, OnTaskLongPressListener longPressListener) {
@@ -113,6 +147,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 }
                 return false;
             });
+
+            bindInlineComments(task);
 
             // Priority Colors
             String priority = task.getPriority() != null ? task.getPriority().toUpperCase() : "LOW";
@@ -146,6 +182,150 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 statusBg.setTint(0x3394A3B8); // 20% Slate
                 tvStatus.setTextColor(0xFF94A3B8);
             }
+        }
+
+        private void bindInlineComments(Task task) {
+            if (layoutCommentToggle == null || layoutInlineComments == null || btnToggleComments == null
+                    || rvInlineComments == null || etInlineComment == null || btnSendInlineComment == null
+                    || task.getId() == null) {
+                return;
+            }
+
+            if (!inlineCommentsEnabled) {
+                layoutCommentToggle.setVisibility(View.GONE);
+                layoutInlineComments.setVisibility(View.GONE);
+                return;
+            }
+
+            layoutCommentToggle.setVisibility(View.VISIBLE);
+            long taskId = task.getId();
+            boolean expanded = expandedComments.getOrDefault(taskId, false);
+            layoutInlineComments.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            btnToggleComments.setRotation(expanded ? 180f : 0f);
+
+            if (rvInlineComments.getLayoutManager() == null) {
+                rvInlineComments.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+            }
+
+            TaskCommentAdapter commentAdapter = inlineCommentAdapters.get(taskId);
+            if (commentAdapter == null) {
+                commentAdapter = new TaskCommentAdapter(inlineCommentUserId, new TaskCommentAdapter.Listener() {
+                    @Override
+                    public void onEdit(Comment comment) {
+                        // Inline panel is optimized for quick chat flow.
+                    }
+
+                    @Override
+                    public void onDelete(Comment comment) {
+                        // Inline panel is optimized for quick chat flow.
+                    }
+
+                    @Override
+                    public void onReact(Comment comment, String reactionType) {
+                        if (comment == null || comment.getId() == null || TextUtils.isEmpty(inlineCommentUserId)) {
+                            return;
+                        }
+                        taskRepository.toggleCommentReaction(comment.getId(), inlineCommentUserId, reactionType,
+                                new TaskRepository.TaskCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        itemView.post(() -> loadComments(taskId));
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                    }
+                                });
+                    }
+                });
+                commentAdapter.setAllowManageActions(false);
+                inlineCommentAdapters.put(taskId, commentAdapter);
+            }
+            rvInlineComments.setAdapter(commentAdapter);
+
+            if (expanded) {
+                renderInlineComments(taskId);
+                if (!commentsCache.containsKey(taskId) && !loadingComments.contains(taskId)) {
+                    loadComments(taskId);
+                }
+            }
+
+            btnToggleComments.setOnClickListener(v -> {
+                boolean nextExpanded = !expandedComments.getOrDefault(taskId, false);
+                expandedComments.put(taskId, nextExpanded);
+                notifyItemChanged(getBindingAdapterPosition());
+            });
+
+            btnSendInlineComment.setOnClickListener(v -> {
+                if (TextUtils.isEmpty(inlineCommentUserId)) {
+                    return;
+                }
+                String content = etInlineComment.getText() != null ? etInlineComment.getText().toString().trim() : "";
+                if (content.isEmpty()) {
+                    return;
+                }
+                btnSendInlineComment.setEnabled(false);
+                taskRepository.createTaskComment(taskId, inlineCommentUserId, content,
+                        new TaskRepository.TaskCallback<Comment>() {
+                            @Override
+                            public void onSuccess(Comment result) {
+                                itemView.post(() -> {
+                                    etInlineComment.setText("");
+                                    btnSendInlineComment.setEnabled(true);
+                                    loadComments(taskId);
+                                });
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                itemView.post(() -> btnSendInlineComment.setEnabled(true));
+                            }
+                        });
+            });
+        }
+
+        private void loadComments(long taskId) {
+            loadingComments.add(taskId);
+            taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
+                @Override
+                public void onSuccess(List<Comment> result) {
+                    itemView.post(() -> {
+                        loadingComments.remove(taskId);
+                        commentsCache.put(taskId, result != null ? result : new ArrayList<>());
+                        renderInlineComments(taskId);
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    itemView.post(() -> {
+                        loadingComments.remove(taskId);
+                        renderInlineComments(taskId);
+                    });
+                }
+            });
+        }
+
+        private void renderInlineComments(long taskId) {
+            List<Comment> comments = commentsCache.get(taskId);
+            if (loadingComments.contains(taskId)) {
+                TaskCommentAdapter adapter = inlineCommentAdapters.get(taskId);
+                if (adapter != null) adapter.setComments(new ArrayList<>());
+                if (tvInlineCommentLabel != null) tvInlineCommentLabel.setText("Bình luận (đang tải...)");
+                return;
+            }
+            if (comments == null || comments.isEmpty()) {
+                TaskCommentAdapter adapter = inlineCommentAdapters.get(taskId);
+                if (adapter != null) adapter.setComments(new ArrayList<>());
+                if (tvInlineCommentLabel != null) tvInlineCommentLabel.setText("Bình luận (0)");
+                return;
+            }
+
+            TaskCommentAdapter adapter = inlineCommentAdapters.get(taskId);
+            if (adapter != null) {
+                adapter.setComments(comments);
+            }
+            if (tvInlineCommentLabel != null) tvInlineCommentLabel.setText("Bình luận (" + comments.size() + ")");
         }
 
         private String formatDate(String rawDate) {
