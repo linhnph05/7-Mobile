@@ -181,6 +181,19 @@ public class CreateTaskActivity extends BaseActivity {
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
         btnSendComment = findViewById(R.id.btnSendComment);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            String prefillTitle = intent.getStringExtra("prefill_title");
+            String prefillDescription = intent.getStringExtra("prefill_description");
+
+            if (prefillTitle != null && !prefillTitle.trim().isEmpty()) {
+                etTitle.setText(prefillTitle);
+            }
+            if (prefillDescription != null && !prefillDescription.trim().isEmpty()) {
+                etDescription.setText(prefillDescription);
+            }
+        }
     }
 
     private void setupCommentsSection() {
@@ -916,11 +929,12 @@ public class CreateTaskActivity extends BaseActivity {
         tv.setTextColor(ContextCompat.getColor(this, colorRes));
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         tv.setPadding(pad, pad, pad, pad);
-        
-        int[] attrs = {android.R.attr.selectableItemBackground};
-        android.content.res.TypedArray ta = obtainStyledAttributes(attrs);
-        tv.setBackground(ta.getDrawable(0));
-        ta.recycle();
+
+        android.util.TypedValue selectableBg = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, selectableBg, true);
+        if (selectableBg.resourceId != 0) {
+            tv.setBackgroundResource(selectableBg.resourceId);
+        }
         
         tv.setOnClickListener(listener);
         return tv;

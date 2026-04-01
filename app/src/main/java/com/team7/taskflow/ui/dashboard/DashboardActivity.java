@@ -12,6 +12,7 @@ import com.team7.taskflow.ui.profile.ProfileActivity;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.core.graphics.Insets;
@@ -31,6 +32,7 @@ import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.notification.NotificationsActivity;
 import com.team7.taskflow.ui.project.CreateProjectActivity;
+import com.team7.taskflow.ui.system.StickyTaskService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -108,10 +110,19 @@ public class DashboardActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        startStickyServiceSafely();
         // Reload projects khi quay lại từ CreateProjectActivity
         // Chỉ load nếu đã có currentUserId
         if (currentUserId != null && !currentUserId.isEmpty()) {
             loadProjects();
+        }
+    }
+
+    private void startStickyServiceSafely() {
+        try {
+            ContextCompat.startForegroundService(this, new Intent(this, StickyTaskService.class));
+        } catch (SecurityException | IllegalStateException e) {
+            Log.e(TAG, "Cannot start sticky foreground service", e);
         }
     }
 
