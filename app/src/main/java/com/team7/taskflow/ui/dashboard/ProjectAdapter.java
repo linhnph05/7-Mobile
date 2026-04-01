@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -60,12 +61,16 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     class ProjectViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvProjectName;
         private final TextView tvProjectDesc;
+        private final TextView tvProgress;
+        private final ProgressBar progressBar;
         private final CardView cardView;
 
         public ProjectViewHolder(@NonNull View itemView) {
             super(itemView);
             tvProjectName = itemView.findViewById(R.id.tvProjectName);
             tvProjectDesc = itemView.findViewById(R.id.tvProjectDesc);
+            tvProgress = itemView.findViewById(R.id.tvProgress);
+            progressBar = itemView.findViewById(R.id.progressBar);
             cardView = itemView.findViewById(R.id.cardProject);
 
             itemView.setOnClickListener(v -> {
@@ -79,16 +84,16 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
         public void bind(Project project) {
             tvProjectName.setText(project.getName());
 
-            // Hiển thị tiến độ hoặc mô tả
-            int total = project.getTotalTasks();
-            int completed = project.getCompletedTasks();
-            if (total > 0) {
-                tvProjectDesc.setText(completed + "/" + total + " tasks completed");
-            } else if (project.getDescription() != null && !project.getDescription().isEmpty()) {
-                tvProjectDesc.setText(project.getDescription());
-            } else {
-                tvProjectDesc.setText("No tasks yet");
+            int progressPercent = project.getProgressPercent();
+            if (progressBar != null) {
+                progressBar.setProgress(progressPercent);
             }
+            if (tvProgress != null) {
+                tvProgress.setText(progressPercent + "%");
+            }
+
+            int activityCount = Math.max(0, project.getNewActivitiesCount());
+            tvProjectDesc.setText(itemView.getContext().getString(R.string.project_activity_count_format, activityCount));
         }
     }
 }

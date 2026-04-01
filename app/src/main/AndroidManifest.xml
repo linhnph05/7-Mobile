@@ -88,6 +88,9 @@
             android:name=".ui.project.ProjectBoardActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.foryou.ForYouActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.timeline.ProjectDetailActivity"
             android:exported="false" />
         <activity

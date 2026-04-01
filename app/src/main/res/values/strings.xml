@@ -30,6 +30,23 @@
     <string name="dashboard_tab_recent">Recent</string>
     <string name="dashboard_focus_title">Focus for today</string>
     <string name="dashboard_focus_desc">AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days.</string>
+    <string name="for_you_title">For You</string>
+    <string name="for_you_open_settings">Open settings</string>
+    <string name="for_you_default_name">Bạn</string>
+    <string name="for_you_greeting_format">Chào buổi sáng, %1$s!</string>
+    <string name="for_you_greeting_preview">Chào buổi sáng, Bạn!</string>
+    <string name="for_you_task_count_today">Bạn có %1$d công việc cần xử lý hôm nay</string>
+    <string name="for_you_task_count_preview">Bạn có 3 công việc cần xử lý hôm nay</string>
+    <string name="for_you_overall_progress">Tiến độ tổng thể</string>
+    <string name="for_you_progress_percent">%1$d%% Hoàn thành</string>
+    <string name="for_you_progress_percent_preview">75%% Hoàn thành</string>
+    <string name="for_you_progress_done">Đã xong: %1$d</string>
+    <string name="for_you_progress_done_preview">Đã xong: 12</string>
+    <string name="for_you_progress_remaining">Còn lại: %1$d</string>
+    <string name="for_you_progress_remaining_preview">Còn lại: 4</string>
+    <string name="for_you_filter_all">Tất cả</string>
+    <string name="for_you_filter_today">Hôm nay</string>
+    <string name="for_you_filter_upcoming">Sắp tới</string>
 
     <!-- ==================== -->
     <!-- PROJECT              -->
@@ -54,6 +71,7 @@
     <string name="project_saved_success">Changes saved!</string>
     <string name="project_deleted_success">Project deleted!</string>
     <string name="project_name_required">Please enter project name</string>
+    <string name="project_activity_count_format">%1$d hoạt động mới</string>
 
     <!-- ==================== -->
     <!-- AUTH                 -->
@@ -91,6 +109,11 @@
     <string name="task_priority_low">Thấp</string>
     <string name="task_priority_medium">Trung bình</string>
     <string name="task_priority_high">Cao</string>
+    <string name="task_add_subtask">Tạo subtask</string>
+    <string name="task_activity_comments_tab">Bình luận</string>
+    <string name="task_activity_history_tab">Lịch sử</string>
+    <string name="task_activity_time_tab">Thời gian</string>
+    <string name="task_worklog_empty">Chưa ghi nhận thời gian làm việc.</string>
 
     <!-- ==================== -->
     <!-- OVERVIEW             -->

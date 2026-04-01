@@ -80,6 +80,8 @@
     <color name="theme_icon_orange_bg">#FFEDD5</color>
     <color name="theme_btn_danger_bg">#FEF2F2</color>
     <color name="theme_btn_danger_text">#DC2626</color>
+     <color name="chip_selected_bg">#1A2945FF</color>
+     <color name="chip_selected_stroke">#4D2945FF</color>
 
     <!-- ═══ LEGACY aliases (so old layouts don't break) ═══ -->
     <color name="background_dark">#121629</color>

@@ -1,0 +1,337 @@
+package com.team7.taskflow.ui.foryou;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.team7.taskflow.R;
+import com.team7.taskflow.data.remote.SupabaseClient;
+import com.team7.taskflow.data.remote.api.UserApi;
+import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.ui.dashboard.DashboardActivity;
+import com.team7.taskflow.ui.profile.ProfileActivity;
+import com.team7.taskflow.ui.project.CreateTaskActivity;
+import com.team7.taskflow.ui.project.TaskAdapter;
+import com.team7.taskflow.utils.NavigationUtils;
+import com.team7.taskflow.utils.SessionManager;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ForYouActivity extends BaseActivity {
+
+    private enum TaskFilter {
+        ALL,
+        TODAY,
+        UPCOMING
+    }
+
+    private TextView tvGreeting;
+    private TextView tvTaskCount;
+    private TextView tvProgressPercent;
+    private TextView tvDoneCount;
+    private TextView tvRemainingCount;
+    private TextView chipAll;
+    private TextView chipToday;
+    private TextView chipUpcoming;
+    private ProgressBar pbOverallProgress;
+    private RecyclerView rvMyTasks;
+    private ImageView ivProfilePic;
+    private ImageView btnSettings;
+    private BottomNavigationView bottomNavigationView;
+
+    private TaskAdapter taskAdapter;
+    private TaskRepository taskRepository;
+    private TaskFilter activeFilter = TaskFilter.ALL;
+    private List<Task> allTasks = new ArrayList<>();
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.fragment_for_you);
+
+        SessionManager.init(this);
+        taskRepository = TaskRepository.getInstance();
+
+        bindViews();
+        setupRecycler();
+        setupActions();
+        setupBottomNavigation();
+        renderGreeting();
+        loadTasks();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadTasks();
+    }
+
+    private void bindViews() {
+        tvGreeting = findViewById(R.id.tvGreeting);
+        tvTaskCount = findViewById(R.id.tvTaskCount);
+        tvProgressPercent = findViewById(R.id.tvProgressPercent);
+        tvDoneCount = findViewById(R.id.tvDoneCount);
+        tvRemainingCount = findViewById(R.id.tvRemainingCount);
+        chipAll = findViewById(R.id.chipAll);
+        chipToday = findViewById(R.id.chipToday);
+        chipUpcoming = findViewById(R.id.chipUpcoming);
+        pbOverallProgress = findViewById(R.id.pbOverallProgress);
+        rvMyTasks = findViewById(R.id.rvMyTasks);
+        ivProfilePic = findViewById(R.id.ivProfilePic);
+        btnSettings = findViewById(R.id.btnSettings);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+    }
+
+    private void setupRecycler() {
+        taskAdapter = new TaskAdapter();
+        taskAdapter.setInlineCommentsEnabled(true, SessionManager.getUserId());
+        taskAdapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
+            @Override
+            public void onTaskClick(Task task) {
+                Intent intent = new Intent(ForYouActivity.this, CreateTaskActivity.class);
+                intent.putExtra("project_id", task.getProjectId());
+                intent.putExtra("task_id", task.getId());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onTaskMenuClick(Task task, android.view.View view) {
+                // No contextual menu in ForYou.
+            }
+        });
+
+        rvMyTasks.setLayoutManager(new LinearLayoutManager(this));
+        rvMyTasks.setAdapter(taskAdapter);
+        rvMyTasks.setNestedScrollingEnabled(false);
+    }
+
+    private void setupActions() {
+        chipAll.setOnClickListener(v -> applyFilter(TaskFilter.ALL));
+        chipToday.setOnClickListener(v -> applyFilter(TaskFilter.TODAY));
+        chipUpcoming.setOnClickListener(v -> applyFilter(TaskFilter.UPCOMING));
+        btnSettings.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+    }
+
+    private void setupBottomNavigation() {
+        if (bottomNavigationView == null) {
+            return;
+        }
+        bottomNavigationView.setItemIconTintList(null);
+        bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_tasks) {
+                return true;
+            }
+            if (id == R.id.nav_home) {
+                Intent intent = new Intent(this, DashboardActivity.class);
+                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                finish();
+                return true;
+            }
+            if (id == R.id.nav_settings) {
+                Intent intent = new Intent(this, ProfileActivity.class);
+                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                finish();
+                return true;
+            }
+            return id == R.id.nav_assistant;
+        });
+    }
+
+    private void renderGreeting() {
+        String displayName = SessionManager.getDisplayName();
+        if (TextUtils.isEmpty(displayName)) {
+            displayName = getString(R.string.for_you_default_name);
+        }
+        tvGreeting.setText(getString(R.string.for_you_greeting_format, displayName));
+
+        ivProfilePic.setImageResource(R.drawable.ic_person);
+        loadUserAvatar();
+    }
+
+    private void loadUserAvatar() {
+        String currentUserId = SessionManager.getUserId();
+        if (TextUtils.isEmpty(currentUserId)) {
+            return;
+        }
+
+        UserApi userApi = SupabaseClient.getInstance().getService(UserApi.class);
+        userApi.getUserById("eq." + currentUserId, "*").enqueue(new Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                    return;
+                }
+                User user = response.body().get(0);
+                if (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty()) {
+                    return;
+                }
+                runOnUiThread(() -> com.bumptech.glide.Glide.with(ForYouActivity.this)
+                        .load(user.getAvatarUrl())
+                        .circleCrop()
+                        .placeholder(R.drawable.ic_person)
+                        .into(ivProfilePic));
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {
+                // Keep default avatar.
+            }
+        });
+    }
+
+    private void loadTasks() {
+        String currentUserId = SessionManager.getUserId();
+        if (TextUtils.isEmpty(currentUserId)) {
+            Toast.makeText(this, getString(R.string.error_unknown), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        taskRepository.getMyTasksWithProjectName(currentUserId, new TaskRepository.TaskCallback<List<Task>>() {
+            @Override
+            public void onSuccess(List<Task> result) {
+                runOnUiThread(() -> {
+                    allTasks = result != null ? result : new ArrayList<>();
+                    updateOverview(allTasks);
+                    applyFilter(activeFilter);
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(ForYouActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void updateOverview(List<Task> tasks) {
+        int total = tasks.size();
+        int doneCount = 0;
+
+        for (Task task : tasks) {
+            if (isDone(task)) {
+                doneCount++;
+            }
+        }
+
+        int remainingCount = Math.max(total - doneCount, 0);
+        int percent = total == 0 ? 0 : (int) Math.round((doneCount * 100.0) / total);
+
+        pbOverallProgress.setProgress(percent);
+        tvProgressPercent.setText(getString(R.string.for_you_progress_percent, percent));
+        tvDoneCount.setText(getString(R.string.for_you_progress_done, doneCount));
+        tvRemainingCount.setText(getString(R.string.for_you_progress_remaining, remainingCount));
+
+        int todayCount = countTasksForToday(tasks);
+        tvTaskCount.setText(getString(R.string.for_you_task_count_today, todayCount));
+    }
+
+    private int countTasksForToday(List<Task> tasks) {
+        int count = 0;
+        for (Task task : tasks) {
+            if (isDueToday(task)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void applyFilter(TaskFilter filter) {
+        activeFilter = filter;
+        updateFilterUi();
+
+        List<Task> filtered = new ArrayList<>();
+        for (Task task : allTasks) {
+            if (matchesFilter(task, filter)) {
+                filtered.add(task);
+            }
+        }
+        taskAdapter.setTasks(filtered);
+    }
+
+    private void updateFilterUi() {
+        styleChip(chipAll, activeFilter == TaskFilter.ALL);
+        styleChip(chipToday, activeFilter == TaskFilter.TODAY);
+        styleChip(chipUpcoming, activeFilter == TaskFilter.UPCOMING);
+    }
+
+    private void styleChip(TextView chip, boolean selected) {
+        chip.setBackgroundResource(selected ? R.drawable.bg_chip_selected : R.drawable.bg_chip_neutral);
+        chip.setTextColor(ContextCompat.getColor(this, selected ? R.color.primary : R.color.theme_text_secondary));
+    }
+
+    private boolean matchesFilter(Task task, TaskFilter filter) {
+        switch (filter) {
+            case TODAY:
+                return isDueToday(task);
+            case UPCOMING:
+                return isUpcoming(task);
+            case ALL:
+            default:
+                return true;
+        }
+    }
+
+    private boolean isDone(Task task) {
+        String status = task.getStatus();
+        if (status == null) {
+            return false;
+        }
+        String normalized = status.toUpperCase(Locale.US);
+        return normalized.contains("DONE") || "COMPLETED".equals(normalized);
+    }
+
+    private boolean isDueToday(Task task) {
+        LocalDate dueDate = parseIsoDate(task.getDueDate());
+        return dueDate != null && dueDate.equals(LocalDate.now());
+    }
+
+    private boolean isUpcoming(Task task) {
+        LocalDate dueDate = parseIsoDate(task.getDueDate());
+        return dueDate != null && dueDate.isAfter(LocalDate.now());
+    }
+
+    private LocalDate parseIsoDate(String value) {
+        if (TextUtils.isEmpty(value)) {
+            return null;
+        }
+
+        try {
+            if (value.length() >= 10) {
+                return LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
+            }
+        } catch (Exception ignored) {
+        }
+
+        try {
+            return OffsetDateTime.parse(value).toLocalDate();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+}

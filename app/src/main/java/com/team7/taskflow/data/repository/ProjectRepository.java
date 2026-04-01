@@ -6,11 +6,15 @@ import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.SupabaseConfig;
 import com.team7.taskflow.data.remote.api.ProjectApi;
 import com.team7.taskflow.data.remote.dto.CreateProjectRequest;
+import com.team7.taskflow.domain.model.ProjectActivity;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.ProjectMember;
+import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -78,7 +82,7 @@ public class ProjectRepository {
                                 }
                             }
 
-                            callback.onSuccess(projects);
+                            enrichDashboardData(projects, callback);
                         } else {
                             callback.onError("Failed to load projects: " + response.code());
                         }
@@ -89,6 +93,135 @@ public class ProjectRepository {
                         callback.onError("Network error: " + t.getMessage());
                     }
                 });
+    }
+
+    private void enrichDashboardData(List<Project> projects, ProjectCallback<List<Project>> callback) {
+        if (projects == null || projects.isEmpty()) {
+            callback.onSuccess(projects);
+            return;
+        }
+
+        AtomicInteger pending = new AtomicInteger(projects.size() * 3);
+        for (Project project : projects) {
+            loadProjectTaskProgress(project, pending, projects, callback);
+            loadProjectActivityCount(project, pending, projects, callback);
+            loadProjectMemberPreviews(project, pending, projects, callback);
+        }
+    }
+
+    private void loadProjectTaskProgress(
+            Project project,
+            AtomicInteger pending,
+            List<Project> projects,
+            ProjectCallback<List<Project>> callback) {
+        projectApi.getProjectTasks(
+                "eq." + project.getId(),
+                "task_id,status").enqueue(new Callback<List<Task>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            int total = 0;
+                            int done = 0;
+                            for (Task task : response.body()) {
+                                String status = task.getStatus();
+                                if (status != null && "TRASH".equalsIgnoreCase(status)) {
+                                    continue;
+                                }
+                                total++;
+                                if (status != null && "DONE".equalsIgnoreCase(status)) {
+                                    done++;
+                                }
+                            }
+                            project.setTotalTasks(total);
+                            project.setCompletedTasks(done);
+                        }
+                        completeEnrichStep(pending, projects, callback);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                        completeEnrichStep(pending, projects, callback);
+                    }
+                });
+    }
+
+    private void loadProjectActivityCount(
+            Project project,
+            AtomicInteger pending,
+            List<Project> projects,
+            ProjectCallback<List<Project>> callback) {
+        projectApi.getProjectActivities(
+                "eq." + project.getId(),
+                "activity_id",
+                "created_at.desc").enqueue(new Callback<List<ProjectActivity>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectActivity>> call,
+                            @NonNull Response<List<ProjectActivity>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            project.setNewActivitiesCount(response.body().size());
+                        } else {
+                            project.setNewActivitiesCount(0);
+                        }
+                        completeEnrichStep(pending, projects, callback);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectActivity>> call, @NonNull Throwable t) {
+                        project.setNewActivitiesCount(0);
+                        completeEnrichStep(pending, projects, callback);
+                    }
+                });
+    }
+
+    private void loadProjectMemberPreviews(
+            Project project,
+            AtomicInteger pending,
+            List<Project> projects,
+            ProjectCallback<List<Project>> callback) {
+        projectApi.getProjectMembers(
+                "eq." + project.getId(),
+                "user_id,users(user_id,display_name,email,avatar_url)").enqueue(new Callback<List<ProjectMember>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectMember>> call,
+                            @NonNull Response<List<ProjectMember>> response) {
+                        List<User> previews = new ArrayList<>();
+                        if (response.isSuccessful() && response.body() != null) {
+                            for (ProjectMember member : response.body()) {
+                                if (member.getUserInfo() == null) {
+                                    continue;
+                                }
+                                User user = new User();
+                                user.setUserId(member.getUserInfo().userId != null
+                                        ? member.getUserInfo().userId
+                                        : member.getUserId());
+                                user.setDisplayName(member.getUserInfo().displayName);
+                                user.setEmail(member.getUserInfo().email);
+                                user.setAvatarUrl(member.getUserInfo().avatarUrl);
+                                previews.add(user);
+                                if (previews.size() == 3) {
+                                    break;
+                                }
+                            }
+                        }
+                        project.setMemberPreviews(previews);
+                        completeEnrichStep(pending, projects, callback);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
+                        project.setMemberPreviews(new ArrayList<>());
+                        completeEnrichStep(pending, projects, callback);
+                    }
+                });
+    }
+
+    private void completeEnrichStep(
+            AtomicInteger pending,
+            List<Project> projects,
+            ProjectCallback<List<Project>> callback) {
+        if (pending.decrementAndGet() == 0) {
+            callback.onSuccess(projects);
+        }
     }
 
     /**

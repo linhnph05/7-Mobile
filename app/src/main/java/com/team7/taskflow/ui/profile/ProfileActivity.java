@@ -130,6 +130,11 @@ public class ProfileActivity extends BaseActivity {
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
                     finish();
                     return true;
+                } else if (id == R.id.nav_tasks) {
+                    Intent intent = new Intent(this, com.team7.taskflow.ui.foryou.ForYouActivity.class);
+                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_TASKS);
+                    finish();
+                    return true;
                 }
                 return false;
             });

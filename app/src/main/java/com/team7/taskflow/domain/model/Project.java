@@ -2,6 +2,9 @@ package com.team7.taskflow.domain.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Project {
 
     @SerializedName("project_id")
@@ -36,6 +39,8 @@ public class Project {
 
     private transient int totalTasks;
     private transient int completedTasks;
+    private transient int newActivitiesCount;
+    private transient List<User> memberPreviews = new ArrayList<>();
     private transient String template;
     private transient String userRole; // OWNER, ADMIN, MEMBER - vai trò của user trong project
 
@@ -78,6 +83,14 @@ public class Project {
 
     public int getCompletedTasks() { return completedTasks; }
     public void setCompletedTasks(int completedTasks) { this.completedTasks = completedTasks; }
+
+    public int getNewActivitiesCount() { return newActivitiesCount; }
+    public void setNewActivitiesCount(int newActivitiesCount) { this.newActivitiesCount = newActivitiesCount; }
+
+    public List<User> getMemberPreviews() { return memberPreviews; }
+    public void setMemberPreviews(List<User> memberPreviews) {
+        this.memberPreviews = memberPreviews != null ? memberPreviews : new ArrayList<>();
+    }
 
     public boolean isPrivate() { return isPrivate; }
     public void setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }

@@ -31,6 +31,13 @@ public interface TaskApi {
             @Query("order") String order
     );
 
+    @GET("tasks")
+    Call<List<Task>> getTasksByProjectWithSelect(
+            @Query("project_id") String projectIdFilter,
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
     /**
      * Get tasks by status
      */

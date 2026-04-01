@@ -191,9 +191,7 @@ public class DashboardActivity extends BaseActivity {
                     // Already on home
                     return true;
                 } else if (id == R.id.nav_tasks) {
-                    Intent intent = new Intent(this, com.team7.taskflow.ui.timeline.ProjectDetailActivity.class);
-                    intent.putExtra("is_my_tasks", true);
-                    intent.putExtra("project_name", "My Assigned Tasks");
+                    Intent intent = new Intent(this, com.team7.taskflow.ui.foryou.ForYouActivity.class);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
                     return true;
                 }

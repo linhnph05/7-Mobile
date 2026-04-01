@@ -1,8 +1,10 @@
 package com.team7.taskflow.data.remote.api;
 
 import com.team7.taskflow.data.remote.dto.CreateProjectRequest;
+import com.team7.taskflow.domain.model.ProjectActivity;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.ProjectMember;
+import com.team7.taskflow.domain.model.Task;
 
 import java.util.List;
 
@@ -73,6 +75,24 @@ public interface ProjectApi {
     Call<List<ProjectMember>> getProjectMembers(
             @Query("project_id") String projectIdFilter,
             @Query("select") String selectFields
+    );
+
+    @GET("tasks")
+    Call<List<Task>> getProjectTasks(
+            @Query("project_id") String projectIdFilter,
+            @Query("select") String selectFields
+    );
+
+    @GET("project_activities")
+    Call<List<ProjectActivity>> getProjectActivities(
+            @Query("project_id") String projectIdFilter,
+            @Query("select") String selectFields,
+            @Query("order") String order
+    );
+
+    @POST("project_activities")
+    Call<Void> createProjectActivity(
+            @Body ProjectActivity activity
     );
 
     /**

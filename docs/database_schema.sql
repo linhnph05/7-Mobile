@@ -10,8 +10,7 @@ CREATE TABLE public.attachments (
   file_type text,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT attachments_pkey PRIMARY KEY (attachment_id),
-  CONSTRAINT attachments_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id),
-  CONSTRAINT attachments_uploader_id_fkey FOREIGN KEY (uploader_id) REFERENCES public.users(user_id)
+  CONSTRAINT attachments_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id)
 );
 CREATE TABLE public.comment_reactions (
   reaction_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -29,6 +28,9 @@ CREATE TABLE public.comments (
   user_id uuid,
   content text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
+  like integer,
+  heart integer,
+  congrats integer,
   CONSTRAINT comments_pkey PRIMARY KEY (comment_id),
   CONSTRAINT comments_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id),
   CONSTRAINT comments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)
@@ -44,6 +46,18 @@ CREATE TABLE public.notifications (
   CONSTRAINT notifications_pkey PRIMARY KEY (notification_id),
   CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id),
   CONSTRAINT notifications_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES public.users(user_id)
+);
+CREATE TABLE public.project_activities (
+  activity_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  project_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  entity_type character varying NOT NULL,
+  entity_id uuid,
+  action_type character varying NOT NULL,
+  old_value jsonb,
+  new_value jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT project_activities_pkey PRIMARY KEY (activity_id)
 );
 CREATE TABLE public.project_invitations (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -113,6 +127,7 @@ CREATE TABLE public.tasks (
   created_at timestamp with time zone DEFAULT now(),
   start_date timestamp with time zone,
   tag text,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT tasks_pkey PRIMARY KEY (task_id),
   CONSTRAINT tasks_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(project_id),
   CONSTRAINT tasks_assignee_id_fkey FOREIGN KEY (assignee_id) REFERENCES public.users(user_id),
@@ -121,12 +136,13 @@ CREATE TABLE public.tasks (
 CREATE TABLE public.users (
   user_id uuid NOT NULL DEFAULT gen_random_uuid(),
   email text NOT NULL UNIQUE,
-  password_hash text NOT NULL,
+  password_hash text,
   display_name text,
   bio text,
   avatar_url text,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT users_pkey PRIMARY KEY (user_id)
+  CONSTRAINT users_pkey PRIMARY KEY (user_id),
+  CONSTRAINT users_auth_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.work_logs (
   log_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,

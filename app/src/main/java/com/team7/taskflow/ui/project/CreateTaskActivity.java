@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -26,6 +25,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.tabs.TabLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
@@ -64,9 +64,12 @@ public class CreateTaskActivity extends BaseActivity {
     private TextView tvStartDate, tvDueDate, tvStartTime, tvDueTime, btnSave, tvToolbarTitle;
     private ProgressBar progressBar;
     private View layoutCommentsSection;
+    private View layoutHistorySection;
+    private View layoutWorkLogSection;
     private RecyclerView rvComments;
     private EditText etCommentInput;
     private ImageView btnSendComment;
+    private TabLayout tabLayoutActivity;
     private TaskCommentAdapter commentAdapter;
     private String currentUserId;
     private TaskRepository taskRepository;
@@ -85,8 +88,6 @@ public class CreateTaskActivity extends BaseActivity {
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-    private Button btnToggleComplete;
-    private Button btnActivityHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,27 +121,15 @@ public class CreateTaskActivity extends BaseActivity {
             btnSave.setText("Update"); // Đổi chữ nút cho rõ ràng
             loadTaskDetails();
             setupCommentsSection();
-            if (btnToggleComplete != null) {
-                btnToggleComplete.setVisibility(View.VISIBLE);
-                btnToggleComplete.setOnClickListener(v -> toggleCompleteStatus());
-            }
-            if (btnActivityHistory != null) {
-                btnActivityHistory.setVisibility(View.VISIBLE);
-                btnActivityHistory.setOnClickListener(v -> showTaskActivityHistory());
-            }
         } else {
             tvToolbarTitle.setText("Create Task");
             btnSave.setText("Create");
-            if (btnToggleComplete != null) {
-                btnToggleComplete.setVisibility(View.GONE);
-            }
-            if (btnActivityHistory != null) {
-                btnActivityHistory.setVisibility(View.GONE);
-            }
             if (layoutCommentsSection != null) {
                 layoutCommentsSection.setVisibility(View.GONE);
             }
         }
+
+        setupActivityTabs();
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         btnSave.setOnClickListener(v -> saveTask());
@@ -175,9 +164,10 @@ public class CreateTaskActivity extends BaseActivity {
         btnSave = findViewById(R.id.btnSave);
         tvToolbarTitle = findViewById(R.id.tvToolbarTitle);
         progressBar = findViewById(R.id.progressBar);
-        btnToggleComplete = findViewById(R.id.btnToggleComplete);
-        btnActivityHistory = findViewById(R.id.btnActivityHistory);
         layoutCommentsSection = findViewById(R.id.layoutCommentsSection);
+        layoutHistorySection = findViewById(R.id.layoutTabHistory);
+        layoutWorkLogSection = findViewById(R.id.layoutTabWorkLog);
+        tabLayoutActivity = findViewById(R.id.tabLayoutActivity);
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
         btnSendComment = findViewById(R.id.btnSendComment);
@@ -226,6 +216,102 @@ public class CreateTaskActivity extends BaseActivity {
         }
 
         loadComments();
+    }
+
+    private void setupActivityTabs() {
+        if (tabLayoutActivity == null) {
+            return;
+        }
+
+        if (taskId == null) {
+            tabLayoutActivity.setVisibility(View.GONE);
+            if (layoutCommentsSection != null) {
+                layoutCommentsSection.setVisibility(View.GONE);
+            }
+            if (layoutHistorySection != null) {
+                layoutHistorySection.setVisibility(View.GONE);
+            }
+            if (layoutWorkLogSection != null) {
+                layoutWorkLogSection.setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        tabLayoutActivity.setVisibility(View.VISIBLE);
+        tabLayoutActivity.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                showActivitySection(tab != null ? tab.getPosition() : 0);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                showActivitySection(tab != null ? tab.getPosition() : 0);
+            }
+        });
+
+        TabLayout.Tab firstTab = tabLayoutActivity.getTabAt(0);
+        if (firstTab != null) {
+            firstTab.select();
+        } else {
+            showActivitySection(0);
+        }
+    }
+
+    private void showActivitySection(int position) {
+        if (layoutCommentsSection != null) {
+            layoutCommentsSection.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
+        }
+        if (layoutHistorySection != null) {
+            layoutHistorySection.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+        }
+        if (layoutWorkLogSection != null) {
+            layoutWorkLogSection.setVisibility(position == 2 ? View.VISIBLE : View.GONE);
+        }
+
+        if (position == 1 && taskId != null) {
+            loadTaskHistoryIntoSection();
+        }
+    }
+
+    private void loadTaskHistoryIntoSection() {
+        if (taskId == null || layoutHistorySection == null) return;
+
+        taskRepository.getTaskHistory(taskId, new TaskRepository.TaskCallback<List<TaskActivity>>() {
+            @Override
+            public void onSuccess(List<TaskActivity> result) {
+                runOnUiThread(() -> {
+                    TextView tvHistoryEmpty = layoutHistorySection.findViewById(R.id.tvHistoryEmpty);
+                    if (tvHistoryEmpty == null) return;
+
+                    if (result == null || result.isEmpty()) {
+                        tvHistoryEmpty.setText(getString(R.string.task_history_empty));
+                        return;
+                    }
+
+                    StringBuilder sb = new StringBuilder();
+                    for (TaskActivity activity : result) {
+                        if (sb.length() > 0) sb.append("\n");
+                        sb.append(formatActivityRow(activity));
+                    }
+                    tvHistoryEmpty.setText(sb.toString());
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    TextView tvHistoryEmpty = layoutHistorySection.findViewById(R.id.tvHistoryEmpty);
+                    if (tvHistoryEmpty != null) {
+                        tvHistoryEmpty.setText(error);
+                    }
+                });
+            }
+        });
     }
 
     private void loadComments() {
@@ -483,10 +569,6 @@ public class CreateTaskActivity extends BaseActivity {
                             selectedParentTaskId = t.getParentTaskId();
                             if (selectedParentTaskId != null && tvDependency != null) {
                                 tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
-                            }
-                            // Update complete button label
-                            if (btnToggleComplete != null) {
-                                updateCompleteButtonLabel();
                             }
                             if (currentAssigneeId != null) {
                                 setAssigneeById(currentAssigneeId);
@@ -817,7 +899,6 @@ public class CreateTaskActivity extends BaseActivity {
         // Only guard transitions TO DONE
         if (!"DONE".equalsIgnoreCase(targetStatus) || selectedParentTaskId == null) {
             setStatus(targetStatus);
-            updateCompleteButtonLabel();
             return;
         }
 
@@ -829,7 +910,6 @@ public class CreateTaskActivity extends BaseActivity {
                     setLoading(false);
                     if (depTask != null && "DONE".equalsIgnoreCase(depTask.getStatus())) {
                         setStatus("DONE");
-                        updateCompleteButtonLabel();
                     } else {
                         Toast.makeText(CreateTaskActivity.this,
                                 "Task liên kết phải hoàn thành trước khi đóng task này",
@@ -1136,20 +1216,4 @@ public class CreateTaskActivity extends BaseActivity {
         return result;
     }
 
-    private void toggleCompleteStatus() {
-        if ("DONE".equals(selectedStatus)) {
-            attemptSetStatus("TODO");
-        } else {
-            attemptSetStatus("DONE");
-        }
-    }
-
-    private void updateCompleteButtonLabel() {
-        if (btnToggleComplete == null) return;
-        if ("DONE".equals(selectedStatus)) {
-            btnToggleComplete.setText("Mở lại tác vụ");
-        } else {
-            btnToggleComplete.setText("Đánh dấu hoàn thành");
-        }
-    }
 }

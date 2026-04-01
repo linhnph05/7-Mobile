@@ -366,34 +366,11 @@ public class TaskListFragment extends Fragment {
         sheet.setContentView(sheetView);
 
         android.widget.TextView tvTitle = sheetView.findViewById(R.id.tvTrashTaskTitle);
-        android.widget.TextView btnRestore = sheetView.findViewById(R.id.btnRestoreTask);
         android.widget.TextView btnDelete = sheetView.findViewById(R.id.btnDeleteForever);
         android.widget.TextView btnClose = sheetView.findViewById(R.id.btnCloseTrashActions);
 
         if (tvTitle != null) {
             tvTitle.setText(task.getTitle() != null ? task.getTitle() : "Task");
-        }
-
-        if (btnRestore != null) {
-            btnRestore.setOnClickListener(v -> {
-                sheet.dismiss();
-                taskRepository.restoreTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        if (!isAdded()) return;
-                        requireActivity().runOnUiThread(() -> {
-                            Toast.makeText(getContext(), "Đã khôi phục task", Toast.LENGTH_SHORT).show();
-                            loadTasks();
-                        });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        if (!isAdded()) return;
-                        requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show());
-                    }
-                });
-            });
         }
 
         if (btnDelete != null) {

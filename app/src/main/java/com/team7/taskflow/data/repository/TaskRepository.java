@@ -8,6 +8,7 @@ import com.team7.taskflow.data.remote.api.ActivityApi;
 import com.team7.taskflow.data.remote.api.ProjectApi;
 import com.team7.taskflow.data.remote.api.TaskApi;
 import com.team7.taskflow.domain.model.ProjectMember;
+import com.team7.taskflow.domain.model.ProjectActivity;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
@@ -63,7 +64,16 @@ public class TaskRepository {
                     @Override
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                            callback.onSuccess(response.body().get(0));
+                            Task created = response.body().get(0);
+                            callback.onSuccess(created);
+                            logProjectActivity(
+                                    created.getProjectId(),
+                                    created.getAssigneeId() != null ? created.getAssigneeId() : SessionManager.getUserId(),
+                                    "TASK",
+                                    created.getId(),
+                                    "CREATE",
+                                    null,
+                                    created.getTitle());
                         } else {
                             callback.onError("Failed to create task: " + response.code());
                         }
@@ -84,7 +94,16 @@ public class TaskRepository {
                     @Override
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                            callback.onSuccess(response.body().get(0));
+                            Task updated = response.body().get(0);
+                            callback.onSuccess(updated);
+                            logProjectActivity(
+                                    updated.getProjectId(),
+                                    SessionManager.getUserId(),
+                                    "TASK",
+                                    updated.getId(),
+                                    "UPDATE",
+                                    null,
+                                    updated.getTitle());
                         } else {
                             callback.onError("Update failed");
                         }
@@ -124,6 +143,8 @@ public class TaskRepository {
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess(null);
+                    logProjectActivityByTaskId(taskId, userIdOrSession(userIdFromStatuses(oldStatus, newStatus)), "TASK", taskId,
+                            "UPDATE_STATUS", oldStatus, newStatus);
                 } else {
                     callback.onError("Failed to update status");
                 }
@@ -162,6 +183,8 @@ public class TaskRepository {
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess(null);
+                    logProjectActivityByTaskId(taskId, SessionManager.getUserId(), "TASK", taskId,
+                            "DELETE", previousStatus, "TRASH");
                 } else {
                     callback.onError("Failed to delete task");
                 }
@@ -227,6 +250,8 @@ public class TaskRepository {
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess(null);
+                    logProjectActivityByTaskId(taskId, SessionManager.getUserId(), "TASK", taskId,
+                            "RESTORE", "TRASH", restoreStatus);
                 } else {
                     callback.onError("Failed to restore task");
                 }
@@ -446,7 +471,10 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    callback.onSuccess(response.body().get(0));
+                    Comment createdComment = response.body().get(0);
+                    callback.onSuccess(createdComment);
+                    logProjectActivityByTaskId(taskId, userId, "COMMENT", createdComment.getId(),
+                            "COMMENT", null, content);
                 } else {
                     callback.onError("Failed to create comment: " + response.code());
                 }
@@ -503,7 +531,7 @@ public class TaskRepository {
     }
 
     public void toggleCommentReaction(long commentId, String userId, String reactionType, TaskCallback<Void> callback) {
-        String select = "comment_id,like,heart,congrats";
+        String select = "comment_id,task_id,like,heart,congrats";
         taskApi.getCommentById("eq." + commentId, select).enqueue(new Callback<List<Comment>>() {
             @Override
             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
@@ -539,6 +567,14 @@ public class TaskRepository {
                             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                                 if (response.isSuccessful()) {
                                     callback.onSuccess(null);
+                                    logProjectActivityByTaskId(
+                                            comment.getTaskId() != null ? comment.getTaskId() : -1,
+                                            userId,
+                                            "COMMENT",
+                                            commentId,
+                                            "REACT",
+                                            null,
+                                            reactionType);
                                 } else {
                                     callback.onError("Failed to update reaction counters: " + response.code());
                                 }
@@ -615,6 +651,64 @@ public class TaskRepository {
                 callback.onError(t.getMessage());
             }
         });
+    }
+
+    private void logProjectActivity(long projectId, String userId, String entityType, Long entityId,
+            String actionType, String oldValue, String newValue) {
+        if (projectId <= 0) {
+            return;
+        }
+        ProjectActivity activity = new ProjectActivity(
+                projectId,
+                userIdOrSession(userId),
+                actionType,
+                entityType,
+                entityId,
+                oldValue,
+                newValue);
+        projectApi.createProjectActivity(activity).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                // Fire-and-forget for dashboard counters.
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                // Ignore logging failures to avoid blocking task actions.
+            }
+        });
+    }
+
+    private void logProjectActivityByTaskId(long taskId, String userId, String entityType, Long entityId,
+            String actionType, String oldValue, String newValue) {
+        if (taskId <= 0) {
+            return;
+        }
+        getTaskById(taskId, new TaskCallback<Task>() {
+            @Override
+            public void onSuccess(Task task) {
+                if (task == null) {
+                    return;
+                }
+                logProjectActivity(task.getProjectId(), userId, entityType, entityId, actionType, oldValue, newValue);
+            }
+
+            @Override
+            public void onError(String error) {
+                // Ignore logging fallback errors.
+            }
+        });
+    }
+
+    private String userIdOrSession(String userId) {
+        if (userId != null && !userId.trim().isEmpty()) {
+            return userId;
+        }
+        return SessionManager.getUserId();
+    }
+
+    private String userIdFromStatuses(String oldStatus, String newStatus) {
+        return SessionManager.getUserId();
     }
 
     /**
