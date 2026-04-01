@@ -138,4 +138,25 @@
 
     <string name="task_history_empty">Chưa có lịch sử thay đổi</string>
     <string name="task_history_time_just_now">Vừa xong</string>
+
+    <!-- ==================== -->
+    <!-- WIDGET & SHORTCUTS   -->
+    <!-- ==================== -->
+    <string name="widget_today_title">3 việc cần làm hôm nay</string>
+    <string name="widget_mark_done">Hoàn thành</string>
+    <string name="widget_today_desc">Hiển thị 3 việc cần làm hôm nay và tick Done nhanh</string>
+    <string name="widget_error">Không thể tải danh sách task</string>
+
+    <string name="shortcut_add_task_short">Thêm Task mới</string>
+    <string name="shortcut_add_task_long">Tạo task mới nhanh</string>
+    <string name="shortcut_view_calendar_short">Xem lịch</string>
+    <string name="shortcut_view_calendar_long">Mở lịch công việc</string>
+    <string name="shortcut_search_short">Tìm kiếm</string>
+    <string name="shortcut_search_long">Tìm task hoặc project</string>
+
+    <string name="sticky_title">Task quan trọng nhất</string>
+    <string name="sticky_no_task">Hiện chưa có task đang làm</string>
+    <string name="sticky_done_action">Hoàn thành</string>
+    <string name="sticky_channel_name">Thông báo task thường trực</string>
+    <string name="sticky_channel_desc">Hiển thị task quan trọng nhất đang làm</string>
 </resources>
