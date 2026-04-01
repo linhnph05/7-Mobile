@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/theme_surface"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tvWidgetTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_today_title"
+        android:textColor="@color/theme_text_primary"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/rowTask1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvTask1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="-"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="12sp" />
+
+        <ImageButton
+            android:id="@+id/btnDone1"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/widget_mark_done"
+            android:src="@drawable/ic_check"
+            android:tint="@color/success" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rowTask2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvTask2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="-"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="12sp" />
+
+        <ImageButton
+            android:id="@+id/btnDone2"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/widget_mark_done"
+            android:src="@drawable/ic_check"
+            android:tint="@color/success" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rowTask3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvTask3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="-"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="12sp" />
+
+        <ImageButton
+            android:id="@+id/btnDone3"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/widget_mark_done"
+            android:src="@drawable/ic_check"
+            android:tint="@color/success" />
+    </LinearLayout>
+
+</LinearLayout>
