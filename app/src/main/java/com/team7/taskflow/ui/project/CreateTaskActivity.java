@@ -31,6 +31,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Comment;
+import com.team7.taskflow.domain.model.ProjectHistoryItem;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
@@ -66,6 +67,9 @@ public class CreateTaskActivity extends BaseActivity {
     private View layoutCommentsSection;
     private View layoutHistorySection;
     private View layoutWorkLogSection;
+    private ListView listHistoryFeed;
+    private TextView tvHistoryEmpty;
+    private HistoryEventAdapter historyAdapter;
     private RecyclerView rvComments;
     private EditText etCommentInput;
     private ImageView btnSendComment;
@@ -167,6 +171,8 @@ public class CreateTaskActivity extends BaseActivity {
         layoutCommentsSection = findViewById(R.id.layoutCommentsSection);
         layoutHistorySection = findViewById(R.id.layoutTabHistory);
         layoutWorkLogSection = findViewById(R.id.layoutTabWorkLog);
+        listHistoryFeed = findViewById(R.id.listHistoryFeed);
+        tvHistoryEmpty = findViewById(R.id.tvHistoryEmpty);
         tabLayoutActivity = findViewById(R.id.tabLayoutActivity);
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
@@ -290,83 +296,178 @@ public class CreateTaskActivity extends BaseActivity {
                 taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
                     @Override
                     public void onSuccess(List<Comment> comments) {
-                        runOnUiThread(() -> renderHistoryFeed(result, comments));
+                        runOnUiThread(() -> showHistoryFeed(result, comments));
                     }
 
                     @Override
                     public void onError(String error) {
-                        runOnUiThread(() -> renderHistoryFeed(result, new ArrayList<>()));
+                        runOnUiThread(() -> showHistoryFeed(result, new ArrayList<>()));
                     }
                 });
             }
 
             @Override
             public void onError(String error) {
-                runOnUiThread(() -> {
-                    TextView tvHistoryEmpty = layoutHistorySection.findViewById(R.id.tvHistoryEmpty);
-                    if (tvHistoryEmpty != null) {
-                        tvHistoryEmpty.setText(error);
-                    }
-                });
+                runOnUiThread(() -> showEmptyHistory(error));
             }
         });
     }
 
-    private void renderHistoryFeed(List<TaskActivity> activities, List<Comment> comments) {
-        TextView tvHistoryEmpty = layoutHistorySection != null
-                ? layoutHistorySection.findViewById(R.id.tvHistoryEmpty)
-                : null;
-        if (tvHistoryEmpty == null) return;
+    private void showHistoryFeed(List<TaskActivity> activities, List<Comment> comments) {
+        if (layoutHistorySection == null || listHistoryFeed == null || tvHistoryEmpty == null) {
+            return;
+        }
 
-        List<HistoryFeedRow> rows = new ArrayList<>();
+        List<ProjectHistoryItem> feed = buildHistoryFeed(activities, comments);
+        if (feed.isEmpty()) {
+            showEmptyHistory(getString(R.string.task_history_empty));
+            return;
+        }
+
+        tvHistoryEmpty.setVisibility(View.GONE);
+        listHistoryFeed.setVisibility(View.VISIBLE);
+        listHistoryFeed.setAdapter(new HistoryEventAdapter(this, feed));
+    }
+
+    private void showEmptyHistory(String message) {
+        if (listHistoryFeed != null) {
+            listHistoryFeed.setVisibility(View.GONE);
+            listHistoryFeed.setAdapter(null);
+        }
+        if (tvHistoryEmpty != null) {
+            tvHistoryEmpty.setVisibility(View.VISIBLE);
+            tvHistoryEmpty.setText(message != null && !message.trim().isEmpty()
+                    ? message
+                    : getString(R.string.task_history_empty));
+        }
+    }
+
+    private List<ProjectHistoryItem> buildHistoryFeed(List<TaskActivity> activities, List<Comment> comments) {
+        List<ProjectHistoryItem> feed = new ArrayList<>();
 
         if (activities != null) {
             for (TaskActivity activity : activities) {
                 if (activity == null) continue;
-                rows.add(HistoryFeedRow.forActivity(activity, formatActivityRow(activity), parseHistoryTime(activity.getCreatedAt())));
+                feed.add(buildHistoryItem(activity));
             }
         }
 
         if (comments != null) {
             for (Comment comment : comments) {
                 if (comment == null) continue;
-                rows.add(HistoryFeedRow.forComment(comment, formatCommentRow(comment), parseHistoryTime(comment.getCreatedAt())));
+                feed.add(buildHistoryItem(comment));
             }
         }
 
-        rows.sort((left, right) -> Long.compare(left.timestamp, right.timestamp));
-
-        if (rows.isEmpty()) {
-            tvHistoryEmpty.setText(getString(R.string.task_history_empty));
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (HistoryFeedRow row : rows) {
-            if (sb.length() > 0) {
-                sb.append("\n\n");
-            }
-            sb.append(row.text);
-        }
-
-        tvHistoryEmpty.setText(sb.toString().trim());
+        feed.sort((left, right) -> Long.compare(parseHistoryTime(left != null ? left.getCreatedAt() : null),
+                parseHistoryTime(right != null ? right.getCreatedAt() : null)));
+        return feed;
     }
 
-    private String formatCommentRow(Comment comment) {
-        String author = "Unknown";
-        if (comment.getUser() != null && comment.getUser().getDisplayNameOrEmail() != null
-                && !comment.getUser().getDisplayNameOrEmail().trim().isEmpty()) {
-            author = comment.getUser().getDisplayNameOrEmail().trim();
-        } else if (comment.getUserId() != null && !comment.getUserId().trim().isEmpty()) {
-            author = comment.getUserId().trim();
-        }
+    private ProjectHistoryItem buildHistoryItem(TaskActivity activity) {
+        ProjectHistoryItem item = new ProjectHistoryItem();
+        item.setSource(ProjectHistoryItem.SOURCE_TASK_ACTIVITY);
+        item.setActorId(activity.getUserId());
+        item.setActorName(resolveActorName(activity.getUserId()));
+        item.setAvatarUrl(resolveActorAvatar(activity.getUserId()));
+        item.setActionLabel(resolveTaskActionLabel(activity.getActionType()));
+        item.setTaskTitle(etTitle != null && etTitle.getText() != null && !etTitle.getText().toString().trim().isEmpty()
+                ? etTitle.getText().toString().trim()
+                : "Task");
+        item.setDetail(resolveTaskDetail(activity.getActionType(), activity.getOldValue(), activity.getNewValue()));
+        item.setCreatedAt(activity.getCreatedAt());
+        return item;
+    }
 
-        String content = comment.getContent() != null ? comment.getContent().trim() : "";
-        if (content.isEmpty()) {
-            content = "(No content)";
-        }
+    private ProjectHistoryItem buildHistoryItem(Comment comment) {
+        ProjectHistoryItem item = new ProjectHistoryItem();
+        item.setSource(ProjectHistoryItem.SOURCE_COMMENT);
+        item.setActorId(comment.getUserId());
+        item.setActorName(resolveCommentAuthorName(comment));
+        item.setAvatarUrl(resolveCommentAvatarUrl(comment));
+        item.setActionLabel("đã bình luận");
+        item.setTaskTitle(etTitle != null && etTitle.getText() != null && !etTitle.getText().toString().trim().isEmpty()
+                ? etTitle.getText().toString().trim()
+                : "Task");
+        item.setDetail("Bình luận");
+        item.setCommentContent(comment.getContent());
+        item.setCreatedAt(comment.getCreatedAt());
+        return item;
+    }
 
-        return formatActivityTime(comment.getCreatedAt()) + " - COMMENT: " + author + " nói: " + content;
+    private String resolveActorName(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return "Unknown";
+        }
+        for (User member : projectMembers) {
+            if (member != null && userId.equals(member.getUserId())) {
+                return member.getDisplayNameOrEmail() != null && !member.getDisplayNameOrEmail().trim().isEmpty()
+                        ? member.getDisplayNameOrEmail().trim()
+                        : userId;
+            }
+        }
+        return userId;
+    }
+
+    private String resolveActorAvatar(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return null;
+        }
+        for (User member : projectMembers) {
+            if (member != null && userId.equals(member.getUserId())) {
+                return member.getAvatarUrl();
+            }
+        }
+        return null;
+    }
+
+    private String resolveCommentAuthorName(Comment comment) {
+        if (comment != null && comment.getUser() != null) {
+            if (comment.getUser().getDisplayNameOrEmail() != null && !comment.getUser().getDisplayNameOrEmail().trim().isEmpty()) {
+                return comment.getUser().getDisplayNameOrEmail().trim();
+            }
+            if (comment.getUser().getUserId() != null && !comment.getUser().getUserId().trim().isEmpty()) {
+                return comment.getUser().getUserId().trim();
+            }
+        }
+        return comment != null && comment.getUserId() != null ? comment.getUserId() : "Unknown";
+    }
+
+    private String resolveCommentAvatarUrl(Comment comment) {
+        if (comment != null && comment.getUser() != null && comment.getUser().getAvatarUrl() != null
+                && !comment.getUser().getAvatarUrl().trim().isEmpty()) {
+            return comment.getUser().getAvatarUrl().trim();
+        }
+        if (comment != null && comment.getUserId() != null) {
+            return resolveActorAvatar(comment.getUserId());
+        }
+        return null;
+    }
+
+    private String resolveTaskActionLabel(String actionType) {
+        if (actionType == null || actionType.trim().isEmpty()) {
+            return "đã cập nhật";
+        }
+        String normalized = actionType.trim().toUpperCase(Locale.US);
+        if ("CREATE".equals(normalized)) return "đã tạo";
+        if ("UPDATE_STATUS".equals(normalized)) return "đã đổi trạng thái";
+        if ("DELETE".equals(normalized)) return "đã đưa vào thùng rác";
+        if ("RESTORE".equals(normalized)) return "đã khôi phục";
+        if ("HARD_DELETE".equals(normalized)) return "đã xóa vĩnh viễn";
+        if (normalized.startsWith("UPDATE")) return "đã chỉnh sửa";
+        return "đã cập nhật";
+    }
+
+    private String resolveTaskDetail(String actionType, String oldValue, String newValue) {
+        String oldText = oldValue != null && !oldValue.trim().isEmpty() ? oldValue.trim() : "-";
+        String newText = newValue != null && !newValue.trim().isEmpty() ? newValue.trim() : "-";
+        String normalized = actionType != null ? actionType.trim().toUpperCase(Locale.US) : "";
+        if ("CREATE".equals(normalized)) return "Trạng thái ban đầu: " + newText;
+        if ("HARD_DELETE".equals(normalized)) return "Task đã bị xóa";
+        if ("UPDATE_STATUS".equals(normalized) || "DELETE".equals(normalized) || "RESTORE".equals(normalized)) {
+            return oldText + " -> " + newText;
+        }
+        return oldText + " -> " + newText;
     }
 
     private long parseHistoryTime(String raw) {
@@ -375,24 +476,6 @@ public class CreateTaskActivity extends BaseActivity {
             return java.time.OffsetDateTime.parse(raw).toInstant().toEpochMilli();
         } catch (Exception ignored) {
             return 0L;
-        }
-    }
-
-    private static class HistoryFeedRow {
-        final String text;
-        final long timestamp;
-
-        private HistoryFeedRow(String text, long timestamp) {
-            this.text = text;
-            this.timestamp = timestamp;
-        }
-
-        static HistoryFeedRow forActivity(TaskActivity activity, String text, long timestamp) {
-            return new HistoryFeedRow(text, timestamp);
-        }
-
-        static HistoryFeedRow forComment(Comment comment, String text, long timestamp) {
-            return new HistoryFeedRow(text, timestamp);
         }
     }
 
