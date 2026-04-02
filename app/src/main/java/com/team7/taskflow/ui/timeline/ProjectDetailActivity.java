@@ -54,7 +54,6 @@ public class ProjectDetailActivity extends BaseActivity {
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
     private BottomNavigationView bottomNavigationView;
-
     private View btnMore;
     private View btnProjectActivity;
     private int currentTabIndex = -1;
@@ -140,8 +139,6 @@ public class ProjectDetailActivity extends BaseActivity {
             if (btnBack != null) btnBack.setOnClickListener(v -> finish());
             if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
         }
-
-
 
         if (btnProjectActivity != null) {
             btnProjectActivity.setOnClickListener(v -> openProjectActivityHistory());
