@@ -50,6 +50,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
     private BottomNavigationView bottomNavigationView;
+    private View btnProjectActivity;
     private View btnMore;
     private int currentTabIndex = -1;
 
@@ -110,6 +111,7 @@ public class ProjectDetailActivity extends BaseActivity {
         tabTimeline = findViewById(R.id.tabTimeline);
         tabCalendar = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        btnProjectActivity = findViewById(R.id.btnProjectActivity);
         btnMore = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
@@ -132,9 +134,13 @@ public class ProjectDetailActivity extends BaseActivity {
         View btnBack = findViewById(R.id.btnBack);
         if (isMyTasksMode) {
             if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
+            if (btnProjectActivity != null) btnProjectActivity.setVisibility(View.GONE);
             if (btnMore != null) btnMore.setVisibility(View.GONE);
         } else {
             if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+            if (btnProjectActivity != null) {
+                btnProjectActivity.setOnClickListener(v -> openProjectActivityHistory());
+            }
             if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
         }
 
@@ -270,6 +276,9 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void updateHeaderActionsForTab(int tabIndex) {
+        if (btnProjectActivity != null) {
+            btnProjectActivity.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
+        }
         if (btnMore != null) {
             if (isMyTasksMode) {
                 btnMore.setVisibility(View.GONE);
@@ -445,5 +454,16 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         bottomSheet.show();
+    }
+
+    private void openProjectActivityHistory() {
+        if (projectId <= 0) {
+            Toast.makeText(this, "Project not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, com.team7.taskflow.ui.project.ProjectActivityHistoryActivity.class);
+        intent.putExtra("project_id", projectId);
+        intent.putExtra("project_name", projectName);
+        startActivity(intent);
     }
 }

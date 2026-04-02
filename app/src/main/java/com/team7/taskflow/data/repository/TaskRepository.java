@@ -527,7 +527,16 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    callback.onSuccess(response.body().get(0));
+                    Comment updated = response.body().get(0);
+                    callback.onSuccess(updated);
+                    logProjectActivityByTaskId(
+                            updated.getTaskId() != null ? updated.getTaskId() : -1,
+                            userId,
+                            "COMMENT",
+                            updated.getId(),
+                            "COMMENT_UPDATE",
+                            null,
+                            content);
                 } else {
                     callback.onError("Failed to update comment: " + response.code());
                 }
@@ -541,19 +550,60 @@ public class TaskRepository {
     }
 
     public void deleteTaskComment(long commentId, String userId, TaskCallback<Void> callback) {
-        taskApi.deleteComment("eq." + commentId, "eq." + userId).enqueue(new Callback<Void>() {
+        taskApi.getCommentById("eq." + commentId, "comment_id,task_id,content").enqueue(new Callback<List<Comment>>() {
             @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if (response.isSuccessful()) {
-                    callback.onSuccess(null);
-                } else {
-                    callback.onError("Failed to delete comment: " + response.code());
+            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                Comment existing = null;
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    existing = response.body().get(0);
                 }
+                final Comment finalExisting = existing;
+
+                taskApi.deleteComment("eq." + commentId, "eq." + userId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            callback.onSuccess(null);
+                            long taskId = finalExisting != null && finalExisting.getTaskId() != null ? finalExisting.getTaskId() : -1;
+                            logProjectActivityByTaskId(
+                                    taskId,
+                                    userId,
+                                    "COMMENT",
+                                    commentId,
+                                    "COMMENT_DELETE",
+                                    finalExisting != null ? finalExisting.getContent() : null,
+                                    null);
+                        } else {
+                            callback.onError("Failed to delete comment: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
             }
 
             @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                callback.onError(t.getMessage());
+            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                // Fallback: still try delete even if prefetch fails.
+                taskApi.deleteComment("eq." + commentId, "eq." + userId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            callback.onSuccess(null);
+                            logProjectActivityByTaskId(-1, userId, "COMMENT", commentId, "COMMENT_DELETE", null, null);
+                        } else {
+                            callback.onError("Failed to delete comment: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
             }
         });
     }
@@ -579,6 +629,7 @@ public class TaskRepository {
                         public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                             if (response.isSuccessful()) {
                                 callback.onSuccess(null);
+                                logReactionProjectActivity(commentId, userId, normalizedReaction, "REMOVE_REACTION");
                             } else {
                                 callback.onError("Failed to remove reaction: " + response.code());
                             }
@@ -603,6 +654,7 @@ public class TaskRepository {
                             public void onResponse(@NonNull Call<List<CommentReaction>> call, @NonNull Response<List<CommentReaction>> response) {
                                 if (response.isSuccessful()) {
                                     callback.onSuccess(null);
+                                    logReactionProjectActivity(commentId, userId, normalizedReaction, "ADD_REACTION");
                                 } else {
                                     callback.onError("Failed to save reaction: " + response.code());
                                 }
@@ -618,6 +670,31 @@ public class TaskRepository {
             @Override
             public void onFailure(@NonNull Call<List<CommentReaction>> call, @NonNull Throwable t) {
                 callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    private void logReactionProjectActivity(long commentId, String userId, String reactionType, String actionType) {
+        taskApi.getCommentById("eq." + commentId, "comment_id,task_id").enqueue(new Callback<List<Comment>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    Comment comment = response.body().get(0);
+                    long taskId = comment.getTaskId() != null ? comment.getTaskId() : -1;
+                    logProjectActivityByTaskId(
+                            taskId,
+                            userId,
+                            "COMMENT",
+                            commentId,
+                            actionType,
+                            null,
+                            reactionType);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                // Ignore logging failures
             }
         });
     }
