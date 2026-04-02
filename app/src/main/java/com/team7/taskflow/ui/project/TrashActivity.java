@@ -1,0 +1,205 @@
+package com.team7.taskflow.ui.project;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.team7.taskflow.R;
+import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.utils.SessionManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TrashActivity extends BaseActivity {
+
+    private static final String TAG = "TrashActivity";
+
+    private ImageView btnBack;
+    private TextView btnEmptyTrash;
+    private TextView tvTotalItems;
+    private TextView tvAutoCleanup;
+    private RecyclerView rvTrashItems;
+    private LinearLayout emptyState;
+    private TrashItemAdapter adapter;
+    private List<Task> trashedTasks = new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_trash);
+
+        // Handle window insets
+        View scrollView = findViewById(R.id.rvTrashItems);
+        ViewCompat.setOnApplyWindowInsetsListener(scrollView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+            return insets;
+        });
+
+        SessionManager.init(this);
+        initViews();
+        setupRecyclerView();
+        setupListeners();
+        loadTrashedTasks();
+    }
+
+    private void initViews() {
+        btnBack = findViewById(R.id.btnBack);
+        btnEmptyTrash = findViewById(R.id.btnEmptyTrash);
+        tvTotalItems = findViewById(R.id.tvTotalItems);
+        tvAutoCleanup = findViewById(R.id.tvAutoCleanup);
+        rvTrashItems = findViewById(R.id.rvTrashItems);
+        emptyState = findViewById(R.id.emptyState);
+    }
+
+    private void setupRecyclerView() {
+        adapter = new TrashItemAdapter(trashedTasks, task -> {
+            // Restore action
+            restoreTask(task);
+        }, task -> {
+            // Delete permanently action
+            deleteTaskPermanently(task);
+        });
+        rvTrashItems.setLayoutManager(new LinearLayoutManager(this));
+        rvTrashItems.setAdapter(adapter);
+    }
+
+    private void setupListeners() {
+        btnBack.setOnClickListener(v -> finish());
+        btnEmptyTrash.setOnClickListener(v -> emptyAllTrash());
+    }
+
+    private void loadTrashedTasks() {
+        String userId = SessionManager.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            Log.e(TAG, "No userId");
+            return;
+        }
+
+        TaskRepository.getInstance().getMyTasksWithProjectNameByStatus(userId, "TRASH", new TaskRepository.TaskCallback<List<Task>>() {
+            @Override
+            public void onSuccess(List<Task> result) {
+                trashedTasks.clear();
+                if (result != null) {
+                    trashedTasks.addAll(result);
+                }
+                adapter.notifyDataSetChanged();
+                updateUI();
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error loading trashed tasks: " + error);
+                updateUI();
+            }
+        });
+    }
+
+    private void updateUI() {
+        tvTotalItems.setText(String.valueOf(trashedTasks.size()));
+        // Calculate cleanup time (30 days from now, simplified to "12 Hours 45 Mins" for demo)
+        tvAutoCleanup.setText("12 Hours 45 Mins");
+
+        if (trashedTasks.isEmpty()) {
+            rvTrashItems.setVisibility(View.GONE);
+            emptyState.setVisibility(View.VISIBLE);
+        } else {
+            rvTrashItems.setVisibility(View.VISIBLE);
+            emptyState.setVisibility(View.GONE);
+        }
+    }
+
+    private void restoreTask(Task task) {
+        if (task == null || task.getId() == 0) return;
+
+        TaskRepository.getInstance().restoreTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Log.d(TAG, "Task restored: " + task.getId());
+                trashedTasks.remove(task);
+                adapter.notifyDataSetChanged();
+                updateUI();
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error restoring task: " + error);
+            }
+        });
+    }
+
+    private void deleteTaskPermanently(Task task) {
+        if (task == null || task.getId() == 0) return;
+
+        TaskRepository.getInstance().permanentlyDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Log.d(TAG, "Task deleted permanently: " + task.getId());
+                trashedTasks.remove(task);
+                adapter.notifyDataSetChanged();
+                updateUI();
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error deleting task: " + error);
+            }
+        });
+    }
+
+    private void emptyAllTrash() {
+        // Show confirmation dialog
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Empty Trash")
+                .setMessage("This will permanently delete all items in trash. This action cannot be undone.")
+                .setPositiveButton("Empty", (dialog, which) -> {
+                    performEmptyTrash();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+    private void performEmptyTrash() {
+        List<Task> toDelete = new ArrayList<>(trashedTasks);
+        int[] deletedCount = {0};
+
+        for (Task task : toDelete) {
+            TaskRepository.getInstance().permanentlyDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    deletedCount[0]++;
+                    if (deletedCount[0] == toDelete.size()) {
+                        trashedTasks.clear();
+                        adapter.notifyDataSetChanged();
+                        updateUI();
+                        Log.d(TAG, "All trash emptied");
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Error emptying trash: " + error);
+                }
+            });
+        }
+    }
+}

@@ -77,17 +77,6 @@
                     app:layout_constraintBottom_toBottomOf="parent">
 
                     <ImageButton
-                        android:id="@+id/btnTrash"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginEnd="4dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Trash"
-                        android:src="@drawable/ic_trash"
-                        android:visibility="gone"
-                        app:tint="?attr/colorOnSurface" />
-
-                    <ImageButton
                         android:id="@+id/btnMoreOptions"
                         android:layout_width="36dp"
                         android:layout_height="36dp"

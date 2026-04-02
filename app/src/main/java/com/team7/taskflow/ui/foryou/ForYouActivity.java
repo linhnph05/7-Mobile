@@ -188,6 +188,10 @@ public class ForYouActivity extends BaseActivity {
                     return;
                 }
                 User user = response.body().get(0);
+                String displayName = user.getDisplayName();
+                if (!TextUtils.isEmpty(displayName)) {
+                    runOnUiThread(() -> tvGreeting.setText(getString(R.string.for_you_greeting_format, displayName)));
+                }
                 if (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty()) {
                     return;
                 }
