@@ -36,11 +36,11 @@ import java.util.List;
 
 public class ProjectDetailActivity extends BaseActivity {
 
-    private static final int TAB_OVERVIEW = 0;
-    private static final int TAB_BOARD = 1;
-    private static final int TAB_LIST = 2;
-    private static final int TAB_TIMELINE = 3;
-    private static final int TAB_CALENDAR = 4;
+    private static final int TAB_OVERVIEW  = 0;
+    private static final int TAB_BOARD     = 1;
+    private static final int TAB_LIST      = 2;
+    private static final int TAB_TIMELINE  = 3;
+    private static final int TAB_CALENDAR  = 4;
 
     private long projectId;
     private String projectName;
@@ -48,6 +48,9 @@ public class ProjectDetailActivity extends BaseActivity {
     private String projectDesc;
     private String currentUserId;
     private boolean isMyTasksMode;
+
+    // ✅ FIX: Thêm field lưu role của user hiện tại
+    private boolean isViewer = false;
 
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
@@ -64,7 +67,7 @@ public class ProjectDetailActivity extends BaseActivity {
 
         projectId = getIntent().getLongExtra("project_id", -1);
         projectName = getIntent().getStringExtra("project_name");
-        projectKey = getIntent().getStringExtra("project_key");
+        projectKey  = getIntent().getStringExtra("project_key");
         projectDesc = getIntent().getStringExtra("project_desc");
         isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
 
@@ -74,9 +77,8 @@ public class ProjectDetailActivity extends BaseActivity {
         initViews();
         setupNavigation();
         setupBottomNavigation();
-        loadUserInfo();
+        loadUserInfo(); // ✅ Load role → ẩn/hiện FAB
 
-        // Handle insets for status bar extension
         View header = findViewById(R.id.layoutHeader);
         if (header != null) {
             ViewCompat.setOnApplyWindowInsetsListener(header, (v, insets) -> {
@@ -86,35 +88,32 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        // Always open Overview tab first (both for projects and My Assigned Tasks)
         openTab(TAB_OVERVIEW);
     }
 
     private void initViews() {
         tvProjectName = findViewById(R.id.tvProjectName);
-        tvMonth = findViewById(R.id.tvMonth);
+        tvMonth       = findViewById(R.id.tvMonth);
 
         if (tvProjectName != null) {
-            if (isMyTasksMode) {
-                tvProjectName.setText("My Assigned Tasks");
-            } else {
-                tvProjectName.setText(projectName != null ? projectName : "Project");
-            }
+            tvProjectName.setText(isMyTasksMode ? "My Assigned Tasks"
+                    : (projectName != null ? projectName : "Project"));
         }
-        
+
         if (tvMonth != null) {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+                    "MMMM yyyy", java.util.Locale.getDefault());
             tvMonth.setText(sdf.format(java.util.Calendar.getInstance().getTime()));
         }
 
-        tabOverview = findViewById(R.id.tabOverview);
-        tabBoard = findViewById(R.id.tabBoard);
-        tabList = findViewById(R.id.tabList);
-        tabTimeline = findViewById(R.id.tabTimeline);
-        tabCalendar = findViewById(R.id.tabCalendar);
+        tabOverview        = findViewById(R.id.tabOverview);
+        tabBoard           = findViewById(R.id.tabBoard);
+        tabList            = findViewById(R.id.tabList);
+        tabTimeline        = findViewById(R.id.tabTimeline);
+        tabCalendar        = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        btnTrash = findViewById(R.id.btnTrash);
-        btnMore = findViewById(R.id.btnMoreOptions);
+        btnTrash           = findViewById(R.id.btnTrash);
+        btnMore            = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
         View bottomBar = findViewById(R.id.includeBottomBar);
@@ -163,28 +162,15 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void setupNavigation() {
-        if (tabOverview != null) {
-            tabOverview.setOnClickListener(v -> openTab(TAB_OVERVIEW));
-        }
-
-        if (tabBoard != null) {
-            tabBoard.setOnClickListener(v -> openTab(TAB_BOARD));
-        }
-
-        if (tabList != null) {
-            tabList.setOnClickListener(v -> openTab(TAB_LIST));
-        }
-
-        if (tabTimeline != null) {
-            tabTimeline.setOnClickListener(v -> openTab(TAB_TIMELINE));
-        }
-
-        if (tabCalendar != null) {
-            tabCalendar.setOnClickListener(v -> openTab(TAB_CALENDAR));
-        }
+        if (tabOverview  != null) tabOverview.setOnClickListener(v  -> openTab(TAB_OVERVIEW));
+        if (tabBoard     != null) tabBoard.setOnClickListener(v     -> openTab(TAB_BOARD));
+        if (tabList      != null) tabList.setOnClickListener(v      -> openTab(TAB_LIST));
+        if (tabTimeline  != null) tabTimeline.setOnClickListener(v  -> openTab(TAB_TIMELINE));
+        if (tabCalendar  != null) tabCalendar.setOnClickListener(v  -> openTab(TAB_CALENDAR));
 
         View fabAddAI = findViewById(R.id.fabAddAI);
         if (fabAddAI != null) {
+            // ✅ Mặc định ẩn nếu isMyTasksMode, sẽ được cập nhật lại sau khi loadUserInfo() xong
             fabAddAI.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
             fabAddAI.setOnClickListener(v -> {
                 Intent aiIntent = new Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
@@ -200,18 +186,18 @@ public class ProjectDetailActivity extends BaseActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_tasks) {
-                return true;
-            }
+            if (id == R.id.nav_tasks)  return true;
             if (id == R.id.nav_home) {
                 Intent intent = new Intent(this, DashboardActivity.class);
-                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                NavigationUtils.startActivityWithNavAnimation(this, intent,
+                        NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
                 finish();
                 return true;
             }
             if (id == R.id.nav_settings) {
                 Intent intent = new Intent(this, ProfileActivity.class);
-                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                NavigationUtils.startActivityWithNavAnimation(this, intent,
+                        NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
                 finish();
                 return true;
             }
@@ -221,29 +207,55 @@ public class ProjectDetailActivity extends BaseActivity {
 
     private void loadUserInfo() {
         if (currentUserId == null || currentUserId.isEmpty()) return;
-        
+
+        // ✅ FIX: Query role của user hiện tại trong project này
         com.team7.taskflow.data.remote.SupabaseClient.getInstance()
-            .getService(com.team7.taskflow.data.remote.api.UserApi.class)
-            .getUserById("eq." + currentUserId, "*")
-            .enqueue(new retrofit2.Callback<List<com.team7.taskflow.domain.model.User>>() {
-                @Override
-                public void onResponse(@NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.User>> response) {
-                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                        com.team7.taskflow.domain.model.User user = response.body().get(0);
-                        // User info loaded but no longer needed for top bar avatar
+                .getService(com.team7.taskflow.data.remote.api.MemberApiService.class)
+                .getMembers("eq." + projectId, "user_id,role")
+                .enqueue(new retrofit2.Callback<List<com.team7.taskflow.domain.model.ProjectMember>>() {
+                    @Override
+                    public void onResponse(
+                            @NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.ProjectMember>> call,
+                            @NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.ProjectMember>> response) {
+
+                        if (!response.isSuccessful() || response.body() == null) return;
+
+                        for (com.team7.taskflow.domain.model.ProjectMember m : response.body()) {
+                            if (currentUserId.equals(m.getUserId())) {
+                                isViewer = m.isViewer();
+                                runOnUiThread(() -> applyRoleRestrictions());
+                                break;
+                            }
+                        }
                     }
-                }
-                @Override
-                public void onFailure(@NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.User>> call, @NonNull Throwable t) {
-                    Log.e("ProjectDetail", "Load user failed: " + t.getMessage());
-                }
-            });
+
+                    @Override
+                    public void onFailure(
+                            @NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.ProjectMember>> call,
+                            @NonNull Throwable t) {
+                        Log.e("ProjectDetail", "Load role failed: " + t.getMessage());
+                    }
+                });
+    }
+
+    // ✅ FIX: Ẩn FAB nếu là Viewer
+    private void applyRoleRestrictions() {
+        if (!isViewer) return; // OWNER / ADMIN / MEMBER → không đụng gì
+
+        // Viewer không được tạo task → ẩn FAB
+        View fabAddAI = findViewById(R.id.fabAddAI);
+        if (fabAddAI != null) {
+            fabAddAI.setVisibility(View.GONE);
+        }
+
+        // Viewer không được xóa task → ẩn nút thùng rác
+        if (btnTrash != null) {
+            btnTrash.setVisibility(View.GONE);
+        }
     }
 
     private void openTab(int targetTabIndex) {
-        if (targetTabIndex == TAB_OVERVIEW && isMyTasksMode && tabOverview == null) {
-            return;
-        }
+        if (targetTabIndex == TAB_OVERVIEW && isMyTasksMode && tabOverview == null) return;
 
         Fragment fragment;
         String tag;
@@ -251,28 +263,28 @@ public class ProjectDetailActivity extends BaseActivity {
 
         switch (targetTabIndex) {
             case TAB_OVERVIEW:
-                fragment = ProjectOverviewFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag = "OVERVIEW";
+                fragment  = ProjectOverviewFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag       = "OVERVIEW";
                 activeTab = tabOverview;
                 break;
             case TAB_BOARD:
-                fragment = BoardFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag = "BOARD";
+                fragment  = BoardFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag       = "BOARD";
                 activeTab = tabBoard;
                 break;
             case TAB_LIST:
-                fragment = TaskListFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag = "LIST";
+                fragment  = TaskListFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag       = "LIST";
                 activeTab = tabList;
                 break;
             case TAB_TIMELINE:
-                fragment = TimelineFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag = "TIMELINE";
+                fragment  = TimelineFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag       = "TIMELINE";
                 activeTab = tabTimeline;
                 break;
             case TAB_CALENDAR:
-                fragment = CalendarFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag = "CALENDAR";
+                fragment  = CalendarFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag       = "CALENDAR";
                 activeTab = tabCalendar;
                 break;
             default:
@@ -291,22 +303,17 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void updateHeaderActionsForTab(int tabIndex) {
-        boolean showTrash = true;
         if (btnTrash != null) {
-            btnTrash.setVisibility(showTrash ? View.VISIBLE : View.GONE);
+            // ✅ Viewer không thấy nút thùng rác
+            btnTrash.setVisibility(isViewer ? View.GONE : View.VISIBLE);
         }
         if (btnMore != null) {
-            if (isMyTasksMode) {
-                btnMore.setVisibility(View.GONE);
-            } else {
-                btnMore.setVisibility(View.VISIBLE);
-            }
+            btnMore.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
         }
     }
 
     private void switchFragment(Fragment fragment, String tag, int targetTabIndex) {
         androidx.fragment.app.FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
-
         if (currentTabIndex != -1) {
             if (targetTabIndex > currentTabIndex) {
                 tx.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -314,7 +321,6 @@ public class ProjectDetailActivity extends BaseActivity {
                 tx.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         }
-
         tx.replace(R.id.fragment_container, fragment, tag).commit();
         currentTabIndex = targetTabIndex;
     }
@@ -329,12 +335,10 @@ public class ProjectDetailActivity extends BaseActivity {
         if (activeTab == null) return;
 
         ImageView icon = (ImageView) activeTab.getChildAt(0);
-        TextView text = (TextView) activeTab.getChildAt(1);
-        
+        TextView  text = (TextView)  activeTab.getChildAt(1);
         icon.setColorFilter(ContextCompat.getColor(this, R.color.primary));
         text.setTextColor(ContextCompat.getColor(this, R.color.primary));
         text.setTypeface(null, android.graphics.Typeface.BOLD);
-        
         if (activeTab.getChildCount() > 2) {
             activeTab.getChildAt(2).setVisibility(View.VISIBLE);
         }
@@ -343,12 +347,10 @@ public class ProjectDetailActivity extends BaseActivity {
     private void resetTab(LinearLayout tab) {
         if (tab == null) return;
         ImageView icon = (ImageView) tab.getChildAt(0);
-        TextView text = (TextView) tab.getChildAt(1);
-        
+        TextView  text = (TextView)  tab.getChildAt(1);
         icon.setColorFilter(Color.parseColor("#888888"));
         text.setTextColor(Color.parseColor("#888888"));
         text.setTypeface(null, android.graphics.Typeface.NORMAL);
-        
         if (tab.getChildCount() > 2) {
             tab.getChildAt(2).setVisibility(View.GONE);
         }
@@ -370,15 +372,12 @@ public class ProjectDetailActivity extends BaseActivity {
 
         android.widget.EditText etProjectName = sheetView.findViewById(R.id.etProjectName);
         android.widget.EditText etProjectDesc = sheetView.findViewById(R.id.etProjectDesc);
-        TextView tvProjectKey = sheetView.findViewById(R.id.tvProjectKey);
+        TextView tvProjectKey                 = sheetView.findViewById(R.id.tvProjectKey);
         android.widget.ImageView btnSaveProject = sheetView.findViewById(R.id.btnSaveProject);
 
-        if (etProjectName != null && projectName != null)
-            etProjectName.setText(projectName);
-        if (etProjectDesc != null && projectDesc != null)
-            etProjectDesc.setText(projectDesc);
-        if (tvProjectKey != null)
-            tvProjectKey.setText(projectKey != null ? "KEY: " + projectKey : "N/A");
+        if (etProjectName != null && projectName != null) etProjectName.setText(projectName);
+        if (etProjectDesc != null && projectDesc  != null) etProjectDesc.setText(projectDesc);
+        if (tvProjectKey  != null) tvProjectKey.setText(projectKey != null ? "KEY: " + projectKey : "N/A");
 
         if (btnSaveProject != null) {
             btnSaveProject.setOnClickListener(v -> {
@@ -395,22 +394,25 @@ public class ProjectDetailActivity extends BaseActivity {
 
                 com.team7.taskflow.data.repository.ProjectRepository.getInstance().updateProject(
                         projectId, updateP,
-                        new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<com.team7.taskflow.domain.model.Project>() {
-                    @Override
-                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
-                        runOnUiThread(() -> {
-                            projectName = newName;
-                            projectDesc = newDesc;
-                            tvProjectName.setText(newName);
-                            Toast.makeText(ProjectDetailActivity.this, "Cập nhật dự án thành công!", Toast.LENGTH_SHORT).show();
-                            bottomSheet.dismiss();
+                        new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<
+                                com.team7.taskflow.domain.model.Project>() {
+                            @Override
+                            public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                                runOnUiThread(() -> {
+                                    projectName = newName;
+                                    projectDesc = newDesc;
+                                    tvProjectName.setText(newName);
+                                    Toast.makeText(ProjectDetailActivity.this,
+                                            "Cập nhật dự án thành công!", Toast.LENGTH_SHORT).show();
+                                    bottomSheet.dismiss();
+                                });
+                            }
+                            @Override
+                            public void onError(String error) {
+                                runOnUiThread(() -> Toast.makeText(
+                                        ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
+                            }
                         });
-                    }
-                    @Override
-                    public void onError(String error) {
-                        runOnUiThread(() -> Toast.makeText(ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
-                    }
-                });
             });
         }
 
@@ -425,9 +427,7 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
-        if (btnCollapse != null) {
-            btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
-        }
+        if (btnCollapse != null) btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
 
         bottomSheet.show();
     }
