@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -321,7 +320,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onTaskMenuClick(Task task, View view) {
-                showTaskMenu(task, view);
+                moveTaskToTrash(task);
             }
         });
     }
@@ -458,35 +457,12 @@ public class CalendarActivity extends BaseActivity {
         dialog.show();
     }
 
-    private void showTaskMenu(Task task, View anchor) {
-        PopupMenu popup = new PopupMenu(this, anchor);
-        popup.getMenu().add(0, 1, 0, "Edit Task");
-        popup.getMenu().add(0, 2, 1, "Delete Task");
-
-        popup.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case 1: // Edit
-                    Intent intent = new Intent(CalendarActivity.this, CreateTaskActivity.class);
-                    intent.putExtra("project_id", task.getProjectId());
-                    intent.putExtra("task_id", task.getId());
-                    taskLauncher.launch(intent);
-                    return true;
-                case 2: // Delete
-                    deleteTask(task);
-                    return true;
-                default:
-                    return false;
-            }
-        });
-        popup.show();
-    }
-
-    private void deleteTask(Task task) {
-        taskRepository.deleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+    private void moveTaskToTrash(Task task) {
+        taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 runOnUiThread(() -> {
-                    Toast.makeText(CalendarActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CalendarActivity.this, "Đã chuyển task vào thùng rác", Toast.LENGTH_SHORT).show();
                     loadTasks();
                 });
             }

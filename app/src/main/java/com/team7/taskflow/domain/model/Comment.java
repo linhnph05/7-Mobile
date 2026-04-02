@@ -22,14 +22,17 @@ public class Comment {
     @SerializedName("users")
     private User user;
 
-    @SerializedName("like")
     private Integer likeCount;
 
-    @SerializedName("heart")
     private Integer heartCount;
 
-    @SerializedName("congrats")
     private Integer congratsCount;
+
+    private boolean likeSelected;
+
+    private boolean heartSelected;
+
+    private boolean congratsSelected;
 
     public Long getId() {
         return id;
@@ -101,5 +104,29 @@ public class Comment {
 
     public void setCongratsCount(Integer congratsCount) {
         this.congratsCount = congratsCount;
+    }
+
+    public boolean isLikeSelected() {
+        return likeSelected;
+    }
+
+    public void setLikeSelected(boolean likeSelected) {
+        this.likeSelected = likeSelected;
+    }
+
+    public boolean isHeartSelected() {
+        return heartSelected;
+    }
+
+    public void setHeartSelected(boolean heartSelected) {
+        this.heartSelected = heartSelected;
+    }
+
+    public boolean isCongratsSelected() {
+        return congratsSelected;
+    }
+
+    public void setCongratsSelected(boolean congratsSelected) {
+        this.congratsSelected = congratsSelected;
     }
 }

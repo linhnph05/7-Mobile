@@ -18,8 +18,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
@@ -52,7 +50,6 @@ public class ProjectDetailActivity extends BaseActivity {
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
     private BottomNavigationView bottomNavigationView;
-    private View btnTrash;
     private View btnMore;
     private int currentTabIndex = -1;
 
@@ -113,7 +110,6 @@ public class ProjectDetailActivity extends BaseActivity {
         tabTimeline = findViewById(R.id.tabTimeline);
         tabCalendar = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        btnTrash = findViewById(R.id.btnTrash);
         btnMore = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
@@ -140,23 +136,6 @@ public class ProjectDetailActivity extends BaseActivity {
         } else {
             if (btnBack != null) btnBack.setOnClickListener(v -> finish());
             if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
-        }
-
-        if (btnTrash != null) {
-            btnTrash.setOnClickListener(v -> {
-                Fragment listFragment = getSupportFragmentManager().findFragmentByTag("LIST");
-                if (listFragment instanceof TaskListFragment) {
-                    ((TaskListFragment) listFragment).openTrashFromHeader();
-                } else {
-                    openTab(TAB_LIST);
-                    findViewById(R.id.fragment_container).post(() -> {
-                        Fragment readyFragment = getSupportFragmentManager().findFragmentByTag("LIST");
-                        if (readyFragment instanceof TaskListFragment) {
-                            ((TaskListFragment) readyFragment).openTrashFromHeader();
-                        }
-                    });
-                }
-            });
         }
 
         updateHeaderActionsForTab(TAB_OVERVIEW);
@@ -291,10 +270,6 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void updateHeaderActionsForTab(int tabIndex) {
-        boolean showTrash = true;
-        if (btnTrash != null) {
-            btnTrash.setVisibility(showTrash ? View.VISIBLE : View.GONE);
-        }
         if (btnMore != null) {
             if (isMyTasksMode) {
                 btnMore.setVisibility(View.GONE);
@@ -355,7 +330,8 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void showProjectSettingsPanel() {
-        BottomSheetDialog bottomSheet = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        com.google.android.material.bottomsheet.BottomSheetDialog bottomSheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
         View sheetView = getLayoutInflater().inflate(R.layout.layout_project_settings_panel, null);
         bottomSheet.setContentView(sheetView);
 
@@ -421,6 +397,45 @@ public class ProjectDetailActivity extends BaseActivity {
                 com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
                         com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(projectId);
                 sheet.show(getSupportFragmentManager(), "members");
+            });
+        }
+
+        View btnDeleteProject = sheetView.findViewById(R.id.btnDeleteProject);
+        if (btnDeleteProject != null) {
+            btnDeleteProject.setOnClickListener(v -> {
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Delete Project")
+                        .setMessage("Are you sure you want to delete this project?")
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            com.team7.taskflow.data.repository.ProjectRepository.getInstance().deleteProject(
+                                    projectId,
+                                    new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            runOnUiThread(() -> {
+                                                Toast.makeText(ProjectDetailActivity.this, "Project deleted", Toast.LENGTH_SHORT).show();
+                                                bottomSheet.dismiss();
+                                                finish();
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onError(String error) {
+                                            runOnUiThread(() -> Toast.makeText(ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
+                                        }
+                                    });
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .show();
+            });
+        }
+
+        View btnViewArchived = sheetView.findViewById(R.id.btnViewArchived);
+        if (btnViewArchived != null) {
+            btnViewArchived.setOnClickListener(v -> {
+                bottomSheet.dismiss();
+                Intent intent = new Intent(this, com.team7.taskflow.ui.project.TrashActivity.class);
+                startActivity(intent);
             });
         }
 

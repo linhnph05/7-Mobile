@@ -9,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -90,7 +89,7 @@ public class TaskListActivity extends BaseActivity {
 
             @Override
             public void onTaskMenuClick(Task task, View view) {
-                showTaskMenu(task, view);
+                moveTaskToTrash(task);
             }
         });
     }
@@ -179,22 +178,20 @@ public class TaskListActivity extends BaseActivity {
         adapter.setTasks(filtered);
     }
 
-    private void showTaskMenu(Task task, View view) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenu().add("Move to Trash");
-        popup.setOnMenuItemClickListener(item -> {
-            taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                    runOnUiThread(() -> loadTasks());
-                }
-                @Override
-                public void onError(String error) {
-                    runOnUiThread(() -> Toast.makeText(TaskListActivity.this, error, Toast.LENGTH_SHORT).show());
-                }
-            });
-            return true;
+    private void moveTaskToTrash(Task task) {
+        taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                runOnUiThread(() -> {
+                    Toast.makeText(TaskListActivity.this, "Đã chuyển task vào thùng rác", Toast.LENGTH_SHORT).show();
+                    loadTasks();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(TaskListActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
         });
-        popup.show();
     }
 }
