@@ -4,16 +4,28 @@ import androidx.annotation.NonNull;
 
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.SupabaseConfig;
+import com.team7.taskflow.data.remote.api.ActivityApi;
 import com.team7.taskflow.data.remote.api.ProjectApi;
+import com.team7.taskflow.data.remote.api.TaskApi;
 import com.team7.taskflow.data.remote.dto.CreateProjectRequest;
+import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.ProjectActivity;
+import com.team7.taskflow.domain.model.ProjectHistoryItem;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
@@ -29,9 +41,13 @@ public class ProjectRepository {
     private static final String TAG = "ProjectRepository";
     private static ProjectRepository instance;
     private final ProjectApi projectApi;
+    private final TaskApi taskApi;
+    private final ActivityApi activityApi;
 
     private ProjectRepository() {
         projectApi = SupabaseClient.getInstance().getService(ProjectApi.class);
+        taskApi = SupabaseClient.getInstance().getService(TaskApi.class);
+        activityApi = SupabaseClient.getInstance().getService(ActivityApi.class);
     }
 
     public static synchronized ProjectRepository getInstance() {
@@ -244,6 +260,349 @@ public class ProjectRepository {
                         callback.onError("Network error: " + t.getMessage());
                     }
                 });
+    }
+
+    public void getProjectHistoryFeed(long projectId, ProjectCallback<List<ProjectHistoryItem>> callback) {
+        projectApi.getProjectTasks("eq." + projectId, "task_id,title")
+                .enqueue(new Callback<List<Task>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                        if (!response.isSuccessful()) {
+                            callback.onError("Failed to load project tasks: " + response.code());
+                            return;
+                        }
+
+                        List<Task> tasks = response.body() != null ? response.body() : new ArrayList<>();
+                        Map<Long, String> taskTitleMap = new HashMap<>();
+                        Set<Long> taskIds = new HashSet<>();
+                        for (Task task : tasks) {
+                            if (task == null) {
+                                continue;
+                            }
+                            long taskId = task.getId();
+                            taskIds.add(taskId);
+                            String title = task.getTitle() != null && !task.getTitle().trim().isEmpty()
+                                    ? task.getTitle().trim()
+                                    : "Task #" + taskId;
+                            taskTitleMap.put(taskId, title);
+                        }
+
+                        fetchMemberProfileMap(projectId, new ProjectCallback<Map<String, UserProfile>>() {
+                            @Override
+                            public void onSuccess(Map<String, UserProfile> userProfileMap) {
+                                if (taskIds.isEmpty()) {
+                                    callback.onSuccess(new ArrayList<>());
+                                    return;
+                                }
+                                String inFilter = "in.(" + joinTaskIds(taskIds) + ")";
+                                fetchTaskHistoryAndComments(inFilter, taskTitleMap, userProfileMap, callback);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                        callback.onError("Network error: " + t.getMessage());
+                    }
+                });
+    }
+
+    private void fetchTaskHistoryAndComments(
+            String taskFilter,
+            Map<Long, String> taskTitleMap,
+            Map<String, UserProfile> userProfileMap,
+            ProjectCallback<List<ProjectHistoryItem>> callback) {
+        activityApi.getActivitiesByTaskFilter(
+                        taskFilter,
+                        "activity_id,task_id,user_id,action_type,old_value,new_value,created_at",
+                        "created_at.desc")
+                .enqueue(new Callback<List<TaskActivity>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<TaskActivity>> call,
+                            @NonNull Response<List<TaskActivity>> response) {
+                        if (!response.isSuccessful()) {
+                            callback.onError("Failed to load task activities: " + response.code());
+                            return;
+                        }
+
+                        List<TaskActivity> taskActivities = response.body() != null ? response.body() : new ArrayList<>();
+                        fetchTaskComments(taskFilter, taskTitleMap, userProfileMap, taskActivities, callback);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<TaskActivity>> call, @NonNull Throwable t) {
+                        callback.onError("Network error: " + t.getMessage());
+                    }
+                });
+    }
+
+    private void fetchTaskComments(
+            String taskFilter,
+            Map<Long, String> taskTitleMap,
+            Map<String, UserProfile> userProfileMap,
+            List<TaskActivity> taskActivities,
+            ProjectCallback<List<ProjectHistoryItem>> callback) {
+        String select = "comment_id,task_id,user_id,content,created_at,users(user_id,display_name,email,avatar_url)";
+        taskApi.getCommentsByTask(taskFilter, select, "created_at.desc")
+                .enqueue(new Callback<List<Comment>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
+                        if (!response.isSuccessful()) {
+                            callback.onError("Failed to load comments: " + response.code());
+                            return;
+                        }
+
+                        List<Comment> comments = response.body() != null ? response.body() : new ArrayList<>();
+                        List<ProjectHistoryItem> feed = new ArrayList<>();
+                        feed.addAll(mapTaskActivities(taskActivities, taskTitleMap, userProfileMap));
+                        feed.addAll(mapComments(comments, taskTitleMap, userProfileMap));
+                        sortFeedByTimeDesc(feed);
+                        callback.onSuccess(feed);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                        callback.onError("Network error: " + t.getMessage());
+                    }
+                });
+    }
+
+    private void fetchMemberProfileMap(long projectId, ProjectCallback<Map<String, UserProfile>> callback) {
+        projectApi.getProjectMembers(
+                        "eq." + projectId,
+                        "user_id,users(user_id,display_name,email,avatar_url)")
+                .enqueue(new Callback<List<ProjectMember>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectMember>> call,
+                            @NonNull Response<List<ProjectMember>> response) {
+                        if (!response.isSuccessful()) {
+                            callback.onError("Failed to load project members: " + response.code());
+                            return;
+                        }
+
+                        Map<String, UserProfile> profiles = new HashMap<>();
+                        List<ProjectMember> members = response.body() != null ? response.body() : new ArrayList<>();
+                        for (ProjectMember member : members) {
+                            if (member == null || member.getUserId() == null || member.getUserId().trim().isEmpty()) {
+                                continue;
+                            }
+                            String userId = member.getUserId();
+                            UserProfile profile = new UserProfile();
+                            profile.displayName = userId;
+                            profile.avatarUrl = null;
+                            if (member.getUserInfo() != null) {
+                                if (member.getUserInfo().displayName != null
+                                        && !member.getUserInfo().displayName.trim().isEmpty()) {
+                                    profile.displayName = member.getUserInfo().displayName.trim();
+                                } else if (member.getUserInfo().email != null
+                                        && !member.getUserInfo().email.trim().isEmpty()) {
+                                    profile.displayName = member.getUserInfo().email.trim();
+                                }
+                                profile.avatarUrl = member.getUserInfo().avatarUrl;
+                            }
+                            profiles.put(userId, profile);
+                        }
+                        callback.onSuccess(profiles);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
+                        callback.onError("Network error: " + t.getMessage());
+                    }
+                });
+    }
+
+    private List<ProjectHistoryItem> mapTaskActivities(
+            List<TaskActivity> taskActivities,
+            Map<Long, String> taskTitleMap,
+            Map<String, UserProfile> userProfileMap) {
+        List<ProjectHistoryItem> result = new ArrayList<>();
+        if (taskActivities == null) {
+            return result;
+        }
+
+        for (TaskActivity activity : taskActivities) {
+            if (activity == null) {
+                continue;
+            }
+            ProjectHistoryItem item = new ProjectHistoryItem();
+            item.setSource(ProjectHistoryItem.SOURCE_TASK_ACTIVITY);
+            item.setActorId(activity.getUserId());
+            item.setActorName(resolveUserName(activity.getUserId(), userProfileMap));
+            item.setAvatarUrl(resolveAvatarUrl(activity.getUserId(), userProfileMap));
+            item.setActionLabel(mapTaskAction(activity.getActionType()));
+            item.setTaskTitle(taskTitleMap.getOrDefault(activity.getTaskId(), "Task #" + activity.getTaskId()));
+            item.setDetail(buildTaskActivityDetail(activity.getActionType(), activity.getOldValue(), activity.getNewValue()));
+            item.setCreatedAt(activity.getCreatedAt());
+            result.add(item);
+        }
+        return result;
+    }
+
+    private List<ProjectHistoryItem> mapComments(
+            List<Comment> comments,
+            Map<Long, String> taskTitleMap,
+            Map<String, UserProfile> userProfileMap) {
+        List<ProjectHistoryItem> result = new ArrayList<>();
+        if (comments == null) {
+            return result;
+        }
+
+        for (Comment comment : comments) {
+            if (comment == null) {
+                continue;
+            }
+            ProjectHistoryItem item = new ProjectHistoryItem();
+            item.setSource(ProjectHistoryItem.SOURCE_COMMENT);
+            item.setActorId(comment.getUserId());
+            item.setActorName(resolveCommentUserName(comment, userProfileMap));
+            item.setAvatarUrl(resolveCommentAvatarUrl(comment, userProfileMap));
+            item.setActionLabel("da binh luan");
+            long taskId = comment.getTaskId() != null ? comment.getTaskId() : -1;
+            item.setTaskTitle(taskTitleMap.getOrDefault(taskId, taskId > 0 ? "Task #" + taskId : "Task"));
+            item.setDetail("Noi dung binh luan");
+            item.setCommentContent(comment.getContent());
+            item.setCreatedAt(comment.getCreatedAt());
+            result.add(item);
+        }
+        return result;
+    }
+
+    private String resolveCommentUserName(Comment comment, Map<String, UserProfile> userProfileMap) {
+        if (comment != null && comment.getUser() != null) {
+            if (comment.getUser().getDisplayName() != null && !comment.getUser().getDisplayName().trim().isEmpty()) {
+                return comment.getUser().getDisplayName().trim();
+            }
+            if (comment.getUser().getEmail() != null && !comment.getUser().getEmail().trim().isEmpty()) {
+                return comment.getUser().getEmail().trim();
+            }
+        }
+        return resolveUserName(comment != null ? comment.getUserId() : null, userProfileMap);
+    }
+
+    private String resolveCommentAvatarUrl(Comment comment, Map<String, UserProfile> userProfileMap) {
+        if (comment != null && comment.getUser() != null
+                && comment.getUser().getAvatarUrl() != null
+                && !comment.getUser().getAvatarUrl().trim().isEmpty()) {
+            return comment.getUser().getAvatarUrl().trim();
+        }
+        return resolveAvatarUrl(comment != null ? comment.getUserId() : null, userProfileMap);
+    }
+
+    private String resolveUserName(String userId, Map<String, UserProfile> userProfileMap) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return "Unknown";
+        }
+        if (userProfileMap != null && userProfileMap.containsKey(userId) && userProfileMap.get(userId) != null) {
+            String displayName = userProfileMap.get(userId).displayName;
+            if (displayName != null && !displayName.trim().isEmpty()) {
+                return displayName;
+            }
+        }
+        return userId;
+    }
+
+    private String resolveAvatarUrl(String userId, Map<String, UserProfile> userProfileMap) {
+        if (userId == null || userId.trim().isEmpty() || userProfileMap == null) {
+            return null;
+        }
+        UserProfile profile = userProfileMap.get(userId);
+        return profile != null ? profile.avatarUrl : null;
+    }
+
+    private String mapTaskAction(String actionTypeRaw) {
+        if (actionTypeRaw == null || actionTypeRaw.trim().isEmpty()) {
+            return "da cap nhat task";
+        }
+
+        String action = actionTypeRaw.trim().toUpperCase(Locale.US);
+        if ("CREATE".equals(action)) {
+            return "da tao task";
+        }
+        if ("UPDATE_STATUS".equals(action)) {
+            return "da doi trang thai";
+        }
+        if ("DELETE".equals(action)) {
+            return "da dua task vao thung rac";
+        }
+        if ("RESTORE".equals(action)) {
+            return "da khoi phuc task";
+        }
+        if ("HARD_DELETE".equals(action)) {
+            return "da xoa vinh vien task";
+        }
+        if (action.startsWith("UPDATE")) {
+            return "da chinh sua task";
+        }
+        return "da cap nhat task";
+    }
+
+    private String buildTaskActivityDetail(String actionTypeRaw, String oldValue, String newValue) {
+        String action = actionTypeRaw != null ? actionTypeRaw.trim().toUpperCase(Locale.US) : "";
+        String oldText = oldValue != null && !oldValue.trim().isEmpty() ? oldValue.trim() : "-";
+        String newText = newValue != null && !newValue.trim().isEmpty() ? newValue.trim() : "-";
+
+        if ("UPDATE_STATUS".equals(action) || "DELETE".equals(action) || "RESTORE".equals(action)) {
+            return oldText + " -> " + newText;
+        }
+        if ("CREATE".equals(action)) {
+            return "Trang thai ban dau: " + newText;
+        }
+        if ("HARD_DELETE".equals(action)) {
+            return "Task da bi xoa khoi he thong";
+        }
+        if (!"-".equals(oldText) || !"-".equals(newText)) {
+            return oldText + " -> " + newText;
+        }
+        return "Cap nhat task";
+    }
+
+    private String joinTaskIds(Set<Long> taskIds) {
+        List<Long> sortedIds = new ArrayList<>(taskIds);
+        Collections.sort(sortedIds);
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < sortedIds.size(); i++) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append(sortedIds.get(i));
+        }
+        return builder.toString();
+    }
+
+    private void sortFeedByTimeDesc(List<ProjectHistoryItem> feed) {
+        if (feed == null) {
+            return;
+        }
+        feed.sort(new Comparator<ProjectHistoryItem>() {
+            @Override
+            public int compare(ProjectHistoryItem left, ProjectHistoryItem right) {
+                long rightTime = parseEpochMillis(right != null ? right.getCreatedAt() : null);
+                long leftTime = parseEpochMillis(left != null ? left.getCreatedAt() : null);
+                return Long.compare(rightTime, leftTime);
+            }
+        });
+    }
+
+    private long parseEpochMillis(String rawTime) {
+        if (rawTime == null || rawTime.trim().isEmpty()) {
+            return 0L;
+        }
+        try {
+            return java.time.OffsetDateTime.parse(rawTime).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
+    }
+
+    private static class UserProfile {
+        String displayName;
+        String avatarUrl;
     }
 
     /**

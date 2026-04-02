@@ -287,21 +287,16 @@ public class CreateTaskActivity extends BaseActivity {
         taskRepository.getTaskHistory(taskId, new TaskRepository.TaskCallback<List<TaskActivity>>() {
             @Override
             public void onSuccess(List<TaskActivity> result) {
-                runOnUiThread(() -> {
-                    TextView tvHistoryEmpty = layoutHistorySection.findViewById(R.id.tvHistoryEmpty);
-                    if (tvHistoryEmpty == null) return;
-
-                    if (result == null || result.isEmpty()) {
-                        tvHistoryEmpty.setText(getString(R.string.task_history_empty));
-                        return;
+                taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
+                    @Override
+                    public void onSuccess(List<Comment> comments) {
+                        runOnUiThread(() -> renderHistoryFeed(result, comments));
                     }
 
-                    StringBuilder sb = new StringBuilder();
-                    for (TaskActivity activity : result) {
-                        if (sb.length() > 0) sb.append("\n");
-                        sb.append(formatActivityRow(activity));
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> renderHistoryFeed(result, new ArrayList<>()));
                     }
-                    tvHistoryEmpty.setText(sb.toString());
                 });
             }
 
@@ -315,6 +310,90 @@ public class CreateTaskActivity extends BaseActivity {
                 });
             }
         });
+    }
+
+    private void renderHistoryFeed(List<TaskActivity> activities, List<Comment> comments) {
+        TextView tvHistoryEmpty = layoutHistorySection != null
+                ? layoutHistorySection.findViewById(R.id.tvHistoryEmpty)
+                : null;
+        if (tvHistoryEmpty == null) return;
+
+        List<HistoryFeedRow> rows = new ArrayList<>();
+
+        if (activities != null) {
+            for (TaskActivity activity : activities) {
+                if (activity == null) continue;
+                rows.add(HistoryFeedRow.forActivity(activity, formatActivityRow(activity), parseHistoryTime(activity.getCreatedAt())));
+            }
+        }
+
+        if (comments != null) {
+            for (Comment comment : comments) {
+                if (comment == null) continue;
+                rows.add(HistoryFeedRow.forComment(comment, formatCommentRow(comment), parseHistoryTime(comment.getCreatedAt())));
+            }
+        }
+
+        rows.sort((left, right) -> Long.compare(left.timestamp, right.timestamp));
+
+        if (rows.isEmpty()) {
+            tvHistoryEmpty.setText(getString(R.string.task_history_empty));
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (HistoryFeedRow row : rows) {
+            if (sb.length() > 0) {
+                sb.append("\n\n");
+            }
+            sb.append(row.text);
+        }
+
+        tvHistoryEmpty.setText(sb.toString().trim());
+    }
+
+    private String formatCommentRow(Comment comment) {
+        String author = "Unknown";
+        if (comment.getUser() != null && comment.getUser().getDisplayNameOrEmail() != null
+                && !comment.getUser().getDisplayNameOrEmail().trim().isEmpty()) {
+            author = comment.getUser().getDisplayNameOrEmail().trim();
+        } else if (comment.getUserId() != null && !comment.getUserId().trim().isEmpty()) {
+            author = comment.getUserId().trim();
+        }
+
+        String content = comment.getContent() != null ? comment.getContent().trim() : "";
+        if (content.isEmpty()) {
+            content = "(No content)";
+        }
+
+        return formatActivityTime(comment.getCreatedAt()) + " - COMMENT: " + author + " nói: " + content;
+    }
+
+    private long parseHistoryTime(String raw) {
+        if (raw == null || raw.isEmpty()) return 0L;
+        try {
+            return java.time.OffsetDateTime.parse(raw).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
+    }
+
+    private static class HistoryFeedRow {
+        final String text;
+        final long timestamp;
+
+        private HistoryFeedRow(String text, long timestamp) {
+            this.text = text;
+            this.timestamp = timestamp;
+        }
+
+        static HistoryFeedRow forActivity(TaskActivity activity, String text, long timestamp) {
+            return new HistoryFeedRow(text, timestamp);
+        }
+
+        static HistoryFeedRow forComment(Comment comment, String text, long timestamp) {
+            return new HistoryFeedRow(text, timestamp);
+        }
     }
 
     private void loadComments() {

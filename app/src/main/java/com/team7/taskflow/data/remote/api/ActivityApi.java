@@ -17,6 +17,13 @@ public interface ActivityApi {
     @GET("task_activities")
     Call<List<TaskActivity>> getActivitiesByTask(@Query("task_id") String taskIdFilter, @Query("order") String order);
 
+    @GET("task_activities")
+    Call<List<TaskActivity>> getActivitiesByTaskFilter(
+            @Query("task_id") String taskIdFilter,
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
     @POST("task_activities")
     Call<Void> logActivity(@Body TaskActivity activity);
 }

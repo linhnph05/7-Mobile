@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="10dp"
     app:cardBackgroundColor="@color/theme_card"
-    app:cardCornerRadius="14dp"
+    app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
     app:strokeColor="@color/theme_border"
     app:strokeWidth="1dp">
@@ -14,51 +14,107 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="12dp">
 
         <View
             android:id="@+id/viewHistoryAccent"
             android:layout_width="4dp"
             android:layout_height="match_parent"
+            android:layout_marginVertical="2dp"
             android:background="@color/indigo_600" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="10dp"
-            android:orientation="vertical">
+            android:layout_marginStart="12dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tvHistoryTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_chip_neutral"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:text="31/03 22:09"
-                android:textColor="@color/slate_600"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+            <FrameLayout
+                android:layout_width="36dp"
+                android:layout_height="36dp">
 
-            <TextView
-                android:id="@+id/tvHistoryAction"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="STATUS_CHANGED"
-                android:textColor="@color/theme_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                <ImageView
+                    android:id="@+id/imgHistoryAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_avatar_blue"
+                    android:contentDescription="Avatar"
+                    android:scaleType="centerCrop" />
 
-            <TextView
-                android:id="@+id/tvHistoryDetail"
-                android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tvHistoryAvatarLetter"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="S"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="TODO -> TRASH"
-                android:textColor="@color/theme_text_secondary"
-                android:textSize="12sp" />
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvHistoryActor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sarah Chen"
+                    android:textColor="@color/theme_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvHistoryAction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="da binh luan trong Mobile UI Redesign"
+                    android:textColor="@color/indigo_600"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvHistoryMeta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_chip_neutral"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:text="2h ago"
+                    android:textColor="@color/theme_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvHistoryComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_history_comment_quote"
+                    android:padding="10dp"
+                    android:text="The contrast ratios on navigation labels should meet accessibility standards."
+                    android:textColor="@color/theme_text_secondary"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvHistoryDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="TODO -> IN_PROGRESS"
+                    android:textColor="@color/theme_text_secondary"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

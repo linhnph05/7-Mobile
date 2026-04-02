@@ -10,14 +10,11 @@ import androidx.annotation.Nullable;
 
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.ProjectRepository;
-import com.team7.taskflow.domain.model.ProjectActivity;
+import com.team7.taskflow.domain.model.ProjectHistoryItem;
 import com.team7.taskflow.ui.base.BaseActivity;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ProjectActivityHistoryActivity extends BaseActivity {
 
@@ -58,13 +55,13 @@ public class ProjectActivityHistoryActivity extends BaseActivity {
         }
 
         setLoading(true);
-        ProjectRepository.getInstance().getProjectActivities(projectId,
-                new ProjectRepository.ProjectCallback<List<ProjectActivity>>() {
+        ProjectRepository.getInstance().getProjectHistoryFeed(projectId,
+                new ProjectRepository.ProjectCallback<List<ProjectHistoryItem>>() {
                     @Override
-                    public void onSuccess(List<ProjectActivity> result) {
+                    public void onSuccess(List<ProjectHistoryItem> result) {
                         runOnUiThread(() -> {
                             setLoading(false);
-                            showRows(formatRows(result));
+                            showRows(result);
                         });
                     }
 
@@ -78,42 +75,13 @@ public class ProjectActivityHistoryActivity extends BaseActivity {
                 });
     }
 
-    private List<String> formatRows(List<ProjectActivity> activities) {
-        List<String> rows = new ArrayList<>();
-        if (activities == null) {
-            return rows;
-        }
-
-        for (ProjectActivity activity : activities) {
-            String action = activity.getActionType() != null ? activity.getActionType() : "UPDATE";
-            String oldValue = activity.getOldValue() != null ? activity.getOldValue() : "";
-            String newValue = activity.getNewValue() != null ? activity.getNewValue() : "";
-            String entity = activity.getEntityType() != null ? activity.getEntityType() : "PROJECT";
-            String detail = entity + ": " + oldValue + " -> " + newValue;
-            rows.add(formatTime(activity.getCreatedAt()) + " - " + action + " (" + detail + ")");
-        }
-        return rows;
-    }
-
-    private String formatTime(String raw) {
-        if (raw == null || raw.isEmpty()) {
-            return "Vừa xong";
-        }
-        try {
-            Date date = Date.from(java.time.OffsetDateTime.parse(raw).toInstant());
-            return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(date);
-        } catch (Exception e) {
-            return raw;
-        }
-    }
-
     private void setLoading(boolean loading) {
         if (progressBar != null) {
             progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         }
     }
 
-    private void showRows(List<String> rows) {
+    private void showRows(List<ProjectHistoryItem> rows) {
         if (rows == null || rows.isEmpty()) {
             if (listHistory != null) listHistory.setVisibility(View.GONE);
             if (tvEmpty != null) tvEmpty.setVisibility(View.VISIBLE);

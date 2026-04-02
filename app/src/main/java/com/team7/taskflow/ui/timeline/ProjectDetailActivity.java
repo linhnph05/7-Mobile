@@ -54,7 +54,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
     private BottomNavigationView bottomNavigationView;
-    private View btnTrash;
+
     private View btnMore;
     private View btnProjectActivity;
     private int currentTabIndex = -1;
@@ -114,7 +114,6 @@ public class ProjectDetailActivity extends BaseActivity {
         tabTimeline          = findViewById(R.id.tabTimeline);
         tabCalendar          = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        btnTrash             = findViewById(R.id.btnTrash);
         btnProjectActivity   = findViewById(R.id.btnProjectActivity);
         btnMore              = findViewById(R.id.btnMoreOptions);
 
@@ -142,21 +141,7 @@ public class ProjectDetailActivity extends BaseActivity {
             if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
         }
 
-        if (btnTrash != null) {
-            btnTrash.setOnClickListener(v -> {
-                Fragment f = getSupportFragmentManager().findFragmentByTag("LIST");
-                if (f instanceof TaskListFragment) {
-                    ((TaskListFragment) f).openTrashFromHeader();
-                } else {
-                    openTab(TAB_LIST);
-                    findViewById(R.id.fragment_container).post(() -> {
-                        Fragment f2 = getSupportFragmentManager().findFragmentByTag("LIST");
-                        if (f2 instanceof TaskListFragment)
-                            ((TaskListFragment) f2).openTrashFromHeader();
-                    });
-                }
-            });
-        }
+
 
         if (btnProjectActivity != null) {
             btnProjectActivity.setOnClickListener(v -> openProjectActivityHistory());
@@ -248,7 +233,6 @@ public class ProjectDetailActivity extends BaseActivity {
         if (!isViewer) return;
         View fabAddAI = findViewById(R.id.fabAddAI);
         if (fabAddAI != null) fabAddAI.setVisibility(View.GONE);
-        if (btnTrash != null) btnTrash.setVisibility(View.GONE);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -291,8 +275,6 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void updateHeaderActionsForTab(int tabIndex) {
-        if (btnTrash != null)
-            btnTrash.setVisibility(isViewer ? View.GONE : View.VISIBLE);
         if (btnProjectActivity != null)
             btnProjectActivity.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
         if (btnMore != null)

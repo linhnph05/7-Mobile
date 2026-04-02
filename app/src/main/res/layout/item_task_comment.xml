@@ -7,22 +7,42 @@
     android:layout_marginBottom="8dp"
     android:orientation="vertical">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardCommentBubble"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/layoutCommentHeaderRow"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/theme_card"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeColor="@color/theme_border"
-        app:strokeWidth="1dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="36dp">
+
+            <ImageView
+                android:id="@+id/imgCommentAvatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_avatar_blue"
+                android:contentDescription="Avatar"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/tvCommentAvatarLetter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="M"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="10dp">
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -36,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:text="Member"
                     android:textColor="@color/theme_text_primary"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -49,22 +69,36 @@
                     android:textSize="11sp" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvCommentContent"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCommentBubble"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:maxWidth="240dp"
-                android:text="Comment content"
-                android:textColor="@color/theme_text_secondary"
-                android:textSize="13sp" />
+                app:cardBackgroundColor="@color/theme_surface_variant"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/theme_border"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/tvCommentContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="260dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="10dp"
+                    android:text="Comment content"
+                    android:textColor="@color/theme_text_primary"
+                    android:textSize="13sp" />
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layoutReactionRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="46dp"
         android:layout_marginTop="6dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -109,6 +143,7 @@
         android:id="@+id/layoutManageRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="46dp"
         android:layout_marginTop="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
