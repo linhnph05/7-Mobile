@@ -626,24 +626,31 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:paddingVertical="24dp"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="24dp"
                         android:visibility="gone">
 
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@drawable/ic_history"
-                            app:tint="#CBD5E1"/>
+                        <com.team7.taskflow.ui.widget.ExpandedListView
+                            android:id="@+id/listHistoryFeed"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:divider="@android:color/transparent"
+                            android:dividerHeight="8dp"
+                            android:scrollbars="none"
+                            android:nestedScrollingEnabled="false"
+                            android:clipToPadding="false" />
 
                         <TextView
                             android:id="@+id/tvHistoryEmpty"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="16dp"
+                            android:gravity="center"
                             android:text="Chưa có lịch sử hoạt động."
                             android:textColor="#94A3B8"
-                            android:textSize="13sp"/>
+                            android:textSize="13sp"
+                            android:visibility="gone" />
                     </LinearLayout>
 
                     <LinearLayout
