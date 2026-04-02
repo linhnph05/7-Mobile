@@ -8,6 +8,12 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <queries>
         <package android:name="com.google.android.gms" />
@@ -22,6 +28,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TaskFlow">
+
+        <activity
+            android:name=".ui.attachment.FullscreenImageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TaskFlow" />
 
         <!-- Auth - Đăng nhập (Launcher) -->
         <activity
@@ -102,11 +113,11 @@
         <activity
             android:name=".ui.project.ProjectActivityHistoryActivity"
             android:exported="false" />
-        <!-- Thêm dòng này vào trong thẻ <application> -->
         <activity
             android:name=".ui.project.CreateTaskActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
         <!-- Notification -->
         <activity android:name=".ui.notification.NotificationsActivity" />
 
@@ -140,11 +151,21 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/task_today_widget_info" />
         </receiver>
+
+        <!-- ✅ FileProvider để share URI ảnh camera -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
 
     </application>
 
