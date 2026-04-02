@@ -33,7 +33,9 @@ public class ProjectActivityHistoryActivity extends BaseActivity {
 
         TextView tvTitle = findViewById(R.id.tvTitle);
         if (tvTitle != null && projectName != null && !projectName.trim().isEmpty()) {
-            tvTitle.setText(projectName + " Activity");
+            tvTitle.setText("Hoạt động của " + projectName.trim());
+        } else if (tvTitle != null) {
+            tvTitle.setText("Hoạt động");
         }
 
         listHistory = findViewById(R.id.listHistory);
