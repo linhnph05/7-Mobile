@@ -57,6 +57,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private BottomNavigationView bottomNavigationView;
     private View btnTrash;
     private View btnMore;
+    private View btnProjectActivity; // ✅ Thêm của đồng đội
     private int currentTabIndex = -1;
 
     @Override
@@ -113,6 +114,7 @@ public class ProjectDetailActivity extends BaseActivity {
         tabCalendar        = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         btnTrash           = findViewById(R.id.btnTrash);
+        btnProjectActivity = findViewById(R.id.btnProjectActivity); // ✅ Thêm của đồng đội
         btnMore            = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
@@ -307,6 +309,10 @@ public class ProjectDetailActivity extends BaseActivity {
             // ✅ Viewer không thấy nút thùng rác
             btnTrash.setVisibility(isViewer ? View.GONE : View.VISIBLE);
         }
+        if (btnProjectActivity != null) {
+            // ✅ Thêm của đồng đội
+            btnProjectActivity.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
+        }
         if (btnMore != null) {
             btnMore.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
         }
@@ -426,9 +432,16 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
-        if (btnCollapse != null) btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
-
-        bottomSheet.show();
+        // ✅ Thêm của đồng đội
+        private void openProjectActivityHistory() {
+            if (projectId <= 0) {
+                Toast.makeText(this, "Project not found", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent intent = new Intent(this,
+                    com.team7.taskflow.ui.project.ProjectActivityHistoryActivity.class);
+            intent.putExtra("project_id", projectId);
+            intent.putExtra("project_name", projectName);
+            startActivity(intent);
+        }
     }
-}

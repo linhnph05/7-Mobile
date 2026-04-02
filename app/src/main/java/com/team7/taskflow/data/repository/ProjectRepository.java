@@ -224,6 +224,28 @@ public class ProjectRepository {
         }
     }
 
+    public void getProjectActivities(long projectId, ProjectCallback<List<ProjectActivity>> callback) {
+        projectApi.getProjectActivities(
+                "eq." + projectId,
+                "*",
+                "created_at.desc").enqueue(new Callback<List<ProjectActivity>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectActivity>> call,
+                            @NonNull Response<List<ProjectActivity>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            callback.onSuccess(response.body());
+                        } else {
+                            callback.onError("Failed to load project activities: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectActivity>> call, @NonNull Throwable t) {
+                        callback.onError("Network error: " + t.getMessage());
+                    }
+                });
+    }
+
     /**
      * Get projects owned by user only
      * 

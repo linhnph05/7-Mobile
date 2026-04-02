@@ -10,14 +10,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
-    android:background="@color/theme_bottom_nav_bg">
+    android:background="@color/theme_bottom_nav_bg"
+    android:paddingBottom="8dp">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:itemIconSize="30dp"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="8dp"
+        app:itemIconSize="32dp"
         app:itemIconTint="@null"
         app:itemActiveIndicatorStyle="@style/BottomNavIndicator_Transparent"
         app:labelVisibilityMode="unlabeled"

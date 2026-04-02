@@ -111,60 +111,29 @@ public class TaskListFragment extends Fragment {
 
             @Override
             public void onTaskMenuClick(Task task, View view) {
-                showTaskMenu(task, view);
+                moveTaskToTrash(task);
             }
         });
     }
 
-    private void showTaskMenu(Task task, View anchor) {
+    private void moveTaskToTrash(Task task) {
         if (getContext() == null || task == null || task.getId() == null) return;
-        View sheetView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_bottom_sheet_task_actions, null);
-        BottomSheetDialog sheet = new BottomSheetDialog(requireContext(), R.style.Theme_TaskFlow_BottomSheet);
-        sheet.setContentView(sheetView);
-
-        android.widget.TextView tvTitle = sheetView.findViewById(R.id.tvSheetTitle);
-        android.widget.TextView btnHistory = sheetView.findViewById(R.id.btnActionHistory);
-        android.widget.TextView btnTrash = sheetView.findViewById(R.id.btnActionTrash);
-        android.widget.TextView btnCancel = sheetView.findViewById(R.id.btnActionCancel);
-
-        if (tvTitle != null) {
-            tvTitle.setText(task.getTitle() != null ? task.getTitle() : "Task Actions");
-        }
-
-        if (btnHistory != null) {
-            btnHistory.setOnClickListener(v -> {
-                sheet.dismiss();
-                showTaskHistory(task.getId());
-            });
-        }
-
-        if (btnTrash != null) {
-            btnTrash.setOnClickListener(v -> {
-                sheet.dismiss();
-                taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        if (!isAdded()) return;
-                        requireActivity().runOnUiThread(() -> {
-                            Toast.makeText(getContext(), "Đã chuyển task vào thùng rác", Toast.LENGTH_SHORT).show();
-                            loadTasks();
-                        });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        if (!isAdded()) return;
-                        requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show());
-                    }
+        taskRepository.softDeleteTask(task.getId(), new TaskRepository.TaskCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Đã chuyển task vào thùng rác", Toast.LENGTH_SHORT).show();
+                    loadTasks();
                 });
-            });
-        }
+            }
 
-        if (btnCancel != null) {
-            btnCancel.setOnClickListener(v -> sheet.dismiss());
-        }
-
-        sheet.show();
+            @Override
+            public void onError(String error) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     private void showTaskHistory(long taskId) {

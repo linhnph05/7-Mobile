@@ -225,15 +225,24 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         if (comment == null || comment.getId() == null || TextUtils.isEmpty(inlineCommentUserId)) {
                             return;
                         }
+
+                        // Optimistic UI update: update count/state immediately on screen.
+                        TaskCommentAdapter localAdapter = inlineCommentAdapters.get(taskId);
+                        if (localAdapter != null) {
+                            localAdapter.applyLocalReactionToggle(comment.getId(), reactionType);
+                        }
+
                         taskRepository.toggleCommentReaction(comment.getId(), inlineCommentUserId, reactionType,
                                 new TaskRepository.TaskCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
-                                        itemView.post(() -> loadComments(taskId));
+                                        // Keep optimistic state; no full reload needed on success.
                                     }
 
                                     @Override
                                     public void onError(String error) {
+                                        // Reload only when backend failed to restore correct state.
+                                        itemView.post(() -> loadComments(taskId));
                                     }
                                 });
                     }

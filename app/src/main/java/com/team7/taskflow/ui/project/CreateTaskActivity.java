@@ -203,6 +203,9 @@ public class CreateTaskActivity extends BaseActivity {
 
             @Override
             public void onReact(Comment comment, String reactionType) {
+                if (commentAdapter != null && comment != null && comment.getId() != null) {
+                    commentAdapter.applyLocalReactionToggle(comment.getId(), reactionType);
+                }
                 toggleReaction(comment, reactionType);
             }
         });
@@ -459,12 +462,14 @@ public class CreateTaskActivity extends BaseActivity {
                 new TaskRepository.TaskCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        runOnUiThread(CreateTaskActivity.this::loadComments);
                     }
 
                     @Override
                     public void onError(String error) {
-                        runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> {
+                            Toast.makeText(CreateTaskActivity.this, error, Toast.LENGTH_SHORT).show();
+                            loadComments();
+                        });
                     }
                 });
     }

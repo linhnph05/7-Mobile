@@ -50,6 +50,41 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
         notifyDataSetChanged();
     }
 
+    public void applyLocalReactionToggle(long commentId, String reactionType) {
+        int index = findCommentIndex(commentId);
+        if (index < 0) {
+            return;
+        }
+
+        Comment comment = comments.get(index);
+        String normalizedReaction = reactionType != null ? reactionType.trim().toUpperCase() : "";
+        if ("LIKE".equals(normalizedReaction)) {
+            boolean selected = comment.isLikeSelected();
+            comment.setLikeSelected(!selected);
+            comment.setLikeCount(Math.max(0, comment.getLikeCount() + (selected ? -1 : 1)));
+        } else if ("LOVE".equals(normalizedReaction)) {
+            boolean selected = comment.isHeartSelected();
+            comment.setHeartSelected(!selected);
+            comment.setHeartCount(Math.max(0, comment.getHeartCount() + (selected ? -1 : 1)));
+        } else if ("CELEBRATE".equals(normalizedReaction)) {
+            boolean selected = comment.isCongratsSelected();
+            comment.setCongratsSelected(!selected);
+            comment.setCongratsCount(Math.max(0, comment.getCongratsCount() + (selected ? -1 : 1)));
+        }
+
+        notifyItemChanged(index);
+    }
+
+    private int findCommentIndex(long commentId) {
+        for (int i = 0; i < comments.size(); i++) {
+            Comment item = comments.get(i);
+            if (item.getId() != null && item.getId().longValue() == commentId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public void setAllowManageActions(boolean allowManageActions) {
         this.allowManageActions = allowManageActions;
     }
@@ -165,16 +200,20 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
 
         private void bindReaction(TextView button, Comment comment, String type, String emoji) {
             int count;
+            boolean selected;
             if ("LIKE".equalsIgnoreCase(type)) {
                 count = comment.getLikeCount();
+                selected = comment.isLikeSelected();
             } else if ("LOVE".equalsIgnoreCase(type)) {
                 count = comment.getHeartCount();
+                selected = comment.isHeartSelected();
             } else {
                 count = comment.getCongratsCount();
+                selected = comment.isCongratsSelected();
             }
             button.setText(emoji + " " + count);
-            button.setTypeface(null, Typeface.NORMAL);
-            button.setAlpha(0.9f);
+            button.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+            button.setAlpha(selected ? 1f : 0.9f);
             button.setOnClickListener(v -> {
                 if (listener != null) listener.onReact(comment, type);
             });
