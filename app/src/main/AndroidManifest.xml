@@ -99,6 +99,9 @@
         <activity
             android:name=".ui.project.TrashActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.project.ProjectActivityHistoryActivity"
+            android:exported="false" />
         <!-- Thêm dòng này vào trong thẻ <application> -->
         <activity
             android:name=".ui.project.CreateTaskActivity"
