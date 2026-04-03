@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Ảnh chụp từ camera lưu tạm trong cache -->
+    <cache-path name="camera_images" path="camera/" />
+    <!-- File từ external cache -->
+    <external-cache-path name="external_cache" path="." />
+</paths>

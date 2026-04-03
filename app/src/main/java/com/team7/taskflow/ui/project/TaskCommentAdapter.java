@@ -5,6 +5,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Comment;
@@ -107,6 +109,8 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
     }
 
     class CommentViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView imgAvatar;
+        private final TextView tvAvatarLetter;
         private final TextView tvAuthor;
         private final TextView tvTime;
         private final TextView tvContent;
@@ -122,6 +126,8 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
 
         CommentViewHolder(@NonNull View itemView) {
             super(itemView);
+            imgAvatar = itemView.findViewById(R.id.imgCommentAvatar);
+            tvAvatarLetter = itemView.findViewById(R.id.tvCommentAvatarLetter);
             tvAuthor = itemView.findViewById(R.id.tvCommentAuthor);
             tvTime = itemView.findViewById(R.id.tvCommentTime);
             tvContent = itemView.findViewById(R.id.tvCommentContent);
@@ -147,6 +153,7 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             tvAuthor.setText(displayName);
             tvTime.setText(formatRelativeTime(comment.getCreatedAt()));
             tvContent.setText(comment.getContent());
+            bindAvatar(comment, displayName);
 
             boolean isOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
             applyBubbleAlignment(isOwner);
@@ -170,31 +177,56 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             bindReaction(btnCelebrate, comment, "CELEBRATE", "🎉");
         }
 
+        private void bindAvatar(Comment comment, String displayName) {
+            String avatarUrl = null;
+            if (comment != null && comment.getUser() != null) {
+                avatarUrl = comment.getUser().getAvatarUrl();
+            }
+
+            String fallbackLetter = "?";
+            if (displayName != null && !displayName.trim().isEmpty()) {
+                fallbackLetter = displayName.trim().substring(0, 1).toUpperCase(Locale.US);
+            }
+
+            if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
+                imgAvatar.setVisibility(View.VISIBLE);
+                tvAvatarLetter.setVisibility(View.GONE);
+                Glide.with(imgAvatar)
+                        .load(avatarUrl)
+                        .circleCrop()
+                        .into(imgAvatar);
+            } else {
+                imgAvatar.setImageDrawable(null);
+                imgAvatar.setVisibility(View.VISIBLE);
+                tvAvatarLetter.setVisibility(View.VISIBLE);
+                tvAvatarLetter.setText(fallbackLetter);
+            }
+        }
+
         private void applyBubbleAlignment(boolean isOwner) {
             if (cardCommentBubble != null) {
                 LinearLayout.LayoutParams bubbleLp = (LinearLayout.LayoutParams) cardCommentBubble.getLayoutParams();
-                bubbleLp.gravity = isOwner ? Gravity.END : Gravity.START;
+                bubbleLp.gravity = Gravity.START;
                 cardCommentBubble.setLayoutParams(bubbleLp);
 
                 int bubbleColor = ContextCompat.getColor(itemView.getContext(),
-                        isOwner ? R.color.indigo_50 : R.color.theme_card);
+                        R.color.theme_surface_variant);
                 cardCommentBubble.setCardBackgroundColor(bubbleColor);
                 cardCommentBubble.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.theme_border));
             }
 
             if (layoutReactionRow != null) {
                 LinearLayout.LayoutParams reactionLp = (LinearLayout.LayoutParams) layoutReactionRow.getLayoutParams();
-                reactionLp.gravity = isOwner ? Gravity.END : Gravity.START;
+                reactionLp.gravity = Gravity.START;
                 layoutReactionRow.setLayoutParams(reactionLp);
             }
 
             if (layoutManageRow != null) {
                 LinearLayout.LayoutParams manageLp = (LinearLayout.LayoutParams) layoutManageRow.getLayoutParams();
-                manageLp.gravity = isOwner ? Gravity.END : Gravity.START;
+                manageLp.gravity = Gravity.START;
                 layoutManageRow.setLayoutParams(manageLp);
             }
 
-            tvAuthor.setVisibility(isOwner ? View.GONE : View.VISIBLE);
             tvContent.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.theme_text_primary));
         }
 

@@ -59,16 +59,11 @@
             android:id="@+id/tvSubTaskInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_subtask_parent_info"
-            android:drawableStart="@drawable/ic_task_alt"
-            android:drawablePadding="8dp"
-            android:ellipsize="end"
-            android:maxLines="1"
+            android:background="@color/theme_surface_variant"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="10dp"
-            android:textColor="@color/theme_text_primary"
+            android:paddingVertical="8dp"
+            android:textColor="@color/theme_text_secondary"
             android:textSize="13sp"
-            android:textStyle="bold"
             android:visibility="gone" />
 
         <ScrollView
@@ -631,24 +626,31 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:paddingVertical="24dp"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="24dp"
                         android:visibility="gone">
 
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@drawable/ic_history"
-                            app:tint="#CBD5E1"/>
+                        <com.team7.taskflow.ui.widget.ExpandedListView
+                            android:id="@+id/listHistoryFeed"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:divider="@android:color/transparent"
+                            android:dividerHeight="8dp"
+                            android:scrollbars="none"
+                            android:nestedScrollingEnabled="false"
+                            android:clipToPadding="false" />
 
                         <TextView
                             android:id="@+id/tvHistoryEmpty"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="16dp"
+                            android:gravity="center"
                             android:text="Chưa có lịch sử hoạt động."
                             android:textColor="#94A3B8"
-                            android:textSize="13sp"/>
+                            android:textSize="13sp"
+                            android:visibility="gone" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -678,21 +680,28 @@
         </ScrollView>
     </LinearLayout>
 
-    <!-- Nút tạo Subtask: đặt cạnh phải, kích thước tương đương FAB tạo task ở ProjectDetail -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddSubTask"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="24dp"
         android:contentDescription="@string/task_add_subtask"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:padding="0dp"
         app:backgroundTint="@color/primary"
-        app:tint="@color/white"
-        app:srcCompat="@drawable/ic_add"
+        app:cornerRadius="8dp"
         app:elevation="10dp"
-        app:pressedTranslationZ="14dp"
-        app:borderWidth="0dp" />
+        app:icon="@drawable/ic_add"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="20dp"
+        app:iconTint="@color/white" />
 
     <ProgressBar
         android:id="@+id/progressBar"

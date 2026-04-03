@@ -10,12 +10,24 @@
     android:paddingHorizontal="10dp"
     android:paddingVertical="8dp">
 
+    <!-- Icon theo loại file — set programmatically -->
     <ImageView
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:id="@+id/ivFileIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_attach_file"
         app:tint="@color/theme_text_secondary" />
+
+    <!-- Thumbnail ảnh — chỉ hiện khi là image -->
+    <ImageView
+        android:id="@+id/ivImageThumb"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:background="@drawable/bg_chip_neutral" />
 
     <TextView
         android:id="@+id/tvFileName"
@@ -28,11 +40,23 @@
         android:textColor="@color/theme_text_primary"
         android:textSize="13sp" />
 
+    <!-- Nút xem trước -->
+    <ImageView
+        android:id="@+id/btnPreview"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="6dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_eye"
+        app:tint="@color/primary" />
+
+    <!-- Nút xóa -->
     <ImageView
         android:id="@+id/btnRemoveFile"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="6dp"
         android:clickable="true"
         android:focusable="true"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
