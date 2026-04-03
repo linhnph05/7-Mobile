@@ -20,7 +20,7 @@ public interface InvitationApiService {
             @Body Map<String, Object> body
     );
 
-    // ✅ Tìm invitation theo project_id + email + status PENDING
+        // ✅ Tìm invitation theo project_id + email + status PENDING
     // Dùng khi Accept: biết project_id (từ notification.referenceId) + email người dùng hiện tại
     @GET("project_invitations")
     Call<List<Map<String, Object>>> findPendingInvitation(
@@ -30,7 +30,7 @@ public interface InvitationApiService {
             @Query("select") String select
     );
 
-    // ✅ Cập nhật status invitation (accepted / declined)
+        // ✅ Cập nhật status invitation (ACCEPTED / DENIED)
     @PATCH("project_invitations")
     Call<Void> updateInvitationStatus(
             @Query("id") String idFilter,

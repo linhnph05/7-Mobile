@@ -12,8 +12,12 @@ import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.User;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
@@ -152,15 +156,35 @@ public class ProjectRepository {
             ProjectCallback<List<Project>> callback) {
         projectApi.getProjectActivities(
                 "eq." + project.getId(),
-                "activity_id",
+                "activity_id,entity_type,action_type,created_at",
                 "created_at.desc").enqueue(new Callback<List<ProjectActivity>>() {
                     @Override
                     public void onResponse(@NonNull Call<List<ProjectActivity>> call,
                             @NonNull Response<List<ProjectActivity>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            project.setNewActivitiesCount(response.body().size());
+                            int todayTotal = 0;
+                            int todayTask = 0;
+                            int todayComment = 0;
+
+                            for (ProjectActivity activity : response.body()) {
+                                if (!isTodayActivity(activity.getCreatedAt())) {
+                                    continue;
+                                }
+                                todayTotal++;
+                                if (isCommentActivity(activity)) {
+                                    todayComment++;
+                                } else if (isTaskActivity(activity)) {
+                                    todayTask++;
+                                }
+                            }
+
+                            project.setNewActivitiesCount(todayTotal);
+                            project.setTaskActivitiesToday(todayTask);
+                            project.setCommentActivitiesToday(todayComment);
                         } else {
                             project.setNewActivitiesCount(0);
+                            project.setTaskActivitiesToday(0);
+                            project.setCommentActivitiesToday(0);
                         }
                         completeEnrichStep(pending, projects, callback);
                     }
@@ -168,9 +192,46 @@ public class ProjectRepository {
                     @Override
                     public void onFailure(@NonNull Call<List<ProjectActivity>> call, @NonNull Throwable t) {
                         project.setNewActivitiesCount(0);
+                        project.setTaskActivitiesToday(0);
+                        project.setCommentActivitiesToday(0);
                         completeEnrichStep(pending, projects, callback);
                     }
                 });
+    }
+
+    private boolean isTodayActivity(String createdAt) {
+        if (createdAt == null || createdAt.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            LocalDate activityDate = OffsetDateTime.parse(createdAt).atZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
+            return LocalDate.now(ZoneId.systemDefault()).equals(activityDate);
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private boolean isTaskActivity(ProjectActivity activity) {
+        String entity = normalize(activity.getEntityType());
+        String action = normalize(activity.getActionType());
+        return entity.contains("task")
+                || action.contains("task")
+                || action.contains("status")
+                || action.contains("assign")
+                || action.contains("due");
+    }
+
+    private boolean isCommentActivity(ProjectActivity activity) {
+        String entity = normalize(activity.getEntityType());
+        String action = normalize(activity.getActionType());
+        return entity.contains("comment")
+                || entity.contains("reaction")
+                || action.contains("comment")
+                || action.contains("reaction");
+    }
+
+    private String normalize(String raw) {
+        return raw == null ? "" : raw.toLowerCase(Locale.US);
     }
 
     private void loadProjectMemberPreviews(

@@ -48,6 +48,9 @@ import android.util.Log;
  */
 public class AiCreateActivity extends AppCompatActivity {
 
+    private static final String EXTRA_PARENT_TASK_ID = "parent_task_id";
+    private static final String EXTRA_PARENT_TASK_TITLE = "parent_task_title";
+
     // ── Constants ────────────────────────────────────────────────────────
 
     /** Color resource used for buttons that have a value selected */
@@ -65,6 +68,7 @@ public class AiCreateActivity extends AppCompatActivity {
     private EditText etPrompt, etParsedTitle, etParsedDescription;
     private ImageButton btnSaveTask;
     private TextView tvTaskId;
+    private TextView tvSubTaskInfo;
 
     // Action buttons (LinearLayout acting as chips)
     private View cardStartDate, cardDueDate, cardPriority, cardAssignee, cardTag, cardAttachment;
@@ -90,6 +94,8 @@ public class AiCreateActivity extends AppCompatActivity {
     private String selectedAssigneeName = null;
     private String selectedAssigneeId = null;
     private String selectedTag = null;
+    private Long selectedParentTaskId = null;
+    private String selectedParentTaskTitle = null;
 
     // AI parsing
     private final Handler parseHandler = new Handler(Looper.getMainLooper());
@@ -124,6 +130,12 @@ public class AiCreateActivity extends AppCompatActivity {
         int num = getIntent().getIntExtra("next_task_number", 1);
         if (num > 0) nextTaskNumber = num;
 
+        long parentTaskId = getIntent().getLongExtra(EXTRA_PARENT_TASK_ID, -1);
+        if (parentTaskId > 0) {
+            selectedParentTaskId = parentTaskId;
+        }
+        selectedParentTaskTitle = getIntent().getStringExtra(EXTRA_PARENT_TASK_TITLE);
+
         if (projectId != -1) {
             loadProjectMembers();
         }
@@ -154,6 +166,7 @@ public class AiCreateActivity extends AppCompatActivity {
         etParsedTitle = findViewById(R.id.etParsedTitle);
         etParsedDescription = findViewById(R.id.etParsedDescription);
         tvTaskId = findViewById(R.id.tvTaskId);
+        tvSubTaskInfo = findViewById(R.id.tvSubTaskInfo);
 
         cardStartDate = findViewById(R.id.cardStartDate);
         cardDueDate = findViewById(R.id.cardDueDate);
@@ -177,6 +190,20 @@ public class AiCreateActivity extends AppCompatActivity {
         ivAttachment = findViewById(R.id.ivAttachment);
 
         containerAttachments = findViewById(R.id.containerAttachments);
+        renderSubTaskInfo();
+    }
+
+    private void renderSubTaskInfo() {
+        if (tvSubTaskInfo == null) {
+            return;
+        }
+        if (selectedParentTaskId == null || selectedParentTaskId <= 0
+                || selectedParentTaskTitle == null || selectedParentTaskTitle.trim().isEmpty()) {
+            tvSubTaskInfo.setVisibility(View.GONE);
+            return;
+        }
+        tvSubTaskInfo.setText(getString(R.string.task_subtask_of_format, selectedParentTaskTitle.trim()));
+        tvSubTaskInfo.setVisibility(View.VISIBLE);
     }
 
     // ── Animations ───────────────────────────────────────────────────────
@@ -393,6 +420,7 @@ public class AiCreateActivity extends AppCompatActivity {
         if (selectedStartDate != null) task.setStartDate(selectedStartDate);
         if (selectedTag != null) task.setTag(selectedTag);
         if (selectedAssigneeId != null) task.setAssigneeId(selectedAssigneeId);
+        task.setParentTaskId(selectedParentTaskId);
 
         TaskRepository.getInstance().createTask(task, new TaskRepository.TaskCallback<Task>() {
             @Override

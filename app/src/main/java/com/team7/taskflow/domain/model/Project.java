@@ -40,6 +40,8 @@ public class Project {
     private transient int totalTasks;
     private transient int completedTasks;
     private transient int newActivitiesCount;
+    private transient int taskActivitiesToday;
+    private transient int commentActivitiesToday;
     private transient List<User> memberPreviews = new ArrayList<>();
     private transient String template;
     private transient String userRole; // OWNER, ADMIN, MEMBER - vai trò của user trong project
@@ -86,6 +88,12 @@ public class Project {
 
     public int getNewActivitiesCount() { return newActivitiesCount; }
     public void setNewActivitiesCount(int newActivitiesCount) { this.newActivitiesCount = newActivitiesCount; }
+
+    public int getTaskActivitiesToday() { return taskActivitiesToday; }
+    public void setTaskActivitiesToday(int taskActivitiesToday) { this.taskActivitiesToday = taskActivitiesToday; }
+
+    public int getCommentActivitiesToday() { return commentActivitiesToday; }
+    public void setCommentActivitiesToday(int commentActivitiesToday) { this.commentActivitiesToday = commentActivitiesToday; }
 
     public List<User> getMemberPreviews() { return memberPreviews; }
     public void setMemberPreviews(List<User> memberPreviews) {

@@ -87,6 +87,16 @@
                         app:tint="?attr/colorOnSurface" />
 
                     <ImageButton
+                        android:id="@+id/btnTrash"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Trash"
+                        android:src="@drawable/ic_trash"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <ImageButton
                         android:id="@+id/btnMoreOptions"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
@@ -237,14 +247,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- Nút tạo task mới: đặt bên phải, chiều cao được tinh chỉnh bằng positionCreateTaskButton() -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabAddAI"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center"
-                android:layout_marginBottom="24dp"
-                android:contentDescription="Tạo Task bằng AI"
-                app:backgroundTint="@color/indigo_600"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="@dimen/spacing_lg"
+                android:contentDescription="@string/task_create_title"
+                app:backgroundTint="@color/primary"
                 app:tint="@color/white"
                 app:srcCompat="@drawable/ic_add"
                 app:elevation="10dp"

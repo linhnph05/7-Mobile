@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -37,6 +38,10 @@ import java.util.List;
 
 public class ProjectDetailActivity extends BaseActivity {
 
+    public static final String EXTRA_INITIAL_TAB = "initial_tab";
+    public static final String EXTRA_OPEN_TASK_ID = "open_task_id";
+    public static final int INITIAL_TAB_TIMELINE = 3;
+
     private static final int TAB_OVERVIEW = 0;
     private static final int TAB_BOARD    = 1;
     private static final int TAB_LIST     = 2;
@@ -58,6 +63,8 @@ public class ProjectDetailActivity extends BaseActivity {
     private View btnMore;
     private View btnProjectActivity;
     private int currentTabIndex = -1;
+    private int requestedInitialTab = TAB_OVERVIEW;
+    private Long pendingOpenTaskId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +77,13 @@ public class ProjectDetailActivity extends BaseActivity {
         projectKey    = getIntent().getStringExtra("project_key");
         projectDesc   = getIntent().getStringExtra("project_desc");
         isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
+        requestedInitialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, TAB_OVERVIEW);
+        if (getIntent().hasExtra(EXTRA_OPEN_TASK_ID)) {
+            long taskId = getIntent().getLongExtra(EXTRA_OPEN_TASK_ID, -1);
+            if (taskId > 0) {
+                pendingOpenTaskId = taskId;
+            }
+        }
 
         SessionManager.init(this);
         currentUserId = SessionManager.getUserId();
@@ -88,7 +102,14 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        openTab(TAB_OVERVIEW);
+        openTab(resolveInitialTab());
+    }
+
+    private int resolveInitialTab() {
+        if (requestedInitialTab == INITIAL_TAB_TIMELINE) {
+            return TAB_TIMELINE;
+        }
+        return TAB_OVERVIEW;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -134,6 +155,7 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         View btnBack = findViewById(R.id.btnBack);
+        positionCreateTaskButton();
         if (isMyTasksMode) {
             if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
             if (btnMore != null) btnMore.setVisibility(View.GONE);
@@ -163,6 +185,28 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         updateHeaderActionsForTab(TAB_OVERVIEW);
+    }
+
+    private void positionCreateTaskButton() {
+        View fabAddAI = findViewById(R.id.fabAddAI);
+        if (fabAddAI == null) {
+            return;
+        }
+
+        View root = findViewById(R.id.rootLayout);
+        if (root == null) {
+            return;
+        }
+
+        root.post(() -> {
+            int rootHeight = root.getHeight();
+            if (rootHeight <= 0) {
+                return;
+            }
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fabAddAI.getLayoutParams();
+            params.bottomMargin = rootHeight / 3;
+            fabAddAI.setLayoutParams(params);
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -308,8 +352,34 @@ public class ProjectDetailActivity extends BaseActivity {
             else
                 tx.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
         }
-        tx.replace(R.id.fragment_container, fragment, tag).commit();
+        tx.replace(R.id.fragment_container, fragment, tag);
+        if (idx == TAB_TIMELINE && pendingOpenTaskId != null) {
+            tx.runOnCommit(this::openPendingTaskDetailAfterTimeline);
+        }
+        tx.commit();
         currentTabIndex = idx;
+    }
+
+    private void openPendingTaskDetailAfterTimeline() {
+        if (pendingOpenTaskId == null || pendingOpenTaskId <= 0) {
+            return;
+        }
+        final long taskId = pendingOpenTaskId;
+        pendingOpenTaskId = null;
+
+        View container = findViewById(R.id.fragment_container);
+        Runnable openTask = () -> {
+            Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.project.CreateTaskActivity.class);
+            intent.putExtra("project_id", projectId);
+            intent.putExtra("task_id", taskId);
+            startActivity(intent);
+        };
+
+        if (container != null) {
+            container.postDelayed(openTask, 180L);
+        } else {
+            openTask.run();
+        }
     }
 
     private void updateTabUI(LinearLayout activeTab) {

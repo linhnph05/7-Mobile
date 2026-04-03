@@ -26,6 +26,7 @@ import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
 import com.team7.taskflow.ui.project.CreateTaskActivity;
 import com.team7.taskflow.ui.project.TaskAdapter;
+import com.team7.taskflow.ui.timeline.ProjectDetailActivity;
 import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -112,9 +113,13 @@ public class ForYouActivity extends BaseActivity {
         taskAdapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                Intent intent = new Intent(ForYouActivity.this, CreateTaskActivity.class);
+                Intent intent = new Intent(ForYouActivity.this, ProjectDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
-                intent.putExtra("task_id", task.getId());
+                intent.putExtra("project_name", task.getProjectName());
+                intent.putExtra(ProjectDetailActivity.EXTRA_INITIAL_TAB, ProjectDetailActivity.INITIAL_TAB_TIMELINE);
+                if (task.getId() != null) {
+                    intent.putExtra(ProjectDetailActivity.EXTRA_OPEN_TASK_ID, task.getId());
+                }
                 startActivity(intent);
             }
 

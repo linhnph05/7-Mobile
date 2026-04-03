@@ -11,14 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:paddingTop="24dp"
+        android:paddingTop="@dimen/spacing_lg"
         app:elevation="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp">
+            android:layout_height="@dimen/avatar_md"
+            android:paddingHorizontal="@dimen/padding_screen">
 
             <ImageView
                 android:id="@+id/ivProfilePic"
@@ -66,9 +65,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="80dp">
+            android:paddingHorizontal="@dimen/padding_screen"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingBottom="@dimen/bottom_nav_padding">
 
             <TextView
                 android:id="@+id/tvGreeting"
@@ -84,9 +83,9 @@
                 android:id="@+id/tvTaskCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="@string/for_you_task_count_preview"
-                android:textColor="@color/theme_text_secondary"
+                android:textColor="@color/theme_text_primary"
                 android:textSize="14sp"
                 tools:text="Bạn có 3 công việc cần xử lý hôm nay" />
 

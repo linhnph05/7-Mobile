@@ -102,43 +102,8 @@
             android:layout_height="24dp"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar">
-
-            <TextView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:background="@drawable/bg_circle_blue"
-                android:backgroundTint="@color/warning"
-                android:gravity="center"
-                android:text="A"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="14dp"
-                android:background="@drawable/bg_circle_blue"
-                android:backgroundTint="@color/project_purple"
-                android:gravity="center"
-                android:text="L"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="28dp"
-                android:background="@drawable/bg_circle_blue"
-                android:backgroundTint="@color/success"
-                android:gravity="center"
-                android:text="G"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </FrameLayout>
+            app:layout_constraintTop_toBottomOf="@+id/progressBar"
+            tools:background="@color/theme_background" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -150,9 +115,11 @@
             app:layout_constraintTop_toTopOf="@+id/layoutAvatars">
 
             <ImageView
+                android:id="@+id/ivTaskActivity"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
-                android:src="@android:drawable/ic_dialog_email"
+                android:contentDescription="@string/dashboard_task_activities_today"
+                android:src="@drawable/ic_task_alt"
                 app:tint="@color/theme_text_secondary" />
 
             <TextView
@@ -165,10 +132,12 @@
                 tools:text="5" />
 
             <ImageView
+                android:id="@+id/ivCommentActivity"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
                 android:layout_marginStart="12dp"
-                android:src="@android:drawable/ic_menu_recent_history"
+                android:contentDescription="@string/dashboard_comment_activities_today"
+                android:src="@drawable/ic_chat"
                 app:tint="@color/theme_text_secondary" />
 
             <TextView

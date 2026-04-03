@@ -13,6 +13,10 @@ import retrofit2.Response;
 
 public class InvitationRepository {
 
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_ACCEPTED = "ACCEPTED";
+    private static final String STATUS_DENIED = "DENIED";
+
     private final InvitationApiService api;
 
     public interface ResultCallback<T> {
@@ -70,7 +74,7 @@ public class InvitationRepository {
         api.findPendingInvitation(
                 "eq." + projectId,
                 "eq." + userEmail,
-                "eq.PENDING",
+            "eq." + STATUS_PENDING,
                 "id,role,status"
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
@@ -85,9 +89,9 @@ public class InvitationRepository {
                 String invitationId = (String) invitation.get("id"); // UUID dạng String
                 String role = (String) invitation.get("role");
 
-                // Bước 2: Cập nhật status = accepted
+                // Bước 2: Cập nhật status = ACCEPTED
                 Map<String, String> statusBody = new HashMap<>();
-                statusBody.put("status", "accepted");
+                statusBody.put("status", STATUS_ACCEPTED);
 
                 api.updateInvitationStatus("eq." + invitationId, statusBody)
                         .enqueue(new Callback<Void>() {
@@ -143,7 +147,7 @@ public class InvitationRepository {
         api.findPendingInvitation(
                 "eq." + projectId,
                 "eq." + userEmail,
-                "eq.PENDING",
+            "eq." + STATUS_PENDING,
                 "id"
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
@@ -156,9 +160,9 @@ public class InvitationRepository {
 
                 String invitationId = (String) r.body().get(0).get("id");
 
-                // Bước 2: Cập nhật status = declined
+                // Bước 2: Cập nhật status = DENIED
                 Map<String, String> body = new HashMap<>();
-                body.put("status", "declined");
+                body.put("status", STATUS_DENIED);
 
                 api.updateInvitationStatus("eq." + invitationId, body)
                         .enqueue(new Callback<Void>() {

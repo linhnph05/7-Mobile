@@ -21,12 +21,26 @@
         android:paddingTop="8dp">
 
         <!-- ═══ PROMPT INPUT ═══ -->
+        <TextView
+            android:id="@+id/tvSubTaskInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/theme_surface"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="13sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <EditText
             android:id="@+id/etPrompt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:background="@null"
             android:hint="Thêm tác vụ (Ví dụ: Nhắn tin cho Đức lúc 3h chiều mai...)"
             android:inputType="textMultiLine"
@@ -35,7 +49,7 @@
             android:textColor="@color/theme_text_primary"
             android:textColorHint="@color/theme_text_hint"
             android:textSize="18sp"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSubTaskInfo"
             app:layout_constraintBottom_toTopOf="@id/divider1" />
 
         <View

@@ -33,8 +33,8 @@
     <string name="for_you_title">For You</string>
     <string name="for_you_open_settings">Open settings</string>
     <string name="for_you_default_name">Bạn</string>
-    <string name="for_you_greeting_format">Chào buổi sáng, %1$s!</string>
-    <string name="for_you_greeting_preview">Chào buổi sáng, Bạn!</string>
+    <string name="for_you_greeting_format">%1$s ơi !</string>
+    <string name="for_you_greeting_preview">Bạn ơi !</string>
     <string name="for_you_task_count_today">Bạn có %1$d công việc cần xử lý hôm nay</string>
     <string name="for_you_task_count_preview">Bạn có 3 công việc cần xử lý hôm nay</string>
     <string name="for_you_overall_progress">Tiến độ tổng thể</string>
@@ -72,6 +72,8 @@
     <string name="project_deleted_success">Project deleted!</string>
     <string name="project_name_required">Please enter project name</string>
     <string name="project_activity_count_format">%1$d hoạt động mới</string>
+    <string name="dashboard_task_activities_today">Task activities today</string>
+    <string name="dashboard_comment_activities_today">Comment activities today</string>
 
     <!-- ==================== -->
     <!-- AUTH                 -->
@@ -114,6 +116,8 @@
     <string name="task_activity_history_tab">Lịch sử</string>
     <string name="task_activity_time_tab">Thời gian</string>
     <string name="task_worklog_empty">Chưa ghi nhận thời gian làm việc.</string>
+    <string name="task_subtask_of_format">Task con của: %1$s</string>
+    <string name="task_add_subtask_from_parent">Tạo subtask từ task này</string>
 
     <!-- ==================== -->
     <!-- OVERVIEW             -->
@@ -161,6 +165,8 @@
 
     <string name="task_history_empty">Chưa có lịch sử thay đổi</string>
     <string name="task_history_time_just_now">Vừa xong</string>
+    <string name="task_not_found">Task không tồn tại</string>
+    <string name="task_load_error">Lỗi tải task</string>
 
     <!-- ==================== -->
     <!-- WIDGET & SHORTCUTS   -->

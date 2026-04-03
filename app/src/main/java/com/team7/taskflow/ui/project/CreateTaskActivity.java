@@ -25,6 +25,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -45,6 +46,9 @@ import java.util.Locale;
 
 public class CreateTaskActivity extends BaseActivity {
 
+    private static final String EXTRA_PARENT_TASK_ID = "parent_task_id";
+    private static final String EXTRA_PARENT_TASK_TITLE = "parent_task_title";
+
     private EditText etTitle, etDescription;
     private TextView tvPriority, tvStatus, tvAssignee, tvTag, tvDependency;
     private ImageView ivPriority, ivStatus, ivAssignee, ivTag, ivDependency;
@@ -62,6 +66,7 @@ public class CreateTaskActivity extends BaseActivity {
     private String selectedAssigneeName = null;
 
     private TextView tvStartDate, tvDueDate, tvStartTime, tvDueTime, btnSave, tvToolbarTitle;
+    private TextView tvSubTaskInfo;
     private ProgressBar progressBar;
     private View layoutCommentsSection;
     private View layoutHistorySection;
@@ -82,6 +87,7 @@ public class CreateTaskActivity extends BaseActivity {
     private String currentAssigneeId = null;
     private String selectedTag = null; // Label/Tag
     private Long selectedParentTaskId = null; // Linked task dependency
+    private String selectedParentTaskTitle = null;
 
     private static final int COLOR_DEFAULT = R.color.slate_500;
 
@@ -98,16 +104,33 @@ public class CreateTaskActivity extends BaseActivity {
         SessionManager.init(this);
         currentUserId = SessionManager.getUserId();
 
-        // Lấy dữ liệu từ Intent an toàn
+        // ──────────────────────────────────────────────────────────────
+        // Lấy dữ liệu từ Intent và validate
+        // ──────────────────────────────────────────────────────────────
         projectId = getIntent().getLongExtra("project_id", -1);
+        if (projectId <= 0) {
+            Log.e("CreateTaskActivity", "Invalid project_id: " + projectId);
+            Toast.makeText(this, "Project không hợp lệ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // KIỂM TRA NẾU CÓ ID THÌ MỚI GÁN (EDIT MODE)
+        // Mode Edit: kiểm tra task_id
         if (getIntent().hasExtra("task_id")) {
             long id = getIntent().getLongExtra("task_id", -1);
-            if (id != -1) {
+            if (id > 0) {
                 taskId = id;
             }
         }
+
+        // Subtask: kiểm tra parent task
+        if (getIntent().hasExtra(EXTRA_PARENT_TASK_ID)) {
+            long parentTaskId = getIntent().getLongExtra(EXTRA_PARENT_TASK_ID, -1);
+            if (parentTaskId > 0) {
+                selectedParentTaskId = parentTaskId;
+            }
+        }
+        selectedParentTaskTitle = getIntent().getStringExtra(EXTRA_PARENT_TASK_TITLE);
 
         initViews();
         initFilePickerLauncher();
@@ -115,13 +138,17 @@ public class CreateTaskActivity extends BaseActivity {
         setupDatePickers();
         loadProjectMembers();
 
-        // LOGIC PHÂN BIỆT GIAO DIỆN
-        if (taskId != null) {
+        // ──────────────────────────────────────────────────────────────
+        // UI phân biệt: Edit mode vs Create mode
+        // ──────────────────────────────────────────────────────────────
+        if (taskId != null && taskId > 0) {
+            // Edit mode
             tvToolbarTitle.setText("Edit Task");
-            btnSave.setText("Update"); // Đổi chữ nút cho rõ ràng
+            btnSave.setText("Update");
             loadTaskDetails();
             setupCommentsSection();
         } else {
+            // Create mode
             tvToolbarTitle.setText("Create Task");
             btnSave.setText("Create");
             if (layoutCommentsSection != null) {
@@ -164,6 +191,7 @@ public class CreateTaskActivity extends BaseActivity {
         btnSave = findViewById(R.id.btnSave);
         tvToolbarTitle = findViewById(R.id.tvToolbarTitle);
         progressBar = findViewById(R.id.progressBar);
+        tvSubTaskInfo = findViewById(R.id.tvSubTaskInfo);
         layoutCommentsSection = findViewById(R.id.layoutCommentsSection);
         layoutHistorySection = findViewById(R.id.layoutTabHistory);
         layoutWorkLogSection = findViewById(R.id.layoutTabWorkLog);
@@ -184,6 +212,20 @@ public class CreateTaskActivity extends BaseActivity {
                 etDescription.setText(prefillDescription);
             }
         }
+
+        renderSubTaskInfo();
+    }
+
+    private void renderSubTaskInfo() {
+        if (tvSubTaskInfo == null) {
+            return;
+        }
+        if (selectedParentTaskId == null || selectedParentTaskId <= 0 || selectedParentTaskTitle == null || selectedParentTaskTitle.trim().isEmpty()) {
+            tvSubTaskInfo.setVisibility(View.GONE);
+            return;
+        }
+        tvSubTaskInfo.setText(getString(R.string.task_subtask_of_format, selectedParentTaskTitle.trim()));
+        tvSubTaskInfo.setVisibility(View.VISIBLE);
     }
 
     private void setupCommentsSection() {
@@ -223,10 +265,14 @@ public class CreateTaskActivity extends BaseActivity {
 
     private void setupActivityTabs() {
         if (tabLayoutActivity == null) {
+            Log.w("CreateTaskActivity", "tabLayoutActivity not found in layout");
             return;
         }
 
-        if (taskId == null) {
+        // ──────────────────────────────────────────────────────────────
+        // Hide activity tabs & sections if in Create mode (no taskId)
+        // ──────────────────────────────────────────────────────────────
+        if (taskId == null || taskId <= 0) {
             tabLayoutActivity.setVisibility(View.GONE);
             if (layoutCommentsSection != null) {
                 layoutCommentsSection.setVisibility(View.GONE);
@@ -237,9 +283,16 @@ public class CreateTaskActivity extends BaseActivity {
             if (layoutWorkLogSection != null) {
                 layoutWorkLogSection.setVisibility(View.GONE);
             }
+            MaterialButton btnAddSubTask = findViewById(R.id.btnAddSubTask);
+            if (btnAddSubTask != null) {
+                btnAddSubTask.setVisibility(View.GONE);
+            }
             return;
         }
 
+        // ──────────────────────────────────────────────────────────────
+        // Setup tabs for Edit mode
+        // ──────────────────────────────────────────────────────────────
         tabLayoutActivity.setVisibility(View.VISIBLE);
         tabLayoutActivity.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -263,6 +316,27 @@ public class CreateTaskActivity extends BaseActivity {
         } else {
             showActivitySection(0);
         }
+
+        MaterialButton btnAddSubTask = findViewById(R.id.btnAddSubTask);
+        if (btnAddSubTask != null) {
+            btnAddSubTask.setVisibility(View.VISIBLE);
+            btnAddSubTask.setContentDescription(getString(R.string.task_add_subtask_from_parent));
+            btnAddSubTask.setOnClickListener(v -> openCreateSubTaskScreen());
+        }
+    }
+
+    private void openCreateSubTaskScreen() {
+        if (taskId == null) {
+            return;
+        }
+        Intent intent = new Intent(this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+        intent.putExtra("project_id", projectId);
+        intent.putExtra(EXTRA_PARENT_TASK_ID, taskId);
+        String title = etTitle != null ? etTitle.getText().toString().trim() : null;
+        if (title != null && !title.isEmpty()) {
+            intent.putExtra(EXTRA_PARENT_TASK_TITLE, title);
+        }
+        startActivity(intent);
     }
 
     private void showActivitySection(int position) {
@@ -534,61 +608,182 @@ public class CreateTaskActivity extends BaseActivity {
     }
 
     private void loadTaskDetails() {
+        // Validate taskId trước khi fetch
+        if (taskId == null || taskId <= 0) {
+            Log.e("CreateTaskActivity", "Invalid taskId for loading details: " + taskId);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
-        // Dùng đúng ID taskId để lấy dữ liệu từ Repo
+        Log.d("CreateTaskActivity", "Loading task details - projectId: " + projectId + ", taskId: " + taskId);
+
+        // Fetch all tasks for the project
         taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> result) {
-                for (Task t : result) {
-                    if (taskId != null && taskId.equals(t.getId())) {
-                        currentAssigneeId = t.getAssigneeId();
-                        runOnUiThread(() -> {
-                            etTitle.setText(t.getTitle());
-                            etDescription.setText(t.getDescription());
-                            setPriority(t.getPriority());
-                            setStatus(t.getStatus());
-                            if (t.getStartDate() != null) {
-                                String rawStart = t.getStartDate();
-                                String startDatePart = rawStart.length() >= 10 ? rawStart.substring(0, 10) : rawStart;
-                                tvStartDate.setText(startDatePart);
-                                if (tvStartTime != null && rawStart.length() > 11) {
-                                    String startTimePart = rawStart.substring(11);
-                                    tvStartTime.setText(startTimePart);
-                                }
-                            }
-                            if (t.getDueDate() != null) {
-                                String raw = t.getDueDate();
-                                String datePart = raw.length() >= 10 ? raw.substring(0, 10) : raw;
-                                tvDueDate.setText(datePart);
-                                if (tvDueTime != null && raw.length() > 11) {
-                                    String timePart = raw.substring(11);
-                                    tvDueTime.setText(timePart);
-                                }
-                            }
-                            // Tag/label
-                            selectedTag = t.getTag();
-                            if (selectedTag != null && tvTag != null) {
-                                tvTag.setText(selectedTag);
-                            }
-                            // Dependency
-                            selectedParentTaskId = t.getParentTaskId();
-                            if (selectedParentTaskId != null && tvDependency != null) {
-                                tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
-                            }
-                            if (currentAssigneeId != null) {
-                                setAssigneeById(currentAssigneeId);
-                            }
-                            setLoading(false);
-                            loadAttachments();
-                        });
-                        break;
-                    }
+                if (result == null || result.isEmpty()) {
+                    Log.w("CreateTaskActivity", "Task list is empty for project: " + projectId);
+                    handleTaskLoadError(getString(R.string.task_not_found));
+                    return;
                 }
+
+                Log.d("CreateTaskActivity", "Fetched " + result.size() + " tasks, looking for taskId: " + taskId);
+
+                // Find the task by ID - use longValue() for safe comparison
+                Task foundTask = findTaskById(result, taskId);
+
+                if (foundTask == null) {
+                    Log.w("CreateTaskActivity", "Task not found with ID: " + taskId +
+                            ". Available IDs: " + getTaskIdList(result));
+                    handleTaskLoadError(getString(R.string.task_not_found));
+                    return;
+                }
+
+                Log.d("CreateTaskActivity", "Task found: " + foundTask.getTitle());
+                populateTaskUI(foundTask);
             }
+
             @Override
             public void onError(String error) {
-                runOnUiThread(() -> setLoading(false));
+                Log.e("CreateTaskActivity", "Error loading task: " + error);
+                handleTaskLoadError(error);
             }
+        });
+    }
+
+    /**
+     * Find task by ID with proper type checking
+     */
+    private Task findTaskById(List<Task> tasks, Long targetId) {
+        if (tasks == null || targetId == null || targetId <= 0) {
+            return null;
+        }
+
+        for (Task task : tasks) {
+            if (task != null && task.getId() != null &&
+                task.getId().longValue() == targetId.longValue()) {
+                return task;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Log all task IDs for debugging
+     */
+    private String getTaskIdList(List<Task> tasks) {
+        if (tasks == null || tasks.isEmpty()) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i) != null && tasks.get(i).getId() != null) {
+                sb.append(tasks.get(i).getId());
+                if (i < tasks.size() - 1) sb.append(", ");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    /**
+     * Populate UI with task data
+     */
+    private void populateTaskUI(Task task) {
+        runOnUiThread(() -> {
+            try {
+                currentAssigneeId = task.getAssigneeId();
+
+                // Title & Description
+                if (etTitle != null && task.getTitle() != null) {
+                    etTitle.setText(task.getTitle());
+                }
+                if (etDescription != null && task.getDescription() != null) {
+                    etDescription.setText(task.getDescription());
+                }
+
+                // Priority & Status
+                if (task.getPriority() != null) {
+                    setPriority(task.getPriority());
+                }
+                if (task.getStatus() != null) {
+                    setStatus(task.getStatus());
+                }
+
+                // Dates
+                populateDateFields(task);
+
+                // Tag/Label
+                selectedTag = task.getTag();
+                if (selectedTag != null && tvTag != null) {
+                    tvTag.setText(selectedTag);
+                }
+
+                // Parent Task (Dependency)
+                selectedParentTaskId = task.getParentTaskId();
+                if (selectedParentTaskId != null && selectedParentTaskId > 0 && tvDependency != null) {
+                    tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
+                }
+
+                // Assignee
+                if (currentAssigneeId != null && !currentAssigneeId.isEmpty()) {
+                    setAssigneeById(currentAssigneeId);
+                }
+
+                setLoading(false);
+                loadAttachments();
+                loadComments();
+                loadTaskHistoryIntoSection();
+            } catch (Exception e) {
+                Log.e("CreateTaskActivity", "Error populating UI: " + e.getMessage(), e);
+                setLoading(false);
+                Toast.makeText(CreateTaskActivity.this, getString(R.string.task_load_error), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Populate date and time fields
+     */
+    private void populateDateFields(Task task) {
+        // Start Date & Time
+        if (task.getStartDate() != null && !task.getStartDate().isEmpty()) {
+            String rawStart = task.getStartDate();
+            String startDatePart = rawStart.length() >= 10 ? rawStart.substring(0, 10) : rawStart;
+            if (tvStartDate != null) {
+                tvStartDate.setText(startDatePart);
+            }
+            if (tvStartTime != null && rawStart.length() > 11) {
+                String startTimePart = rawStart.substring(11);
+                tvStartTime.setText(startTimePart);
+            }
+        }
+
+        // Due Date & Time
+        if (task.getDueDate() != null && !task.getDueDate().isEmpty()) {
+            String rawDue = task.getDueDate();
+            String datePart = rawDue.length() >= 10 ? rawDue.substring(0, 10) : rawDue;
+            if (tvDueDate != null) {
+                tvDueDate.setText(datePart);
+            }
+            if (tvDueTime != null && rawDue.length() > 11) {
+                String timePart = rawDue.substring(11);
+                tvDueTime.setText(timePart);
+            }
+        }
+    }
+
+    /**
+     * Handle task loading errors with user-friendly message
+     */
+    private void handleTaskLoadError(String errorMessage) {
+        runOnUiThread(() -> {
+            setLoading(false);
+            String displayMsg = errorMessage;
+            if (displayMsg == null || displayMsg.isEmpty()) {
+                displayMsg = getString(R.string.task_load_error);
+            }
+            Toast.makeText(CreateTaskActivity.this, displayMsg, Toast.LENGTH_SHORT).show();
+            finish();
         });
     }
 
@@ -610,24 +805,39 @@ public class CreateTaskActivity extends BaseActivity {
     }
 
     private void loadProjectMembers() {
+        if (projectId <= 0) {
+            Log.w("CreateTaskActivity", "projectId invalid, skipping member load");
+            return;
+        }
+
         taskRepository.getProjectMembers(projectId, new TaskRepository.TaskCallback<List<User>>() {
             @Override
             public void onSuccess(List<User> members) {
+                if (members == null || members.isEmpty()) {
+                    Log.w("CreateTaskActivity", "No project members found");
+                    return;
+                }
+
                 projectMembers = members;
                 runOnUiThread(() -> {
-                    // Nếu đang ở chế độ Edit, hãy chọn đúng người sau khi load xong list
-                    if (taskId != null && currentAssigneeId != null) {
-                        setAssigneeById(currentAssigneeId);
+                    try {
+                        // If in Edit mode with assignee, select it after members load
+                        if (taskId != null && taskId > 0 && currentAssigneeId != null && !currentAssigneeId.isEmpty()) {
+                            setAssigneeById(currentAssigneeId);
+                        }
+                    } catch (Exception e) {
+                        Log.e("CreateTaskActivity", "Error in loadProjectMembers callback: " + e.getMessage(), e);
                     }
                 });
             }
 
             @Override
             public void onError(String error) {
-                Log.e("MEMBER_LOAD", error);            }
+                Log.e("CreateTaskActivity", "Error loading project members: " + error);
+            }
         });
     }
-    private void saveTask() {
+     private void saveTask() {
         String title = etTitle.getText().toString().trim();
         if (title.isEmpty()) {
             etTitle.setError("Title is required");
@@ -671,13 +881,16 @@ public class CreateTaskActivity extends BaseActivity {
         task.setTag(selectedTag);
         task.setParentTaskId(selectedParentTaskId);
 
-        // QUAN TRỌNG: Kiểm tra taskId để quyết định gọi hàm nào
-        if (taskId == null) {
-            // TẠO MỚI
+        // ──────────────────────────────────────────────────────────────
+        // Phân biệt mode: Create vs Update
+        // Kiểm tra taskId > 0 vì nó có thể từ Intent (không phải null)
+        // ──────────────────────────────────────────────────────────────
+        if (taskId == null || taskId <= 0) {
+            // Create mode: tạo task mới
             taskRepository.createTask(task, handleResult());
         } else {
-            // CẬP NHẬT
-            task.setId(taskId); // Phải gán ID vào object task để server biết update dòng nào
+            // Edit mode: cập nhật task có sẵn
+            task.setId(taskId);
             taskRepository.updateTask(taskId, task, handleResult());
         }
     }
