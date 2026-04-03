@@ -60,6 +60,9 @@
     <color name="theme_card">#FFFFFF</color>
     <color name="theme_input_bg">#F1F5F9</color>
     <color name="theme_bottom_nav_bg">#FFFFFF</color>
+     <color name="theme_bottom_nav_icon_line">#FFFFFF</color>
+     <color name="theme_bottom_nav_icon_unchecked">#0F172A</color>
+     <color name="theme_bottom_nav_fab_icon">#FFFFFF</color>
 
     <!-- Text -->
     <color name="theme_text_primary">#0F172A</color>

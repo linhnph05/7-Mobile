@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.team7.taskflow.ui.foryou.ForYouActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
 
 import androidx.activity.EdgeToEdge;
@@ -72,14 +73,15 @@ public class DashboardActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_dashboard);
 
-        // Xử lý insets: chỉ thêm padding top cho status bar
-        // Bottom bar không cần padding vì nằm trên thanh điều hướng hệ thống
+        // Xử lý insets cho scrollView: thêm padding top cho status bar
         View scrollView = findViewById(R.id.scrollView);
         ViewCompat.setOnApplyWindowInsetsListener(scrollView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
             return insets;
         });
+
+        // Bottom bar được include - fitsSystemWindows="true" sẽ tự động xử lý bottom insets
 
         // Initialize session
         SessionManager.init(this);
@@ -110,6 +112,11 @@ public class DashboardActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Update bottom navigation selected item to ensure icon highlights correctly
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setItemIconTintList(null);
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
         startStickyServiceSafely();
         // Reload projects khi quay lại từ CreateProjectActivity
         // Chỉ load nếu đã có currentUserId
@@ -138,6 +145,15 @@ public class DashboardActivity extends BaseActivity {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         if (bottomNavigationView != null) {
             bottomNavigationView.setItemIconTintList(null);
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
+
+        View bottomBarContainer = findViewById(R.id.includeBottomBar);
+        if (bottomBarContainer != null) {
+            bottomBarContainer.bringToFront();
+        }
+        if (fabAdd != null) {
+            fabAdd.bringToFront();
         }
     }
 
@@ -185,13 +201,15 @@ public class DashboardActivity extends BaseActivity {
                 int id = item.getItemId();
                 if (id == R.id.nav_settings) {
                     Intent intent = new Intent(this, ProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_SETTINGS);
                     return true;
                 } else if (id == R.id.nav_home) {
                     // Already on home
                     return true;
                 } else if (id == R.id.nav_tasks) {
-                    Intent intent = new Intent(this, com.team7.taskflow.ui.foryou.ForYouActivity.class);
+                    Intent intent = new Intent(this, ForYouActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
                     return true;
                 }

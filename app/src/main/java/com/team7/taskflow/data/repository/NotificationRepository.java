@@ -53,9 +53,31 @@ public class NotificationRepository {
                         if (response.isSuccessful() && response.body() != null) {
                             enrichAndReturn(response.body(), callback);
                         } else {
+                            Log.w(TAG, "Select with actor failed, fallback to basic select. Code=" + response.code());
+                            fetchNotificationsFallback(userId, callback);
+                        }
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
+                        Log.w(TAG, "Select with actor failed, fallback to basic select: " + t.getMessage());
+                        fetchNotificationsFallback(userId, callback);
+                    }
+                });
+    }
+
+    private void fetchNotificationsFallback(String userId, NotificationCallback<List<Notification>> callback) {
+        api.getNotifications("eq." + userId, "*", "created_at.desc")
+                .enqueue(new Callback<List<Notification>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Notification>> call,
+                                           @NonNull Response<List<Notification>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            enrichAndReturn(response.body(), callback);
+                        } else {
                             callback.onError("Failed to load notifications: " + response.code());
                         }
                     }
+
                     @Override
                     public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
                         callback.onError("Network error: " + t.getMessage());

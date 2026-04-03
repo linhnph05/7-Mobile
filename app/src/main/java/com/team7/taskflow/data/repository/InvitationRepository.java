@@ -112,8 +112,19 @@ public class InvitationRepository {
                                         .enqueue(new Callback<Void>() {
                                             @Override
                                             public void onResponse(Call<Void> c, Response<Void> r3) {
-                                                if (r3.isSuccessful()) cb.onSuccess(null);
-                                                else cb.onError("Lỗi thêm thành viên: " + r3.code());
+                                                    if (r3.isSuccessful()) {
+                                                        ProjectRepository.getInstance().logProjectActivity(
+                                                                projectId,
+                                                                userId,
+                                                                "MEMBER_JOINED",
+                                                                "MEMBER",
+                                                                null,
+                                                                null,
+                                                                role != null ? role : "MEMBER");
+                                                        cb.onSuccess(null);
+                                                    } else {
+                                                        cb.onError("Lỗi thêm thành viên: " + r3.code());
+                                                    }
                                             }
                                             @Override
                                             public void onFailure(Call<Void> c, Throwable t) {

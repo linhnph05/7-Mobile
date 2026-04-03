@@ -1,10 +1,10 @@
 package com.team7.taskflow.data.repository;
 
-import com.team7.taskflow.BuildConfig;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.api.MemberApiService;
 import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.utils.SessionManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +15,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MemberRepository {
+
+    private static final String ROLE_REMOVED = ProjectMember.ROLE_REMOVED;
 
     private final MemberApiService api;
 
@@ -35,8 +37,17 @@ public class MemberRepository {
         ).enqueue(new Callback<List<ProjectMember>>() {
             @Override
             public void onResponse(Call<List<ProjectMember>> call, Response<List<ProjectMember>> r) {
-                if (r.isSuccessful() && r.body() != null) cb.onSuccess(r.body());
-                else cb.onError("Lỗi tải danh sách: " + r.code());
+                if (r.isSuccessful() && r.body() != null) {
+                    List<ProjectMember> filtered = new java.util.ArrayList<>();
+                    for (ProjectMember member : r.body()) {
+                        if (member != null && !member.isRemoved()) {
+                            filtered.add(member);
+                        }
+                    }
+                    cb.onSuccess(filtered);
+                } else {
+                    cb.onError("Lỗi tải danh sách: " + r.code());
+                }
             }
             @Override
             public void onFailure(Call<List<ProjectMember>> call, Throwable t) {
@@ -87,12 +98,26 @@ public class MemberRepository {
 
     // Xóa thành viên
     public void removeMember(long projectId, String userId, ResultCallback<Void> cb) {
-        api.removeMember( "eq." + projectId, "eq." + userId)
+        Map<String, String> body = new HashMap<>();
+        body.put("role", ROLE_REMOVED);
+
+        api.updateMember("eq." + projectId, "eq." + userId, body)
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> r) {
-                        if (r.isSuccessful()) cb.onSuccess(null);
-                        else cb.onError("Lỗi xóa thành viên: " + r.code());
+                        if (r.isSuccessful()) {
+                            ProjectRepository.getInstance().logProjectActivity(
+                                    projectId,
+                                    SessionManager.getUserId(),
+                                    "MEMBER_REMOVED",
+                                    "MEMBER",
+                                    null,
+                                    null,
+                                    userId);
+                            cb.onSuccess(null);
+                        } else {
+                            cb.onError("Lỗi xóa thành viên: " + r.code());
+                        }
                     }
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {

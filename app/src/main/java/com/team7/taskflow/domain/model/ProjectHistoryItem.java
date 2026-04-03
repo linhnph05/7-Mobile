@@ -2,6 +2,7 @@ package com.team7.taskflow.domain.model;
 
 public class ProjectHistoryItem {
 
+    public static final String SOURCE_PROJECT_ACTIVITY = "PROJECT_ACTIVITY";
     public static final String SOURCE_TASK_ACTIVITY = "TASK_ACTIVITY";
     public static final String SOURCE_COMMENT = "COMMENT";
 

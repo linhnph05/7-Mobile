@@ -8,6 +8,7 @@ import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
+import com.team7.taskflow.ui.foryou.ForYouActivity;
 import com.team7.taskflow.utils.SessionManager;
 import com.team7.taskflow.utils.NavigationUtils;
 
@@ -30,6 +31,8 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.cardview.widget.CardView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.team7.taskflow.ui.project.CreateProjectActivity;
 
 public class ProfileActivity extends BaseActivity {
 
@@ -42,6 +45,7 @@ public class ProfileActivity extends BaseActivity {
     private ImageView ivAvatar;
     private CardView avatarCard;
     private Button btnLogout;
+    private FloatingActionButton fabAdd;
     private UserRepository userRepository;
 
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
@@ -66,6 +70,17 @@ public class ProfileActivity extends BaseActivity {
         loadUserProfile();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update bottom navigation selected item to ensure icon highlights correctly
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        if (bottomNav != null) {
+            bottomNav.setItemIconTintList(null);
+            bottomNav.setSelectedItemId(R.id.nav_settings);
+        }
+    }
+
     private void initViews() {
         switchDarkMode = findViewById(R.id.switchDarkMode);
         tvProfileName = findViewById(R.id.tvProfileName);
@@ -76,6 +91,7 @@ public class ProfileActivity extends BaseActivity {
         ivAvatar = findViewById(R.id.ivAvatar);
         avatarCard = findViewById(R.id.avatarCard);
         btnLogout = findViewById(R.id.btnLogout);
+        fabAdd = findViewById(R.id.fabAdd);
 
         // Hiển thị email từ session ngay lập tức
         String email = SessionManager.getUserEmail();
@@ -99,6 +115,10 @@ public class ProfileActivity extends BaseActivity {
                         .build());
             });
         }
+
+        if (fabAdd != null) {
+            fabAdd.setOnClickListener(v -> startActivity(new Intent(this, CreateProjectActivity.class)));
+        }
     }
 
     private void setupThemeSwitch() {
@@ -118,8 +138,6 @@ public class ProfileActivity extends BaseActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
             bottomNav.setItemIconTintList(null);
-        }
-        if (bottomNav != null) {
             bottomNav.setSelectedItemId(R.id.nav_settings);
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
@@ -127,13 +145,13 @@ public class ProfileActivity extends BaseActivity {
                     return true;
                 } else if (id == R.id.nav_home) {
                     Intent intent = new Intent(this, DashboardActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
-                    finish();
                     return true;
                 } else if (id == R.id.nav_tasks) {
-                    Intent intent = new Intent(this, com.team7.taskflow.ui.foryou.ForYouActivity.class);
+                    Intent intent = new Intent(this, ForYouActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_TASKS);
-                    finish();
                     return true;
                 }
                 return false;

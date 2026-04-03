@@ -65,6 +65,7 @@ public class AiCreateActivity extends AppCompatActivity {
     // ── Views ────────────────────────────────────────────────────────────
 
     private View bottomSheet, bgOverlay;
+    private View cardSubTaskInfo;
     private EditText etPrompt, etParsedTitle, etParsedDescription;
     private ImageButton btnSaveTask;
     private TextView tvTaskId;
@@ -111,7 +112,19 @@ public class AiCreateActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(0, 0);
-        setContentView(R.layout.activity_ai_create);
+
+        int contentLayout = shouldUseSubTaskLayout(getIntent())
+            ? R.layout.activity_ai_create_subtask
+            : R.layout.activity_ai_create;
+        setContentView(contentLayout);
+
+        // Handle back pressed gesture with OnBackPressedDispatcher
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                closeActivity();
+            }
+        });
 
         readIntentExtras();
         bindViews();
@@ -161,6 +174,7 @@ public class AiCreateActivity extends AppCompatActivity {
     private void bindViews() {
         bottomSheet = findViewById(R.id.bottomSheet);
         bgOverlay = findViewById(R.id.bgOverlay);
+        cardSubTaskInfo = findViewById(R.id.cardSubTaskInfo);
         btnSaveTask = findViewById(R.id.btnSaveTask);
         etPrompt = findViewById(R.id.etPrompt);
         etParsedTitle = findViewById(R.id.etParsedTitle);
@@ -199,11 +213,32 @@ public class AiCreateActivity extends AppCompatActivity {
         }
         if (selectedParentTaskId == null || selectedParentTaskId <= 0
                 || selectedParentTaskTitle == null || selectedParentTaskTitle.trim().isEmpty()) {
+            if (cardSubTaskInfo != null) {
+                cardSubTaskInfo.setVisibility(View.GONE);
+            }
             tvSubTaskInfo.setVisibility(View.GONE);
             return;
         }
-        tvSubTaskInfo.setText(getString(R.string.task_subtask_of_format, selectedParentTaskTitle.trim()));
+        TextView tvParentTaskLabel = findViewById(R.id.tvParentTaskLabel);
+        String safeParentTitle = selectedParentTaskTitle.trim();
+        if (tvParentTaskLabel != null) {
+            tvSubTaskInfo.setText(safeParentTitle);
+            if (cardSubTaskInfo != null) {
+                cardSubTaskInfo.setVisibility(View.VISIBLE);
+            }
+        } else {
+            tvSubTaskInfo.setText(getString(R.string.task_subtask_of_format, safeParentTitle));
+        }
         tvSubTaskInfo.setVisibility(View.VISIBLE);
+    }
+
+    private boolean shouldUseSubTaskLayout(Intent intent) {
+        if (intent == null) {
+            return false;
+        }
+        long parentTaskId = intent.getLongExtra(EXTRA_PARENT_TASK_ID, -1L);
+        String parentTaskTitle = intent.getStringExtra(EXTRA_PARENT_TASK_TITLE);
+        return parentTaskId > 0 && parentTaskTitle != null && !parentTaskTitle.trim().isEmpty();
     }
 
     // ── Animations ───────────────────────────────────────────────────────
@@ -751,7 +786,7 @@ public class AiCreateActivity extends AppCompatActivity {
         tv.setTextColor(ContextCompat.getColor(this, colorRes));
         tv.setPadding(dp(20), dp(14), dp(20), dp(14));
         // Ripple effect
-        int[] attrs = {android.R.attr.selectableItemBackground};
+        int[] attrs = new int[] {android.R.attr.selectableItemBackground};
         android.content.res.TypedArray ta = obtainStyledAttributes(attrs);
         tv.setBackground(ta.getDrawable(0));
         ta.recycle();
@@ -849,10 +884,5 @@ public class AiCreateActivity extends AppCompatActivity {
             finish();
             overridePendingTransition(0, 0);
         }).start();
-    }
-
-    @Override
-    public void onBackPressed() {
-        closeActivity();
     }
 }

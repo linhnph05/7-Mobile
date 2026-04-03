@@ -8,7 +8,6 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.PATCH;
@@ -39,11 +38,12 @@ public interface MemberApiService {
             @Body Map<String, String> body
     );
 
-    // Xóa thành viên khỏi project
-    @DELETE("project_members")
-    Call<Void> removeMember(
+    // Cập nhật trạng thái/role của thành viên (dùng cho soft-delete member)
+    @PATCH("project_members")
+    Call<Void> updateMember(
             @Query("project_id") String projectIdFilter,
-            @Query("user_id") String userIdFilter
+            @Query("user_id") String userIdFilter,
+            @Body Map<String, String> body
     );
 
     // Tìm user theo email (để mời)

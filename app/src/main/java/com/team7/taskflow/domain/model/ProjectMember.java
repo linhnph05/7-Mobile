@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class ProjectMember {
 
+    public static final String ROLE_REMOVED = "REMOVED";
+
     @SerializedName("project_id")
     private long projectId;
 
@@ -94,5 +96,6 @@ public class ProjectMember {
     public boolean isAdmin() { return "ADMIN".equalsIgnoreCase(role); }
     public boolean isMember() { return "MEMBER".equalsIgnoreCase(role); }
     public boolean isViewer() { return "VIEWER".equalsIgnoreCase(role); }
+    public boolean isRemoved() { return ROLE_REMOVED.equalsIgnoreCase(role); }
     public boolean canEdit() { return isOwner() || isAdmin(); }
 }

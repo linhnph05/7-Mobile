@@ -137,7 +137,7 @@ public class CalendarFragment extends Fragment {
         adapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                Intent intent = new Intent(requireContext(), CreateTaskActivity.class);
+                Intent intent = new Intent(requireContext(), TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 taskLauncher.launch(intent);
@@ -273,7 +273,18 @@ public class CalendarFragment extends Fragment {
             }
         }
 
+        filteredList.sort((left, right) -> Long.compare(parseTaskCreatedTime(right), parseTaskCreatedTime(left)));
+
         adapter.setTasks(filteredList);
+    }
+
+    private long parseTaskCreatedTime(Task task) {
+        if (task == null || task.getCreatedAt() == null || task.getCreatedAt().trim().isEmpty()) return 0L;
+        try {
+            return java.time.OffsetDateTime.parse(task.getCreatedAt()).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
     }
 
     private String normalizeDate(String raw) {

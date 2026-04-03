@@ -3,27 +3,32 @@
 
     <item
         android:id="@+id/nav_home"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_home"
-        android:title="Home" />
+        android:title="@string/nav_home" />
 
     <item
         android:id="@+id/nav_tasks"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_tasks"
-        android:title="Tasks" />
+        android:title="@string/nav_tasks" />
 
     <item
         android:id="@+id/nav_placeholder"
+        android:checkable="false"
         android:title=""
         android:enabled="false" />
 
     <item
         android:id="@+id/nav_assistant"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_assistant"
-        android:title="Assistant" />
+        android:title="@string/nav_assistant" />
 
     <item
         android:id="@+id/nav_settings"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_settings"
-        android:title="Settings" />
+        android:title="@string/nav_settings" />
 
 </menu>

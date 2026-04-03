@@ -8,7 +8,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,11 +23,12 @@ import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
-import com.team7.taskflow.ui.project.CreateTaskActivity;
+import com.team7.taskflow.ui.project.CreateProjectActivity;
 import com.team7.taskflow.ui.project.TaskAdapter;
 import com.team7.taskflow.ui.timeline.ProjectDetailActivity;
 import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.utils.SessionManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -60,8 +60,8 @@ public class ForYouActivity extends BaseActivity {
     private ProgressBar pbOverallProgress;
     private RecyclerView rvMyTasks;
     private ImageView ivProfilePic;
-    private ImageView btnSettings;
     private BottomNavigationView bottomNavigationView;
+    private FloatingActionButton fabAdd;
 
     private TaskAdapter taskAdapter;
     private TaskRepository taskRepository;
@@ -71,7 +71,6 @@ public class ForYouActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.fragment_for_you);
 
         SessionManager.init(this);
@@ -88,6 +87,11 @@ public class ForYouActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Update bottom navigation selected item to ensure icon highlights correctly
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setItemIconTintList(null);
+            bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
+        }
         loadTasks();
     }
 
@@ -103,8 +107,11 @@ public class ForYouActivity extends BaseActivity {
         pbOverallProgress = findViewById(R.id.pbOverallProgress);
         rvMyTasks = findViewById(R.id.rvMyTasks);
         ivProfilePic = findViewById(R.id.ivProfilePic);
-        btnSettings = findViewById(R.id.btnSettings);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setItemIconTintList(null);
+        }
+        fabAdd = findViewById(R.id.fabAdd);
     }
 
     private void setupRecycler() {
@@ -138,14 +145,15 @@ public class ForYouActivity extends BaseActivity {
         chipAll.setOnClickListener(v -> applyFilter(TaskFilter.ALL));
         chipToday.setOnClickListener(v -> applyFilter(TaskFilter.TODAY));
         chipUpcoming.setOnClickListener(v -> applyFilter(TaskFilter.UPCOMING));
-        btnSettings.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        if (fabAdd != null) {
+            fabAdd.setOnClickListener(v -> startActivity(new Intent(this, CreateProjectActivity.class)));
+        }
     }
 
     private void setupBottomNavigation() {
         if (bottomNavigationView == null) {
             return;
         }
-        bottomNavigationView.setItemIconTintList(null);
         bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -154,14 +162,14 @@ public class ForYouActivity extends BaseActivity {
             }
             if (id == R.id.nav_home) {
                 Intent intent = new Intent(this, DashboardActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
-                finish();
                 return true;
             }
             if (id == R.id.nav_settings) {
                 Intent intent = new Intent(this, ProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
-                finish();
                 return true;
             }
             return id == R.id.nav_assistant;
@@ -280,7 +288,19 @@ public class ForYouActivity extends BaseActivity {
                 filtered.add(task);
             }
         }
+        filtered.sort((left, right) -> Long.compare(parseTaskCreatedTime(right), parseTaskCreatedTime(left)));
         taskAdapter.setTasks(filtered);
+    }
+
+    private long parseTaskCreatedTime(Task task) {
+        if (task == null || TextUtils.isEmpty(task.getCreatedAt())) {
+            return 0L;
+        }
+        try {
+            return OffsetDateTime.parse(task.getCreatedAt()).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
     }
 
     private void updateFilterUi() {

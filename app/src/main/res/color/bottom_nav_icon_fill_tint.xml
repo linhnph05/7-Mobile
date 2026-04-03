@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Checked (selected): fill with primary blue color -->
     <item android:color="@color/primary" android:state_checked="true" />
-    <item android:color="#00000000" /> <!-- Trong suốt khi không chọn -->
+    <!-- Unchecked: transparent fill (outline only) -->
+    <item android:color="@android:color/transparent" />
 </selector>

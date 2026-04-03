@@ -1,29 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Thanh bottom dùng chung cho nhiều màn hình.
-    FAB được thêm riêng ở Dashboard.
--->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottomBarContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    android:background="@color/theme_bottom_nav_bg"
-    android:paddingBottom="8dp">
+    android:background="@android:color/transparent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:elevation="18dp"
+    android:fitsSystemWindows="true"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    android:translationZ="18dp">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/bottomNavSurface"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:paddingVertical="12dp"
-        android:paddingHorizontal="8dp"
-        app:itemIconSize="32dp"
-        app:itemIconTint="@null"
-        app:itemActiveIndicatorStyle="@style/BottomNavIndicator_Transparent"
-        app:labelVisibilityMode="unlabeled"
-        app:menu="@menu/bottom_nav_menu" />
+        android:background="@drawable/bg_bottom_nav"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-</FrameLayout>
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_nav_height"
+            android:background="@android:color/transparent"
+            android:minHeight="@dimen/bottom_nav_height"
+            android:paddingHorizontal="0dp"
+            android:paddingVertical="0dp"
+            app:itemActiveIndicatorStyle="@style/BottomNavIndicator_Transparent"
+            app:itemBackground="@drawable/bg_bottom_nav_item_selected"
+            app:itemIconSize="@dimen/icon_bottom_nav"
+            app:itemIconTint="@null"
+            app:labelVisibilityMode="unlabeled"
+            app:menu="@menu/bottom_nav_menu" />
+
+    </FrameLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_input_add"
+        android:translationY="@dimen/bottom_nav_fab_offset"
+        app:backgroundTint="@color/primary"
+        app:fabCustomSize="@dimen/fab_size"
+        app:maxImageSize="@dimen/icon_md"
+        app:tint="@color/theme_bottom_nav_fab_icon"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavSurface"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

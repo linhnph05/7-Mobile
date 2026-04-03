@@ -1,5 +1,6 @@
 package com.team7.taskflow.ui.notification;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,10 +17,14 @@ import com.google.android.material.chip.Chip;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.InvitationRepository;
 import com.team7.taskflow.data.repository.NotificationRepository;
+import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Notification;
 import com.team7.taskflow.domain.model.Notification.NotificationType;
+import com.team7.taskflow.domain.model.Task;
 import android.util.Log;
 import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.ui.timeline.ProjectDetailActivity;
+import com.team7.taskflow.ui.project.TaskDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +42,7 @@ public class NotificationsActivity extends BaseActivity {
     private List<Notification> allNotifications = new ArrayList<>();
     private final NotificationRepository notificationRepo = NotificationRepository.getInstance();
     private final InvitationRepository invitationRepo = new InvitationRepository();
+    private final TaskRepository taskRepository = TaskRepository.getInstance();
 
     private static final String[] FILTER_OPTIONS = {
             "All types", "@me", "Comment", "Join request"
@@ -47,6 +53,7 @@ public class NotificationsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SessionManager.init(this);
         setContentView(R.layout.activity_notifications);
         initViews();
         setupFilterDropdown();
@@ -85,6 +92,7 @@ public class NotificationsActivity extends BaseActivity {
                                 }
                             });
                 }
+                navigateFromNotification(notification);
             }
 
             @Override
@@ -280,5 +288,55 @@ public class NotificationsActivity extends BaseActivity {
     private void showEmptyState(boolean show) {
         layoutEmptyState.setVisibility(show ? View.VISIBLE : View.GONE);
         rvNotifications.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    private void navigateFromNotification(Notification notification) {
+        if (notification == null || notification.getReferenceId() == null) {
+            return;
+        }
+
+        long referenceId = notification.getReferenceId();
+        NotificationType type = notification.getType();
+
+        if (type == NotificationType.PROJECT_INVITE) {
+            openProjectDetail(referenceId, notification.getReferenceName());
+            return;
+        }
+
+        openTaskDetail(referenceId);
+    }
+
+    private void openProjectDetail(long projectId, String projectName) {
+        Intent intent = new Intent(this, ProjectDetailActivity.class);
+        intent.putExtra("project_id", projectId);
+        if (projectName != null && !projectName.trim().isEmpty()) {
+            intent.putExtra("project_name", projectName.trim());
+        }
+        startActivity(intent);
+    }
+
+    private void openTaskDetail(long taskId) {
+        taskRepository.getTaskById(taskId, new TaskRepository.TaskCallback<Task>() {
+            @Override
+            public void onSuccess(Task task) {
+                runOnUiThread(() -> {
+                    if (task == null || task.getProjectId() <= 0) {
+                        Toast.makeText(NotificationsActivity.this,
+                                "Không thể mở task từ thông báo", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Intent intent = new Intent(NotificationsActivity.this, TaskDetailActivity.class);
+                    intent.putExtra("project_id", task.getProjectId());
+                    intent.putExtra("task_id", task.getId());
+                    startActivity(intent);
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
+                        "Lỗi mở task: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 }

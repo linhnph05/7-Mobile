@@ -114,10 +114,9 @@
             android:name=".ui.project.ProjectActivityHistoryActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.project.CreateTaskActivity"
+            android:name=".ui.project.TaskDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <!-- Notification -->
         <activity android:name=".ui.notification.NotificationsActivity" />
 

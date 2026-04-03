@@ -48,6 +48,7 @@
     <dimen name="icon_sm">20dp</dimen>
     <dimen name="icon_md">24dp</dimen>
     <dimen name="icon_lg">32dp</dimen>
+    <dimen name="icon_bottom_nav">29dp</dimen>
     <dimen name="fab_size">56dp</dimen>
 
     <!-- ==================== -->
@@ -55,5 +56,6 @@
     <!-- ==================== -->
     <dimen name="bottom_nav_height">56dp</dimen>
     <dimen name="bottom_nav_padding">80dp</dimen>
+    <dimen name="bottom_nav_fab_offset">24dp</dimen>
 </resources>
 

@@ -16,6 +16,7 @@ import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.utils.SessionManager;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -327,49 +328,244 @@ public class ProjectRepository {
                 .enqueue(new Callback<List<Task>>() {
                     @Override
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
-                        if (!response.isSuccessful()) {
-                            callback.onError("Failed to load project tasks: " + response.code());
-                            return;
-                        }
-
-                        List<Task> tasks = response.body() != null ? response.body() : new ArrayList<>();
                         Map<Long, String> taskTitleMap = new HashMap<>();
-                        Set<Long> taskIds = new HashSet<>();
-                        for (Task task : tasks) {
-                            if (task == null) {
-                                continue;
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Task> tasks = response.body();
+                            for (Task task : tasks) {
+                                if (task == null) {
+                                    continue;
+                                }
+                                long taskId = task.getId();
+                                String title = task.getTitle() != null && !task.getTitle().trim().isEmpty()
+                                        ? task.getTitle().trim()
+                                        : "Task #" + taskId;
+                                taskTitleMap.put(taskId, title);
                             }
-                            long taskId = task.getId();
-                            taskIds.add(taskId);
-                            String title = task.getTitle() != null && !task.getTitle().trim().isEmpty()
-                                    ? task.getTitle().trim()
-                                    : "Task #" + taskId;
-                            taskTitleMap.put(taskId, title);
                         }
 
-                        fetchMemberProfileMap(projectId, new ProjectCallback<Map<String, UserProfile>>() {
-                            @Override
-                            public void onSuccess(Map<String, UserProfile> userProfileMap) {
-                                if (taskIds.isEmpty()) {
-                                    callback.onSuccess(new ArrayList<>());
-                                    return;
-                                }
-                                String inFilter = "in.(" + joinTaskIds(taskIds) + ")";
-                                fetchTaskHistoryAndComments(inFilter, taskTitleMap, userProfileMap, callback);
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                callback.onError(error);
-                            }
-                        });
+                        continueProjectHistoryFeed(projectId, taskTitleMap, callback);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                        continueProjectHistoryFeed(projectId, new HashMap<>(), callback);
+                    }
+                });
+    }
+
+    private void continueProjectHistoryFeed(long projectId,
+            Map<Long, String> taskTitleMap,
+            ProjectCallback<List<ProjectHistoryItem>> callback) {
+        fetchMemberProfileMap(projectId, new ProjectCallback<Map<String, UserProfile>>() {
+            @Override
+            public void onSuccess(Map<String, UserProfile> userProfileMap) {
+                loadProjectActivityFeed(projectId, taskTitleMap, userProfileMap, callback);
+            }
+
+            @Override
+            public void onError(String error) {
+                callback.onError(error);
+            }
+        });
+    }
+
+    public void logProjectActivity(long projectId, String userId, String actionType, String entityType,
+            Long entityId, String oldValue, String newValue) {
+        if (projectId <= 0) {
+            return;
+        }
+
+        ProjectActivity activity = new ProjectActivity(
+                projectId,
+                userId != null && !userId.trim().isEmpty() ? userId : SessionManager.getUserId(),
+                actionType,
+                entityType,
+                entityId,
+                oldValue,
+                newValue);
+
+        projectApi.createProjectActivity(activity).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                // Fire-and-forget.
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                // Ignore logging failures to avoid blocking the primary action.
+            }
+        });
+    }
+
+    private void loadProjectActivityFeed(long projectId,
+            Map<Long, String> taskTitleMap,
+            Map<String, UserProfile> userProfileMap,
+            ProjectCallback<List<ProjectHistoryItem>> callback) {
+        projectApi.getProjectActivities(
+                "eq." + projectId,
+                "activity_id,project_id,user_id,action_type,entity_type,entity_id,old_value,new_value,created_at",
+                "created_at.desc").enqueue(new Callback<List<ProjectActivity>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<ProjectActivity>> call,
+                            @NonNull Response<List<ProjectActivity>> response) {
+                        if (!response.isSuccessful()) {
+                            callback.onError("Failed to load project activities: " + response.code());
+                            return;
+                        }
+
+                        List<ProjectActivity> activities = response.body() != null ? response.body() : new ArrayList<>();
+                        List<ProjectHistoryItem> feed = mapProjectActivities(activities, taskTitleMap, userProfileMap);
+                        sortFeedByTimeDesc(feed);
+                        callback.onSuccess(feed);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<ProjectActivity>> call, @NonNull Throwable t) {
                         callback.onError("Network error: " + t.getMessage());
                     }
                 });
+    }
+
+    private List<ProjectHistoryItem> mapProjectActivities(
+            List<ProjectActivity> activities,
+            Map<Long, String> taskTitleMap,
+            Map<String, UserProfile> userProfileMap) {
+        List<ProjectHistoryItem> result = new ArrayList<>();
+        if (activities == null) {
+            return result;
+        }
+
+        for (ProjectActivity activity : activities) {
+            if (activity == null) {
+                continue;
+            }
+
+            ProjectHistoryItem item = new ProjectHistoryItem();
+            item.setSource(ProjectHistoryItem.SOURCE_PROJECT_ACTIVITY);
+            item.setActorId(activity.getUserId());
+            item.setActorName(resolveUserName(activity.getUserId(), userProfileMap));
+            item.setAvatarUrl(resolveAvatarUrl(activity.getUserId(), userProfileMap));
+            item.setActionLabel(mapProjectAction(activity.getActionType(), activity.getEntityType()));
+            item.setTaskTitle(resolveProjectTargetTitle(activity, taskTitleMap));
+            item.setDetail(buildProjectActivityDetail(activity));
+            if (isCommentActivity(activity)) {
+                item.setCommentContent(resolveProjectCommentContent(activity));
+            }
+            item.setCreatedAt(activity.getCreatedAt());
+            result.add(item);
+        }
+
+        return result;
+    }
+
+    private String resolveProjectTargetTitle(ProjectActivity activity, Map<Long, String> taskTitleMap) {
+        if (activity == null) {
+            return "";
+        }
+
+        String entityType = normalize(activity.getEntityType());
+        if (entityType.contains("task") && activity.getEntityId() != null && taskTitleMap != null) {
+            long taskId = activity.getEntityId();
+            return taskTitleMap.getOrDefault(taskId, "Task #" + taskId);
+        }
+        return "";
+    }
+
+    private String resolveProjectCommentContent(ProjectActivity activity) {
+        if (activity == null) {
+            return null;
+        }
+
+        String action = normalize(activity.getActionType());
+        if (action.contains("delete")) {
+            return activity.getOldValue();
+        }
+        return activity.getNewValue();
+    }
+
+    private String mapProjectAction(String actionTypeRaw, String entityTypeRaw) {
+        String action = actionTypeRaw != null ? actionTypeRaw.trim().toUpperCase(Locale.US) : "";
+        String entity = normalize(entityTypeRaw);
+
+        if (action.contains("COMMENT_DELETE")) return "da xoa binh luan";
+        if (action.contains("COMMENT_UPDATE")) return "da chinh sua binh luan";
+        if (action.contains("COMMENT")) return "da binh luan";
+        if (action.contains("ADD_REACTION")) return "da them cam xuc";
+        if (action.contains("REMOVE_REACTION")) return "da bo cam xuc";
+        if (action.contains("MEMBER_JOINED") || action.contains("MEMBER_ADDED") || action.contains("OWNER_JOINED")) {
+            return "da them thanh vien";
+        }
+        if (action.contains("MEMBER_REMOVED") || action.contains("MEMBER_LEFT")) {
+            return "da xoa thanh vien";
+        }
+        if ("CREATE".equals(action)) {
+            if (entity.contains("project")) return "da tao project";
+            if (entity.contains("task")) return "da tao task";
+            return "da tao moi";
+        }
+        if ("UPDATE_STATUS".equals(action)) return "da doi trang thai";
+        if (action.startsWith("UPDATE")) {
+            if (entity.contains("project")) return "da cap nhat project";
+            if (entity.contains("task")) return "da cap nhat task";
+            if (entity.contains("member")) return "da cap nhat thanh vien";
+            return "da cap nhat";
+        }
+        if (action.contains("DELETE") || action.contains("TRASH")) {
+            if (entity.contains("project")) return "da xoa project";
+            if (entity.contains("task")) return "da xoa task";
+            return "da xoa";
+        }
+        if (action.contains("RESTORE")) {
+            if (entity.contains("task")) return "da khoi phuc task";
+            if (entity.contains("project")) return "da khoi phuc project";
+            return "da khoi phuc";
+        }
+        return "da cap nhat";
+    }
+
+    private String buildProjectActivityDetail(ProjectActivity activity) {
+        if (activity == null) {
+            return "";
+        }
+
+        String action = normalize(activity.getActionType());
+        String entity = normalize(activity.getEntityType());
+        String oldText = trimOrDash(activity.getOldValue());
+        String newText = trimOrDash(activity.getNewValue());
+
+        if (action.contains("COMMENT")) {
+            return "";
+        }
+
+        if (action.contains("MEMBER")) {
+            return newText;
+        }
+
+        if (action.contains("ADD_REACTION") || action.contains("REMOVE_REACTION")) {
+            return newText;
+        }
+
+        if ("UPDATE_STATUS".equals(action) || "DELETE".equals(action) || "RESTORE".equals(action)
+                || "HARD_DELETE".equals(action)) {
+            return oldText + " -> " + newText;
+        }
+
+        if (entity.contains("project") && ("CREATE".equals(action) || action.startsWith("UPDATE"))) {
+            return newText;
+        }
+
+        return "";
+    }
+
+    private String resolveProjectTargetTitle(long entityId, Map<Long, String> taskTitleMap) {
+        if (entityId <= 0 || taskTitleMap == null) {
+            return "";
+        }
+        return taskTitleMap.getOrDefault(entityId, "Task #" + entityId);
+    }
+
+    private String trimOrDash(String raw) {
+        return raw != null && !raw.trim().isEmpty() ? raw.trim() : "-";
     }
 
     private void fetchTaskHistoryAndComments(
@@ -738,6 +934,14 @@ public class ProjectRepository {
                             @NonNull Response<List<Project>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Project createdProject = response.body().get(0);
+                            logProjectActivity(
+                                    createdProject.getId(),
+                                    createdProject.getOwnerId(),
+                                    "CREATE",
+                                    "PROJECT",
+                                    createdProject.getId(),
+                                    null,
+                                    createdProject.getName());
 
                             // Tự động thêm owner vào project_members với role OWNER
                             addOwnerAsMember(createdProject, callback);
@@ -780,6 +984,14 @@ public class ProjectRepository {
                         // Vì project đã được tạo thành công
                         if (response.isSuccessful()) {
                             project.setUserRole("OWNER");
+                            logProjectActivity(
+                                    project.getId(),
+                                    project.getOwnerId(),
+                                    "MEMBER_JOINED",
+                                    "MEMBER",
+                                    null,
+                                    null,
+                                    "OWNER");
                         }
                         callback.onSuccess(project);
                     }
@@ -805,7 +1017,16 @@ public class ProjectRepository {
                     public void onResponse(@NonNull Call<List<Project>> call,
                             @NonNull Response<List<Project>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                            callback.onSuccess(response.body().get(0));
+                            Project updatedProject = response.body().get(0);
+                            logProjectActivity(
+                                    updatedProject.getId(),
+                                    updatedProject.getOwnerId(),
+                                    "UPDATE",
+                                    "PROJECT",
+                                    updatedProject.getId(),
+                                    null,
+                                    updatedProject.getName());
+                            callback.onSuccess(updatedProject);
                         } else {
                             callback.onError("Failed to update project: " + response.code());
                         }
@@ -828,6 +1049,14 @@ public class ProjectRepository {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
+                            logProjectActivity(
+                                    projectId,
+                                    SessionManager.getUserId(),
+                                    "DELETE",
+                                    "PROJECT",
+                                    projectId,
+                                    null,
+                                    null);
                             callback.onSuccess(null);
                         } else {
                             callback.onError("Failed to delete project: " + response.code());
@@ -852,7 +1081,13 @@ public class ProjectRepository {
                     public void onResponse(@NonNull Call<List<ProjectMember>> call,
                             @NonNull Response<List<ProjectMember>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            callback.onSuccess(response.body());
+                            List<ProjectMember> filtered = new ArrayList<>();
+                            for (ProjectMember member : response.body()) {
+                                if (member != null && !member.isRemoved()) {
+                                    filtered.add(member);
+                                }
+                            }
+                            callback.onSuccess(filtered);
                         } else {
                             callback.onError("Failed to load members: " + response.code());
                         }

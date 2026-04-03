@@ -71,7 +71,13 @@ public class ProjectDetailActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_project_detail);
 
-        projectId     = getIntent().getLongExtra("project_id", -1);
+        projectId     = readLongExtraFlexible(getIntent(), "project_id", -1L);
+        if (projectId <= 0) {
+            projectId = readLongExtraFlexible(getIntent(), "projectId", -1L);
+        }
+        if (projectId <= 0) {
+            projectId = readLongExtraFlexible(getIntent(), "id", -1L);
+        }
         projectName   = getIntent().getStringExtra("project_name");
         projectKey    = getIntent().getStringExtra("project_key");
         projectDesc   = getIntent().getStringExtra("project_desc");
@@ -97,6 +103,16 @@ public class ProjectDetailActivity extends BaseActivity {
             ViewCompat.setOnApplyWindowInsetsListener(header, (v, insets) -> {
                 Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                 v.setPadding(v.getPaddingLeft(), sys.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
+
+        // Xử lý insets cho bottom bar: thêm padding bottom cho navigation bar
+        View bottomBarContainer = findViewById(R.id.includeBottomBar);
+        if (bottomBarContainer != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
+                Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), sys.bottom);
                 return insets;
             });
         }
@@ -163,7 +179,12 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         if (btnProjectActivity != null) {
-            btnProjectActivity.setOnClickListener(v -> openProjectActivityHistory());
+            btnProjectActivity.setVisibility(isMyTasksMode ? View.GONE : View.VISIBLE);
+            btnProjectActivity.setEnabled(true);
+            btnProjectActivity.setClickable(true);
+            btnProjectActivity.setFocusable(true);
+            btnProjectActivity.bringToFront();
+            btnProjectActivity.setOnClickListener(this::onProjectActivityClick);
         }
 
         updateHeaderActionsForTab(TAB_OVERVIEW);
@@ -214,20 +235,19 @@ public class ProjectDetailActivity extends BaseActivity {
 
     private void setupBottomNavigation() {
         if (!isMyTasksMode || bottomNavigationView == null) return;
-        bottomNavigationView.setItemIconTintList(null);
         bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_tasks) return true;
             if (id == R.id.nav_home) {
-                Intent i = new Intent(this, DashboardActivity.class);
+                    Intent i = new Intent(this, DashboardActivity.class);
                 NavigationUtils.startActivityWithNavAnimation(this, i,
                         NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
                 finish();
                 return true;
             }
             if (id == R.id.nav_settings) {
-                Intent i = new Intent(this, ProfileActivity.class);
+                    Intent i = new Intent(this, ProfileActivity.class);
                 NavigationUtils.startActivityWithNavAnimation(this, i,
                         NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
                 finish();
@@ -348,7 +368,7 @@ public class ProjectDetailActivity extends BaseActivity {
 
         View container = findViewById(R.id.fragment_container);
         Runnable openTask = () -> {
-            Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.project.CreateTaskActivity.class);
+            Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.project.TaskDetailActivity.class);
             intent.putExtra("project_id", projectId);
             intent.putExtra("task_id", taskId);
             startActivity(intent);
@@ -459,16 +479,6 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        View btnViewArchived = sheetView.findViewById(R.id.btnViewArchived);
-        if (btnViewArchived != null) {
-            btnViewArchived.setOnClickListener(v -> {
-                bottomSheet.dismiss();
-                Intent intent = new Intent(this,
-                        com.team7.taskflow.ui.project.TrashActivity.class);
-                startActivity(intent);
-            });
-        }
-
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
         if (btnCollapse != null) btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
 
@@ -478,15 +488,68 @@ public class ProjectDetailActivity extends BaseActivity {
     // ─────────────────────────────────────────────────────────────────────────
     // Project Activity History (của đồng đội)
     // ─────────────────────────────────────────────────────────────────────────
+    private void onProjectActivityClick(View view) {
+        openProjectActivityHistory();
+    }
+
     private void openProjectActivityHistory() {
-        if (projectId <= 0) {
-            Toast.makeText(this, "Project not found", Toast.LENGTH_SHORT).show();
+        long resolvedProjectId = resolveProjectIdForHistory();
+        if (resolvedProjectId <= 0) {
+            Toast.makeText(this, "Không tìm thấy project id", Toast.LENGTH_SHORT).show();
             return;
         }
+
         Intent intent = new Intent(this,
                 com.team7.taskflow.ui.project.ProjectActivityHistoryActivity.class);
-        intent.putExtra("project_id", projectId);
+        intent.putExtra("project_id", resolvedProjectId);
         intent.putExtra("project_name", projectName);
         startActivity(intent);
+    }
+
+    private long resolveProjectIdForHistory() {
+        if (projectId > 0) {
+            return projectId;
+        }
+
+        long fromIntent = readLongExtraFlexible(getIntent(), "project_id", -1L);
+        if (fromIntent > 0) {
+            projectId = fromIntent;
+            return fromIntent;
+        }
+
+        fromIntent = readLongExtraFlexible(getIntent(), "projectId", -1L);
+        if (fromIntent > 0) {
+            projectId = fromIntent;
+            return fromIntent;
+        }
+
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (current != null && current.getArguments() != null) {
+            long fromFragment = current.getArguments().getLong("project_id", -1L);
+            if (fromFragment > 0) {
+                projectId = fromFragment;
+                return fromFragment;
+            }
+        }
+
+        return -1L;
+    }
+
+    private long readLongExtraFlexible(Intent intent, String key, long defaultValue) {
+        if (intent == null || key == null || key.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            Object raw = intent.getExtras() != null ? intent.getExtras().get(key) : null;
+            if (raw instanceof Number) {
+                return ((Number) raw).longValue();
+            }
+            if (raw instanceof String) {
+                return Long.parseLong(((String) raw).trim());
+            }
+        } catch (Exception ignored) {
+            // Fall through to regular getLongExtra.
+        }
+        return intent.getLongExtra(key, defaultValue);
     }
 }

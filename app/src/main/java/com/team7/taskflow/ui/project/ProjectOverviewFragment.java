@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,13 +32,13 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.formatter.StackedValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.MemberRepository;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.ProjectMember;
-import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.Task;
 
 import java.text.SimpleDateFormat;
@@ -75,6 +76,13 @@ public class ProjectOverviewFragment extends Fragment {
     private View cardBarChart;
     
     private Map<String, String> memberNames = new HashMap<>();
+    private int todoCount;
+    private int inProgressCount;
+    private int doneCount;
+
+    private static final String STATUS_TODO_KEY = "TODO";
+    private static final String STATUS_IN_PROGRESS_KEY = "IN_PROGRESS";
+    private static final String STATUS_DONE_KEY = "DONE";
 
     public static ProjectOverviewFragment newInstance(long projectId, boolean isMyTasksMode, String userId) {
         ProjectOverviewFragment fragment = new ProjectOverviewFragment();
@@ -141,7 +149,7 @@ public class ProjectOverviewFragment extends Fragment {
             @Override
             public void onTaskClick(Task task) {
                 if (getContext() == null) return;
-                android.content.Intent intent = new android.content.Intent(getContext(), CreateTaskActivity.class);
+                android.content.Intent intent = new android.content.Intent(getContext(), TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 startActivity(intent);
@@ -204,8 +212,22 @@ public class ProjectOverviewFragment extends Fragment {
 
         barChartProductivity.getAxisLeft().setDrawGridLines(false);
         barChartProductivity.getAxisLeft().setTextColor(textColor);
+        barChartProductivity.getAxisLeft().setGranularity(1f);
         barChartProductivity.getAxisRight().setEnabled(false);
-        barChartProductivity.getLegend().setEnabled(false);
+
+        Legend legend = barChartProductivity.getLegend();
+        legend.setEnabled(true);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+        legend.setTextColor(textColor);
+        legend.setForm(Legend.LegendForm.SQUARE);
+        legend.setXEntrySpace(12f);
+        legend.setYOffset(24f);
+
+        // Add extra bottom room so legend does not sit too close to x-axis labels.
+        barChartProductivity.setExtraBottomOffset(8f);
     }
 
     private int getThemeColor(int attr) {
@@ -276,7 +298,7 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void processTaskStats(List<Task> tasks) {
-        int todo = 0, in_progress = 0, done = 0, overdue = 0;
+        int todo = 0, inProgress = 0, done = 0, overdue = 0;
         
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -287,7 +309,7 @@ public class ProjectOverviewFragment extends Fragment {
             if (status.contains("DONE")) {
                 done++;
             } else if (status.contains("IN_PROGRESS") || status.contains("PROGRESS") || status.contains("DOING")) {
-                in_progress++;
+                inProgress++;
             } else {
                 todo++;
             }
@@ -301,28 +323,32 @@ public class ProjectOverviewFragment extends Fragment {
         tvDoneTasks.setText(String.valueOf(done));
         tvOverdueTasks.setText(String.valueOf(overdue));
 
-        updatePieChart(todo, in_progress, done);
+        todoCount = todo;
+        inProgressCount = inProgress;
+        doneCount = done;
+
+        updatePieChart(todo, inProgress, done);
         if (!isMyTasksMode) {
             updateBarChart(tasks);
         }
     }
 
-    private void updatePieChart(int todo, int in_progress, int done) {
+    private void updatePieChart(int todo, int inProgress, int done) {
         pieChartStatus.setBackgroundColor(Color.TRANSPARENT);
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
         if (todo > 0) {
-            entries.add(new PieEntry(todo, getString(R.string.task_status_todo)));
-            colors.add(0xFF94A3B8); // Slate 400
+            entries.add(new PieEntry(todo, getString(R.string.overview_status_todo_count, todo)));
+            colors.add(ContextCompat.getColor(requireContext(), R.color.slate_400));
         }
-        if (in_progress > 0) {
-            entries.add(new PieEntry(in_progress, getString(R.string.task_status_in_progress)));
-            colors.add(0xFF6366F1); // Indigo 500
+        if (inProgress > 0) {
+            entries.add(new PieEntry(inProgress, getString(R.string.overview_status_in_progress_count, inProgress)));
+            colors.add(ContextCompat.getColor(requireContext(), R.color.primary));
         }
         if (done > 0) {
-            entries.add(new PieEntry(done, getString(R.string.task_status_done)));
-            colors.add(0xFF10B981); // Emerald 500
+            entries.add(new PieEntry(done, getString(R.string.overview_status_done_count, done)));
+            colors.add(ContextCompat.getColor(requireContext(), R.color.green_500));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -333,7 +359,7 @@ public class ProjectOverviewFragment extends Fragment {
         PieData data = new PieData(dataSet);
         pieChartStatus.setData(data);
 
-        int total = todo + in_progress + done;
+        int total = todo + inProgress + done;
         int percent = total > 0 ? (done * 100 / total) : 0;
         
         SpannableString centerText = new SpannableString(percent + "%\n" + getString(R.string.overview_done).toUpperCase());
@@ -346,47 +372,71 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void updateBarChart(List<Task> tasks) {
-        Map<String, Integer> stats = new HashMap<>();
-        // Group tasks by assignee
-        for (Task t : tasks) {
-            String assigneeId = t.getAssigneeId();
-            String name = (assigneeId == null || !memberNames.containsKey(assigneeId)) 
-                ? "Chưa phân công" : memberNames.get(assigneeId);
-            stats.put(name, stats.getOrDefault(name, 0) + 1);
-        }
-
         barChartProductivity.setBackgroundColor(Color.TRANSPARENT);
         ArrayList<BarEntry> entries = new ArrayList<>();
         ArrayList<String> labels = new ArrayList<>();
-        
+
+        Map<String, int[]> stats = new HashMap<>();
+        String unassignedLabel = getString(R.string.overview_unassigned_label);
+
+        for (Task t : tasks) {
+            String assigneeId = t.getAssigneeId();
+            String name = (assigneeId == null || !memberNames.containsKey(assigneeId))
+                    ? unassignedLabel
+                    : memberNames.get(assigneeId);
+
+            int[] buckets = stats.computeIfAbsent(name, k -> new int[] {0, 0, 0});
+            String status = t.getStatus() != null ? t.getStatus().toUpperCase(Locale.US) : STATUS_TODO_KEY;
+
+            if (status.contains("DONE")) {
+                buckets[2]++;
+            } else if (status.contains("IN_PROGRESS") || status.contains("PROGRESS") || status.contains("DOING")) {
+                buckets[1]++;
+            } else {
+                buckets[0]++;
+            }
+        }
+
+        List<String> orderedNames = new ArrayList<>(stats.keySet());
+        orderedNames.sort((left, right) -> {
+            if (left.equals(unassignedLabel)) return 1;
+            if (right.equals(unassignedLabel)) return -1;
+            return left.compareToIgnoreCase(right);
+        });
+
         int i = 0;
-        for (Map.Entry<String, Integer> entry : stats.entrySet()) {
-            entries.add(new BarEntry(i, entry.getValue()));
-            // Rút gọn tên nếu quá dài (ví dụ: "Nguyễn Văn A" -> "Nguyễn V. A")
-            String label = entry.getKey();
+        for (String name : orderedNames) {
+            int[] buckets = stats.get(name);
+            if (buckets == null) {
+                continue;
+            }
+            entries.add(new BarEntry(i, new float[] {buckets[0], buckets[1], buckets[2]}));
+            String label = name;
             if (label.length() > 10) label = label.substring(0, 8) + "..";
             labels.add(label);
             i++;
         }
 
-        ArrayList<Integer> colors = new ArrayList<>();
-        int[] palette = {0xFF6366F1, 0xFF10B981, 0xFFF59E0B, 0xFFF43F5E, 0xFF8B5CF6, 0xFFEC4899};
-        for (int j = 0; j < entries.size(); j++) {
-            colors.add(palette[j % palette.length]);
+        if (entries.isEmpty()) {
+            barChartProductivity.clear();
+            return;
         }
 
         BarDataSet dataSet = new BarDataSet(entries, "");
-        dataSet.setColors(colors);
+        dataSet.setColors(new int[] {
+                ContextCompat.getColor(requireContext(), R.color.slate_400),
+                ContextCompat.getColor(requireContext(), R.color.primary),
+                ContextCompat.getColor(requireContext(), R.color.green_500)
+        });
+        dataSet.setStackLabels(new String[] {
+            "Cần làm",
+            "Đang làm",
+            "Đã xong"
+        });
         dataSet.setDrawValues(true);
         dataSet.setValueTextColor(getThemeColor(com.google.android.material.R.attr.colorOnSurface));
-        dataSet.setValueTextSize(11f);
-        // Định dạng số nguyên cho giá trị trên đỉnh cột
-        dataSet.setValueFormatter(new com.github.mikephil.charting.formatter.ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.valueOf((int) value);
-            }
-        });
+        dataSet.setValueTextSize(12f);
+        dataSet.setValueFormatter(new StackedValueFormatter(false, "", 0));
 
         BarData data = new BarData(dataSet);
         data.setBarWidth(0.5f);
@@ -396,8 +446,7 @@ public class ProjectOverviewFragment extends Fragment {
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setLabelCount(labels.size());
         xAxis.setGranularity(1f);
-        
-        barChartProductivity.getAxisLeft().setGranularity(1f); // Trục Y hiển thị số nguyên
+        barChartProductivity.getAxisLeft().setGranularity(1f);
         barChartProductivity.getAxisRight().setEnabled(false);
         barChartProductivity.invalidate();
     }
@@ -408,11 +457,20 @@ public class ProjectOverviewFragment extends Fragment {
             if (!"DONE".equalsIgnoreCase(t.getStatus())) upcoming.add(t);
         }
         Collections.sort(upcoming, (t1, t2) -> {
-             if (t1.getDueDate() == null) return 1;
-             if (t2.getDueDate() == null) return -1;
-             return t1.getDueDate().compareTo(t2.getDueDate());
+            return Long.compare(parseTaskCreatedTime(t2), parseTaskCreatedTime(t1));
         });
         int limit = Math.min(upcoming.size(), 5);
         taskAdapter.setTasks(upcoming.subList(0, limit));
+    }
+
+    private long parseTaskCreatedTime(Task task) {
+        if (task == null || task.getCreatedAt() == null || task.getCreatedAt().trim().isEmpty()) {
+            return 0L;
+        }
+        try {
+            return java.time.OffsetDateTime.parse(task.getCreatedAt()).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
     }
 }

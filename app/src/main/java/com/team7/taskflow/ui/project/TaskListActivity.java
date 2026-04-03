@@ -17,10 +17,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
+import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.ui.base.BaseActivity;
-import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -46,6 +46,16 @@ public class TaskListActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_task_list);
 
+        // Xử lý insets cho bottom bar: thêm padding bottom cho navigation bar
+        View bottomBarContainer = findViewById(R.id.includeBottomBar);
+        if (bottomBarContainer != null) {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
+                androidx.core.graphics.Insets sys = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), sys.bottom);
+                return insets;
+            });
+        }
+
         projectId = getIntent().getLongExtra("project_id", -1);
         taskRepository = TaskRepository.getInstance();
 
@@ -55,7 +65,7 @@ public class TaskListActivity extends BaseActivity {
         setupBottomNavigation();
 
         findViewById(R.id.fabAdd).setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateTaskActivity.class);
+            Intent intent = new Intent(this, TaskDetailActivity.class);
             intent.putExtra("project_id", projectId != -1 ? projectId : 1L);
             startActivity(intent);
         });
@@ -81,7 +91,7 @@ public class TaskListActivity extends BaseActivity {
             @Override
             public void onTaskClick(Task task) {
                 // Mở màn hình chi tiết/chỉnh sửa khi nhấn vào task
-                Intent intent = new Intent(TaskListActivity.this, CreateTaskActivity.class);
+                Intent intent = new Intent(TaskListActivity.this, TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 startActivity(intent);
@@ -122,17 +132,17 @@ public class TaskListActivity extends BaseActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
             bottomNav.setItemIconTintList(null);
-        }
-        if (bottomNav != null) {
             bottomNav.setSelectedItemId(R.id.nav_tasks);
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
                 if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, DashboardActivity.class));
+                    Intent intent = new Intent(this, DashboardActivity.class);
+                    startActivity(intent);
                     finish();
                     return true;
                 } else if (id == R.id.nav_settings) {
-                    startActivity(new Intent(this, ProfileActivity.class));
+                    Intent intent = new Intent(this, ProfileActivity.class);
+                    startActivity(intent);
                     finish();
                     return true;
                 }
@@ -175,7 +185,19 @@ public class TaskListActivity extends BaseActivity {
                 filtered.add(t);
             }
         }
+        filtered.sort((left, right) -> Long.compare(parseTaskCreatedTime(right), parseTaskCreatedTime(left)));
         adapter.setTasks(filtered);
+    }
+
+    private long parseTaskCreatedTime(Task task) {
+        if (task == null || task.getCreatedAt() == null || task.getCreatedAt().trim().isEmpty()) {
+            return 0L;
+        }
+        try {
+            return java.time.OffsetDateTime.parse(task.getCreatedAt()).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
     }
 
     private void moveTaskToTrash(Task task) {

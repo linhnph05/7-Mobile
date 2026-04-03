@@ -115,7 +115,7 @@ public class ProjectBoardActivity extends BaseActivity {
             @Override
             public void onTaskClick(Task task) {
                 // Nhấn vào thẻ Task: mở màn hình chi tiết/chỉnh sửa
-                Intent intent = new Intent(ProjectBoardActivity.this, CreateTaskActivity.class);
+                Intent intent = new Intent(ProjectBoardActivity.this, TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 taskLauncher.launch(intent);
@@ -372,7 +372,7 @@ public class ProjectBoardActivity extends BaseActivity {
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case 1: // Edit Task
-                    Intent intent = new Intent(ProjectBoardActivity.this, CreateTaskActivity.class);
+                    Intent intent = new Intent(ProjectBoardActivity.this, TaskDetailActivity.class);
                     // Dùng projectId của chính task đó thay vì projectId của Activity (vì global mode có nhiều projects)
                     intent.putExtra("project_id", task.getProjectId());
                     intent.putExtra("task_id", task.getId());

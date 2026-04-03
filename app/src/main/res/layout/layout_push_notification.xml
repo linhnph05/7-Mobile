@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
+
+    <View
+        android:id="@+id/vBrandAccent"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:background="#4F46E5" />
+
+    <RelativeLayout
+        android:id="@+id/layoutIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@id/vBrandAccent"
+        android:background="@drawable/bg_btn_action_primary"> <ImageView
+            android:id="@+id/ivNotifIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_calendar"
+                app:tint="#4F46E5" /> </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_toStartOf="@id/tvNotifTime"
+        android:layout_toEndOf="@id/layoutIcon"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvNotifTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sắp đến hạn chót!"
+            android:textColor="#1E293B" 
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvNotifMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Tác vụ 'Thiết kế Database' cho dự án TaskFlow sẽ hết hạn trong 30 phút nữa."
+            android:textColor="#64748B" 
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvNotifTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:text="10:30"
+        android:textColor="#94A3B8"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

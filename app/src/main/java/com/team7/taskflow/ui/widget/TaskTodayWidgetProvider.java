@@ -72,7 +72,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
                     bindRow(context, views, today, 1, R.id.rowTask2, R.id.tvTask2, R.id.btnDone2);
                     bindRow(context, views, today, 2, R.id.rowTask3, R.id.tvTask3, R.id.btnDone3);
 
-                    Intent openIntent = new Intent(context, DashboardActivity.class);
+                            Intent openIntent = new Intent(context, DashboardActivity.class);
                     PendingIntent openPending = PendingIntent.getActivity(
                             context, appWidgetId, openIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.tvWidgetTitle, openPending);

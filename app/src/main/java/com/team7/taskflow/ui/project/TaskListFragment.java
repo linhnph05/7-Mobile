@@ -103,7 +103,7 @@ public class TaskListFragment extends Fragment {
             @Override
             public void onTaskClick(Task task) {
                 if (getContext() == null || task.getId() == null) return;
-                Intent intent = new Intent(getContext(), CreateTaskActivity.class);
+                Intent intent = new Intent(getContext(), com.team7.taskflow.ui.project.TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 startActivity(intent);
@@ -430,6 +430,9 @@ public class TaskListFragment extends Fragment {
                                 }
                             }
                         }
+                        visibleTasks.sort((left, right) -> Long.compare(
+                                parseTaskCreatedTime(right),
+                                parseTaskCreatedTime(left)));
                         taskAdapter.setTasks(visibleTasks);
                     }
                     if (swipeRefresh != null) {
@@ -454,6 +457,17 @@ public class TaskListFragment extends Fragment {
             taskRepository.getMyTasksWithProjectName(currentUserId, callback);
         } else {
             taskRepository.getTasksByProject(projectId, callback);
+        }
+    }
+
+    private long parseTaskCreatedTime(Task task) {
+        if (task == null || task.getCreatedAt() == null || task.getCreatedAt().trim().isEmpty()) {
+            return 0L;
+        }
+        try {
+            return java.time.OffsetDateTime.parse(task.getCreatedAt()).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
         }
     }
 }

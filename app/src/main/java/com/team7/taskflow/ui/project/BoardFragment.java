@@ -111,7 +111,7 @@ public class BoardFragment extends Fragment {
             @Override
             public void onTaskClick(Task task) {
                 if (getContext() == null) return;
-                android.content.Intent intent = new android.content.Intent(getContext(), CreateTaskActivity.class);
+                android.content.Intent intent = new android.content.Intent(getContext(), com.team7.taskflow.ui.project.TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 startActivity(intent);

@@ -11,7 +11,7 @@ import com.team7.taskflow.data.repository.ProjectRepository;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
-import com.team7.taskflow.ui.project.CreateTaskActivity;
+import com.team7.taskflow.ui.project.TaskDetailActivity;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
@@ -77,7 +77,7 @@ public class ShareToTaskActivity extends BaseActivity {
                                 return;
                             }
 
-                            Intent createIntent = new Intent(ShareToTaskActivity.this, CreateTaskActivity.class);
+                            Intent createIntent = new Intent(ShareToTaskActivity.this, TaskDetailActivity.class);
                             createIntent.putExtra("project_id", result.get(0).getId());
                             createIntent.putExtra("prefill_title", finalPrefillTitle);
                             createIntent.putExtra("prefill_description", finalPrefillDescription);

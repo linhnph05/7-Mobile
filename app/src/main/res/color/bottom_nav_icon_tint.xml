@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Khi icon ở trạng thái được chọn: Đường nét vẫn giữ màu đen (hoặc màu text chính theo theme) -->
-    <item android:color="@color/theme_text_primary" android:state_checked="true" />
-    
-    <!-- Khi icon không được chọn: Giữ màu xám/đen theo theme gốc -->
-    <item android:color="@color/theme_text_primary" android:state_checked="false" />
+    <!-- Checked (selected): white strokes to contrast with blue background -->
+    <item android:color="@android:color/white" android:state_checked="true" />
+    <!-- Unchecked: theme-driven outline color -->
+    <item android:color="@color/theme_bottom_nav_icon_line" />
 </selector>

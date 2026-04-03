@@ -62,6 +62,16 @@ public class CalendarActivity extends BaseActivity {
             });
         }
 
+        // Xử lý insets cho bottom bar: thêm padding bottom cho navigation bar
+        View bottomBarContainer = findViewById(R.id.includeBottomBar);
+        if (bottomBarContainer != null) {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
+                androidx.core.graphics.Insets sys = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), sys.bottom);
+                return insets;
+            });
+        }
+
         // 0. Register launcher để reload sau khi Edit Task xong
         taskLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -312,7 +322,7 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onTaskClick(Task task) {
                 // Nhấn vào thẻ task: mở màn hình chi tiết/chỉnh sửa
-                Intent intent = new Intent(CalendarActivity.this, CreateTaskActivity.class);
+                Intent intent = new Intent(CalendarActivity.this, com.team7.taskflow.ui.project.TaskDetailActivity.class);
                 intent.putExtra("project_id", task.getProjectId());
                 intent.putExtra("task_id", task.getId());
                 taskLauncher.launch(intent);
@@ -414,11 +424,24 @@ public class CalendarActivity extends BaseActivity {
             }
         }
 
+        filteredList.sort((left, right) -> Long.compare(parseTaskCreatedTime(right), parseTaskCreatedTime(left)));
+
         runOnUiThread(() -> {
             if (adapter != null) {
                 adapter.setTasks(filteredList);
             }
         });
+    }
+
+    private long parseTaskCreatedTime(Task task) {
+        if (task == null || task.getCreatedAt() == null || task.getCreatedAt().trim().isEmpty()) {
+            return 0L;
+        }
+        try {
+            return java.time.OffsetDateTime.parse(task.getCreatedAt()).toInstant().toEpochMilli();
+        } catch (Exception ignored) {
+            return 0L;
+        }
     }
 
     private void showQuickAddSheet() {

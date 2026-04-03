@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:paddingTop="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_sm"
         app:elevation="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -39,19 +39,6 @@
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/btnSettings"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/for_you_open_settings"
-                android:padding="0dp"
-                android:src="@drawable/ic_settings"
-                app:tint="@color/theme_text_secondary"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.AppBarLayout>

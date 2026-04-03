@@ -205,7 +205,9 @@ public class HistoryEventAdapter extends BaseAdapter {
         String detail = detailRaw != null ? detailRaw.toUpperCase(Locale.US) : "";
         String normalizedSource = source != null ? source.toUpperCase(Locale.US) : "";
 
-        if (ProjectHistoryItem.SOURCE_COMMENT.equals(normalizedSource) || action.contains("BINH LUAN")) {
+        if (ProjectHistoryItem.SOURCE_COMMENT.equals(normalizedSource)
+                || action.contains("BINH LUAN")
+                || action.contains("COMMENT")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.indigo_600);
         }
 
@@ -229,11 +231,19 @@ public class HistoryEventAdapter extends BaseAdapter {
             return ContextCompat.getColor(inflater.getContext(), R.color.text_red_600);
         }
 
-        if (action.contains("TAO")) {
+        if (action.contains("MEMBER_REMOVED") || action.contains("MEMBER_LEFT") || action.contains("XOA THANH VIEN")) {
+            return ContextCompat.getColor(inflater.getContext(), R.color.text_red_600);
+        }
+
+        if (action.contains("MEMBER") || action.contains("THANH VIEN") || action.contains("JOIN")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.success);
         }
 
-        if (action.contains("CHINH SUA") || action.contains("CAP NHAT")) {
+        if (action.contains("TAO") || action.contains("CREATE")) {
+            return ContextCompat.getColor(inflater.getContext(), R.color.success);
+        }
+
+        if (action.contains("CHINH SUA") || action.contains("CAP NHAT") || action.contains("UPDATE")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.slate_700);
         }
 

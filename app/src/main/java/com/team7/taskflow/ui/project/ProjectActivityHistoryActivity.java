@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.content.Intent;
 
 import androidx.annotation.Nullable;
 
@@ -28,7 +29,13 @@ public class ProjectActivityHistoryActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project_activity_history);
 
-        projectId = getIntent().getLongExtra("project_id", -1);
+        projectId = readLongExtraFlexible(getIntent(), "project_id", -1L);
+        if (projectId <= 0) {
+            projectId = readLongExtraFlexible(getIntent(), "projectId", -1L);
+        }
+        if (projectId <= 0) {
+            projectId = readLongExtraFlexible(getIntent(), "id", -1L);
+        }
         String projectName = getIntent().getStringExtra("project_name");
 
         TextView tvTitle = findViewById(R.id.tvTitle);
@@ -94,5 +101,23 @@ public class ProjectActivityHistoryActivity extends BaseActivity {
             listHistory.setVisibility(View.VISIBLE);
             listHistory.setAdapter(new HistoryEventAdapter(this, rows));
         }
+    }
+
+    private long readLongExtraFlexible(Intent intent, String key, long defaultValue) {
+        if (intent == null || key == null || key.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            Object raw = intent.getExtras() != null ? intent.getExtras().get(key) : null;
+            if (raw instanceof Number) {
+                return ((Number) raw).longValue();
+            }
+            if (raw instanceof String) {
+                return Long.parseLong(((String) raw).trim());
+            }
+        } catch (Exception ignored) {
+            // Fall through to regular getLongExtra.
+        }
+        return intent.getLongExtra(key, defaultValue);
     }
 }

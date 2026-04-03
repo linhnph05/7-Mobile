@@ -2,9 +2,10 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/theme_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,16 +15,18 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@color/white"
-            android:paddingHorizontal="8dp">
+            android:background="?attr/colorSurface"
+            android:elevation="4dp"
+            android:paddingHorizontal="16dp">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
                 android:src="@drawable/ic_chevron_left"
-                app:tint="@color/slate_900"
+                app:tint="?attr/colorOnSurface"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -32,8 +35,8 @@
                 android:id="@+id/tvToolbarTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Create Task"
-                android:textColor="@color/slate_900"
+                android:text="@string/task_create_title"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +48,7 @@
                 android:id="@+id/btnSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Create"
+                android:text="@string/task_create_button"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -55,16 +58,47 @@
                 app:layout_constraintBottom_toBottomOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/tvSubTaskInfo"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSubTaskInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/theme_surface_variant"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:textColor="@color/theme_text_secondary"
-            android:textSize="13sp"
-            android:visibility="gone" />
+            android:layout_marginHorizontal="@dimen/spacing_lg"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/theme_surface_variant"
+            app:cardCornerRadius="@dimen/radius_md"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/theme_border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/spacing_md"
+                android:paddingVertical="@dimen/spacing_sm">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_sm"
+                    android:layout_height="@dimen/icon_sm"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_task_alt"
+                    app:tint="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvSubTaskInfo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_weight="1"
+                    android:textColor="@color/theme_text_secondary"
+                    android:textSize="13sp"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <ScrollView
             android:layout_width="match_parent"
@@ -680,28 +714,19 @@
         </ScrollView>
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddSubTask"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddSubTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="@dimen/spacing_lg"
         android:contentDescription="@string/task_add_subtask"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:minWidth="40dp"
-        android:minHeight="40dp"
-        android:padding="0dp"
         app:backgroundTint="@color/primary"
-        app:cornerRadius="8dp"
+        app:tint="@color/white"
+        app:srcCompat="@drawable/ic_add"
         app:elevation="10dp"
-        app:icon="@drawable/ic_add"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="20dp"
-        app:iconTint="@color/white" />
+        app:pressedTranslationZ="14dp"
+        app:borderWidth="0dp" />
 
     <ProgressBar
         android:id="@+id/progressBar"

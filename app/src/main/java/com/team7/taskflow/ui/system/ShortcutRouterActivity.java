@@ -11,7 +11,7 @@ import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
-import com.team7.taskflow.ui.project.CreateTaskActivity;
+import com.team7.taskflow.ui.project.TaskDetailActivity;
 import com.team7.taskflow.ui.timeline.ProjectDetailActivity;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -70,7 +70,7 @@ public class ShortcutRouterActivity extends BaseActivity {
                     }
 
                     Project firstProject = result.get(0);
-                    Intent intent = new Intent(ShortcutRouterActivity.this, CreateTaskActivity.class);
+                    Intent intent = new Intent(ShortcutRouterActivity.this, TaskDetailActivity.class);
                     intent.putExtra("project_id", firstProject.getId());
                     startActivity(intent);
                     finish();

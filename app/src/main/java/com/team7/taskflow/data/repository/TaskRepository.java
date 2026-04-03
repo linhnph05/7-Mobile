@@ -415,6 +415,9 @@ public class TaskRepository {
                         if (response.isSuccessful() && response.body() != null) {
                             List<User> users = new java.util.ArrayList<>();
                             for (ProjectMember pm : response.body()) {
+                                if (pm == null || pm.isRemoved()) {
+                                    continue;
+                                }
                                 User u = new User();
                                 if (pm.getUserInfo() != null) {
                                     ProjectMember.UserInfo info = pm.getUserInfo();
@@ -461,7 +464,7 @@ public class TaskRepository {
     public void getTaskComments(long taskId, TaskCallback<List<Comment>> callback) {
         String select = "comment_id,task_id,user_id,content,created_at," 
             + "users(user_id,display_name,avatar_url)";
-        taskApi.getCommentsByTask("eq." + taskId, select, "created_at.asc").enqueue(new Callback<List<Comment>>() {
+        taskApi.getCommentsByTask("eq." + taskId, select, "created_at.desc").enqueue(new Callback<List<Comment>>() {
             @Override
             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                 if (response.isSuccessful()) {
@@ -501,8 +504,8 @@ public class TaskRepository {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     Comment createdComment = response.body().get(0);
                     callback.onSuccess(createdComment);
-                    logProjectActivityByTaskId(taskId, userId, "COMMENT", createdComment.getId(),
-                            "COMMENT", null, content);
+                            logProjectActivityByTaskId(taskId, userId, "TASK", taskId,
+                                    "COMMENT", null, content);
                 } else {
                     callback.onError("Failed to create comment: " + response.code());
                 }
@@ -532,8 +535,8 @@ public class TaskRepository {
                     logProjectActivityByTaskId(
                             updated.getTaskId() != null ? updated.getTaskId() : -1,
                             userId,
-                            "COMMENT",
-                            updated.getId(),
+                            "TASK",
+                            updated.getTaskId() != null ? updated.getTaskId() : -1,
                             "COMMENT_UPDATE",
                             null,
                             content);
@@ -568,8 +571,8 @@ public class TaskRepository {
                             logProjectActivityByTaskId(
                                     taskId,
                                     userId,
-                                    "COMMENT",
-                                    commentId,
+                                    "TASK",
+                                    taskId,
                                     "COMMENT_DELETE",
                                     finalExisting != null ? finalExisting.getContent() : null,
                                     null);
@@ -593,7 +596,7 @@ public class TaskRepository {
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             callback.onSuccess(null);
-                            logProjectActivityByTaskId(-1, userId, "COMMENT", commentId, "COMMENT_DELETE", null, null);
+                            logProjectActivityByTaskId(-1L, userId, "TASK", -1L, "COMMENT_DELETE", null, null);
                         } else {
                             callback.onError("Failed to delete comment: " + response.code());
                         }
@@ -684,8 +687,8 @@ public class TaskRepository {
                     logProjectActivityByTaskId(
                             taskId,
                             userId,
-                            "COMMENT",
-                            commentId,
+                            "TASK",
+                            taskId,
                             actionType,
                             null,
                             reactionType);
@@ -806,10 +809,11 @@ public class TaskRepository {
         taskApi.getTasksByProject("eq." + projectId, "position.asc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
-                if (response.isSuccessful())
+                if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
-                else
+                } else {
                     callback.onError("Load failed");
+                }
             }
 
             @Override
@@ -820,7 +824,7 @@ public class TaskRepository {
     }
 
     public void getTasksByProjectAndStatus(long projectId, String status, TaskCallback<List<Task>> callback) {
-        taskApi.getTasksByStatus("eq." + projectId, "eq." + status, "position.asc").enqueue(new Callback<List<Task>>() {
+        taskApi.getTasksByStatus("eq." + projectId, "eq." + status, "created_at.desc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful()) {
@@ -922,7 +926,7 @@ public class TaskRepository {
      * Get tasks assigned to a specific user
      */
     public void getMyTasks(String userId, TaskCallback<List<Task>> callback) {
-        taskApi.getTasksByAssignee("*", "eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
+        taskApi.getTasksByAssignee("*", "eq." + userId, "created_at.desc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful()) {
@@ -944,7 +948,7 @@ public class TaskRepository {
      */
     public void getMyTasksWithProjectName(String userId, TaskCallback<List<Task>> callback) {
         // Use Supabase PostgREST syntax: *,projects(*) to include related project data
-        taskApi.getTasksByAssignee("*,projects(*)", "eq." + userId, "due_date.asc").enqueue(new Callback<List<Task>>() {
+        taskApi.getTasksByAssignee("*,projects(*)", "eq." + userId, "created_at.desc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful()) {
@@ -966,7 +970,7 @@ public class TaskRepository {
                 "*,projects(*)",
                 "eq." + userId,
                 "eq." + status,
-                "due_date.asc").enqueue(new Callback<List<Task>>() {
+                "created_at.desc").enqueue(new Callback<List<Task>>() {
                     @Override
                     public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                         if (response.isSuccessful()) {

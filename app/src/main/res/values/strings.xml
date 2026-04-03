@@ -108,6 +108,7 @@
     <string name="task_status_todo">Cần làm</string>
     <string name="task_status_in_progress">Đang làm</string>
     <string name="task_status_done">Hoàn thành</string>
+    <string name="task_create_button">Create</string>
     <string name="task_priority_low">Thấp</string>
     <string name="task_priority_medium">Trung bình</string>
     <string name="task_priority_high">Cao</string>
@@ -117,7 +118,11 @@
     <string name="task_activity_time_tab">Thời gian</string>
     <string name="task_worklog_empty">Chưa ghi nhận thời gian làm việc.</string>
     <string name="task_subtask_of_format">Task con của: %1$s</string>
+    <string name="task_subtask_parent_label">Đang tạo task con của</string>
     <string name="task_add_subtask_from_parent">Tạo subtask từ task này</string>
+    <string name="task_subtask_create_title">Tạo Task Con</string>
+    <string name="task_subtask_create_dialog_parent">Task cha: %1$s</string>
+    <string name="task_subtask_title_hint">Tên task con...</string>
 
     <!-- ==================== -->
     <!-- OVERVIEW             -->
@@ -131,6 +136,10 @@
     <string name="overview_upcoming">Hạn chót sắp tới</string>
     <string name="overview_no_tasks">Chưa có công việc nào</string>
     <string name="overview_no_tasks_desc">Hãy nhấn nút AI để tạo công việc đầu tiên!</string>
+    <string name="overview_status_todo_count">Cần làm: %1$d</string>
+    <string name="overview_status_in_progress_count">Đang làm: %1$d</string>
+    <string name="overview_status_done_count">Đã xong: %1$d</string>
+    <string name="overview_unassigned_label">Chưa phân công</string>
 
     <!-- ==================== -->
     <!-- BOTTOM NAV           -->
