@@ -96,7 +96,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
                 for (int appWidgetId : ids) {
                     RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_today_tasks);
                     views.setTextViewText(R.id.tvWidgetCount, recentOpen.size() + " RECENT");
-                    views.setViewVisibility(R.id.btnWidgetReload, android.view.View.GONE);
+                    views.setViewVisibility(R.id.btnWidgetReload, android.view.View.VISIBLE);
                     bindRow(context, views, recentOpen, 0, appWidgetId, R.id.rowTask1, R.id.ivState1, R.id.tvTask1, R.id.tvMeta1);
                     bindRow(context, views, recentOpen, 1, appWidgetId, R.id.rowTask2, R.id.ivState2, R.id.tvTask2, R.id.tvMeta2);
                     bindRow(context, views, recentOpen, 2, appWidgetId, R.id.rowTask3, R.id.ivState3, R.id.tvTask3, R.id.tvMeta3);

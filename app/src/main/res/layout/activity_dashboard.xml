@@ -44,7 +44,7 @@
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="@id/imgAvatar"
                 app:layout_constraintStart_toEndOf="@id/imgAvatar"
-                app:layout_constraintEnd_toStartOf="@id/btnNotification"
+                app:layout_constraintEnd_toStartOf="@id/notificationContainer"
                 app:layout_constraintTop_toTopOf="@id/imgAvatar">
 
                 <TextView
@@ -59,17 +59,24 @@
                     android:ellipsize="end" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/btnNotification"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:contentDescription="Notifications"
-                android:src="@drawable/ic_notification"
-                android:layout_marginEnd="16dp"
-                app:tint="@color/theme_text_primary"
+            <FrameLayout
+                android:id="@+id/notificationContainer"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="12dp"
                 app:layout_constraintBottom_toBottomOf="@id/imgAvatar"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/imgAvatar" />
+                app:layout_constraintTop_toTopOf="@id/imgAvatar">
+
+                <ImageView
+                    android:id="@+id/btnNotification"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="Notifications"
+                    android:src="@drawable/ic_notification"
+                    app:tint="@color/theme_text_primary" />
+            </FrameLayout>
 
             <EditText
                 android:id="@+id/searchBar"

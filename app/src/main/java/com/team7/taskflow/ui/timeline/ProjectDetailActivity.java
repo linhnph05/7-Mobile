@@ -63,7 +63,6 @@ public class ProjectDetailActivity extends BaseActivity {
 
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
-    private TextView tvActivityBadge;
     private BottomNavigationView bottomNavigationView;
     private View btnMore;
     private View btnProjectActivity;
@@ -184,7 +183,6 @@ public class ProjectDetailActivity extends BaseActivity {
         tabCalendar          = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         btnProjectActivity   = findViewById(R.id.btnProjectActivity);
-        tvActivityBadge      = findViewById(R.id.tvProjectActivityBadge);
         btnMore              = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
@@ -221,42 +219,7 @@ public class ProjectDetailActivity extends BaseActivity {
             btnProjectActivity.setOnClickListener(this::onProjectActivityClick);
         }
 
-        loadActivityBadgeCount();
-
         updateHeaderActionsForTab(TAB_OVERVIEW);
-    }
-
-    private void loadActivityBadgeCount() {
-        if (tvActivityBadge == null || isMyTasksMode || projectId <= 0) {
-            return;
-        }
-
-        ProjectRepository.getInstance().getProjectActivities(projectId,
-                new ProjectRepository.ProjectCallback<List<ProjectActivity>>() {
-                    @Override
-                    public void onSuccess(List<ProjectActivity> result) {
-                        runOnUiThread(() -> updateActivityBadge(result != null ? result.size() : 0));
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        runOnUiThread(() -> updateActivityBadge(0));
-                    }
-                });
-    }
-
-    private void updateActivityBadge(int count) {
-        if (tvActivityBadge == null) {
-            return;
-        }
-
-        if (count <= 0) {
-            tvActivityBadge.setVisibility(View.GONE);
-            return;
-        }
-
-        tvActivityBadge.setVisibility(View.VISIBLE);
-        tvActivityBadge.setText(count > 99 ? "99+" : String.valueOf(count));
     }
 
     private void positionCreateTaskButton() {
