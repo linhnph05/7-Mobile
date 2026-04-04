@@ -68,6 +68,7 @@
     <color name="theme_text_primary">#0F172A</color>
     <color name="theme_text_secondary">#64748B</color>
     <color name="theme_text_hint">#94A3B8</color>
+     <color name="theme_board_count_text">#0F172A</color>
 
     <!-- Borders & dividers -->
     <color name="theme_border">#CBD5E1</color>

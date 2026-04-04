@@ -2,6 +2,8 @@ package com.team7.taskflow.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 import com.team7.taskflow.R;
 
@@ -10,6 +12,10 @@ import com.team7.taskflow.R;
  * Giữ thứ tự: Home (0) → Tasks (1) → Assistant (2) → Settings (3)
  */
 public class NavigationUtils {
+    public static final String EXTRA_NAV_FROM = "extra_nav_from";
+    public static final String EXTRA_NAV_TO = "extra_nav_to";
+    private static final long CONTENT_SLIDE_DURATION_MS = 240L;
+
     // Navigation item indices
     public static final int NAV_HOME = 0;
     public static final int NAV_TASKS = 1;
@@ -27,14 +33,39 @@ public class NavigationUtils {
             int currentNavIndex,
             int targetNavIndex
     ) {
+        intent.putExtra(EXTRA_NAV_FROM, currentNavIndex);
+        intent.putExtra(EXTRA_NAV_TO, targetNavIndex);
         currentActivity.startActivity(intent);
-        
-        if (targetNavIndex > currentNavIndex) {
-            // Moving right in nav bar → slide in from right
-            currentActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        } else if (targetNavIndex < currentNavIndex) {
-            // Moving left in nav bar → slide in from left
-            currentActivity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        // Disable whole-activity transition so bottom bar does not slide.
+        currentActivity.overridePendingTransition(0, 0);
+    }
+
+    public static void applyTopContentSlideAnimation(Activity activity, View contentView) {
+        if (activity == null || contentView == null || activity.getIntent() == null) {
+            return;
         }
+
+        int from = activity.getIntent().getIntExtra(EXTRA_NAV_FROM, -1);
+        int to = activity.getIntent().getIntExtra(EXTRA_NAV_TO, -1);
+        if (from < 0 || to < 0 || from == to) {
+            return;
+        }
+
+        contentView.post(() -> {
+            int width = contentView.getWidth();
+            if (width <= 0) {
+                return;
+            }
+
+            float startTranslationX = to > from ? width : -width;
+            contentView.setTranslationX(startTranslationX);
+            contentView.setAlpha(0.92f);
+            contentView.animate()
+                    .translationX(0f)
+                    .alpha(1f)
+                    .setDuration(CONTENT_SLIDE_DURATION_MS)
+                    .setInterpolator(new DecelerateInterpolator())
+                    .start();
+        });
     }
 }

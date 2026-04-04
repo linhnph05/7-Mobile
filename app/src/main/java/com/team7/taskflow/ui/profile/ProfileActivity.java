@@ -58,6 +58,7 @@ public class ProfileActivity extends BaseActivity {
 
         // Khởi tạo SessionManager
         SessionManager.init(this);
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
 
         initViews();
         setupThemeSwitch();
@@ -145,13 +146,13 @@ public class ProfileActivity extends BaseActivity {
                     return true;
                 } else if (id == R.id.nav_home) {
                     Intent intent = new Intent(this, DashboardActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
+                    finish();
                     return true;
                 } else if (id == R.id.nav_tasks) {
                     Intent intent = new Intent(this, ForYouActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_TASKS);
+                    finish();
                     return true;
                 }
                 return false;

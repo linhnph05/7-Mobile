@@ -359,7 +359,68 @@ public class ProjectRepository {
         fetchMemberProfileMap(projectId, new ProjectCallback<Map<String, UserProfile>>() {
             @Override
             public void onSuccess(Map<String, UserProfile> userProfileMap) {
-                loadProjectActivityFeed(projectId, taskTitleMap, userProfileMap, callback);
+                loadProjectActivityFeed(projectId, taskTitleMap, userProfileMap,
+                        new ProjectCallback<List<ProjectHistoryItem>>() {
+                            @Override
+                            public void onSuccess(List<ProjectHistoryItem> projectFeed) {
+                                String taskFilter = buildTaskFilterForHistory(taskTitleMap);
+                                if (taskFilter == null) {
+                                    callback.onSuccess(projectFeed);
+                                    return;
+                                }
+
+                                fetchTaskHistoryAndComments(
+                                        taskFilter,
+                                        taskTitleMap,
+                                        userProfileMap,
+                                        new ProjectCallback<List<ProjectHistoryItem>>() {
+                                            @Override
+                                            public void onSuccess(List<ProjectHistoryItem> taskFeed) {
+                                                List<ProjectHistoryItem> merged = new ArrayList<>();
+                                                if (projectFeed != null) {
+                                                    merged.addAll(projectFeed);
+                                                }
+                                                if (taskFeed != null) {
+                                                    merged.addAll(taskFeed);
+                                                }
+                                                sortFeedByTimeDesc(merged);
+                                                callback.onSuccess(merged);
+                                            }
+
+                                            @Override
+                                            public void onError(String error) {
+                                                // Keep project-level history even if task-level queries fail.
+                                                callback.onSuccess(projectFeed != null ? projectFeed : new ArrayList<>());
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                String taskFilter = buildTaskFilterForHistory(taskTitleMap);
+                                if (taskFilter == null) {
+                                    callback.onError(error);
+                                    return;
+                                }
+
+                                // Fallback to task-level history so screen still has useful data.
+                                fetchTaskHistoryAndComments(
+                                        taskFilter,
+                                        taskTitleMap,
+                                        userProfileMap,
+                                        new ProjectCallback<List<ProjectHistoryItem>>() {
+                                            @Override
+                                            public void onSuccess(List<ProjectHistoryItem> taskFeed) {
+                                                callback.onSuccess(taskFeed != null ? taskFeed : new ArrayList<>());
+                                            }
+
+                                            @Override
+                                            public void onError(String taskError) {
+                                                callback.onError(error);
+                                            }
+                                        });
+                            }
+                        });
             }
 
             @Override
@@ -367,6 +428,13 @@ public class ProjectRepository {
                 callback.onError(error);
             }
         });
+    }
+
+    private String buildTaskFilterForHistory(Map<Long, String> taskTitleMap) {
+        if (taskTitleMap == null || taskTitleMap.isEmpty()) {
+            return null;
+        }
+        return "in.(" + joinTaskIds(taskTitleMap.keySet()) + ")";
     }
 
     public void logProjectActivity(long projectId, String userId, String actionType, String entityType,
@@ -936,7 +1004,7 @@ public class ProjectRepository {
                             Project createdProject = response.body().get(0);
                             logProjectActivity(
                                     createdProject.getId(),
-                                    createdProject.getOwnerId(),
+                                    SessionManager.getUserId(),
                                     "CREATE",
                                     "PROJECT",
                                     createdProject.getId(),
@@ -986,7 +1054,7 @@ public class ProjectRepository {
                             project.setUserRole("OWNER");
                             logProjectActivity(
                                     project.getId(),
-                                    project.getOwnerId(),
+                                    SessionManager.getUserId(),
                                     "MEMBER_JOINED",
                                     "MEMBER",
                                     null,
@@ -1020,7 +1088,7 @@ public class ProjectRepository {
                             Project updatedProject = response.body().get(0);
                             logProjectActivity(
                                     updatedProject.getId(),
-                                    updatedProject.getOwnerId(),
+                                    SessionManager.getUserId(),
                                     "UPDATE",
                                     "PROJECT",
                                     updatedProject.getId(),

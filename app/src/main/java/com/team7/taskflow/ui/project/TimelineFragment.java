@@ -234,14 +234,14 @@ public class TimelineFragment extends Fragment {
             tvDay.setLayoutParams(new LinearLayout.LayoutParams((int)(COLUMN_WIDTH_DP * density), -2));
             tvDay.setGravity(Gravity.CENTER);
             tvDay.setTextSize(11f);
-            tvDay.setTextColor(0xFF64748B);
+            tvDay.setTextColor(ContextCompat.getColor(requireContext(), R.color.theme_text_secondary));
             if (containerGanttDays != null) containerGanttDays.addView(tvDay);
 
             View grid = new View(getContext());
             LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(1, -1);
             glp.setMargins((int)(COLUMN_WIDTH_DP * density)-1, 0, 0, 0);
             grid.setLayoutParams(glp);
-            grid.setBackgroundColor(0xFFE2E8F0);
+            grid.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.theme_border));
             if (containerGanttGrid != null) containerGanttGrid.addView(grid);
 
             String m = new SimpleDateFormat("MMM", Locale.US).format(iter.getTime());
@@ -260,7 +260,15 @@ public class TimelineFragment extends Fragment {
             ((TextView)labelView.findViewById(R.id.tvTaskName)).setText(t.getTitle());
             ImageView iv = labelView.findViewById(R.id.imgAssigneeAvatar);
             if (iv != null && t.getAssigneeId() != null && assigneeAvatarUrlMap.containsKey(t.getAssigneeId())) {
-                com.bumptech.glide.Glide.with(this).load(assigneeAvatarUrlMap.get(t.getAssigneeId())).circleCrop().into(iv);
+                iv.setVisibility(View.VISIBLE);
+                com.bumptech.glide.Glide.with(this)
+                        .load(assigneeAvatarUrlMap.get(t.getAssigneeId()))
+                        .circleCrop()
+                        .placeholder(R.drawable.bg_avatar_bordered)
+                        .error(R.drawable.bg_avatar_bordered)
+                        .into(iv);
+            } else if (iv != null) {
+                iv.setVisibility(View.INVISIBLE);
             }
             containerTaskLabels.addView(labelView);
 
@@ -319,7 +327,7 @@ public class TimelineFragment extends Fragment {
         tv.setPadding(32, 0, 0, 0);
         tv.setTextSize(12f);
         tv.setTypeface(null, android.graphics.Typeface.BOLD);
-        tv.setTextColor(0xFF1E293B);
+        tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.theme_text_primary));
         containerGanttMonths.addView(tv);
     }
 }

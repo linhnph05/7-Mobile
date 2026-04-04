@@ -106,7 +106,7 @@ public class TaskDetailActivity extends BaseActivity {
     private String selectedTag = null;
     private Long selectedParentTaskId = null;
 
-    private static final int COLOR_DEFAULT = R.color.slate_500;
+    private static final int COLOR_DEFAULT = R.color.theme_text_secondary;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
     private Calendar startCalendar = Calendar.getInstance();
@@ -386,7 +386,7 @@ public class TaskDetailActivity extends BaseActivity {
         containerAttachments.setVisibility(View.VISIBLE);
         int count = attachedFileUris.size() + existingAttachments.size();
         tvAttachment.setText(count + " file");
-        setActive(cardAttachment, tvAttachment, ivAttachment, R.color.slate_900);
+        setActive(cardAttachment, tvAttachment, ivAttachment, R.color.theme_text_primary);
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -823,7 +823,7 @@ public class TaskDetailActivity extends BaseActivity {
         dlg.setOnShowListener(d -> {
             android.widget.Button neg = dlg.getButton(AlertDialog.BUTTON_NEGATIVE);
             android.widget.Button pos = dlg.getButton(AlertDialog.BUTTON_POSITIVE);
-            if (neg != null) { neg.setAllCaps(false); neg.setTextColor(ContextCompat.getColor(this, R.color.slate_500)); }
+            if (neg != null) { neg.setAllCaps(false); neg.setTextColor(ContextCompat.getColor(this, R.color.theme_text_secondary)); }
             if (pos != null) {
                 pos.setAllCaps(false); pos.setTextColor(ContextCompat.getColor(this, R.color.indigo_600));
                 pos.setOnClickListener(v -> {
@@ -995,7 +995,7 @@ public class TaskDetailActivity extends BaseActivity {
         String[] statuses = {"TODO", "DOING", "DONE"};
         for (String s : statuses) {
             String label; int color;
-            switch (s) { case "DONE": label = "Hoàn thành"; color = R.color.success; break; case "DOING": label = "Đang làm"; color = R.color.warning; break; default: label = "Cần làm"; color = R.color.slate_700; }
+            switch (s) { case "DONE": label = "Hoàn thành"; color = R.color.success; break; case "DOING": label = "Đang làm"; color = R.color.warning; break; default: label = "Cần làm"; color = R.color.theme_text_primary; }
             container.addView(createPickerItem(label, x -> { attemptSetStatus(s); d.dismiss(); }, color));
         }
         d.setContentView(v); d.show();
@@ -1006,7 +1006,7 @@ public class TaskDetailActivity extends BaseActivity {
         int colorRes;
         if ("DONE".equals(status)) { colorRes = R.color.success; tvStatus.setText("Done"); }
         else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText("Doing"); }
-        else { colorRes = R.color.slate_400; tvStatus.setText("To Do"); }
+        else { colorRes = R.color.theme_text_secondary; tvStatus.setText("To Do"); }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
     }
 
@@ -1014,8 +1014,8 @@ public class TaskDetailActivity extends BaseActivity {
         BottomSheetDialog d = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
         View v = getLayoutInflater().inflate(R.layout.dialog_assignee_picker, null); d.setContentView(v);
         LinearLayout container = v.findViewById(R.id.containerMembers);
-        for (User m : projectMembers) { String name = m.getDisplayName(); container.addView(createPickerItem(name, x -> { setAssignee(m.getUserId(), name); d.dismiss(); }, R.color.slate_900)); }
-        container.addView(createPickerItem("Bỏ chọn", x -> { setAssignee(null, null); d.dismiss(); }, R.color.slate_500));
+        for (User m : projectMembers) { String name = m.getDisplayName(); container.addView(createPickerItem(name, x -> { setAssignee(m.getUserId(), name); d.dismiss(); }, R.color.theme_text_primary)); }
+        container.addView(createPickerItem("Bỏ chọn", x -> { setAssignee(null, null); d.dismiss(); }, R.color.theme_text_secondary));
         d.show();
     }
 
@@ -1025,9 +1025,9 @@ public class TaskDetailActivity extends BaseActivity {
         TextView tvTitle = v.findViewById(R.id.tvTitle); LinearLayout container = v.findViewById(R.id.containerItems);
         if (tvTitle != null) tvTitle.setText("Chọn nhãn");
         for (String tag : new String[]{"Design", "Dev", "Study", "Bug", "Review"}) {
-            container.addView(createPickerItem(tag, x -> { selectedTag = tag; if (tvTag != null) { tvTag.setText(tag); setActive(cardTag, tvTag, ivTag, R.color.project_blue); } d.dismiss(); }, R.color.slate_900));
+            container.addView(createPickerItem(tag, x -> { selectedTag = tag; if (tvTag != null) { tvTag.setText(tag); setActive(cardTag, tvTag, ivTag, R.color.project_blue); } d.dismiss(); }, R.color.theme_text_primary));
         }
-        container.addView(createPickerItem("Bỏ chọn nhãn", x -> { selectedTag = null; if (tvTag != null) { tvTag.setText("Nhãn"); setDefault(cardTag, tvTag, ivTag); } d.dismiss(); }, R.color.slate_500));
+        container.addView(createPickerItem("Bỏ chọn nhãn", x -> { selectedTag = null; if (tvTag != null) { tvTag.setText("Nhãn"); setDefault(cardTag, tvTag, ivTag); } d.dismiss(); }, R.color.theme_text_secondary));
         d.setContentView(v); d.show();
     }
 
@@ -1063,9 +1063,9 @@ public class TaskDetailActivity extends BaseActivity {
                     for (Task t : tasks) {
                         if (taskId != null && taskId.equals(t.getId())) continue;
                         String label = "#" + t.getId() + " • " + t.getTitle();
-                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); if (tvDependency != null) { tvDependency.setText("Phụ thuộc: " + label); setActive(cardDependency, tvDependency, ivDependency, R.color.project_green); } d.dismiss(); }, R.color.slate_900));
+                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); if (tvDependency != null) { tvDependency.setText("Phụ thuộc: " + label); setActive(cardDependency, tvDependency, ivDependency, R.color.project_green); } d.dismiss(); }, R.color.theme_text_primary));
                     }
-                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; if (tvDependency != null) { tvDependency.setText("Không liên kết"); setDefault(cardDependency, tvDependency, ivDependency); } d.dismiss(); }, R.color.slate_500));
+                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; if (tvDependency != null) { tvDependency.setText("Không liên kết"); setDefault(cardDependency, tvDependency, ivDependency); } d.dismiss(); }, R.color.theme_text_secondary));
                     d.setContentView(v); d.show();
                 });
             }

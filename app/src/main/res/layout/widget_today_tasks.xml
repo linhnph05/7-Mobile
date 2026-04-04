@@ -1,102 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/theme_surface"
+    android:background="@drawable/bg_widget_panel"
     android:orientation="vertical"
     android:padding="12dp">
 
-    <TextView
-        android:id="@+id/tvWidgetTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/widget_today_title"
-        android:textColor="@color/theme_text_primary"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvWidgetTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_recent_title"
+            android:textColor="#E6EEF9"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvWidgetCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_widget_badge"
+            android:paddingLeft="8dp"
+            android:paddingTop="4dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="4dp"
+            android:text="0 TODAY"
+            android:textColor="#2B82F8"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnWidgetReload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_widget_badge"
+                android:paddingLeft="8dp"
+                android:paddingTop="4dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="4dp"
+                android:text="LOAD"
+                android:textColor="#7FC2FF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rowTask1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_widget_task_item"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="10dp">
 
-        <TextView
-            android:id="@+id/tvTask1"
+        <ImageView
+            android:id="@+id/ivState1"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_widget_checkbox" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:maxLines="1"
-            android:text="-"
-            android:textColor="@color/theme_text_secondary"
-            android:textSize="12sp" />
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btnDone1"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/widget_mark_done"
-            android:src="@drawable/ic_check"
-            android:tint="@color/success" />
+            <TextView
+                android:id="@+id/tvTask1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="-"
+                android:textColor="#E7EEF9"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMeta1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:text="MEDIUM"
+                android:textColor="#7E8EA6"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rowTask2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_widget_task_item"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="10dp">
 
-        <TextView
-            android:id="@+id/tvTask2"
+        <ImageView
+            android:id="@+id/ivState2"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_widget_checkbox" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:maxLines="1"
-            android:text="-"
-            android:textColor="@color/theme_text_secondary"
-            android:textSize="12sp" />
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btnDone2"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/widget_mark_done"
-            android:src="@drawable/ic_check"
-            android:tint="@color/success" />
+            <TextView
+                android:id="@+id/tvTask2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="-"
+                android:textColor="#E7EEF9"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMeta2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:text="MEDIUM"
+                android:textColor="#7E8EA6"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rowTask3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_widget_task_item"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="10dp">
 
-        <TextView
-            android:id="@+id/tvTask3"
+        <ImageView
+            android:id="@+id/ivState3"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_widget_checkbox" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:maxLines="1"
-            android:text="-"
-            android:textColor="@color/theme_text_secondary"
-            android:textSize="12sp" />
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btnDone3"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/widget_mark_done"
-            android:src="@drawable/ic_check"
-            android:tint="@color/success" />
+            <TextView
+                android:id="@+id/tvTask3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="-"
+                android:textColor="#E7EEF9"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMeta3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:text="MEDIUM"
+                android:textColor="#7E8EA6"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+
     </LinearLayout>
 
 </LinearLayout>

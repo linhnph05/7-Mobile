@@ -77,6 +77,8 @@ public class ForYouActivity extends BaseActivity {
         taskRepository = TaskRepository.getInstance();
 
         bindViews();
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.appBarLayout));
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.contentScrollView));
         setupRecycler();
         setupActions();
         setupBottomNavigation();
@@ -162,14 +164,14 @@ public class ForYouActivity extends BaseActivity {
             }
             if (id == R.id.nav_home) {
                 Intent intent = new Intent(this, DashboardActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                finish();
                 return true;
             }
             if (id == R.id.nav_settings) {
                 Intent intent = new Intent(this, ProfileActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                finish();
                 return true;
             }
             return id == R.id.nav_assistant;

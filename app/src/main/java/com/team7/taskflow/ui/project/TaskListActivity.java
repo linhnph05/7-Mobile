@@ -22,6 +22,7 @@ import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
+import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.ArrayList;
@@ -137,12 +138,16 @@ public class TaskListActivity extends BaseActivity {
                 int id = item.getItemId();
                 if (id == R.id.nav_home) {
                     Intent intent = new Intent(this, DashboardActivity.class);
-                    startActivity(intent);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    NavigationUtils.startActivityWithNavAnimation(this, intent,
+                            NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
                     finish();
                     return true;
                 } else if (id == R.id.nav_settings) {
                     Intent intent = new Intent(this, ProfileActivity.class);
-                    startActivity(intent);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    NavigationUtils.startActivityWithNavAnimation(this, intent,
+                            NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
                     finish();
                     return true;
                 }

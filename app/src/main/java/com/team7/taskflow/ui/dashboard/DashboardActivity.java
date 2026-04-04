@@ -104,6 +104,7 @@ public class DashboardActivity extends BaseActivity {
         projectRepository = ProjectRepository.getInstance();
 
         initViews();
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
         setupRecyclerView();
         setupListeners();
         loadUserInfo();
@@ -201,16 +202,16 @@ public class DashboardActivity extends BaseActivity {
                 int id = item.getItemId();
                 if (id == R.id.nav_settings) {
                     Intent intent = new Intent(this, ProfileActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_SETTINGS);
+                    finish();
                     return true;
                 } else if (id == R.id.nav_home) {
                     // Already on home
                     return true;
                 } else if (id == R.id.nav_tasks) {
                     Intent intent = new Intent(this, ForYouActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
+                    finish();
                     return true;
                 }
                 // TODO: Handle nav_assistant

@@ -38,6 +38,9 @@ public class TrashActivity extends BaseActivity {
     private LinearLayout emptyState;
     private TrashItemAdapter adapter;
     private List<Task> trashedTasks = new ArrayList<>();
+    private long projectId = -1L;
+    private boolean isMyTasksMode = true;
+    private String projectName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,10 @@ public class TrashActivity extends BaseActivity {
         });
 
         SessionManager.init(this);
+        projectId = getIntent().getLongExtra("project_id", -1L);
+        isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
+        projectName = getIntent().getStringExtra("project_name");
+
         initViews();
         setupRecyclerView();
         setupListeners();
@@ -93,11 +100,20 @@ public class TrashActivity extends BaseActivity {
             return;
         }
 
-        TaskRepository.getInstance().getMyTasksWithProjectNameByStatus(userId, "TRASH", new TaskRepository.TaskCallback<List<Task>>() {
+        TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> result) {
                 trashedTasks.clear();
                 if (result != null) {
+                    if (projectId > 0 && projectName != null && !projectName.trim().isEmpty()) {
+                        for (Task task : result) {
+                            if (task.getProjectInfo() == null) {
+                                com.team7.taskflow.domain.model.Project project = new com.team7.taskflow.domain.model.Project();
+                                project.setName(projectName);
+                                task.setProjectInfo(project);
+                            }
+                        }
+                    }
                     trashedTasks.addAll(result);
                 }
                 adapter.notifyDataSetChanged();
@@ -109,7 +125,13 @@ public class TrashActivity extends BaseActivity {
                 Log.e(TAG, "Error loading trashed tasks: " + error);
                 updateUI();
             }
-        });
+        };
+
+        if (projectId > 0 && !isMyTasksMode) {
+            TaskRepository.getInstance().getTasksByProjectAndStatus(projectId, "TRASH", callback);
+        } else {
+            TaskRepository.getInstance().getMyTasksWithProjectNameByStatus(userId, "TRASH", callback);
+        }
     }
 
     private void updateUI() {

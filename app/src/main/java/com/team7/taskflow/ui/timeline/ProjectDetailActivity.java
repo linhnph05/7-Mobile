@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,11 +28,14 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
+import com.team7.taskflow.data.repository.ProjectRepository;
+import com.team7.taskflow.domain.model.ProjectActivity;
 import com.team7.taskflow.ui.project.BoardFragment;
 import com.team7.taskflow.ui.project.CalendarFragment;
 import com.team7.taskflow.ui.project.ProjectOverviewFragment;
 import com.team7.taskflow.ui.project.TaskListFragment;
 import com.team7.taskflow.ui.project.TimelineFragment;
+import com.team7.taskflow.ui.system.ShortcutRouterActivity;
 import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -58,12 +63,14 @@ public class ProjectDetailActivity extends BaseActivity {
 
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
+    private TextView tvActivityBadge;
     private BottomNavigationView bottomNavigationView;
     private View btnMore;
     private View btnProjectActivity;
     private int currentTabIndex = -1;
     private int requestedInitialTab = TAB_OVERVIEW;
     private Long pendingOpenTaskId;
+    private boolean openAiCreateFromShortcut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +96,7 @@ public class ProjectDetailActivity extends BaseActivity {
                 pendingOpenTaskId = taskId;
             }
         }
+        openAiCreateFromShortcut = getIntent().getBooleanExtra(ShortcutRouterActivity.EXTRA_OPEN_AI_CREATE, false);
 
         SessionManager.init(this);
         currentUserId = SessionManager.getUserId();
@@ -118,6 +126,30 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         openTab(resolveInitialTab());
+        triggerAiCreateIfRequested();
+    }
+
+    private void triggerAiCreateIfRequested() {
+        if (!openAiCreateFromShortcut || projectId <= 0) {
+            return;
+        }
+        openAiCreateFromShortcut = false;
+        getIntent().removeExtra(ShortcutRouterActivity.EXTRA_OPEN_AI_CREATE);
+
+        View container = findViewById(R.id.fragment_container);
+        Runnable openTaskCreator = () -> {
+            Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.ai.AiCreateActivity.class);
+            intent.putExtra("project_id", projectId);
+            intent.putExtra("project_name", projectName);
+            intent.putExtra("project_key", projectKey);
+            startActivity(intent);
+        };
+
+        if (container != null) {
+            container.postDelayed(openTaskCreator, 180L);
+        } else {
+            openTaskCreator.run();
+        }
     }
 
     private int resolveInitialTab() {
@@ -151,6 +183,7 @@ public class ProjectDetailActivity extends BaseActivity {
         tabCalendar          = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         btnProjectActivity   = findViewById(R.id.btnProjectActivity);
+        tvActivityBadge      = findViewById(R.id.tvProjectActivityBadge);
         btnMore              = findViewById(R.id.btnMoreOptions);
 
         View fragmentContainer = findViewById(R.id.fragment_container);
@@ -187,7 +220,42 @@ public class ProjectDetailActivity extends BaseActivity {
             btnProjectActivity.setOnClickListener(this::onProjectActivityClick);
         }
 
+        loadActivityBadgeCount();
+
         updateHeaderActionsForTab(TAB_OVERVIEW);
+    }
+
+    private void loadActivityBadgeCount() {
+        if (tvActivityBadge == null || isMyTasksMode || projectId <= 0) {
+            return;
+        }
+
+        ProjectRepository.getInstance().getProjectActivities(projectId,
+                new ProjectRepository.ProjectCallback<List<ProjectActivity>>() {
+                    @Override
+                    public void onSuccess(List<ProjectActivity> result) {
+                        runOnUiThread(() -> updateActivityBadge(result != null ? result.size() : 0));
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> updateActivityBadge(0));
+                    }
+                });
+    }
+
+    private void updateActivityBadge(int count) {
+        if (tvActivityBadge == null) {
+            return;
+        }
+
+        if (count <= 0) {
+            tvActivityBadge.setVisibility(View.GONE);
+            return;
+        }
+
+        tvActivityBadge.setVisibility(View.VISIBLE);
+        tvActivityBadge.setText(count > 99 ? "99+" : String.valueOf(count));
     }
 
     private void positionCreateTaskButton() {
@@ -206,8 +274,27 @@ public class ProjectDetailActivity extends BaseActivity {
             if (rootHeight <= 0) {
                 return;
             }
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fabAddAI.getLayoutParams();
-            params.bottomMargin = rootHeight / 3;
+            View bottomBar = findViewById(R.id.includeBottomBar);
+            int spacing = getResources().getDimensionPixelSize(R.dimen.spacing_lg);
+            int bottomBarHeight = 0;
+            if (bottomBar != null && bottomBar.getVisibility() == View.VISIBLE) {
+                bottomBarHeight = bottomBar.getHeight();
+            }
+
+            int bottomInset = 0;
+            WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(root);
+            if (rootInsets != null) {
+                bottomInset = rootInsets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+
+            ViewGroup.LayoutParams rawParams = fabAddAI.getLayoutParams();
+            if (!(rawParams instanceof FrameLayout.LayoutParams)) {
+                return;
+            }
+
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) rawParams;
+            params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            params.bottomMargin = (bottomBarHeight > 0 ? bottomBarHeight : bottomInset) + spacing;
             fabAddAI.setLayoutParams(params);
         });
     }
@@ -476,6 +563,30 @@ public class ProjectDetailActivity extends BaseActivity {
                 com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
                         com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(projectId);
                 sheet.show(getSupportFragmentManager(), "members");
+            });
+        }
+
+        View btnProjectActivityHistory = sheetView.findViewById(R.id.btnProjectActivityHistory);
+        if (btnProjectActivityHistory != null) {
+            btnProjectActivityHistory.setOnClickListener(v -> {
+                bottomSheet.dismiss();
+                Intent intent = new Intent(ProjectDetailActivity.this,
+                        com.team7.taskflow.ui.project.ProjectActivityHistoryActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", projectName);
+                startActivity(intent);
+            });
+        }
+
+        View btnViewArchived = sheetView.findViewById(R.id.btnViewArchived);
+        if (btnViewArchived != null) {
+            btnViewArchived.setOnClickListener(v -> {
+                bottomSheet.dismiss();
+                Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.project.TrashActivity.class);
+                intent.putExtra("project_id", projectId);
+                intent.putExtra("project_name", projectName);
+                intent.putExtra("is_my_tasks", isMyTasksMode);
+                startActivity(intent);
             });
         }
 

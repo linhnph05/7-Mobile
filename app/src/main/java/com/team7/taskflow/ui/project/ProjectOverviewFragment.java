@@ -265,13 +265,14 @@ public class ProjectOverviewFragment extends Fragment {
         TaskRepository.TaskCallback<List<Task>> callback = new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> tasks) {
-                if (tasks == null || tasks.isEmpty()) {
+                List<Task> activeTasks = filterOutTrashTasks(tasks);
+                if (activeTasks.isEmpty()) {
                     showEmptyState(true);
                     return;
                 }
                 showEmptyState(false);
-                processTaskStats(tasks);
-                updateUpcomingTasks(tasks);
+                processTaskStats(activeTasks);
+                updateUpcomingTasks(activeTasks);
             }
 
             @Override
@@ -285,6 +286,22 @@ public class ProjectOverviewFragment extends Fragment {
         } else {
             taskRepository.getTasksByProject(projectId, callback);
         }
+    }
+
+    private List<Task> filterOutTrashTasks(List<Task> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Task> activeTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            String status = task != null && task.getStatus() != null
+                    ? task.getStatus().trim().toUpperCase(Locale.US)
+                    : "";
+            if (!"TRASH".equals(status)) {
+                activeTasks.add(task);
+            }
+        }
+        return activeTasks;
     }
 
     private void showEmptyState(boolean isEmpty) {
@@ -387,6 +404,9 @@ public class ProjectOverviewFragment extends Fragment {
 
             int[] buckets = stats.computeIfAbsent(name, k -> new int[] {0, 0, 0});
             String status = t.getStatus() != null ? t.getStatus().toUpperCase(Locale.US) : STATUS_TODO_KEY;
+            if ("TRASH".equals(status)) {
+                continue;
+            }
 
             if (status.contains("DONE")) {
                 buckets[2]++;
@@ -454,7 +474,10 @@ public class ProjectOverviewFragment extends Fragment {
     private void updateUpcomingTasks(List<Task> allTasks) {
         List<Task> upcoming = new ArrayList<>();
         for (Task t : allTasks) {
-            if (!"DONE".equalsIgnoreCase(t.getStatus())) upcoming.add(t);
+            String status = t.getStatus() != null ? t.getStatus() : "";
+            if (!"DONE".equalsIgnoreCase(status) && !"TRASH".equalsIgnoreCase(status)) {
+                upcoming.add(t);
+            }
         }
         Collections.sort(upcoming, (t1, t2) -> {
             return Long.compare(parseTaskCreatedTime(t2), parseTaskCreatedTime(t1));
