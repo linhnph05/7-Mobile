@@ -5,7 +5,7 @@
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/theme_background">
+    android:background="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,18 +15,16 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="?attr/colorSurface"
-            android:elevation="4dp"
-            android:paddingHorizontal="16dp">
+            android:background="@color/white"
+            android:paddingHorizontal="8dp">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/back"
                 android:src="@drawable/ic_chevron_left"
-                app:tint="?attr/colorOnSurface"
+                app:tint="@color/slate_900"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -35,8 +33,8 @@
                 android:id="@+id/tvToolbarTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/task_create_title"
-                android:textColor="?attr/colorOnSurface"
+                android:text="Create Task"
+                android:textColor="@color/slate_900"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +46,7 @@
                 android:id="@+id/btnSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/task_create_button"
+                android:text="Create"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold"

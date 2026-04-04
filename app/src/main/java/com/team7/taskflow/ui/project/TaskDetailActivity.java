@@ -9,15 +9,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -112,14 +108,10 @@ public class TaskDetailActivity extends BaseActivity {
 
     private static final int COLOR_DEFAULT = R.color.slate_500;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
-    private static final long AUTO_SAVE_DELAY_MS = 700L;
 
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar   = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-    private final Handler autoSaveHandler = new Handler(Looper.getMainLooper());
-    private final Runnable autoSaveRunnable = this::saveCurrentTaskChanges;
-    private boolean isHydratingTask = false;
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // onCreate
@@ -144,20 +136,18 @@ public class TaskDetailActivity extends BaseActivity {
         applySubTaskContextFromIntent();
         initFilePickerLauncher();
         initCameraLauncher();       // âœ… ThÃªm
-        isHydratingTask = taskId != null;
         setupPickers();
         setupDatePickers();
-        setupAutoSaveWatchers();
         loadProjectMembers();
 
         if (taskId != null) {
-            tvToolbarTitle.setText(R.string.task_detail_title);
-            btnSave.setText(R.string.save);
+            tvToolbarTitle.setText("Edit Task");
+            btnSave.setText("Update");
             loadTaskDetails();
             setupCommentsSection();
         } else {
-            tvToolbarTitle.setText(R.string.task_create_title);
-            btnSave.setText(R.string.task_create_button);
+            tvToolbarTitle.setText("Create Task");
+            btnSave.setText("Create");
             if (layoutCommentsSection != null) layoutCommentsSection.setVisibility(View.GONE);
         }
 
@@ -314,7 +304,6 @@ public class TaskDetailActivity extends BaseActivity {
                             attachedFileUris.add(data.getData());
                         }
                         updateAttachmentUi();
-                        scheduleImmediateAutoSave();
                     }
                 });
     }
@@ -326,7 +315,6 @@ public class TaskDetailActivity extends BaseActivity {
                     if (success && cameraImageUri != null) {
                         attachedFileUris.add(cameraImageUri);
                         updateAttachmentUi();
-                        scheduleImmediateAutoSave();
                     }
                 });
     }
@@ -520,26 +508,18 @@ public class TaskDetailActivity extends BaseActivity {
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Upload
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    private void uploadNextAttachment(int index, long targetTaskId, String baseMsg, boolean finishAfterUpload) {
+    private void uploadNextAttachment(int index, long targetTaskId, String baseMsg) {
         if (index >= attachedFileUris.size()) {
-            if (finishAfterUpload) {
-                String finalMsg = baseMsg;
-                if (uploadSuccessCount > 0) finalMsg += " (Kèm " + uploadSuccessCount + " file)";
-                Toast.makeText(this, finalMsg, Toast.LENGTH_LONG).show();
-                setResult(RESULT_OK);
-                finish();
-            } else {
-                attachedFileUris.clear();
-                updateAttachmentUi();
-                loadAttachments();
-            }
+            String finalMsg = baseMsg;
+            if (uploadSuccessCount > 0) finalMsg += " (Kèm " + uploadSuccessCount + " file)";
+            Toast.makeText(this, finalMsg, Toast.LENGTH_LONG).show();
+            setResult(RESULT_OK);
+            finish();
             return;
         }
 
         Uri uri = attachedFileUris.get(index);
-        if (finishAfterUpload && tvToolbarTitle != null) {
-            tvToolbarTitle.setText("Đang tải file " + (index + 1) + "/" + attachedFileUris.size());
-        }
+        tvToolbarTitle.setText("Đang tải file " + (index + 1) + "/" + attachedFileUris.size());
 
         String mimeType = getContentResolver().getType(uri);
         String fileName = getFileNameFromUri(uri);
@@ -549,15 +529,13 @@ public class TaskDetailActivity extends BaseActivity {
                 new TaskRepository.TaskCallback<com.team7.taskflow.domain.model.Attachment>() {
                     @Override public void onSuccess(com.team7.taskflow.domain.model.Attachment r) {
                         uploadSuccessCount++;
-                        runOnUiThread(() -> uploadNextAttachment(index + 1, targetTaskId, baseMsg, finishAfterUpload));
+                        runOnUiThread(() -> uploadNextAttachment(index + 1, targetTaskId, baseMsg));
                     }
                     @Override public void onError(String error) {
                         runOnUiThread(() -> {
-                            if (finishAfterUpload) {
-                                Toast.makeText(TaskDetailActivity.this,
-                                        "Lỗi file " + (index + 1) + ": " + error, Toast.LENGTH_LONG).show();
-                            }
-                            uploadNextAttachment(index + 1, targetTaskId, baseMsg, finishAfterUpload);
+                            Toast.makeText(TaskDetailActivity.this,
+                                    "Lỗi file " + (index + 1) + ": " + error, Toast.LENGTH_LONG).show();
+                            uploadNextAttachment(index + 1, targetTaskId, baseMsg);
                         });
                     }
                 });
@@ -882,14 +860,11 @@ public class TaskDetailActivity extends BaseActivity {
     // Task CRUD
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void loadTaskDetails() {
-        isHydratingTask = true;
         setLoading(true);
         taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
             @Override public void onSuccess(List<Task> result) {
-                boolean found = false;
                 for (Task t : result) {
                     if (taskId != null && taskId.equals(t.getId())) {
-                        found = true;
                         currentAssigneeId = t.getAssigneeId();
                         runOnUiThread(() -> {
                             etTitle.setText(t.getTitle());
@@ -913,21 +888,13 @@ public class TaskDetailActivity extends BaseActivity {
                             renderSubTaskInfo(t.getParentTaskId() != null ? ("#" + t.getParentTaskId()) : null);
                             if (currentAssigneeId != null) setAssigneeById(currentAssigneeId);
                             setLoading(false);
-                            isHydratingTask = false;
                             loadAttachments();
                         });
                         break;
                     }
                 }
-
-                if (!found) {
-                    runOnUiThread(() -> {
-                        setLoading(false);
-                        isHydratingTask = false;
-                    });
-                }
             }
-            @Override public void onError(String e) { runOnUiThread(() -> { setLoading(false); isHydratingTask = false; }); }
+            @Override public void onError(String e) { runOnUiThread(() -> setLoading(false)); }
         });
     }
 
@@ -975,63 +942,12 @@ public class TaskDetailActivity extends BaseActivity {
         else { task.setId(taskId); taskRepository.updateTask(taskId, task, handleResult()); }
     }
 
-    private void saveCurrentTaskChanges() {
-        if (taskId == null || isHydratingTask) {
-            return;
-        }
-
-        String title = etTitle != null && etTitle.getText() != null ? etTitle.getText().toString().trim() : "";
-        if (title.isEmpty()) {
-            return;
-        }
-
-        Task task = buildTaskFromForm(title);
-        task.setId(taskId);
-        taskRepository.updateTask(taskId, task, new TaskRepository.TaskCallback<Task>() {
-            @Override
-            public void onSuccess(Task result) {
-                if (result != null && !attachedFileUris.isEmpty()) {
-                    uploadSuccessCount = 0;
-                    uploadNextAttachment(0, result.getId(), null, false);
-                }
-            }
-
-            @Override
-            public void onError(String error) {
-                if (!isFinishing()) {
-                    runOnUiThread(() -> Toast.makeText(TaskDetailActivity.this, error, Toast.LENGTH_SHORT).show());
-                }
-            }
-        });
-    }
-
-    private Task buildTaskFromForm(String title) {
-        Task task = new Task(projectId, title);
-        task.setAssigneeId(selectedAssigneeName != null ? currentAssigneeId : null);
-        task.setDescription(etDescription.getText().toString().trim());
-        task.setPriority(selectedPriority);
-        task.setStatus(selectedStatus);
-
-        String sd = tvStartDate.getText().toString();
-        String st = tvStartTime != null ? tvStartTime.getText().toString() : null;
-        String sc = sd.contains("-") ? (st != null && st.matches("\\d{2}:\\d{2}") ? sd + " " + st : sd) : null;
-        task.setStartDate(sc);
-
-        String dd = tvDueDate.getText().toString();
-        String dt = tvDueTime != null ? tvDueTime.getText().toString() : null;
-        String dc = dd.contains("-") ? (dt != null && dt.matches("\\d{2}:\\d{2}") ? dd + " " + dt : dd) : null;
-        task.setDueDate(dc);
-        task.setTag(selectedTag);
-        task.setParentTaskId(selectedParentTaskId);
-        return task;
-    }
-
     private TaskRepository.TaskCallback<Task> handleResult() {
         return new TaskRepository.TaskCallback<Task>() {
             @Override public void onSuccess(Task r) {
                 runOnUiThread(() -> {
                     String msg = taskId == null ? "Task Created" : "Task Updated";
-                    if (!attachedFileUris.isEmpty()) { uploadSuccessCount = 0; uploadNextAttachment(0, r.getId(), msg, true); }
+                    if (!attachedFileUris.isEmpty()) { uploadSuccessCount = 0; uploadNextAttachment(0, r.getId(), msg); }
                     else { setLoading(false); Toast.makeText(TaskDetailActivity.this, msg, Toast.LENGTH_SHORT).show(); setResult(RESULT_OK); finish(); }
                 });
             }
@@ -1069,7 +985,6 @@ public class TaskDetailActivity extends BaseActivity {
         if ("HIGH".equals(priority)) { label = "High"; colorRes = R.color.priority_high; }
         else if ("LOW".equals(priority)) { label = "Low"; colorRes = R.color.priority_low; }
         tvPriority.setText(label); setActive(cardPriority, tvPriority, ivPriority, colorRes);
-        scheduleImmediateAutoSave();
     }
 
     private void showStatusPicker() {
@@ -1093,7 +1008,6 @@ public class TaskDetailActivity extends BaseActivity {
         else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText("Doing"); }
         else { colorRes = R.color.slate_400; tvStatus.setText("To Do"); }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
-        scheduleImmediateAutoSave();
     }
 
     private void showAssigneePicker() {
@@ -1111,9 +1025,9 @@ public class TaskDetailActivity extends BaseActivity {
         TextView tvTitle = v.findViewById(R.id.tvTitle); LinearLayout container = v.findViewById(R.id.containerItems);
         if (tvTitle != null) tvTitle.setText("Chọn nhãn");
         for (String tag : new String[]{"Design", "Dev", "Study", "Bug", "Review"}) {
-            container.addView(createPickerItem(tag, x -> { selectedTag = tag; if (tvTag != null) { tvTag.setText(tag); setActive(cardTag, tvTag, ivTag, R.color.project_blue); } scheduleImmediateAutoSave(); d.dismiss(); }, R.color.slate_900));
+            container.addView(createPickerItem(tag, x -> { selectedTag = tag; if (tvTag != null) { tvTag.setText(tag); setActive(cardTag, tvTag, ivTag, R.color.project_blue); } d.dismiss(); }, R.color.slate_900));
         }
-        container.addView(createPickerItem("Bỏ chọn nhãn", x -> { selectedTag = null; if (tvTag != null) { tvTag.setText("Nhãn"); setDefault(cardTag, tvTag, ivTag); } scheduleImmediateAutoSave(); d.dismiss(); }, R.color.slate_500));
+        container.addView(createPickerItem("Bỏ chọn nhãn", x -> { selectedTag = null; if (tvTag != null) { tvTag.setText("Nhãn"); setDefault(cardTag, tvTag, ivTag); } d.dismiss(); }, R.color.slate_500));
         d.setContentView(v); d.show();
     }
 
@@ -1121,7 +1035,6 @@ public class TaskDetailActivity extends BaseActivity {
         selectedAssigneeName = name; currentAssigneeId = id;
         if (name != null) { tvAssignee.setText("@" + name); setActive(cardAssignee, tvAssignee, ivAssignee, R.color.project_purple); }
         else { tvAssignee.setText("Phân công"); setDefault(cardAssignee, tvAssignee, ivAssignee); }
-        scheduleImmediateAutoSave();
     }
 
     private void attemptSetStatus(String targetStatus) {
@@ -1150,9 +1063,9 @@ public class TaskDetailActivity extends BaseActivity {
                     for (Task t : tasks) {
                         if (taskId != null && taskId.equals(t.getId())) continue;
                         String label = "#" + t.getId() + " • " + t.getTitle();
-                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); if (tvDependency != null) { tvDependency.setText("Phụ thuộc: " + label); setActive(cardDependency, tvDependency, ivDependency, R.color.project_green); } scheduleImmediateAutoSave(); d.dismiss(); }, R.color.slate_900));
+                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); if (tvDependency != null) { tvDependency.setText("Phụ thuộc: " + label); setActive(cardDependency, tvDependency, ivDependency, R.color.project_green); } d.dismiss(); }, R.color.slate_900));
                     }
-                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; if (tvDependency != null) { tvDependency.setText("Không liên kết"); setDefault(cardDependency, tvDependency, ivDependency); } scheduleImmediateAutoSave(); d.dismiss(); }, R.color.slate_500));
+                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; if (tvDependency != null) { tvDependency.setText("Không liên kết"); setDefault(cardDependency, tvDependency, ivDependency); } d.dismiss(); }, R.color.slate_500));
                     d.setContentView(v); d.show();
                 });
             }
@@ -1210,49 +1123,11 @@ public class TaskDetailActivity extends BaseActivity {
     }
 
     private void showDatePicker(Calendar cal, TextView tv) {
-        new DatePickerDialog(this, (view, y, m, d) -> { cal.set(y, m, d); tv.setText(dateFormat.format(cal.getTime())); scheduleImmediateAutoSave(); }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+        new DatePickerDialog(this, (view, y, m, d) -> { cal.set(y, m, d); tv.setText(dateFormat.format(cal.getTime())); }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void showTimePicker(Calendar cal, TextView tv) {
-        new TimePickerDialog(this, (view, h, min) -> { cal.set(Calendar.HOUR_OF_DAY, h); cal.set(Calendar.MINUTE, min); tv.setText(String.format(Locale.US, "%02d:%02d", h, min)); scheduleImmediateAutoSave(); }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show();
-    }
-
-    private void setupAutoSaveWatchers() {
-        if (etTitle != null) {
-            etTitle.addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    scheduleAutoSave();
-                }
-                @Override public void afterTextChanged(Editable s) {}
-            });
-        }
-
-        if (etDescription != null) {
-            etDescription.addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    scheduleAutoSave();
-                }
-                @Override public void afterTextChanged(Editable s) {}
-            });
-        }
-    }
-
-    private void scheduleAutoSave() {
-        if (taskId == null || isHydratingTask) {
-            return;
-        }
-        autoSaveHandler.removeCallbacks(autoSaveRunnable);
-        autoSaveHandler.postDelayed(autoSaveRunnable, AUTO_SAVE_DELAY_MS);
-    }
-
-    private void scheduleImmediateAutoSave() {
-        if (taskId == null || isHydratingTask) {
-            return;
-        }
-        autoSaveHandler.removeCallbacks(autoSaveRunnable);
-        autoSaveRunnable.run();
+        new TimePickerDialog(this, (view, h, min) -> { cal.set(Calendar.HOUR_OF_DAY, h); cal.set(Calendar.MINUTE, min); tv.setText(String.format(Locale.US, "%02d:%02d", h, min)); }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show();
     }
 
     private void setLoading(boolean loading) {
