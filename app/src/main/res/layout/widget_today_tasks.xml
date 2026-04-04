@@ -47,11 +47,11 @@
                 android:paddingTop="4dp"
                 android:paddingRight="8dp"
                 android:paddingBottom="4dp"
-                android:text="LOAD"
+                android:text="@string/widget_reload"
                 android:textColor="#7FC2FF"
                 android:textSize="10sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="visible" />
     </LinearLayout>
 
     <LinearLayout
