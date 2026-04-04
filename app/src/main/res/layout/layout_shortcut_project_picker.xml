@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="12dp">
+
+    <TextView
+        android:id="@+id/tvPickerTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/shortcut_picker_title"
+        android:textColor="@color/theme_text_primary"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvPickerSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/shortcut_picker_subtitle"
+        android:textColor="@color/theme_text_secondary"
+        android:textSize="13sp" />
+
+    <LinearLayout
+        android:id="@+id/containerProjectPickerItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="vertical" />
+
+    <TextView
+        android:id="@+id/btnPickerCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_chip_neutral"
+        android:gravity="center"
+        android:paddingVertical="10dp"
+        android:text="@string/cancel"
+        android:textColor="@color/theme_text_secondary"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

@@ -15,12 +15,13 @@
     <color name="theme_bottom_nav_bg">#1A1F36</color>
     <color name="theme_bottom_nav_icon_line">#000000</color>
     <color name="theme_bottom_nav_icon_unchecked">#FFFFFF</color>
-    <color name="theme_bottom_nav_fab_icon">#000000</color>
+    <color name="theme_bottom_nav_fab_icon">#FFFFFF</color>
 
     <!-- Text -->
     <color name="theme_text_primary">#FFFFFF</color>
     <color name="theme_text_secondary">#A0A0A0</color>
     <color name="theme_text_hint">#606060</color>
+    <color name="theme_board_count_text">#000000</color>
 
     <!-- Borders & dividers -->
     <color name="theme_border">#334155</color>

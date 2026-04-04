@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.project;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -244,9 +245,15 @@ public class HistoryEventAdapter extends BaseAdapter {
         }
 
         if (action.contains("CHINH SUA") || action.contains("CAP NHAT") || action.contains("UPDATE")) {
+            if (isNightMode()) {
+                return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_primary);
+            }
             return ContextCompat.getColor(inflater.getContext(), R.color.slate_700);
         }
 
+        if (isNightMode()) {
+            return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
+        }
         return Color.parseColor("#475569");
     }
 
@@ -283,10 +290,21 @@ public class HistoryEventAdapter extends BaseAdapter {
         }
 
         if (action.contains("UPDATE") || action.contains("EDIT")) {
+            if (isNightMode()) {
+                return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_primary);
+            }
             return ContextCompat.getColor(inflater.getContext(), R.color.slate_700);
         }
 
+        if (isNightMode()) {
+            return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
+        }
         return Color.parseColor("#475569");
+    }
+
+    private boolean isNightMode() {
+        int nightMode = inflater.getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
     private String formatRelativeTime(String rawTime) {

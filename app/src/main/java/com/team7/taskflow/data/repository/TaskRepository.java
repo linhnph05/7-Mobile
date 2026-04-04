@@ -68,15 +68,16 @@ public class TaskRepository {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task created = response.body().get(0);
                             callback.onSuccess(created);
+                            String actorId = SessionManager.getUserId();
                             logTaskActivity(
                                     created.getId(),
-                                    created.getAssigneeId() != null ? created.getAssigneeId() : SessionManager.getUserId(),
+                                actorId,
                                     "CREATE",
                                     null,
                                     created.getStatus() != null ? created.getStatus() : "TODO");
                             logProjectActivity(
                                     created.getProjectId(),
-                                    created.getAssigneeId() != null ? created.getAssigneeId() : SessionManager.getUserId(),
+                                actorId,
                                     "TASK",
                                     created.getId(),
                                     "CREATE",
@@ -211,19 +212,55 @@ public class TaskRepository {
     }
 
     public void deleteTask(long taskId, TaskCallback<Void> callback) {
-        taskApi.deleteTask("eq." + taskId).enqueue(new Callback<Void>() {
+        getTaskById(taskId, new TaskCallback<Task>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    logTaskActivity(taskId, SessionManager.getUserId(), "HARD_DELETE", "TRASH", "DELETED");
-                    callback.onSuccess(null);
-                } else
-                    callback.onError("Delete failed: " + response.code());
+            public void onSuccess(Task taskBeforeDelete) {
+                taskApi.deleteTask("eq." + taskId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            logTaskActivity(taskId, SessionManager.getUserId(), "HARD_DELETE", "TRASH", "DELETED");
+                            if (taskBeforeDelete != null && taskBeforeDelete.getProjectId() > 0) {
+                                logProjectActivity(
+                                        taskBeforeDelete.getProjectId(),
+                                        SessionManager.getUserId(),
+                                        "TASK",
+                                        taskId,
+                                        "HARD_DELETE",
+                                        "TRASH",
+                                        "DELETED");
+                            }
+                            callback.onSuccess(null);
+                        } else {
+                            callback.onError("Delete failed: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                callback.onError(t.getMessage());
+            public void onError(String error) {
+                taskApi.deleteTask("eq." + taskId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            logTaskActivity(taskId, SessionManager.getUserId(), "HARD_DELETE", "TRASH", "DELETED");
+                            callback.onSuccess(null);
+                        } else {
+                            callback.onError("Delete failed: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
             }
         });
     }
@@ -504,8 +541,8 @@ public class TaskRepository {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     Comment createdComment = response.body().get(0);
                     callback.onSuccess(createdComment);
-                            logProjectActivityByTaskId(taskId, userId, "TASK", taskId,
-                                    "COMMENT", null, content);
+                        logProjectActivityByTaskId(taskId, userId, "TASK", taskId,
+                            "COMMENT_CREATE", null, content);
                 } else {
                     callback.onError("Failed to create comment: " + response.code());
                 }
