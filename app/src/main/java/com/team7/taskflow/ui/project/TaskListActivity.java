@@ -34,6 +34,7 @@ public class TaskListActivity extends BaseActivity {
     private TaskAdapter adapter;
     private TaskRepository taskRepository;
     private SwipeRefreshLayout swipeRefresh;
+    private boolean isBottomNavNavigating = false;
     
     private TextView tabToDo, tabDoing, tabDone;
     private String currentStatus = "TODO";
@@ -133,10 +134,14 @@ public class TaskListActivity extends BaseActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
             bottomNav.setItemIconTintList(null);
-            bottomNav.setSelectedItemId(R.id.nav_tasks);
+            bottomNav.getMenu().findItem(R.id.nav_tasks).setChecked(true);
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
+                if (isBottomNavNavigating) {
+                    return true;
+                }
                 if (id == R.id.nav_home) {
+                    isBottomNavNavigating = true;
                     Intent intent = new Intent(this, DashboardActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent,
@@ -144,6 +149,7 @@ public class TaskListActivity extends BaseActivity {
                     finish();
                     return true;
                 } else if (id == R.id.nav_settings) {
+                    isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ProfileActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavigationUtils.startActivityWithNavAnimation(this, intent,

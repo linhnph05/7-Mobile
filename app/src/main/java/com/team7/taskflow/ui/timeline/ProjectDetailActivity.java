@@ -67,6 +67,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private BottomNavigationView bottomNavigationView;
     private View btnMore;
     private View btnProjectActivity;
+    private boolean isBottomNavNavigating = false;
     private int currentTabIndex = -1;
     private int requestedInitialTab = TAB_OVERVIEW;
     private Long pendingOpenTaskId;
@@ -322,11 +323,13 @@ public class ProjectDetailActivity extends BaseActivity {
 
     private void setupBottomNavigation() {
         if (!isMyTasksMode || bottomNavigationView == null) return;
-        bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
+        bottomNavigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+            if (isBottomNavNavigating) return true;
             if (id == R.id.nav_tasks) return true;
             if (id == R.id.nav_home) {
+                isBottomNavNavigating = true;
                     Intent i = new Intent(this, DashboardActivity.class);
                 NavigationUtils.startActivityWithNavAnimation(this, i,
                         NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
@@ -334,6 +337,7 @@ public class ProjectDetailActivity extends BaseActivity {
                 return true;
             }
             if (id == R.id.nav_settings) {
+                isBottomNavNavigating = true;
                     Intent i = new Intent(this, ProfileActivity.class);
                 NavigationUtils.startActivityWithNavAnimation(this, i,
                         NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);

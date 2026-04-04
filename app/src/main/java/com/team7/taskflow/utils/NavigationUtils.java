@@ -2,6 +2,7 @@ package com.team7.taskflow.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -15,6 +16,8 @@ public class NavigationUtils {
     public static final String EXTRA_NAV_FROM = "extra_nav_from";
     public static final String EXTRA_NAV_TO = "extra_nav_to";
     private static final long CONTENT_SLIDE_DURATION_MS = 240L;
+    private static final long NAVIGATION_DEBOUNCE_MS = 350L;
+    private static long lastNavigationAtMs = 0L;
 
     // Navigation item indices
     public static final int NAV_HOME = 0;
@@ -33,6 +36,22 @@ public class NavigationUtils {
             int currentNavIndex,
             int targetNavIndex
     ) {
+        if (currentActivity == null || intent == null) {
+            return;
+        }
+
+        long now = SystemClock.elapsedRealtime();
+        if (now - lastNavigationAtMs < NAVIGATION_DEBOUNCE_MS) {
+            return;
+        }
+
+        if (intent.getComponent() != null
+                && currentActivity.getClass().getName().equals(intent.getComponent().getClassName())) {
+            return;
+        }
+
+        lastNavigationAtMs = now;
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(EXTRA_NAV_FROM, currentNavIndex);
         intent.putExtra(EXTRA_NAV_TO, targetNavIndex);
         currentActivity.startActivity(intent);
