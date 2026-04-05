@@ -24,17 +24,35 @@
             android:focusable="true"
             android:focusableInTouchMode="true">
 
-            <ImageView
-                android:id="@+id/imgAvatar"
+            <FrameLayout
+                android:id="@+id/layoutAvatar"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="Avatar"
-                android:src="@drawable/bg_avatar_bordered"
                 android:layout_marginTop="8dp"
                 android:layout_marginStart="16dp"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageView
+                    android:id="@+id/imgAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Avatar"
+                    android:src="@drawable/bg_avatar_grey_bordered" />
+
+                <TextView
+                    android:id="@+id/tvAvatarLetter"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="A"
+                    tools:ignore="HardcodedText" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -42,10 +60,10 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="@id/imgAvatar"
-                app:layout_constraintStart_toEndOf="@id/imgAvatar"
-                app:layout_constraintEnd_toStartOf="@id/btnNotification"
-                app:layout_constraintTop_toTopOf="@id/imgAvatar">
+                app:layout_constraintBottom_toBottomOf="@id/layoutAvatar"
+                app:layout_constraintStart_toEndOf="@id/layoutAvatar"
+                app:layout_constraintEnd_toStartOf="@id/layoutNotification"
+                app:layout_constraintTop_toTopOf="@id/layoutAvatar">
 
                 <TextView
                     android:id="@+id/tvWorkspaceName"
@@ -59,17 +77,41 @@
                     android:ellipsize="end" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/btnNotification"
+            <FrameLayout
+                android:id="@+id/layoutNotification"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:contentDescription="Notifications"
-                android:src="@drawable/ic_notification"
                 android:layout_marginEnd="16dp"
-                app:tint="@color/theme_text_primary"
-                app:layout_constraintBottom_toBottomOf="@id/imgAvatar"
+                app:layout_constraintBottom_toBottomOf="@id/layoutAvatar"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/imgAvatar" />
+                app:layout_constraintTop_toTopOf="@id/layoutAvatar">
+
+                <ImageView
+                    android:id="@+id/btnNotification"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Notifications"
+                    android:src="@drawable/ic_notification"
+                    app:tint="@color/theme_text_primary" />
+
+                <TextView
+                    android:id="@+id/tvNotificationBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end|top"
+                    android:layout_marginTop="-2dp"
+                    android:layout_marginEnd="-2dp"
+                    android:background="@drawable/bg_circle_blue"
+                    android:gravity="center"
+                    android:minWidth="18dp"
+                    android:paddingHorizontal="3dp"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:text="3"
+                    tools:visibility="visible" />
+            </FrameLayout>
 
             <EditText
                 android:id="@+id/searchBar"
@@ -90,7 +132,7 @@
                 android:maxLines="1"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/imgAvatar" />
+                app:layout_constraintTop_toBottomOf="@id/layoutAvatar" />
 
             <HorizontalScrollView
                 android:id="@+id/tabsScroll"

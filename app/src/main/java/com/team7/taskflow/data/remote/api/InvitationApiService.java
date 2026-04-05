@@ -33,7 +33,7 @@ public interface InvitationApiService {
         // ✅ Cập nhật status invitation (ACCEPTED / DENIED)
     @PATCH("project_invitations")
     Call<Void> updateInvitationStatus(
-            @Query("id") String idFilter,
+                    @Query("invitation_id") String invitationIdFilter,
             @Body Map<String, String> body
     );
 
@@ -41,6 +41,7 @@ public interface InvitationApiService {
     @POST("project_members")
     Call<Void> addMember(
             @Header("Prefer") String prefer,
+            @Query("on_conflict") String onConflict,
             @Body Map<String, Object> body
     );
 }

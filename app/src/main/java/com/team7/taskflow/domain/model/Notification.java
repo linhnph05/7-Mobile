@@ -2,6 +2,11 @@ package com.team7.taskflow.domain.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -26,8 +31,9 @@ public class Notification {
         TASK_ASSIGNED,
         MENTION,
         COMMENT,
-        TASK_COMPLETED,
+        TASK_STATUS_CHANGED,
         REACTION,
+        DELETED,
         ATTACHMENT_ADDED,
         DEADLINE_REMINDER,
         SYSTEM_ALERT
@@ -49,6 +55,9 @@ public class Notification {
 
     @SerializedName("reference_id")
     private Long referenceId; // FK to projects.project_id or tasks.task_id
+
+    @SerializedName("task_activity_id")
+    private Long taskActivityId; // FK to task_activities.activity_id (for TASK_STATUS_CHANGED)
 
     @SerializedName("is_read")
     private boolean isRead;
@@ -75,6 +84,9 @@ public class Notification {
 
     /** Pre-built HTML content string for display */
     private transient String displayContent;
+
+    /** Task activity details (fetched from task_activities table for TASK_STATUS_CHANGED) */
+    private transient TaskActivity activityDetail;
 
     // ── Constructors ────────────────────────────────────────────────
 
@@ -157,12 +169,28 @@ public class Notification {
         this.createdAt = createdAt;
     }
 
+    public Long getTaskActivityId() {
+        return taskActivityId;
+    }
+
+    public void setTaskActivityId(Long taskActivityId) {
+        this.taskActivityId = taskActivityId;
+    }
+
     public ActorInfo getActor() {
         return actor;
     }
 
     public void setActor(ActorInfo actor) {
         this.actor = actor;
+    }
+
+    public TaskActivity getActivityDetail() {
+        return activityDetail;
+    }
+
+    public void setActivityDetail(TaskActivity activityDetail) {
+        this.activityDetail = activityDetail;
     }
 
     // ── Client-enriched field accessors ──────────────────────────────
@@ -200,6 +228,10 @@ public class Notification {
         if (typeRaw == null)
             return NotificationType.SYSTEM_ALERT;
         try {
+            if ("TASK_COMPLETED".equals(typeRaw)) {
+                typeParsed = NotificationType.TASK_STATUS_CHANGED;
+                return typeParsed;
+            }
             typeParsed = NotificationType.valueOf(typeRaw);
         } catch (IllegalArgumentException e) {
             typeParsed = NotificationType.SYSTEM_ALERT;
@@ -229,8 +261,9 @@ public class Notification {
             case TASK_ASSIGNED:
             case MENTION:
             case COMMENT:
-            case TASK_COMPLETED:
+            case TASK_STATUS_CHANGED:
             case REACTION:
+            case DELETED:
             case ATTACHMENT_ADDED:
             case DEADLINE_REMINDER:
                 return "Task: " + ref;
@@ -244,8 +277,9 @@ public class Notification {
     }
 
     /**
-     * Build a human-readable HTML content string based on type, actor, and
-     * reference.
+     * Build a human-readable HTML content string based on type, actor, and reference.
+     * For TASK_STATUS_CHANGED, uses activityDetail (fetched from task_activities by Repository).
+     * Routes to different content builders based on actionType.
      */
     public String buildDisplayContent() {
         String actor = "<b>" + getActorName() + "</b>";
@@ -263,11 +297,19 @@ public class Notification {
             case COMMENT:
                 displayContent = actor + " commented on a task.";
                 break;
-            case TASK_COMPLETED:
-                displayContent = actor + " completed a task.";
+            case TASK_STATUS_CHANGED:
+                // Route to specific builders based on activity details
+                if (activityDetail != null && activityDetail.getActionType() != null) {
+                    displayContent = buildActivityContent(actor, activityDetail);
+                } else {
+                    displayContent = actor + " updated task.";
+                }
                 break;
             case REACTION:
                 displayContent = actor + " reacted to your comment.";
+                break;
+            case DELETED:
+                displayContent = actor + " withdrew a reaction.";
                 break;
             case ATTACHMENT_ADDED:
                 displayContent = actor + " added an attachment.";
@@ -282,5 +324,173 @@ public class Notification {
                 displayContent = "You have a new notification.";
         }
         return displayContent;
+    }
+
+    /**
+     * Route to specific content builder based on actionType from TaskActivity.
+     * Handles: UPDATE_STATUS, UPDATE_DUE_DATE, UPDATE_PRIORITY, UPDATE_START_DATE, UPDATE_TITLE, UPDATE_ASSIGNEE, UPDATE_TAG, etc.
+     */
+    private String buildActivityContent(String actor, TaskActivity activity) {
+        String actionType = activity.getActionType();
+        if (actionType == null) {
+            return actor + " updated task.";
+        }
+
+        actionType = actionType.toUpperCase().trim();
+
+        switch (actionType) {
+            case "UPDATE_STATUS":
+                return buildStatusChangeContent(actor, activity);
+            case "UPDATE_DUE_DATE":
+                return buildDueDateChangeContent(actor, activity);
+            case "UPDATE_PRIORITY":
+                return buildPriorityChangeContent(actor, activity);
+            case "UPDATE_START_DATE":
+                return buildStartDateChangeContent(actor, activity);
+            case "UPDATE_TITLE":
+                return buildTitleChangeContent(actor, activity);
+            case "UPDATE_ASSIGNEE":
+                return buildAssigneeChangeContent(actor, activity);
+            case "UPDATE_TAG":
+                return buildTagChangeContent(actor, activity);
+            case "UPDATE_DESCRIPTION":
+                return buildDescriptionChangeContent(actor, activity);
+            case "DELETE":
+            case "CREATE":
+                return actor + " updated task.";
+            default:
+                return actor + " updated task.";
+        }
+    }
+
+    private String buildStatusChangeContent(String actor, TaskActivity activity) {
+        String oldVal = activity.getOldValue();
+        String newVal = activity.getNewValue();
+
+        if (oldVal != null && newVal != null) {
+            return actor + " changed status from <b>" + oldVal + "</b> to <b>" + newVal + "</b>.";
+        }
+        return actor + " changed task status to <b>" + (newVal != null ? newVal : "?") + "</b>.";
+    }
+
+    private String buildDueDateChangeContent(String actor, TaskActivity activity) {
+        String oldVal = activity.getOldValue();
+        String newVal = activity.getNewValue();
+
+        if (newVal != null && !newVal.isEmpty()) {
+            return actor + " changed due date to <b>" + formatDateDisplay(newVal) + "</b>.";
+        } else if (oldVal != null && !oldVal.isEmpty()) {
+            return actor + " removed the due date.";
+        }
+        return actor + " changed the due date.";
+    }
+
+    private String buildPriorityChangeContent(String actor, TaskActivity activity) {
+        String oldVal = activity.getOldValue();
+        String newVal = activity.getNewValue();
+
+        if (newVal != null && !newVal.isEmpty() && (oldVal == null || oldVal.isEmpty())) {
+            return actor + " added priority <b>" + newVal + "</b>.";
+        } else if ((newVal == null || newVal.isEmpty()) && oldVal != null && !oldVal.isEmpty()) {
+            return actor + " removed priority <b>" + oldVal + "</b>.";
+        } else if (newVal != null && !newVal.isEmpty()) {
+            return actor + " changed priority to <b>" + newVal + "</b>.";
+        }
+        return actor + " changed task priority.";
+    }
+
+    private String buildStartDateChangeContent(String actor, TaskActivity activity) {
+        String oldVal = activity.getOldValue();
+        String newVal = activity.getNewValue();
+
+        if (newVal != null && !newVal.isEmpty()) {
+            return actor + " changed start date to <b>" + formatDateDisplay(newVal) + "</b>.";
+        } else if (oldVal != null && !oldVal.isEmpty()) {
+            return actor + " removed the start date.";
+        }
+        return actor + " changed the start date.";
+    }
+
+    private String buildTitleChangeContent(String actor, TaskActivity activity) {
+        String newVal = activity.getNewValue();
+
+        if (newVal != null && !newVal.isEmpty()) {
+            return actor + " changed task title to <b>" + escapeHtml(newVal) + "</b>.";
+        }
+        return actor + " changed task title.";
+    }
+
+    private String buildAssigneeChangeContent(String actor, TaskActivity activity) {
+        String newVal = activity.getNewValue();
+        String oldVal = activity.getOldValue();
+
+        if (newVal != null && !newVal.isEmpty()) {
+            return actor + " assigned task to <b>" + newVal + "</b>.";
+        } else if (oldVal != null && !oldVal.isEmpty()) {
+            return actor + " removed task assignment.";
+        }
+        return actor + " changed task assignee.";
+    }
+
+    private String buildTagChangeContent(String actor, TaskActivity activity) {
+        String newVal = activity.getNewValue();
+        String oldVal = activity.getOldValue();
+
+        if (newVal != null && !newVal.isEmpty()) {
+            return actor + " added tag <b>" + newVal + "</b>.";
+        } else if (oldVal != null && !oldVal.isEmpty()) {
+            return actor + " removed tag <b>" + oldVal + "</b>.";
+        }
+        return actor + " changed task tag.";
+    }
+
+    private String buildDescriptionChangeContent(String actor, TaskActivity activity) {
+        return actor + " changed task description.";
+    }
+
+    /**
+     * Escape HTML special characters to prevent injection
+     */
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
+    }
+
+    /**
+     * Format date string for display in Vietnam timezone.
+     * - Date only: dd/MM/yyyy
+     * - Date-time: HH:mm dd/MM/yyyy
+     */
+    private String formatDateDisplay(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return dateStr;
+        }
+
+        String value = dateStr.trim();
+        ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+        try {
+            if (value.contains("T")) {
+                OffsetDateTime offsetDateTime = OffsetDateTime.parse(value, DateTimeFormatter.ISO_DATE_TIME);
+                return offsetDateTime.atZoneSameInstant(vietnamZone).format(dateTimeFormatter);
+            }
+
+            if (value.contains(":")) {
+                DateTimeFormatter inputDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime localDateTime = LocalDateTime.parse(value, inputDateTime);
+                return localDateTime.atZone(vietnamZone).format(dateTimeFormatter);
+            }
+
+            LocalDate localDate = LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE);
+            return localDate.format(dateFormatter);
+        } catch (Exception e) {
+            return value;
+        }
     }
 }

@@ -4,11 +4,9 @@ import androidx.annotation.NonNull;
 
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.SupabaseConfig;
-import com.team7.taskflow.data.remote.api.ActivityApi;
 import com.team7.taskflow.data.remote.api.ProjectApi;
 import com.team7.taskflow.data.remote.api.TaskApi;
 import com.team7.taskflow.domain.model.ProjectMember;
-import com.team7.taskflow.domain.model.ProjectActivity;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.TaskActivity;
 import com.team7.taskflow.domain.model.User;
@@ -16,6 +14,7 @@ import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.CommentReaction;
 import com.team7.taskflow.utils.SessionManager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +31,12 @@ public class TaskRepository {
 
     private static TaskRepository instance;
     private final TaskApi taskApi;
-    private final ActivityApi activityApi;
     private final ProjectApi projectApi;
     private final com.team7.taskflow.data.remote.api.StorageApi storageApi;
     private final Map<Long, String> statusBeforeTrashCache = new HashMap<>();
 
     private TaskRepository() {
         taskApi = SupabaseClient.getInstance().getService(TaskApi.class);
-        activityApi = SupabaseClient.getInstance().getService(ActivityApi.class);
         projectApi = SupabaseClient.getInstance().getService(ProjectApi.class);
         storageApi = SupabaseClient.getInstance()
                 .getStorageService(com.team7.taskflow.data.remote.api.StorageApi.class);
@@ -61,28 +58,14 @@ public class TaskRepository {
     // ── Create ──────────────────────────────────────────────────────────
 
     public void createTask(Task task, TaskCallback<Task> callback) {
-        taskApi.createTask(task, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
+        Task payload = buildCreatePayload(task);
+        taskApi.createTask(payload, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
                 .enqueue(new Callback<List<Task>>() {
                     @Override
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task created = response.body().get(0);
                             callback.onSuccess(created);
-                            String actorId = SessionManager.getUserId();
-                            logTaskActivity(
-                                    created.getId(),
-                                actorId,
-                                    "CREATE",
-                                    null,
-                                    created.getStatus() != null ? created.getStatus() : "TODO");
-                            logProjectActivity(
-                                    created.getProjectId(),
-                                actorId,
-                                    "TASK",
-                                    created.getId(),
-                                    "CREATE",
-                                    null,
-                                    created.getTitle());
                         } else {
                             callback.onError("Failed to create task: " + response.code());
                         }
@@ -105,16 +88,8 @@ public class TaskRepository {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task updated = response.body().get(0);
                             callback.onSuccess(updated);
-                            logProjectActivity(
-                                    updated.getProjectId(),
-                                    SessionManager.getUserId(),
-                                    "TASK",
-                                    updated.getId(),
-                                    "UPDATE",
-                                    null,
-                                    updated.getTitle());
                         } else {
-                            callback.onError("Update failed");
+                            callback.onError("Update failed: " + buildApiError("update_task", response));
                         }
                     }
 
@@ -152,11 +127,8 @@ public class TaskRepository {
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess(null);
-                    logTaskActivity(taskId, SessionManager.getUserId(), "UPDATE_STATUS", oldStatus, newStatus);
-                    logProjectActivityByTaskId(taskId, userIdOrSession(userIdFromStatuses(oldStatus, newStatus)), "TASK", taskId,
-                            "UPDATE_STATUS", oldStatus, newStatus);
                 } else {
-                    callback.onError("Failed to update status");
+                    callback.onError("Failed to update status: " + buildApiError("update_task_status", response));
                 }
             }
 
@@ -196,9 +168,6 @@ public class TaskRepository {
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess(null);
-                    logTaskActivity(taskId, SessionManager.getUserId(), "DELETE", previousStatus, "TRASH");
-                    logProjectActivityByTaskId(taskId, SessionManager.getUserId(), "TASK", taskId,
-                            "DELETE", previousStatus, "TRASH");
                 } else {
                     callback.onError("Failed to delete task");
                 }
@@ -219,17 +188,6 @@ public class TaskRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful()) {
-                            logTaskActivity(taskId, SessionManager.getUserId(), "HARD_DELETE", "TRASH", "DELETED");
-                            if (taskBeforeDelete != null && taskBeforeDelete.getProjectId() > 0) {
-                                logProjectActivity(
-                                        taskBeforeDelete.getProjectId(),
-                                        SessionManager.getUserId(),
-                                        "TASK",
-                                        taskId,
-                                        "HARD_DELETE",
-                                        "TRASH",
-                                        "DELETED");
-                            }
                             callback.onSuccess(null);
                         } else {
                             callback.onError("Delete failed: " + response.code());
@@ -249,7 +207,6 @@ public class TaskRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful()) {
-                            logTaskActivity(taskId, SessionManager.getUserId(), "HARD_DELETE", "TRASH", "DELETED");
                             callback.onSuccess(null);
                         } else {
                             callback.onError("Delete failed: " + response.code());
@@ -306,9 +263,6 @@ public class TaskRepository {
                 if (response.isSuccessful()) {
                     statusBeforeTrashCache.remove(taskId);
                     callback.onSuccess(null);
-                    logTaskActivity(taskId, SessionManager.getUserId(), "RESTORE", "TRASH", restoreStatus);
-                    logProjectActivityByTaskId(taskId, SessionManager.getUserId(), "TASK", taskId,
-                            "RESTORE", "TRASH", restoreStatus);
                 } else {
                     callback.onError("Failed to restore task");
                 }
@@ -482,7 +436,7 @@ public class TaskRepository {
                 });
     }
     public void getTaskHistory(long taskId, TaskCallback<List<TaskActivity>> callback) {
-        activityApi.getActivitiesByTask("eq." + taskId, "created_at.desc").enqueue(new Callback<List<TaskActivity>>() {
+        taskApi.getTaskActivities("eq." + taskId, "created_at.desc").enqueue(new Callback<List<TaskActivity>>() {
             @Override
             public void onResponse(Call<List<TaskActivity>> call, Response<List<TaskActivity>> response) {
                 if (response.isSuccessful())
@@ -499,9 +453,9 @@ public class TaskRepository {
     }
 
     public void getTaskComments(long taskId, TaskCallback<List<Comment>> callback) {
-        String select = "comment_id,task_id,user_id,content,created_at," 
+        String select = "comment_id,task_id,user_id,content,created_at,is_deleted," 
             + "users(user_id,display_name,avatar_url)";
-        taskApi.getCommentsByTask("eq." + taskId, select, "created_at.desc").enqueue(new Callback<List<Comment>>() {
+        taskApi.getCommentsByTask("eq." + taskId, "eq.false", select, "created_at.desc").enqueue(new Callback<List<Comment>>() {
             @Override
             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                 if (response.isSuccessful()) {
@@ -518,7 +472,7 @@ public class TaskRepository {
                         }
                     });
                 } else {
-                    callback.onError("Failed to load comments: " + response.code());
+                    callback.onError("Failed to load comments: " + buildApiError("comments", response));
                 }
             }
 
@@ -529,10 +483,38 @@ public class TaskRepository {
         });
     }
 
+    public void getCommentById(long commentId, TaskCallback<Comment> callback) {
+        taskApi.getCommentById("eq." + commentId, "comment_id,task_id,user_id,content,is_deleted")
+                .enqueue(new Callback<List<Comment>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Comment>> call,
+                            @NonNull Response<List<Comment>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            callback.onSuccess(response.body().get(0));
+                        } else {
+                            callback.onError("Comment not found");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
+    }
+
     public void createTaskComment(long taskId, String userId, String content, TaskCallback<Comment> callback) {
+        String effectiveUserId = userId != null && !userId.trim().isEmpty()
+                ? userId.trim()
+                : SessionManager.getUserId();
+        if (effectiveUserId == null || effectiveUserId.trim().isEmpty()) {
+            callback.onError("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+            return;
+        }
+
         Map<String, Object> body = new HashMap<>();
         body.put("task_id", taskId);
-        body.put("user_id", userId);
+        body.put("user_id", effectiveUserId);
         body.put("content", content);
 
         taskApi.createComment(body, SupabaseConfig.PREFER_RETURN_REPRESENTATION).enqueue(new Callback<List<Comment>>() {
@@ -541,10 +523,8 @@ public class TaskRepository {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     Comment createdComment = response.body().get(0);
                     callback.onSuccess(createdComment);
-                        logProjectActivityByTaskId(taskId, userId, "TASK", taskId,
-                            "COMMENT_CREATE", null, content);
                 } else {
-                    callback.onError("Failed to create comment: " + response.code());
+                    callback.onError("Failed to create comment: " + buildApiError("create_comment", response));
                 }
             }
 
@@ -556,12 +536,20 @@ public class TaskRepository {
     }
 
     public void updateTaskComment(long commentId, String userId, String content, TaskCallback<Comment> callback) {
+        String effectiveUserId = userId != null && !userId.trim().isEmpty()
+            ? userId.trim()
+            : SessionManager.getUserId();
+        if (effectiveUserId == null || effectiveUserId.trim().isEmpty()) {
+            callback.onError("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+            return;
+        }
+
         Map<String, Object> body = new HashMap<>();
         body.put("content", content);
 
         taskApi.updateComment(
                 "eq." + commentId,
-                "eq." + userId,
+            "eq." + effectiveUserId,
                 body,
                 SupabaseConfig.PREFER_RETURN_REPRESENTATION).enqueue(new Callback<List<Comment>>() {
             @Override
@@ -569,16 +557,8 @@ public class TaskRepository {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     Comment updated = response.body().get(0);
                     callback.onSuccess(updated);
-                    logProjectActivityByTaskId(
-                            updated.getTaskId() != null ? updated.getTaskId() : -1,
-                            userId,
-                            "TASK",
-                            updated.getTaskId() != null ? updated.getTaskId() : -1,
-                            "COMMENT_UPDATE",
-                            null,
-                            content);
                 } else {
-                    callback.onError("Failed to update comment: " + response.code());
+                    callback.onError("Failed to update comment: " + buildApiError("update_comment", response));
                 }
             }
 
@@ -590,36 +570,41 @@ public class TaskRepository {
     }
 
     public void deleteTaskComment(long commentId, String userId, TaskCallback<Void> callback) {
-        taskApi.getCommentById("eq." + commentId, "comment_id,task_id,content").enqueue(new Callback<List<Comment>>() {
+        String effectiveUserId = userId != null && !userId.trim().isEmpty()
+                ? userId.trim()
+                : SessionManager.getUserId();
+        if (effectiveUserId == null || effectiveUserId.trim().isEmpty()) {
+            callback.onError("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+            return;
+        }
+
+        taskApi.getCommentById("eq." + commentId, "comment_id,task_id,content,is_deleted").enqueue(new Callback<List<Comment>>() {
             @Override
             public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
-                Comment existing = null;
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    existing = response.body().get(0);
+                    Comment existing = response.body().get(0);
+                    if (existing != null && existing.isDeleted()) {
+                        callback.onSuccess(null);
+                        return;
+                    }
                 }
-                final Comment finalExisting = existing;
 
-                taskApi.deleteComment("eq." + commentId, "eq." + userId).enqueue(new Callback<Void>() {
+                Map<String, Object> body = new HashMap<>();
+                body.put("is_deleted", true);
+
+                taskApi.updateComment("eq." + commentId, "eq." + effectiveUserId, body, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
+                        .enqueue(new Callback<List<Comment>>() {
                     @Override
-                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                         if (response.isSuccessful()) {
                             callback.onSuccess(null);
-                            long taskId = finalExisting != null && finalExisting.getTaskId() != null ? finalExisting.getTaskId() : -1;
-                            logProjectActivityByTaskId(
-                                    taskId,
-                                    userId,
-                                    "TASK",
-                                    taskId,
-                                    "COMMENT_DELETE",
-                                    finalExisting != null ? finalExisting.getContent() : null,
-                                    null);
                         } else {
-                            callback.onError("Failed to delete comment: " + response.code());
+                            callback.onError("Failed to delete comment: " + buildApiError("soft_delete_comment", response));
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
                         callback.onError(t.getMessage());
                     }
                 });
@@ -627,20 +612,23 @@ public class TaskRepository {
 
             @Override
             public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
-                // Fallback: still try delete even if prefetch fails.
-                taskApi.deleteComment("eq." + commentId, "eq." + userId).enqueue(new Callback<Void>() {
+                Map<String, Object> body = new HashMap<>();
+                body.put("is_deleted", true);
+
+                // Fallback: still try soft-delete even if prefetch fails.
+                taskApi.updateComment("eq." + commentId, "eq." + effectiveUserId, body, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
+                        .enqueue(new Callback<List<Comment>>() {
                     @Override
-                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                         if (response.isSuccessful()) {
                             callback.onSuccess(null);
-                            logProjectActivityByTaskId(-1L, userId, "TASK", -1L, "COMMENT_DELETE", null, null);
                         } else {
-                            callback.onError("Failed to delete comment: " + response.code());
+                            callback.onError("Failed to delete comment: " + buildApiError("soft_delete_comment_fallback", response));
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
                         callback.onError(t.getMessage());
                     }
                 });
@@ -649,13 +637,21 @@ public class TaskRepository {
     }
 
     public void toggleCommentReaction(long commentId, String userId, String reactionType, TaskCallback<Void> callback) {
+        String effectiveUserId = userId != null && !userId.trim().isEmpty()
+                ? userId.trim()
+                : SessionManager.getUserId();
+        if (effectiveUserId == null || effectiveUserId.trim().isEmpty()) {
+            callback.onError("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+            return;
+        }
+
         String normalizedReaction = reactionType != null ? reactionType.trim().toUpperCase() : "";
         if (!"LIKE".equals(normalizedReaction) && !"LOVE".equals(normalizedReaction) && !"CELEBRATE".equals(normalizedReaction)) {
             callback.onError("Invalid reaction type");
             return;
         }
 
-        taskApi.getCommentReactions("eq." + commentId, "eq." + userId, "eq." + normalizedReaction).enqueue(new Callback<List<CommentReaction>>() {
+        taskApi.getCommentReactions("eq." + commentId, "eq." + effectiveUserId, null).enqueue(new Callback<List<CommentReaction>>() {
             @Override
             public void onResponse(@NonNull Call<List<CommentReaction>> call, @NonNull Response<List<CommentReaction>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
@@ -664,28 +660,46 @@ public class TaskRepository {
                         callback.onError("Reaction not found");
                         return;
                     }
-                    taskApi.deleteCommentReaction("eq." + existing.getId()).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                callback.onSuccess(null);
-                                logReactionProjectActivity(commentId, userId, normalizedReaction, "REMOVE_REACTION");
-                            } else {
-                                callback.onError("Failed to remove reaction: " + response.code());
-                            }
-                        }
 
-                        @Override
-                        public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                            callback.onError(t.getMessage());
-                        }
-                    });
+                    String existingType = existing.getReactionType() != null
+                            ? existing.getReactionType().trim().toUpperCase()
+                            : "";
+
+                    Map<String, Object> updateBody = new HashMap<>();
+                    if (normalizedReaction.equals(existingType)) {
+                        updateBody.put("reaction_type", "DELETED");
+                    } else {
+                        updateBody.put("reaction_type", normalizedReaction);
+                    }
+
+                    taskApi.updateCommentReaction(
+                            "eq." + existing.getId(),
+                            updateBody,
+                            SupabaseConfig.PREFER_RETURN_REPRESENTATION)
+                            .enqueue(new Callback<List<CommentReaction>>() {
+                                @Override
+                                public void onResponse(@NonNull Call<List<CommentReaction>> call,
+                                        @NonNull Response<List<CommentReaction>> response) {
+                                    if (response.isSuccessful()) {
+                                        callback.onSuccess(null);
+                                    } else {
+                                        callback.onError("Failed to update reaction: "
+                                                + buildApiError("update_reaction", response));
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<List<CommentReaction>> call,
+                                        @NonNull Throwable t) {
+                                    callback.onError(t.getMessage());
+                                }
+                            });
                     return;
                 }
 
                 Map<String, Object> body = new HashMap<>();
                 body.put("comment_id", commentId);
-                body.put("user_id", userId);
+                body.put("user_id", effectiveUserId);
                 body.put("reaction_type", normalizedReaction);
 
                 taskApi.createCommentReaction(body, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
@@ -694,9 +708,8 @@ public class TaskRepository {
                             public void onResponse(@NonNull Call<List<CommentReaction>> call, @NonNull Response<List<CommentReaction>> response) {
                                 if (response.isSuccessful()) {
                                     callback.onSuccess(null);
-                                    logReactionProjectActivity(commentId, userId, normalizedReaction, "ADD_REACTION");
                                 } else {
-                                    callback.onError("Failed to save reaction: " + response.code());
+                                    callback.onError("Failed to save reaction: " + buildApiError("create_reaction", response));
                                 }
                             }
 
@@ -710,31 +723,6 @@ public class TaskRepository {
             @Override
             public void onFailure(@NonNull Call<List<CommentReaction>> call, @NonNull Throwable t) {
                 callback.onError(t.getMessage());
-            }
-        });
-    }
-
-    private void logReactionProjectActivity(long commentId, String userId, String reactionType, String actionType) {
-        taskApi.getCommentById("eq." + commentId, "comment_id,task_id").enqueue(new Callback<List<Comment>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    Comment comment = response.body().get(0);
-                    long taskId = comment.getTaskId() != null ? comment.getTaskId() : -1;
-                    logProjectActivityByTaskId(
-                            taskId,
-                            userId,
-                            "TASK",
-                            taskId,
-                            actionType,
-                            null,
-                            reactionType);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
-                // Ignore logging failures
             }
         });
     }
@@ -834,12 +822,98 @@ public class TaskRepository {
             map.put("position", task.getPosition());
         // Optional fields used by detail/edit screens – always send them so
         // clearing values (null) is reflected in Supabase
-        map.put("due_date", task.getDueDate());
-        map.put("start_date", task.getStartDate());
-        map.put("assignee_id", task.getAssigneeId());
-        map.put("tag", task.getTag());
+        map.put("due_date", normalizeTimestamp(task.getDueDate()));
+        map.put("start_date", normalizeTimestamp(task.getStartDate()));
+        map.put("assignee_id", normalizeUuid(task.getAssigneeId()));
+        map.put("tag", normalizeNullableText(task.getTag()));
         map.put("parent_task_id", task.getParentTaskId());
         return map;
+    }
+
+    private Task buildCreatePayload(Task source) {
+        Task payload = new Task(source.getProjectId(), source.getTitle());
+        payload.setDescription(normalizeNullableText(source.getDescription()));
+        payload.setStatus(normalizeNullableText(source.getStatus()));
+        payload.setPriority(normalizeNullableText(source.getPriority()));
+        payload.setPosition(source.getPosition());
+        payload.setDueDate(normalizeTimestamp(source.getDueDate()));
+        payload.setStartDate(normalizeTimestamp(source.getStartDate()));
+        payload.setAssigneeId(normalizeUuid(source.getAssigneeId()));
+        payload.setParentTaskId(source.getParentTaskId());
+        payload.setTag(normalizeNullableText(source.getTag()));
+        return payload;
+    }
+
+    private String normalizeNullableText(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeUuid(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        // Keep valid UUID-like values only; invalid user input should not be sent to DB.
+        return trimmed.matches("^[0-9a-fA-F-]{36}$") ? trimmed : null;
+    }
+
+    private String normalizeTimestamp(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        // Accept already-ISO timestamps as-is.
+        if (trimmed.contains("T")) {
+            return trimmed;
+        }
+
+        // Convert UI format "yyyy-MM-dd HH:mm" to ISO-compatible format.
+        if (trimmed.matches("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$")) {
+            return trimmed.replace(" ", "T") + ":00";
+        }
+
+        // Convert plain date "yyyy-MM-dd" to start-of-day timestamp.
+        if (trimmed.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+            return trimmed + "T00:00:00";
+        }
+
+        return trimmed;
+    }
+
+    private String buildApiError(String operation, Response<?> response) {
+        if (response == null) {
+            return operation + " failed: empty response";
+        }
+
+        String bodyText = "";
+        try {
+            if (response.errorBody() != null) {
+                bodyText = response.errorBody().string();
+            }
+        } catch (IOException ignored) {
+            bodyText = "";
+        }
+
+        if (bodyText != null) {
+            bodyText = bodyText.trim();
+        }
+
+        if (bodyText == null || bodyText.isEmpty()) {
+            return operation + " failed with HTTP " + response.code();
+        }
+
+        return operation + " failed with HTTP " + response.code() + ": " + bodyText;
     }
 
     public void getTasksByProject(long projectId, TaskCallback<List<Task>> callback) {
@@ -876,87 +950,6 @@ public class TaskRepository {
                 callback.onError(t.getMessage());
             }
         });
-    }
-
-    private void logProjectActivity(long projectId, String userId, String entityType, Long entityId,
-            String actionType, String oldValue, String newValue) {
-        if (projectId <= 0) {
-            return;
-        }
-        ProjectActivity activity = new ProjectActivity(
-                projectId,
-                userIdOrSession(userId),
-                actionType,
-                entityType,
-                entityId,
-                oldValue,
-                newValue);
-        projectApi.createProjectActivity(activity).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                // Fire-and-forget for dashboard counters.
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                // Ignore logging failures to avoid blocking task actions.
-            }
-        });
-    }
-
-    private void logTaskActivity(long taskId, String userId, String actionType, String oldValue, String newValue) {
-        if (taskId <= 0) {
-            return;
-        }
-        TaskActivity activity = new TaskActivity(
-                taskId,
-                userIdOrSession(userId),
-                actionType,
-                oldValue,
-                newValue);
-        activityApi.logActivity(activity).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                // Fire-and-forget
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                // Ignore activity logging failures to avoid blocking main flow.
-            }
-        });
-    }
-
-    private void logProjectActivityByTaskId(long taskId, String userId, String entityType, Long entityId,
-            String actionType, String oldValue, String newValue) {
-        if (taskId <= 0) {
-            return;
-        }
-        getTaskById(taskId, new TaskCallback<Task>() {
-            @Override
-            public void onSuccess(Task task) {
-                if (task == null) {
-                    return;
-                }
-                logProjectActivity(task.getProjectId(), userId, entityType, entityId, actionType, oldValue, newValue);
-            }
-
-            @Override
-            public void onError(String error) {
-                // Ignore logging fallback errors.
-            }
-        });
-    }
-
-    private String userIdOrSession(String userId) {
-        if (userId != null && !userId.trim().isEmpty()) {
-            return userId;
-        }
-        return SessionManager.getUserId();
-    }
-
-    private String userIdFromStatuses(String oldStatus, String newStatus) {
-        return SessionManager.getUserId();
     }
 
     /**

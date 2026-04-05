@@ -1,8 +1,10 @@
 package com.team7.taskflow.data.remote.api;
 
 import com.team7.taskflow.domain.model.Notification;
+import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.TaskActivity;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ public interface NotificationApi {
     Call<Void> markAllAsRead(
             @Query("user_id") String userIdFilter,
             @Query("is_read") String isReadFilter,
+            @Query("type") String typeFilter,
             @Body Map<String, Object> body);
 
     // ✅ Xóa notification sau khi Accept/Decline invite
@@ -64,5 +67,15 @@ public interface NotificationApi {
     @GET("tasks")
     Call<List<Task>> getTasksByIds(
             @Query("task_id") String taskIdFilter,
+            @Query("select") String select);
+
+    @GET("comments")
+    Call<List<Comment>> getCommentsByIds(
+            @Query("comment_id") String commentIdFilter,
+            @Query("select") String select);
+
+    @GET("task_activities")
+    Call<List<TaskActivity>> getTaskActivitiesByIds(
+            @Query("activity_id") String activityIdFilter,
             @Query("select") String select);
 }

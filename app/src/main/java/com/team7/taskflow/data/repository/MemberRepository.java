@@ -4,8 +4,8 @@ import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.api.MemberApiService;
 import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.User;
-import com.team7.taskflow.utils.SessionManager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,23 +58,46 @@ public class MemberRepository {
 
     // Thêm thành viên (đã biết userId)
     public void addMember(long projectId, String userId, String role, ResultCallback<Void> cb) {
+        String normalizedRole = (role == null || role.trim().isEmpty())
+                ? "MEMBER"
+                : role.trim().toUpperCase();
+
         Map<String, Object> body = new HashMap<>();
         body.put("project_id", projectId);
         body.put("user_id", userId);
-        body.put("role", role);
+        body.put("role", normalizedRole);
 
-        api.addMember("return=minimal", body)
+        api.addMember("resolution=merge-duplicates,return=minimal", "project_id,user_id", body)
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> r) {
-                        if (r.isSuccessful()) cb.onSuccess(null);
-                        else cb.onError("Lỗi thêm thành viên: " + r.code());
+                        if (r.isSuccessful()) {
+                            cb.onSuccess(null);
+                        } else {
+                            cb.onError("Lỗi thêm thành viên: " + r.code() + formatErrorBody(r));
+                        }
                     }
+
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         cb.onError(t.getMessage());
                     }
                 });
+    }
+
+    private String formatErrorBody(Response<?> response) {
+        if (response == null || response.errorBody() == null) {
+            return "";
+        }
+        try {
+            String body = response.errorBody().string();
+            if (body == null || body.trim().isEmpty()) {
+                return "";
+            }
+            return " - " + body;
+        } catch (IOException ignored) {
+            return "";
+        }
     }
 
     // Cập nhật role
@@ -106,14 +129,6 @@ public class MemberRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> r) {
                         if (r.isSuccessful()) {
-                            ProjectRepository.getInstance().logProjectActivity(
-                                    projectId,
-                                    SessionManager.getUserId(),
-                                    "MEMBER_REMOVED",
-                                    "MEMBER",
-                                    null,
-                                    null,
-                                    userId);
                             cb.onSuccess(null);
                         } else {
                             cb.onError("Lỗi xóa thành viên: " + r.code());

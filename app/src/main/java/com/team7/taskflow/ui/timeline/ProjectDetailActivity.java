@@ -60,6 +60,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private String currentUserId;
     private boolean isMyTasksMode;
     private boolean isViewer = false;
+    private boolean isOwner = false;
 
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
     private TextView tvProjectName, tvMonth;
@@ -362,6 +363,7 @@ public class ProjectDetailActivity extends BaseActivity {
                         for (com.team7.taskflow.domain.model.ProjectMember m : r.body()) {
                             if (currentUserId.equals(m.getUserId())) {
                                 isViewer = m.isViewer();
+                                isOwner = m.isOwner();
                                 runOnUiThread(ProjectDetailActivity.this::applyRoleRestrictions);
                                 break;
                             }
@@ -587,6 +589,54 @@ public class ProjectDetailActivity extends BaseActivity {
                 intent.putExtra("project_name", projectName);
                 intent.putExtra("is_my_tasks", isMyTasksMode);
                 startActivity(intent);
+            });
+        }
+
+        View btnDeleteProject = sheetView.findViewById(R.id.btnDeleteProject);
+        if (btnDeleteProject != null) {
+            btnDeleteProject.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+            btnDeleteProject.setOnClickListener(v -> {
+                if (!isOwner) {
+                    Toast.makeText(this, getString(R.string.project_delete_owner_only), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.project_delete_confirm_title))
+                        .setMessage(getString(R.string.project_delete_confirm_message))
+                        .setNegativeButton(getString(R.string.cancel), null)
+                        .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
+                            com.team7.taskflow.data.repository.ProjectRepository.getInstance()
+                                    .deleteProject(projectId,
+                                            new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<Void>() {
+                                                @Override
+                                                public void onSuccess(Void result) {
+                                                    runOnUiThread(() -> {
+                                                        Toast.makeText(ProjectDetailActivity.this,
+                                                                getString(R.string.project_deleted_success),
+                                                                Toast.LENGTH_SHORT).show();
+                                                        bottomSheet.dismiss();
+                                                        Intent intent = new Intent(ProjectDetailActivity.this,
+                                                                DashboardActivity.class);
+                                                        NavigationUtils.startActivityWithNavAnimation(
+                                                                ProjectDetailActivity.this,
+                                                                intent,
+                                                                NavigationUtils.NAV_TASKS,
+                                                                NavigationUtils.NAV_HOME);
+                                                        finish();
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void onError(String error) {
+                                                    runOnUiThread(() -> Toast.makeText(
+                                                            ProjectDetailActivity.this,
+                                                            error,
+                                                            Toast.LENGTH_SHORT).show());
+                                                }
+                                            });
+                        })
+                        .show();
             });
         }
 

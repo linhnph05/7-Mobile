@@ -30,6 +30,8 @@
     <string name="dashboard_tab_recent">Recent</string>
     <string name="dashboard_focus_title">Focus for today</string>
     <string name="dashboard_focus_desc">AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days.</string>
+    <string name="dashboard_workspace_guest">Hello, Guest</string>
+    <string name="dashboard_workspace_format">Hello, %1$s</string>
     <string name="for_you_title">For You</string>
     <string name="for_you_open_settings">Open settings</string>
     <string name="for_you_default_name">Bạn</string>
@@ -70,7 +72,21 @@
     <string name="project_created_success">Project created successfully!</string>
     <string name="project_saved_success">Changes saved!</string>
     <string name="project_deleted_success">Project deleted!</string>
+    <string name="project_delete_owner_only">Only the project owner can delete this project.</string>
     <string name="project_name_required">Please enter project name</string>
+    <string name="project_trash_title">Project Trash</string>
+    <string name="project_trash_count_default">0 projects</string>
+    <string name="project_trash_count_format">%1$d projects</string>
+    <string name="project_trash_empty_title">Trash is empty</string>
+    <string name="project_trash_empty_desc">Deleted projects will appear here.</string>
+    <string name="project_restore_action">Restore</string>
+    <string name="project_restore_confirm_title">Restore Project</string>
+    <string name="project_restore_confirm_message">Restore %1$s to your active projects?</string>
+    <string name="project_restore_success">Project restored successfully.</string>
+    <string name="project_unnamed">Untitled project</string>
+    <string name="project_no_description">No description</string>
+    <string name="project_deleted_at_unknown">Deleted time unknown</string>
+    <string name="project_deleted_at_format">Deleted at: %1$s</string>
     <string name="project_activity_count_format">%1$d hoạt động mới</string>
     <string name="dashboard_task_activities_today">Task activities today</string>
     <string name="dashboard_comment_activities_today">Comment activities today</string>
@@ -204,4 +220,70 @@
     <string name="sticky_done_action">Hoàn thành</string>
     <string name="sticky_channel_name">Thông báo task thường trực</string>
     <string name="sticky_channel_desc">Hiển thị task quan trọng nhất đang làm</string>
+
+    <!-- ==================== -->
+    <!-- PROJECT ACTIVITY     -->
+    <!-- ==================== -->
+    <!-- Activity action labels for project history feed -->
+    <string name="activity_project_created">đã tạo dự án</string>
+    <string name="activity_project_updated">đã cập nhật dự án</string>
+    <string name="activity_project_deleted">đã xoá dự án</string>
+    <string name="activity_project_restored">đã khôi phục dự án</string>
+
+    <string name="activity_task_created">đã tạo công việc</string>
+    <string name="activity_task_updated">đã cập nhật công việc</string>
+    <string name="activity_task_deleted">đã xoá công việc</string>
+    <string name="activity_task_restored">đã khôi phục công việc</string>
+    <string name="activity_task_status_changed">đã thay đổi trạng thái</string>
+
+    <string name="activity_comment_created">đã bình luận</string>
+    <string name="activity_comment_updated">đã chỉnh sửa bình luận</string>
+    <string name="activity_comment_deleted">đã xoá bình luận</string>
+
+    <string name="activity_reaction_added">đã thêm phản ứng</string>
+    <string name="activity_reaction_removed">đã bỏ phản ứng</string>
+
+    <string name="activity_member_added">đã thêm thành viên</string>
+    <string name="activity_member_updated">đã cập nhật thành viên</string>
+    <string name="activity_member_removed">đã xoá thành viên</string>
+    <string name="activity_member_joined">đã tham gia dự án</string>
+
+    <string name="activity_invitation_sent">đã gửi lời mời</string>
+    
+    <!-- Generic fallback -->
+    <string name="activity_item_updated">đã cập nhật</string>
+
+    <string name="comment_deleted_placeholder">Bình luận đã bị xóa</string>
+    <string name="notification_related_content_deleted">Nội dung liên quan đã bị xóa</string>
+    <string name="notification_related_task_deleted">Task liên quan đã bị xóa</string>
+    <string name="notification_reaction_withdrawn">Reaction đã được thu hồi</string>
+    <string name="notification_open_task_failed">Không thể mở task từ thông báo</string>
+    <string name="notification_invite_accept">Chấp nhận</string>
+    <string name="notification_invite_decline">Từ chối</string>
+    <string name="notification_time_just_now">Vừa xong</string>
+
+    <plurals name="notification_time_minutes_ago">
+        <item quantity="one">%d phút trước</item>
+        <item quantity="other">%d phút trước</item>
+    </plurals>
+
+    <plurals name="notification_time_hours_ago">
+        <item quantity="one">%d giờ trước</item>
+        <item quantity="other">%d giờ trước</item>
+    </plurals>
+
+    <plurals name="notification_time_days_ago">
+        <item quantity="one">%d ngày trước</item>
+        <item quantity="other">%d ngày trước</item>
+    </plurals>
+
+    <string name="push_channel_name">TaskFlow updates</string>
+    <string name="push_channel_description">Important updates for your assigned work and invitations</string>
+    <string name="push_title_general">TaskFlow</string>
+    <string name="push_title_project_invite">Project invitation</string>
+    <string name="push_title_task_assigned">Task assigned</string>
+    <string name="push_title_task_status_changed">Task status changed</string>
+    <string name="push_title_comment">New comment</string>
+    <string name="push_title_attachment_added">New attachment</string>
+    <string name="push_title_deadline_reminder">Deadline reminder</string>
 </resources>

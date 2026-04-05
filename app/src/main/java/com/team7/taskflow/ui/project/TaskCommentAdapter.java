@@ -13,10 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Comment;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -152,7 +152,10 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
 
             tvAuthor.setText(displayName);
             tvTime.setText(formatRelativeTime(comment.getCreatedAt()));
-            tvContent.setText(comment.getContent());
+                boolean isDeleted = comment != null && comment.isDeleted();
+                tvContent.setText(isDeleted
+                    ? itemView.getContext().getString(R.string.comment_deleted_placeholder)
+                    : comment.getContent());
             bindAvatar(comment, displayName);
 
             boolean isOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
@@ -165,16 +168,33 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
                 btnDelete.setVisibility(View.GONE);
             }
 
+            if (isDeleted) {
+                btnEdit.setVisibility(View.GONE);
+                btnDelete.setVisibility(View.GONE);
+                btnLike.setEnabled(false);
+                btnLove.setEnabled(false);
+                btnCelebrate.setEnabled(false);
+                btnLike.setAlpha(0.5f);
+                btnLove.setAlpha(0.5f);
+                btnCelebrate.setAlpha(0.5f);
+            } else {
+                btnLike.setEnabled(true);
+                btnLove.setEnabled(true);
+                btnCelebrate.setEnabled(true);
+            }
+
             btnEdit.setOnClickListener(v -> {
+                if (isDeleted) return;
                 if (listener != null) listener.onEdit(comment);
             });
             btnDelete.setOnClickListener(v -> {
+                if (isDeleted) return;
                 if (listener != null) listener.onDelete(comment);
             });
 
-            bindReaction(btnLike, comment, "LIKE", "👍");
-            bindReaction(btnLove, comment, "LOVE", "❤️");
-            bindReaction(btnCelebrate, comment, "CELEBRATE", "🎉");
+            bindReaction(btnLike, comment, "LIKE", "👍", isDeleted);
+            bindReaction(btnLove, comment, "LOVE", "❤️", isDeleted);
+            bindReaction(btnCelebrate, comment, "CELEBRATE", "🎉", isDeleted);
         }
 
         private void bindAvatar(Comment comment, String displayName) {
@@ -182,25 +202,8 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             if (comment != null && comment.getUser() != null) {
                 avatarUrl = comment.getUser().getAvatarUrl();
             }
-
-            String fallbackLetter = "?";
-            if (displayName != null && !displayName.trim().isEmpty()) {
-                fallbackLetter = displayName.trim().substring(0, 1).toUpperCase(Locale.US);
-            }
-
-            if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
-                imgAvatar.setVisibility(View.VISIBLE);
-                tvAvatarLetter.setVisibility(View.GONE);
-                Glide.with(imgAvatar)
-                        .load(avatarUrl)
-                        .circleCrop()
-                        .into(imgAvatar);
-            } else {
-                imgAvatar.setImageDrawable(null);
-                imgAvatar.setVisibility(View.VISIBLE);
-                tvAvatarLetter.setVisibility(View.VISIBLE);
-                tvAvatarLetter.setText(fallbackLetter);
-            }
+            imgAvatar.setVisibility(View.VISIBLE);
+            AvatarUiUtils.bindAvatarOrFallback(imgAvatar, tvAvatarLetter, avatarUrl, displayName);
         }
 
         private void applyBubbleAlignment(boolean isOwner) {
@@ -230,7 +233,7 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             tvContent.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.theme_text_primary));
         }
 
-        private void bindReaction(TextView button, Comment comment, String type, String emoji) {
+        private void bindReaction(TextView button, Comment comment, String type, String emoji, boolean isDeleted) {
             int count;
             boolean selected;
             if ("LIKE".equalsIgnoreCase(type)) {
@@ -247,6 +250,9 @@ public class TaskCommentAdapter extends RecyclerView.Adapter<TaskCommentAdapter.
             button.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
             button.setAlpha(selected ? 1f : 0.9f);
             button.setOnClickListener(v -> {
+                if (isDeleted) {
+                    return;
+                }
                 if (listener != null) listener.onReact(comment, type);
             });
         }

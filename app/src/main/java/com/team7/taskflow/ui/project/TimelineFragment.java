@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -259,14 +260,9 @@ public class TimelineFragment extends Fragment {
             View labelView = getLayoutInflater().inflate(R.layout.item_timeline_label, containerTaskLabels, false);
             ((TextView)labelView.findViewById(R.id.tvTaskName)).setText(t.getTitle());
             ImageView iv = labelView.findViewById(R.id.imgAssigneeAvatar);
-            if (iv != null && t.getAssigneeId() != null && assigneeAvatarUrlMap.containsKey(t.getAssigneeId())) {
+            if (iv != null && t.getAssigneeId() != null) {
                 iv.setVisibility(View.VISIBLE);
-                com.bumptech.glide.Glide.with(this)
-                        .load(assigneeAvatarUrlMap.get(t.getAssigneeId()))
-                        .circleCrop()
-                        .placeholder(R.drawable.bg_avatar_bordered)
-                        .error(R.drawable.bg_avatar_bordered)
-                        .into(iv);
+                AvatarUiUtils.bindAvatarOrFallback(iv, null, assigneeAvatarUrlMap.get(t.getAssigneeId()), t.getAssigneeId());
             } else if (iv != null) {
                 iv.setVisibility(View.INVISIBLE);
             }

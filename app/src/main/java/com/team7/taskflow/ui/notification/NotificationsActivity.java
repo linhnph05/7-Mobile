@@ -1,5 +1,8 @@
 package com.team7.taskflow.ui.notification;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +21,7 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.InvitationRepository;
 import com.team7.taskflow.data.repository.NotificationRepository;
 import com.team7.taskflow.data.repository.TaskRepository;
+import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Notification;
 import com.team7.taskflow.domain.model.Notification.NotificationType;
 import com.team7.taskflow.domain.model.Task;
@@ -80,6 +84,10 @@ public class NotificationsActivity extends BaseActivity {
 
             @Override
             public void onNotificationClick(Notification notification) {
+                if (notification != null && notification.getType() == NotificationType.PROJECT_INVITE) {
+                    return;
+                }
+
                 if (!notification.isRead()) {
                     notification.setRead(true);
                     adapter.notifyDataSetChanged();
@@ -107,29 +115,17 @@ public class NotificationsActivity extends BaseActivity {
 
                 String userId = SessionManager.getUserId();
                 String userEmail = SessionManager.getUserEmail(); // ✅ Cần email để tìm invitation
-                if (userId == null || userEmail == null) {
+                if (userId == null || userId.trim().isEmpty() || userEmail == null || userEmail.trim().isEmpty()) {
                     Toast.makeText(NotificationsActivity.this,
                             "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // ✅ Xóa notification khỏi list local ngay lập tức
-                allNotifications.remove(notification);
-                runOnUiThread(() -> applyFilters());
-
                 invitationRepo.acceptInvitation(projectId, userId, userEmail,
                         new InvitationRepository.ResultCallback<Void>() {
                             @Override
                             public void onSuccess(Void data) {
-                                // Xóa khỏi DB
-                                notificationRepo.deleteNotification(
-                                        notification.getNotificationId(),
-                                        new NotificationRepository.NotificationCallback<Void>() {
-                                            @Override public void onSuccess(Void v) {}
-                                            @Override public void onError(String e) {
-                                                Log.e("Notifications", "Delete failed: " + e);
-                                            }
-                                        });
+                                markInviteAsRead(notification);
                                 runOnUiThread(() ->
                                         Toast.makeText(NotificationsActivity.this,
                                                 "Đã tham gia dự án: " + notification.getReferenceName(),
@@ -137,9 +133,7 @@ public class NotificationsActivity extends BaseActivity {
                             }
                             @Override
                             public void onError(String message) {
-                                runOnUiThread(() ->
-                                        Toast.makeText(NotificationsActivity.this,
-                                                "Lỗi tham gia: " + message, Toast.LENGTH_SHORT).show());
+                                runOnUiThread(() -> showAcceptInviteErrorDialog(message, projectId, userId, userEmail));
                             }
                         });
             }
@@ -160,38 +154,44 @@ public class NotificationsActivity extends BaseActivity {
                     return;
                 }
 
-                // ✅ Luôn xóa notification trước, bất kể decline thành công hay thất bại
-                // Vì notification không còn hợp lệ (đã xử lý hoặc invitation hết hạn)
-                notificationRepo.deleteNotification(
-                        notification.getNotificationId(),
-                        new NotificationRepository.NotificationCallback<Void>() {
-                            @Override public void onSuccess(Void v) {}
-                            @Override public void onError(String e) {
-                                Log.e("Notifications", "Delete failed: " + e);
-                            }
-                        });
-
-                // Xóa khỏi list local ngay lập tức
-                allNotifications.remove(notification);
-                runOnUiThread(() -> applyFilters());
-
-                // Cố gắng cập nhật status trong DB (best-effort, không chặn UI)
                 invitationRepo.declineInvitation(projectId, userEmail,
                         new InvitationRepository.ResultCallback<Void>() {
                             @Override
                             public void onSuccess(Void data) {
+                                markInviteAsRead(notification);
                                 runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
                                         "Đã từ chối lời mời", Toast.LENGTH_SHORT).show());
                             }
                             @Override
                             public void onError(String message) {
-                                // Không show lỗi vì notification đã bị xóa rồi
-                                Log.w("Notifications", "Decline invitation: " + message);
+                                runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
+                                        "Lỗi từ chối: " + message, Toast.LENGTH_SHORT).show());
                             }
                         });
             }
         });
         rvNotifications.setAdapter(adapter);
+    }
+
+    private void markInviteAsRead(Notification notification) {
+        if (notification == null || notification.isRead()) {
+            return;
+        }
+
+        notification.setRead(true);
+        runOnUiThread(this::applyFilters);
+
+        notificationRepo.markAsRead(notification.getNotificationId(),
+                new NotificationRepository.NotificationCallback<Void>() {
+                    @Override public void onSuccess(Void result) {}
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("Notifications", "Mark invite as read failed: " + error);
+                        notification.setRead(false);
+                        runOnUiThread(NotificationsActivity.this::applyFilters);
+                    }
+                });
     }
 
     private void setupFilterDropdown() {
@@ -203,6 +203,28 @@ public class NotificationsActivity extends BaseActivity {
             currentFilter = FILTER_OPTIONS[position];
             applyFilters();
         });
+    }
+
+    private void showAcceptInviteErrorDialog(String message, Long projectId, String userId, String userEmail) {
+        String safeMessage = (message == null || message.trim().isEmpty()) ? "Unknown error" : message.trim();
+        String details = "Accept invite failed"
+                + "\nproject_id: " + (projectId != null ? projectId : "null")
+                + "\nuser_id: " + (userId != null ? userId : "null")
+                + "\nemail: " + (userEmail != null ? userEmail : "null")
+                + "\n\nerror:\n" + safeMessage;
+
+        new AlertDialog.Builder(this)
+                .setTitle("Lỗi tham gia dự án")
+                .setMessage(details)
+                .setPositiveButton("Đóng", null)
+                .setNeutralButton("Copy", (d, w) -> {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    if (clipboard != null) {
+                        clipboard.setPrimaryClip(ClipData.newPlainText("accept_invite_error", details));
+                        Toast.makeText(this, "Đã copy lỗi", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
     }
 
     private void setupClickListeners() {
@@ -245,7 +267,11 @@ public class NotificationsActivity extends BaseActivity {
             boolean matchesType = true;
             if ("@me".equals(currentFilter)) {
                 matchesType = (n.getType() == NotificationType.TASK_ASSIGNED
-                        || n.getType() == NotificationType.MENTION);
+                        || n.getType() == NotificationType.MENTION
+                        || n.getType() == NotificationType.REACTION
+                        || n.getType() == NotificationType.DELETED
+                        || n.getType() == NotificationType.TASK_STATUS_CHANGED
+                        || n.getType() == NotificationType.ATTACHMENT_ADDED);
             } else if ("Comment".equals(currentFilter)) {
                 matchesType = (n.getType() == NotificationType.COMMENT);
             } else if ("Join request".equals(currentFilter)) {
@@ -261,7 +287,11 @@ public class NotificationsActivity extends BaseActivity {
     private void markAllAsRead() {
         String userId = SessionManager.getUserId();
         if (userId == null || userId.isEmpty()) return;
-        for (Notification n : allNotifications) n.setRead(true);
+        for (Notification n : allNotifications) {
+            if (n.getType() != NotificationType.PROJECT_INVITE) {
+                n.setRead(true);
+            }
+        }
         applyFilters();
         notificationRepo.markAllAsRead(userId,
                 new NotificationRepository.NotificationCallback<Void>() {
@@ -303,6 +333,32 @@ public class NotificationsActivity extends BaseActivity {
             return;
         }
 
+        if (type == NotificationType.DELETED) {
+            showDeletedContentMessage();
+            return;
+        }
+
+        if (type == NotificationType.COMMENT || type == NotificationType.REACTION) {
+            taskRepository.getCommentById(referenceId, new TaskRepository.TaskCallback<Comment>() {
+                @Override
+                public void onSuccess(Comment comment) {
+                    runOnUiThread(() -> {
+                        if (comment == null || comment.isDeleted() || comment.getTaskId() == null || comment.getTaskId() <= 0) {
+                            showDeletedContentMessage();
+                            return;
+                        }
+                        openTaskDetail(comment.getTaskId());
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    runOnUiThread(NotificationsActivity.this::showDeletedContentMessage);
+                }
+            });
+            return;
+        }
+
         openTaskDetail(referenceId);
     }
 
@@ -320,9 +376,22 @@ public class NotificationsActivity extends BaseActivity {
             @Override
             public void onSuccess(Task task) {
                 runOnUiThread(() -> {
-                    if (task == null || task.getProjectId() <= 0) {
+                    if (task == null) {
                         Toast.makeText(NotificationsActivity.this,
-                                "Không thể mở task từ thông báo", Toast.LENGTH_SHORT).show();
+                                getString(R.string.notification_related_content_deleted), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String status = task.getStatus() != null ? task.getStatus().trim().toUpperCase() : "";
+                    if ("TRASH".equals(status)) {
+                        Toast.makeText(NotificationsActivity.this,
+                                getString(R.string.notification_related_task_deleted), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (task.getProjectId() <= 0) {
+                        Toast.makeText(NotificationsActivity.this,
+                                getString(R.string.notification_open_task_failed), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Intent intent = new Intent(NotificationsActivity.this, TaskDetailActivity.class);
@@ -335,8 +404,13 @@ public class NotificationsActivity extends BaseActivity {
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
-                        "Lỗi mở task: " + error, Toast.LENGTH_SHORT).show());
+                        getString(R.string.notification_related_content_deleted), Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    private void showDeletedContentMessage() {
+        Toast.makeText(NotificationsActivity.this,
+                getString(R.string.notification_related_content_deleted), Toast.LENGTH_SHORT).show();
     }
 }

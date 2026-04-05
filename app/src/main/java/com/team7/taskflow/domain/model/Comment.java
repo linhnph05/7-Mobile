@@ -19,6 +19,9 @@ public class Comment {
     @SerializedName("created_at")
     private String createdAt;
 
+    @SerializedName("is_deleted")
+    private Boolean isDeleted;
+
     @SerializedName("users")
     private User user;
 
@@ -80,6 +83,14 @@ public class Comment {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted != null && isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 
     public int getLikeCount() {

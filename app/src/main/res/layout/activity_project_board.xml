@@ -20,7 +20,7 @@
                 android:id="@+id/imgUserAvatar"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/bg_avatar_bordered"
+                android:src="@drawable/bg_avatar_grey_bordered"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

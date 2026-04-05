@@ -28,9 +28,7 @@ CREATE TABLE public.comments (
   user_id uuid,
   content text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
-  like integer,
-  heart integer,
-  congrats integer,
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT comments_pkey PRIMARY KEY (comment_id),
   CONSTRAINT comments_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id),
   CONSTRAINT comments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)
@@ -43,16 +41,18 @@ CREATE TABLE public.notifications (
   reference_id bigint,
   is_read boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
+  task_activity_id bigint,
   CONSTRAINT notifications_pkey PRIMARY KEY (notification_id),
+  CONSTRAINT notifications_task_activity_id_fkey FOREIGN KEY (task_activity_id) REFERENCES public.task_activities(activity_id),
   CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id),
   CONSTRAINT notifications_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES public.users(user_id)
 );
 CREATE TABLE public.project_activities (
   activity_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  project_id uuid NOT NULL,
+  project_id bigint NOT NULL,
   user_id uuid NOT NULL,
   entity_type character varying NOT NULL,
-  entity_id uuid,
+  entity_id bigint,
   action_type character varying NOT NULL,
   old_value jsonb,
   new_value jsonb,
@@ -60,14 +60,15 @@ CREATE TABLE public.project_activities (
   CONSTRAINT project_activities_pkey PRIMARY KEY (activity_id)
 );
 CREATE TABLE public.project_invitations (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id uuid NOT NULL DEFAULT gen_random_uuid() UNIQUE,
   project_id bigint NOT NULL,
   inviter_id uuid NOT NULL,
   email text NOT NULL,
   role character varying NOT NULL DEFAULT 'MEMBER'::character varying,
   status character varying NOT NULL DEFAULT 'PENDING'::character varying,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT project_invitations_pkey PRIMARY KEY (id),
+  invitation_id bigint NOT NULL DEFAULT nextval('project_invitations_invitation_id_seq'::regclass),
+  CONSTRAINT project_invitations_pkey PRIMARY KEY (invitation_id),
   CONSTRAINT project_invitations_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(project_id),
   CONSTRAINT project_invitations_inviter_id_fkey FOREIGN KEY (inviter_id) REFERENCES public.users(user_id)
 );
@@ -76,7 +77,8 @@ CREATE TABLE public.project_members (
   user_id uuid NOT NULL,
   role text DEFAULT 'MEMBER'::text,
   joined_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT project_members_pkey PRIMARY KEY (project_id, user_id),
+  id bigint NOT NULL DEFAULT nextval('project_members_id_seq'::regclass),
+  CONSTRAINT project_members_pkey PRIMARY KEY (id),
   CONSTRAINT project_members_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(project_id),
   CONSTRAINT project_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)
 );

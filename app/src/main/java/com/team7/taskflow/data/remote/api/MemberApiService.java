@@ -27,6 +27,7 @@ public interface MemberApiService {
     @POST("project_members")
     Call<Void> addMember(
             @Header("Prefer") String prefer,
+            @Query("on_conflict") String onConflict,
             @Body Map<String, Object> body
     );
 

@@ -21,15 +21,33 @@
             android:layout_height="@dimen/avatar_md"
             android:paddingHorizontal="@dimen/padding_screen">
 
-            <ImageView
-                android:id="@+id/ivProfilePic"
+            <FrameLayout
+                android:id="@+id/layoutProfileAvatar"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="@drawable/ic_person"
-                android:backgroundTint="@color/theme_border"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/ivProfilePic"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_avatar_grey_bordered"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:id="@+id/tvProfileAvatarLetter"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="A"
+                    tools:ignore="HardcodedText" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -40,7 +58,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+                app:layout_constraintStart_toEndOf="@id/layoutProfileAvatar"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.AppBarLayout>

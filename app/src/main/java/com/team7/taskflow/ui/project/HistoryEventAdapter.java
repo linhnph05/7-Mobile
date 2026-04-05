@@ -12,9 +12,9 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import com.bumptech.glide.Glide;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.ProjectHistoryItem;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -362,22 +362,11 @@ public class HistoryEventAdapter extends BaseAdapter {
         }
 
         void bindAvatar(String avatarUrl, String fallbackLetter) {
-            String letter = fallbackLetter != null && !fallbackLetter.trim().isEmpty() ? fallbackLetter.trim() : "?";
-            if (avatarUrl != null && !avatarUrl.trim().isEmpty() && imgAvatar != null) {
-                imgAvatar.setVisibility(View.VISIBLE);
-                tvAvatarLetter.setVisibility(View.GONE);
-                Glide.with(imgAvatar)
-                        .load(avatarUrl)
-                        .circleCrop()
-                        .into(imgAvatar);
-            } else {
-                if (imgAvatar != null) {
-                    imgAvatar.setImageDrawable(null);
-                    imgAvatar.setVisibility(View.VISIBLE);
-                }
-                tvAvatarLetter.setVisibility(View.VISIBLE);
-                tvAvatarLetter.setText(letter);
+            if (imgAvatar == null) {
+                return;
             }
+            imgAvatar.setVisibility(View.VISIBLE);
+            AvatarUiUtils.bindAvatarOrFallback(imgAvatar, tvAvatarLetter, avatarUrl, fallbackLetter);
         }
     }
 }

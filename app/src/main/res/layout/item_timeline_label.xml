@@ -14,7 +14,7 @@
         android:layout_marginEnd="8dp"
         android:contentDescription="Assignee Avatar"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_avatar_bordered"
+        android:src="@drawable/bg_avatar_grey_bordered"
         android:visibility="invisible" />
 
     <TextView

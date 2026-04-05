@@ -26,6 +26,8 @@ public class SupabaseConfig {
     // Content types
     public static final String CONTENT_TYPE_JSON = "application/json";
     public static final String PREFER_RETURN_REPRESENTATION = "return=representation";
+    public static final String TIMEZONE_ASIA_HO_CHI_MINH = "Asia/Ho_Chi_Minh";
+    public static final String PREFER_TIMEZONE_VIETNAM = "timezone=" + TIMEZONE_ASIA_HO_CHI_MINH;
 
     public static final String GOOGLE_WEB_CLIENT_ID = BuildConfig.GOOGLE_WEB_CLIENT_ID;
 }

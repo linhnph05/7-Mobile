@@ -34,6 +34,13 @@ public interface ProjectApi {
             @Query("order") String order
     );
 
+    @GET("projects")
+    Call<List<Project>> getDeletedOwnedProjects(
+            @Query("owner_id") String ownerIdFilter,
+            @Query("is_deleted") String isDeletedFilter,
+            @Query("order") String order
+    );
+
     /**
      * Get all projects for current user (as owner)
      * @deprecated Use getOwnedProjects instead
@@ -58,16 +65,6 @@ public interface ProjectApi {
     );
 
     /**
-     * Add a member to a project
-     * POST /project_members
-     */
-    @POST("project_members")
-    Call<List<ProjectMember>> addProjectMember(
-            @Body ProjectMember member,
-            @Header("Prefer") String prefer
-    );
-
-    /**
      * Get all members of a project
      * Supabase query: /project_members?project_id=eq.{id}&select=*,users(*)
      */
@@ -88,11 +85,6 @@ public interface ProjectApi {
             @Query("project_id") String projectIdFilter,
             @Query("select") String selectFields,
             @Query("order") String order
-    );
-
-    @POST("project_activities")
-    Call<Void> createProjectActivity(
-            @Body ProjectActivity activity
     );
 
     /**
@@ -148,6 +140,13 @@ public interface ProjectApi {
             @Body DeleteBody body
     );
 
+    @PATCH("projects")
+    Call<List<Project>> restoreProject(
+            @Query("project_id") String projectIdFilter,
+            @Body RestoreBody body,
+            @Header("Prefer") String prefer
+    );
+
     /**
      * Hard delete project
      * DELETE /projects?project_id=eq.{id}
@@ -168,5 +167,10 @@ public interface ProjectApi {
             this.deleted_at = java.time.Instant.now().toString();
         }
     }
+
+        class RestoreBody {
+                private boolean is_deleted = false;
+                private String deleted_at = null;
+        }
 }
 

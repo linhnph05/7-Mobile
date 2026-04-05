@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/theme_surface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/padding_screen"
+        android:paddingVertical="@dimen/spacing_lg">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/icon_md"
+            android:layout_height="@dimen/icon_md"
+            android:src="@drawable/ic_back"
+            android:tint="@color/theme_text_primary"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:text="@string/project_trash_title"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="@dimen/text_xl"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTrashCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="@dimen/text_sm"
+            android:textStyle="bold"
+            android:text="@string/project_trash_count_default" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/theme_border" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDeletedProjects"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="@dimen/padding_screen"
+        android:paddingTop="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_lg" />
+
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/padding_screen"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/icon_lg"
+            android:layout_height="@dimen/icon_lg"
+            android:alpha="0.6"
+            android:src="@drawable/ic_trash"
+            android:tint="@color/slate_400"
+            android:contentDescription="@string/project_trash_empty_title" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:text="@string/project_trash_empty_title"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="@dimen/text_md"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="@string/project_trash_empty_desc"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="@dimen/text_sm" />
+    </LinearLayout>
+
+</LinearLayout>

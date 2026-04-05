@@ -1,8 +1,6 @@
 package com.team7.taskflow.ui.dashboard;
 
 import android.content.Context;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +13,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +82,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             tvProjectName = itemView.findViewById(R.id.tvProjectName);
             tvProjectDesc = itemView.findViewById(R.id.tvProjectDesc);
             tvProgress = itemView.findViewById(R.id.tvProgress);
-            tvTaskCount = itemView.findViewById(R.id.tvDaysLeft);
-            tvCommentCount = itemView.findViewById(R.id.tvCommentCount);
+            tvTaskCount = itemView.findViewById(R.id.tvCommentCount);
+            tvCommentCount = itemView.findViewById(R.id.tvDaysLeft);
             layoutAvatars = itemView.findViewById(R.id.layoutAvatars);
             progressBar = itemView.findViewById(R.id.progressBar);
             cardView = itemView.findViewById(R.id.cardProject);
@@ -133,27 +130,22 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             for (int i = 0; i < limit; i++) {
                 User member = members.get(i);
                 if (member != null && !TextUtils.isEmpty(member.getAvatarUrl())) {
-                    layoutAvatars.addView(createAvatarImage(member.getAvatarUrl(), i));
+                    layoutAvatars.addView(createAvatarImage(member.getAvatarUrl(), member.getDisplayNameOrEmail(), i));
                 } else {
                     layoutAvatars.addView(createFallbackAvatar(resolveInitial(member), i));
                 }
             }
         }
 
-        private View createAvatarImage(String avatarUrl, int index) {
+        private View createAvatarImage(String avatarUrl, String displayName, int index) {
             Context context = itemView.getContext();
             AppCompatImageView avatar = new AppCompatImageView(context);
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(dpToPx(AVATAR_SIZE_DP), dpToPx(AVATAR_SIZE_DP));
             params.setMarginStart(dpToPx(index * AVATAR_OFFSET_DP));
             avatar.setLayoutParams(params);
             avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            avatar.setBackgroundResource(R.drawable.bg_circle_outline);
-            Glide.with(context)
-                    .load(avatarUrl)
-                    .circleCrop()
-                    .placeholder(R.drawable.ic_person)
-                    .error(R.drawable.ic_person)
-                    .into(avatar);
+            avatar.setBackgroundResource(R.drawable.bg_avatar_grey_bordered);
+            AvatarUiUtils.bindAvatarOrFallback(avatar, null, avatarUrl, displayName);
             return avatar;
         }
 
@@ -165,14 +157,11 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             avatar.setLayoutParams(params);
             avatar.setGravity(android.view.Gravity.CENTER);
             avatar.setText(initial);
-            avatar.setTextSize(10f);
-            avatar.setTypeface(Typeface.DEFAULT_BOLD);
-            avatar.setTextColor(ContextCompat.getColor(context, R.color.theme_text_primary));
+            avatar.setTextSize(12f);
+            avatar.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            avatar.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.white));
 
-            GradientDrawable bg = new GradientDrawable();
-            bg.setShape(GradientDrawable.OVAL);
-            bg.setColor(ContextCompat.getColor(context, R.color.theme_border));
-            avatar.setBackground(bg);
+            avatar.setBackgroundResource(R.drawable.bg_avatar_grey_bordered);
             return avatar;
         }
 
@@ -180,17 +169,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             if (member == null) {
                 return "?";
             }
-            String raw = member.getDisplayNameOrEmail();
-            if (TextUtils.isEmpty(raw)) {
-                return "?";
-            }
-            String[] parts = raw.trim().split("\\s+");
-            if (parts.length >= 2) {
-                char first = Character.toUpperCase(parts[0].charAt(0));
-                char second = Character.toUpperCase(parts[1].charAt(0));
-                return String.valueOf(first) + second;
-            }
-            return String.valueOf(Character.toUpperCase(raw.trim().charAt(0)));
+            return AvatarUiUtils.resolveInitial(member.getDisplayNameOrEmail());
         }
 
         private int dpToPx(int dp) {

@@ -6,6 +6,9 @@ public class ProjectMember {
 
     public static final String ROLE_REMOVED = "REMOVED";
 
+    @SerializedName("id")
+    private Long id;
+
     @SerializedName("project_id")
     private long projectId;
 
@@ -54,6 +57,9 @@ public class ProjectMember {
     public ProjectMember() {}
 
     // ── Getters & Setters ──────────────────────────────────────
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
     public long getProjectId() { return projectId; }
     public void setProjectId(long projectId) { this.projectId = projectId; }
 

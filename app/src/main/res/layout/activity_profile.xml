@@ -84,7 +84,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@mipmap/ic_launcher" /> </androidx.cardview.widget.CardView>
+                        android:src="@drawable/bg_avatar_grey_bordered" /> </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="32dp"
@@ -349,6 +349,51 @@
                         android:layout_toEndOf="@+id/iconNoti"
                         android:layout_marginStart="12dp"
                         android:text="Notifications"
+                        android:textColor="@color/text_slate_900"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/text_slate_500" />
+                </RelativeLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_slate_300" />
+
+                <RelativeLayout
+                    android:id="@+id/rowProjectTrash"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/iconProjectTrash"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_centerVertical="true"
+                        app:cardBackgroundColor="@color/bg_red_50"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_trash"
+                            app:tint="@color/text_red_600" />
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/iconProjectTrash"
+                        android:layout_marginStart="12dp"
+                        android:text="@string/project_trash_title"
                         android:textColor="@color/text_slate_900"
                         android:textSize="16sp"
                         android:textStyle="bold" />

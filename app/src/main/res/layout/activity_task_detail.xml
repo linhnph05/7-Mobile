@@ -13,8 +13,10 @@
         android:orientation="vertical">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
             android:background="@color/theme_surface"
             android:paddingHorizontal="8dp">
 

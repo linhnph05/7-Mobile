@@ -20,6 +20,7 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,6 +138,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             // Format date: yyyy-MM-dd -> MMM dd, yyyy
             String formattedDate = formatDate(task.getDueDate());
             tvDueDate.setText(formattedDate);
+
+            if (ivAssignee != null) {
+                AvatarUiUtils.bindAvatarOrFallback(
+                        ivAssignee,
+                        null,
+                        null,
+                        task.getAssigneeId());
+            }
 
             itemView.setOnClickListener(v -> { if (listener != null) listener.onTaskClick(task); });
             btnMenu.setOnClickListener(v -> { if (listener != null) listener.onTaskMenuClick(task, v); });

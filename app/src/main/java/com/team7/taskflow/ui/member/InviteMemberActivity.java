@@ -12,8 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.repository.InvitationRepository;
 import com.team7.taskflow.data.repository.MemberRepository;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
 
@@ -25,7 +27,8 @@ public class InviteMemberActivity extends AppCompatActivity {
     private TextView tvResultName, tvResultEmail, tvAvatar, tvError;
     private CardView cardResult;
     private RadioGroup rgRole;
-    private MemberRepository repository;
+    private MemberRepository memberRepository;
+    private InvitationRepository invitationRepository;
 
     private long projectId;
     private String foundUserId; // lưu userId sau khi tìm thấy
@@ -50,7 +53,8 @@ public class InviteMemberActivity extends AppCompatActivity {
         Button btnSearch    = findViewById(R.id.btn_search);
         Button btnAddMember = findViewById(R.id.btn_add_member);
 
-        repository = new MemberRepository();
+        memberRepository = new MemberRepository();
+        invitationRepository = new InvitationRepository();
 
         // Tìm user
         btnSearch.setOnClickListener(v -> {
@@ -66,7 +70,7 @@ public class InviteMemberActivity extends AppCompatActivity {
         btnAddMember.setOnClickListener(v -> {
             if (foundUserId == null) return;
             String role = getSelectedRole();
-            addMember(foundUserId, role);
+            addMember(role);
         });
     }
 
@@ -74,7 +78,7 @@ public class InviteMemberActivity extends AppCompatActivity {
         tvError.setVisibility(View.GONE);
         cardResult.setVisibility(View.GONE);
 
-        repository.searchUserByEmail(email, new MemberRepository.ResultCallback<List<User>>() {
+        memberRepository.searchUserByEmail(email, new MemberRepository.ResultCallback<List<User>>() {
             @Override
             public void onSuccess(List<User> data) {
                 runOnUiThread(() -> {
@@ -95,13 +99,34 @@ public class InviteMemberActivity extends AppCompatActivity {
         });
     }
 
-    private void addMember(String userId, String role) {
-        repository.addMember(projectId, userId, role, new MemberRepository.ResultCallback<Void>() {
+    private void addMember(String role) {
+        if (foundUserId == null || foundUserId.trim().isEmpty()) {
+            showError("Vui lòng tìm kiếm user trước");
+            return;
+        }
+
+        SessionManager.init(this);
+        String inviterId = SessionManager.getUserId();
+        if (inviterId == null || inviterId.trim().isEmpty()) {
+            showError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+            return;
+        }
+
+        String inviteEmail = tvResultEmail.getText() != null
+                ? tvResultEmail.getText().toString().trim()
+                : "";
+        if (inviteEmail.isEmpty()) {
+            showError("Không tìm thấy email người dùng để gửi lời mời");
+            return;
+        }
+
+        invitationRepository.createInvitation(projectId, inviterId, inviteEmail, role,
+                new InvitationRepository.ResultCallback<Void>() {
             @Override
             public void onSuccess(Void data) {
                 runOnUiThread(() -> {
                     Toast.makeText(InviteMemberActivity.this,
-                            "Đã thêm thành viên thành công!", Toast.LENGTH_SHORT).show();
+                            "Đã gửi lời mời thành công!", Toast.LENGTH_SHORT).show();
                     setResult(RESULT_OK);
                     finish();
                 });

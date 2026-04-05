@@ -133,7 +133,7 @@
                 android:id="@+id/ivAssignee"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@mipmap/ic_launcher_round"
+                android:src="@drawable/bg_avatar_grey_bordered"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
         </LinearLayout>
 

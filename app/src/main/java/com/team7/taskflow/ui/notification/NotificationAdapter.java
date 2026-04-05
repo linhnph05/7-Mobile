@@ -1,5 +1,6 @@
 package com.team7.taskflow.ui.notification;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,20 +17,20 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Notification;
 import com.team7.taskflow.domain.model.Notification.NotificationType;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
+import java.util.TimeZone;
 
 /**
  * Multi-view-type RecyclerView Adapter for Notifications.
  *
  * Maps 9 database NotificationTypes into 3 ViewTypes:
  * VIEW_TYPE_INVITE ← PROJECT_INVITE
- * VIEW_TYPE_ME ← TASK_ASSIGNED, MENTION, COMMENT, TASK_COMPLETED, REACTION,
+ * VIEW_TYPE_ME ← TASK_ASSIGNED, MENTION, COMMENT, TASK_STATUS_CHANGED, REACTION,
  * ATTACHMENT_ADDED
  * VIEW_TYPE_REMINDER ← DEADLINE_REMINDER, SYSTEM_ALERT
  */
@@ -41,6 +42,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private List<Notification> notificationList = new ArrayList<>();
     private final OnNotificationActionListener listener;
+    private Context appContext;
 
     // ── Listener interface ──────────────────────────────────────────
 
@@ -81,6 +83,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        if (appContext == null) {
+            appContext = parent.getContext().getApplicationContext();
+        }
         switch (viewType) {
             case VIEW_TYPE_INVITE:
                 return new InviteViewHolder(
@@ -155,7 +160,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 }
             }
 
-            // Relative time
+            // Vietnam datetime format
             tvTime.setText(formatRelativeTime(notification.getCreatedAt()));
 
             // Unread dot
@@ -174,24 +179,31 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     class InviteViewHolder extends BaseNotificationViewHolder {
         ShapeableImageView ivAvatar;
+        TextView tvAvatarLetter;
         MaterialButton btnAccept, btnDecline;
 
         public InviteViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
+            tvAvatarLetter = itemView.findViewById(R.id.tv_avatar_letter);
             btnAccept = itemView.findViewById(R.id.btn_accept);
             btnDecline = itemView.findViewById(R.id.btn_decline);
         }
 
         public void bindInvite(Notification notification) {
-            // Avatar — use first letter of actor name as placeholder
-            ivAvatar.setImageResource(R.drawable.ic_person);
+            bindActorAvatar(ivAvatar, tvAvatarLetter, notification);
+
+            boolean canRespond = true;
+            btnAccept.setVisibility(canRespond ? View.VISIBLE : View.GONE);
+            btnDecline.setVisibility(canRespond ? View.VISIBLE : View.GONE);
 
             btnAccept.setOnClickListener(v -> {
+                if (!canRespond) return;
                 if (listener != null)
                     listener.onAcceptInvite(notification);
             });
             btnDecline.setOnClickListener(v -> {
+                if (!canRespond) return;
                 if (listener != null)
                     listener.onDeclineInvite(notification);
             });
@@ -204,16 +216,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     class MeViewHolder extends BaseNotificationViewHolder {
         ShapeableImageView ivAvatar;
+        TextView tvAvatarLetter;
         ImageView ivBadge;
 
         public MeViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
+            tvAvatarLetter = itemView.findViewById(R.id.tv_avatar_letter);
             ivBadge = itemView.findViewById(R.id.iv_badge_comment);
         }
 
         public void bindMe(Notification notification) {
-            ivAvatar.setImageResource(R.drawable.ic_person);
+            bindActorAvatar(ivAvatar, tvAvatarLetter, notification);
 
             // Show badge only for COMMENT or MENTION
             NotificationType type = notification.getType();
@@ -256,31 +270,22 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     // ── Utility ─────────────────────────────────────────────────────
 
     /**
-     * Format a Date into a human-readable relative time string (e.g. "2m ago", "3h
-     * ago").
+     * Format a Date in Vietnam timezone: HH:mm dd/MM/yyyy.
      */
     private String formatRelativeTime(Date date) {
-        if (date == null)
+        if (date == null) {
             return "";
-        long diffMs = System.currentTimeMillis() - date.getTime();
-        if (diffMs < 0)
-            diffMs = 0;
+        }
+        java.text.SimpleDateFormat vnFormat = new java.text.SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.forLanguageTag("vi-VN"));
+        vnFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        return vnFormat.format(date);
+    }
 
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMs);
-        if (minutes < 1)
-            return "Just now";
-        if (minutes < 60)
-            return minutes + "m ago";
-
-        long hours = TimeUnit.MILLISECONDS.toHours(diffMs);
-        if (hours < 24)
-            return hours + "h ago";
-
-        long days = TimeUnit.MILLISECONDS.toDays(diffMs);
-        if (days < 7)
-            return days + "d ago";
-
-        // Older than a week — show date
-        return new SimpleDateFormat("MMM dd", Locale.getDefault()).format(date);
+    private void bindActorAvatar(ShapeableImageView avatarView,
+            TextView letterView,
+            Notification notification) {
+        String actorName = notification != null ? notification.getActorName() : null;
+        String avatarUrl = notification != null ? notification.getActorAvatarUrl() : null;
+        AvatarUiUtils.bindAvatarOrFallback(avatarView, letterView, avatarUrl, actorName);
     }
 }

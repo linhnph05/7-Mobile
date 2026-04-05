@@ -21,6 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -367,13 +368,12 @@ public class CalendarActivity extends BaseActivity {
                     if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                         com.team7.taskflow.domain.model.User user = response.body().get(0);
                         runOnUiThread(() -> {
-                            if (imgUserAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                                com.bumptech.glide.Glide.with(CalendarActivity.this)
-                                    .load(user.getAvatarUrl())
-                                    .circleCrop()
-                                    .placeholder(R.drawable.bg_avatar_bordered)
-                                    .error(R.drawable.bg_avatar_bordered)
-                                    .into(imgUserAvatar);
+                            if (imgUserAvatar != null) {
+                                AvatarUiUtils.bindAvatarOrFallback(
+                                        imgUserAvatar,
+                                        null,
+                                        user.getAvatarUrl(),
+                                        user.getDisplayNameOrEmail());
                             }
                         });
                     }

@@ -15,7 +15,7 @@
         android:backgroundTint="@color/theme_surface_variant"
         android:padding="12dp"
         android:src="@android:drawable/ic_lock_idle_alarm"
-        app:tint="#2196F3"
+        app:tint="@color/primary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,7 +24,7 @@
         android:layout_width="10dp"
         android:layout_height="10dp"
         android:background="@drawable/bg_circle_blue"
-        android:backgroundTint="#2196F3"
+        android:backgroundTint="@color/primary"
         app:layout_constraintCircle="@+id/iv_sys_icon"
         app:layout_constraintCircleAngle="45"
         app:layout_constraintCircleRadius="24dp"

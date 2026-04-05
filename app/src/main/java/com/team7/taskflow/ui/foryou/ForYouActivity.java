@@ -21,6 +21,7 @@ import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.base.BaseActivity;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
 import com.team7.taskflow.ui.project.CreateProjectActivity;
@@ -60,6 +61,7 @@ public class ForYouActivity extends BaseActivity {
     private ProgressBar pbOverallProgress;
     private RecyclerView rvMyTasks;
     private ImageView ivProfilePic;
+    private TextView tvProfileAvatarLetter;
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fabAdd;
 
@@ -109,6 +111,7 @@ public class ForYouActivity extends BaseActivity {
         pbOverallProgress = findViewById(R.id.pbOverallProgress);
         rvMyTasks = findViewById(R.id.rvMyTasks);
         ivProfilePic = findViewById(R.id.ivProfilePic);
+        tvProfileAvatarLetter = findViewById(R.id.tvProfileAvatarLetter);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         if (bottomNavigationView != null) {
             bottomNavigationView.setItemIconTintList(null);
@@ -185,7 +188,7 @@ public class ForYouActivity extends BaseActivity {
         }
         tvGreeting.setText(getString(R.string.for_you_greeting_format, displayName));
 
-        ivProfilePic.setImageResource(R.drawable.ic_person);
+        AvatarUiUtils.bindAvatarOrFallback(ivProfilePic, tvProfileAvatarLetter, null, displayName);
         loadUserAvatar();
     }
 
@@ -210,11 +213,11 @@ public class ForYouActivity extends BaseActivity {
                 if (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty()) {
                     return;
                 }
-                runOnUiThread(() -> com.bumptech.glide.Glide.with(ForYouActivity.this)
-                        .load(user.getAvatarUrl())
-                        .circleCrop()
-                        .placeholder(R.drawable.ic_person)
-                        .into(ivProfilePic));
+                runOnUiThread(() -> AvatarUiUtils.bindAvatarOrFallback(
+                    ivProfilePic,
+                    tvProfileAvatarLetter,
+                    user.getAvatarUrl(),
+                    user.getDisplayNameOrEmail()));
             }
 
             @Override

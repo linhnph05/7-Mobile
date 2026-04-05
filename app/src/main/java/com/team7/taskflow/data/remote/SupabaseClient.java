@@ -82,6 +82,14 @@ public class SupabaseClient {
             // QUAN TRỌNG: Thêm Content-Type cho các API REST (ngoại trừ Storage upload)
             if (!original.url().toString().contains("/storage/v1/object/")) {
                 builder.header(SupabaseConfig.HEADER_CONTENT_TYPE, SupabaseConfig.CONTENT_TYPE_JSON);
+
+                String existingPrefer = original.header(SupabaseConfig.HEADER_PREFER);
+                if (existingPrefer == null || existingPrefer.trim().isEmpty()) {
+                    builder.header(SupabaseConfig.HEADER_PREFER, SupabaseConfig.PREFER_TIMEZONE_VIETNAM);
+                } else if (!existingPrefer.toLowerCase().contains("timezone=")) {
+                    builder.header(SupabaseConfig.HEADER_PREFER,
+                            existingPrefer + "," + SupabaseConfig.PREFER_TIMEZONE_VIETNAM);
+                }
             }
 
             if (accessToken != null && !accessToken.isEmpty()) {

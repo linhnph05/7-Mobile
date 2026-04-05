@@ -2,8 +2,11 @@ package com.team7.taskflow.ui.dashboard;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,15 +31,21 @@ import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.api.UserApi;
+import com.team7.taskflow.data.repository.NotificationRepository;
 import com.team7.taskflow.data.repository.ProjectRepository;
+import com.team7.taskflow.domain.model.Notification;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.ui.notification.NotificationsActivity;
+import com.team7.taskflow.ui.notification.NotificationPushScheduler;
 import com.team7.taskflow.ui.project.CreateProjectActivity;
 import com.team7.taskflow.ui.system.StickyTaskService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,8 +66,11 @@ public class DashboardActivity extends BaseActivity {
     // Views
     private FloatingActionButton fabAdd;
     private ImageView btnNotification;
+    private TextView tvNotificationBadge;
     private ImageView imgAvatar;
+    private TextView tvAvatarLetter;
     private TextView tvWorkspaceName;
+    private EditText searchBar;
     private RecyclerView rvProjects;
     private BottomNavigationView bottomNavigationView;
 
@@ -66,6 +78,7 @@ public class DashboardActivity extends BaseActivity {
     private ProjectAdapter projectAdapter;
     private ProjectRepository projectRepository;
     private String currentUserId;
+    private List<Project> allProjects = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +115,7 @@ public class DashboardActivity extends BaseActivity {
 
         // Initialize repository
         projectRepository = ProjectRepository.getInstance();
+        NotificationPushScheduler.ensureScheduled(this);
 
         initViews();
         NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
@@ -119,6 +133,7 @@ public class DashboardActivity extends BaseActivity {
             bottomNavigationView.setSelectedItemId(R.id.nav_home);
         }
         startStickyServiceSafely();
+        loadUnreadNotificationCount();
         // Reload projects khi quay lại từ CreateProjectActivity
         // Chỉ load nếu đã có currentUserId
         if (currentUserId != null && !currentUserId.isEmpty()) {
@@ -140,8 +155,11 @@ public class DashboardActivity extends BaseActivity {
     private void initViews() {
         fabAdd = findViewById(R.id.fabAdd); // defined only in dashboard layout include
         btnNotification = findViewById(R.id.btnNotification);
+        tvNotificationBadge = findViewById(R.id.tvNotificationBadge);
         imgAvatar = findViewById(R.id.imgAvatar);
+        tvAvatarLetter = findViewById(R.id.tvAvatarLetter);
         tvWorkspaceName = findViewById(R.id.tvWorkspaceName);
+        searchBar = findViewById(R.id.searchBar);
         rvProjects = findViewById(R.id.projectRecyclerView);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         if (bottomNavigationView != null) {
@@ -196,6 +214,21 @@ public class DashboardActivity extends BaseActivity {
             startActivity(intent);
         });
 
+        if (searchBar != null) {
+            searchBar.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    applyProjectSearchFilter(s != null ? s.toString() : "");
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        }
+
         // Bottom navigation bar
         if (bottomNavigationView != null) {
             bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -229,7 +262,7 @@ public class DashboardActivity extends BaseActivity {
         if (currentUserId == null || currentUserId.isEmpty()) {
             Log.e(TAG, "No userId in session, cannot load user info");
             if (tvWorkspaceName != null) {
-                tvWorkspaceName.setText("Hello, Guest");
+                tvWorkspaceName.setText(getString(R.string.dashboard_workspace_guest));
             }
             loadProjects();
             return;
@@ -239,8 +272,17 @@ public class DashboardActivity extends BaseActivity {
         String savedName = SessionManager.getDisplayName();
         if (savedName != null && !savedName.isEmpty()) {
             if (tvWorkspaceName != null) {
-                tvWorkspaceName.setText("Hello, " + savedName);
+                tvWorkspaceName.setText(getString(R.string.dashboard_workspace_format, savedName));
             }
+            if (imgAvatar != null) {
+                AvatarUiUtils.bindAvatarOrFallback(imgAvatar, tvAvatarLetter, null, savedName);
+            }
+        } else if (imgAvatar != null) {
+            AvatarUiUtils.bindAvatarOrFallback(
+                    imgAvatar,
+                    tvAvatarLetter,
+                    null,
+                    getString(R.string.dashboard_workspace_guest));
         }
 
         // Gọi API để cập nhật tên mới nhất từ database (nếu có mạng)
@@ -264,15 +306,15 @@ public class DashboardActivity extends BaseActivity {
 
                         String displayName = user.getDisplayNameOrEmail();
                         if (tvWorkspaceName != null) {
-                            tvWorkspaceName.setText("Hello, " + displayName);
+                            tvWorkspaceName.setText(getString(R.string.dashboard_workspace_format, displayName));
                         }
 
-                        if (imgAvatar != null && user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                            com.bumptech.glide.Glide.with(DashboardActivity.this)
-                                    .load(user.getAvatarUrl())
-                                    .circleCrop()
-                                    .placeholder(R.drawable.ic_person)
-                                    .into(imgAvatar);
+                        if (imgAvatar != null) {
+                            AvatarUiUtils.bindAvatarOrFallback(
+                                    imgAvatar,
+                                    tvAvatarLetter,
+                                    user.getAvatarUrl(),
+                                    displayName);
                         }
 
                         Log.d(TAG, "Loaded user: " + user.getEmail() + ", ID: " + currentUserId);
@@ -318,9 +360,13 @@ public class DashboardActivity extends BaseActivity {
                         Toast.makeText(DashboardActivity.this,
                                 "Bạn chưa có project nào. Nhấn + để tạo mới!",
                                 Toast.LENGTH_SHORT).show();
+                        allProjects = new ArrayList<>();
                         projectAdapter.setProjects(new java.util.ArrayList<>());
                     } else {
-                        projectAdapter.setProjects(projects);
+                        allProjects = new ArrayList<>(projects);
+                        applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
+                                ? searchBar.getText().toString()
+                                : "");
                         Log.d(TAG, "Loaded " + projects.size() + " projects from database");
                     }
                 });
@@ -335,5 +381,73 @@ public class DashboardActivity extends BaseActivity {
                 });
             }
         });
+    }
+
+    private void loadUnreadNotificationCount() {
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            updateNotificationBadge(0);
+            return;
+        }
+
+        NotificationRepository.getInstance().getNotifications(
+                currentUserId,
+                new NotificationRepository.NotificationCallback<List<Notification>>() {
+                    @Override
+                    public void onSuccess(List<Notification> result) {
+                        int unread = 0;
+                        if (result != null) {
+                            for (Notification notification : result) {
+                                if (notification != null && !notification.isRead()) {
+                                    unread++;
+                                }
+                            }
+                        }
+                        final int unreadCount = unread;
+                        runOnUiThread(() -> updateNotificationBadge(unreadCount));
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> updateNotificationBadge(0));
+                    }
+                });
+    }
+
+    private void updateNotificationBadge(int unreadCount) {
+        if (tvNotificationBadge == null) {
+            return;
+        }
+
+        if (unreadCount <= 0) {
+            tvNotificationBadge.setVisibility(View.GONE);
+            return;
+        }
+
+        tvNotificationBadge.setVisibility(View.VISIBLE);
+        tvNotificationBadge.setText(unreadCount > 99 ? "99+" : String.valueOf(unreadCount));
+    }
+
+    private void applyProjectSearchFilter(String keyword) {
+        if (projectAdapter == null) {
+            return;
+        }
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            projectAdapter.setProjects(new ArrayList<>(allProjects));
+            return;
+        }
+
+        String query = keyword.trim().toLowerCase(Locale.US);
+        List<Project> filtered = new ArrayList<>();
+        for (Project project : allProjects) {
+            if (project == null) {
+                continue;
+            }
+            String name = project.getName() != null ? project.getName() : "";
+            if (name.toLowerCase(Locale.US).contains(query)) {
+                filtered.add(project);
+            }
+        }
+        projectAdapter.setProjects(filtered);
     }
 }

@@ -41,7 +41,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
     private MemberRepository memberRepo;
     private InvitationRepository invitationRepo;
 
-    // Lưu email user tìm được (dùng để tạo invitation theo email)
+    // Lưu thông tin user tìm được
     private String foundUserEmail;
 
     @Nullable
@@ -71,7 +71,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         Button btnSearch       = view.findViewById(R.id.btn_search);
         Button btnAddMember    = view.findViewById(R.id.btn_add_member);
 
-        memberRepo     = new MemberRepository();
+        memberRepo = new MemberRepository();
         invitationRepo = new InvitationRepository();
 
         // ── Tìm kiếm user theo email ────────────────────────────
@@ -92,7 +92,6 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
                     if (!isAdded()) return;
                     requireActivity().runOnUiThread(() -> {
                         User user = data.get(0);
-                        // ✅ Lưu email thay vì userId
                         foundUserEmail = user.getEmail();
                         String name = user.getDisplayName() != null
                                 ? user.getDisplayName() : email;
@@ -115,15 +114,16 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
 
         // ── Gửi lời mời ────────────────────────────────────────
         btnAddMember.setOnClickListener(v -> {
-            if (foundUserEmail == null) {
+            if (foundUserEmail == null || foundUserEmail.trim().isEmpty()) {
                 tvError.setText("Vui lòng tìm kiếm user trước");
                 tvError.setVisibility(View.VISIBLE);
                 return;
             }
 
+            SessionManager.init(requireContext());
             String inviterId = SessionManager.getUserId();
-            if (inviterId == null || inviterId.isEmpty()) {
-                tvError.setText("Phiên đăng nhập hết hạn");
+            if (inviterId == null || inviterId.trim().isEmpty()) {
+                tvError.setText("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại");
                 tvError.setVisibility(View.VISIBLE);
                 return;
             }
@@ -135,8 +135,6 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
 
             final String finalRole = role;
 
-            // ✅ Gửi lời mời qua project_invitations
-            // Trigger Supabase sẽ tự tạo notification cho người được mời
             invitationRepo.createInvitation(projectId, inviterId, foundUserEmail, finalRole,
                     new InvitationRepository.ResultCallback<Void>() {
                         @Override
@@ -144,7 +142,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
                             if (!isAdded()) return;
                             requireActivity().runOnUiThread(() -> {
                                 Toast.makeText(requireContext(),
-                                        "Đã gửi lời mời tới " + foundUserEmail,
+                                        "Đã gửi lời mời thành công",
                                         Toast.LENGTH_SHORT).show();
                                 dismiss();
                             });

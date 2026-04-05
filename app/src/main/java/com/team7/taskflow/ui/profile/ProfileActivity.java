@@ -5,10 +5,12 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.repository.UserRepository;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.foryou.ForYouActivity;
+import com.team7.taskflow.ui.notification.NotificationPushScheduler;
 import com.team7.taskflow.utils.SessionManager;
 import com.team7.taskflow.utils.NavigationUtils;
 
@@ -45,6 +47,7 @@ public class ProfileActivity extends BaseActivity {
     private ImageView ivAvatar;
     private CardView avatarCard;
     private Button btnLogout;
+    private View rowProjectTrash;
     private FloatingActionButton fabAdd;
     private UserRepository userRepository;
 
@@ -66,6 +69,7 @@ public class ProfileActivity extends BaseActivity {
         setupLogout();
         setupSaveButton();
         setupImagePicker();
+        setupProjectTrash();
 
         userRepository = new UserRepository();
         loadUserProfile();
@@ -93,19 +97,26 @@ public class ProfileActivity extends BaseActivity {
         avatarCard = findViewById(R.id.avatarCard);
         btnLogout = findViewById(R.id.btnLogout);
         fabAdd = findViewById(R.id.fabAdd);
+        rowProjectTrash = findViewById(R.id.rowProjectTrash);
 
         // Hiển thị email từ session ngay lập tức
         String email = SessionManager.getUserEmail();
         if (etEmail != null && !email.isEmpty()) {
             etEmail.setText(email);
         }
+
+        AvatarUiUtils.bindAvatarOrFallback(
+            ivAvatar,
+            null,
+            null,
+            SessionManager.getDisplayName());
     }
 
     private void setupImagePicker() {
         pickMedia = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
             if (uri != null) {
                 selectedImageUri = uri;
-                Glide.with(this).load(uri).circleCrop().into(ivAvatar);
+                AvatarUiUtils.bindAvatarOrFallback(ivAvatar, null, uri.toString(), SessionManager.getDisplayName());
             }
         });
 
@@ -163,6 +174,7 @@ public class ProfileActivity extends BaseActivity {
     private void setupLogout() {
         if (btnLogout != null) {
             btnLogout.setOnClickListener(v -> {
+                NotificationPushScheduler.cancel(ProfileActivity.this);
                 SessionManager.clearSession();
                 SupabaseClient.getInstance().clearAccessToken();
 
@@ -170,6 +182,15 @@ public class ProfileActivity extends BaseActivity {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
+            });
+        }
+    }
+
+    private void setupProjectTrash() {
+        if (rowProjectTrash != null) {
+            rowProjectTrash.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, ProjectTrashActivity.class);
+                startActivity(intent);
             });
         }
     }
@@ -252,13 +273,11 @@ public class ProfileActivity extends BaseActivity {
                         etEmail.setText(user.getEmail());
                     }
                     
-                    if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                        Glide.with(ProfileActivity.this)
-                             .load(user.getAvatarUrl())
-                             .placeholder(R.mipmap.ic_launcher)
-                             .circleCrop()
-                             .into(ivAvatar);
-                    }
+                    AvatarUiUtils.bindAvatarOrFallback(
+                            ivAvatar,
+                            null,
+                            user.getAvatarUrl(),
+                            user.getDisplayNameOrEmail());
                 });
             }
 

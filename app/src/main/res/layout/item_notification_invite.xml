@@ -7,22 +7,40 @@
     android:background="@color/notification_unread_bg"
     android:padding="16dp">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iv_avatar"
+    <FrameLayout
+        android:id="@+id/layout_avatar"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:background="#FF9800"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_avatar_grey_bordered"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
+
+        <TextView
+            android:id="@+id/tv_avatar_letter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="A"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+    </FrameLayout>
 
     <View
         android:id="@+id/view_unread_dot"
         android:layout_width="10dp"
         android:layout_height="10dp"
         android:background="@drawable/bg_circle_blue"
-        android:backgroundTint="#2196F3"
-        app:layout_constraintCircle="@+id/iv_avatar"
+        android:backgroundTint="@color/primary"
+        app:layout_constraintCircle="@+id/layout_avatar"
         app:layout_constraintCircleAngle="45"
         app:layout_constraintCircleRadius="24dp"
         tools:ignore="MissingConstraints" />
@@ -45,7 +63,7 @@
         android:layout_marginEnd="8dp"
         android:orientation="vertical"
         app:layout_constraintEnd_toStartOf="@+id/tv_time"
-        app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+        app:layout_constraintStart_toEndOf="@+id/layout_avatar"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -83,8 +101,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:backgroundTint="#2945FF"
-            android:text="Chấp nhận"
+            android:backgroundTint="@color/primary"
+            android:text="@string/notification_invite_accept"
             android:textColor="@color/white"
             app:cornerRadius="8dp"
             app:icon="@android:drawable/ic_input_add"
@@ -97,11 +115,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/theme_surface_variant"
-            android:text="Từ chối"
+            android:text="@string/notification_invite_decline"
             android:textColor="@color/theme_text_primary"
             app:cornerRadius="8dp"
             app:icon="@android:drawable/ic_delete"
-            app:iconTint="#F44336" />
+            app:iconTint="@color/danger" />
 
     </LinearLayout>
 

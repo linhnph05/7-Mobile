@@ -3,6 +3,7 @@ package com.team7.taskflow.data.remote.api;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.CommentReaction;
+import com.team7.taskflow.domain.model.TaskActivity;
 
 import java.util.List;
 import java.util.Map;
@@ -138,6 +139,7 @@ public interface TaskApi {
     @GET("comments")
     Call<List<Comment>> getCommentsByTask(
             @Query("task_id") String taskIdFilter,
+            @Query("is_deleted") String isDeletedFilter,
             @Query("select") String select,
             @Query("order") String order
     );
@@ -191,6 +193,19 @@ public interface TaskApi {
     @DELETE("comment_reactions")
     Call<Void> deleteCommentReaction(
             @Query("reaction_id") String reactionIdFilter
+    );
+
+    @PATCH("comment_reactions")
+    Call<List<CommentReaction>> updateCommentReaction(
+            @Query("reaction_id") String reactionIdFilter,
+            @Body Map<String, Object> body,
+            @Header("Prefer") String prefer
+    );
+
+    @GET("task_activities")
+    Call<List<TaskActivity>> getTaskActivities(
+            @Query("task_id") String taskIdFilter,
+            @Query("order") String order
     );
 
     /**

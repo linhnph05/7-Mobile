@@ -29,6 +29,9 @@ import androidx.activity.EdgeToEdge;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -47,6 +50,10 @@ import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.ai.AiCreateActivity;
 import com.team7.taskflow.utils.SessionManager;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -112,6 +119,8 @@ public class TaskDetailActivity extends BaseActivity {
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar   = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // onCreate
@@ -121,6 +130,15 @@ public class TaskDetailActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_task_detail);
+
+        View header = findViewById(R.id.layoutHeader);
+        if (header != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(header, (v, insets) -> {
+                Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), sys.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
 
         taskRepository = TaskRepository.getInstance();
         SessionManager.init(this);
@@ -595,33 +613,22 @@ public class TaskDetailActivity extends BaseActivity {
         taskRepository.getTaskHistory(taskId, new TaskRepository.TaskCallback<List<TaskActivity>>() {
             @Override
             public void onSuccess(List<TaskActivity> result) {
-                taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
-                    @Override
-                    public void onSuccess(List<Comment> comments) {
-                        runOnUiThread(() -> showHistoryFeed(result, comments));
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        runOnUiThread(() -> showHistoryFeed(result, new ArrayList<>()));
-                    }
-                });
+                runOnUiThread(() -> showHistoryFeed(result));
             }
 
             @Override 
             public void onError(String error) {
-                // ÄÃ£ giáº£i quyáº¿t conflict táº¡i Ä‘Ã¢y (dÃ¹ng showEmptyHistory)
                 runOnUiThread(() -> showEmptyHistory(error));
             }
         });
     }
 
-    private void showHistoryFeed(List<TaskActivity> activities, List<Comment> comments) {
+    private void showHistoryFeed(List<TaskActivity> activities) {
         if (layoutHistorySection == null || listHistoryFeed == null || tvHistoryEmpty == null) {
             return;
         }
 
-        List<ProjectHistoryItem> feed = buildHistoryFeed(activities, comments);
+        List<ProjectHistoryItem> feed = buildHistoryFeed(activities);
         if (feed.isEmpty()) {
             showEmptyHistory(getString(R.string.task_history_empty));
             return;
@@ -645,20 +652,13 @@ public class TaskDetailActivity extends BaseActivity {
         }
     }
 
-    private List<ProjectHistoryItem> buildHistoryFeed(List<TaskActivity> activities, List<Comment> comments) {
+    private List<ProjectHistoryItem> buildHistoryFeed(List<TaskActivity> activities) {
         List<ProjectHistoryItem> feed = new ArrayList<>();
 
         if (activities != null) {
             for (TaskActivity activity : activities) {
                 if (activity == null) continue;
                 feed.add(buildHistoryItem(activity));
-            }
-        }
-
-        if (comments != null) {
-            for (Comment comment : comments) {
-                if (comment == null) continue;
-                feed.add(buildHistoryItem(comment));
             }
         }
 
@@ -683,22 +683,6 @@ public class TaskDetailActivity extends BaseActivity {
         return item;
     }
 
-    private ProjectHistoryItem buildHistoryItem(Comment comment) {
-        ProjectHistoryItem item = new ProjectHistoryItem();
-        item.setSource(ProjectHistoryItem.SOURCE_COMMENT);
-        item.setActorId(comment.getUserId());
-        item.setActorName(resolveCommentAuthorName(comment));
-        item.setAvatarUrl(resolveCommentAvatarUrl(comment));
-        item.setActionLabel("đã bình luận");
-        item.setTaskTitle(etTitle != null && etTitle.getText() != null && !etTitle.getText().toString().trim().isEmpty()
-                ? etTitle.getText().toString().trim()
-                : "Task");
-        item.setDetail("Bình luận");
-        item.setCommentContent(comment.getContent());
-        item.setCreatedAt(comment.getCreatedAt());
-        return item;
-    }
-
     private String resolveActorName(String userId) {
         if (userId == null || userId.trim().isEmpty()) {
             return "Unknown";
@@ -707,10 +691,10 @@ public class TaskDetailActivity extends BaseActivity {
             if (member != null && userId.equals(member.getUserId())) {
                 return member.getDisplayNameOrEmail() != null && !member.getDisplayNameOrEmail().trim().isEmpty()
                         ? member.getDisplayNameOrEmail().trim()
-                        : userId;
+                        : "Unknown";
             }
         }
-        return userId;
+        return "Unknown";
     }
 
     private String resolveActorAvatar(String userId) {
@@ -725,29 +709,6 @@ public class TaskDetailActivity extends BaseActivity {
         return null;
     }
 
-    private String resolveCommentAuthorName(Comment comment) {
-        if (comment != null && comment.getUser() != null) {
-            if (comment.getUser().getDisplayNameOrEmail() != null && !comment.getUser().getDisplayNameOrEmail().trim().isEmpty()) {
-                return comment.getUser().getDisplayNameOrEmail().trim();
-            }
-            if (comment.getUser().getUserId() != null && !comment.getUser().getUserId().trim().isEmpty()) {
-                return comment.getUser().getUserId().trim();
-            }
-        }
-        return comment != null && comment.getUserId() != null ? comment.getUserId() : "Unknown";
-    }
-
-    private String resolveCommentAvatarUrl(Comment comment) {
-        if (comment != null && comment.getUser() != null && comment.getUser().getAvatarUrl() != null
-                && !comment.getUser().getAvatarUrl().trim().isEmpty()) {
-            return comment.getUser().getAvatarUrl().trim();
-        }
-        if (comment != null && comment.getUserId() != null) {
-            return resolveActorAvatar(comment.getUserId());
-        }
-        return null;
-    }
-
     private String resolveTaskActionLabel(String actionType) {
         if (actionType == null || actionType.trim().isEmpty()) {
             return "đã cập nhật";
@@ -755,6 +716,11 @@ public class TaskDetailActivity extends BaseActivity {
         String normalized = actionType.trim().toUpperCase(Locale.US);
         if ("CREATE".equals(normalized)) return "đã tạo";
         if ("UPDATE_STATUS".equals(normalized)) return "đã đổi trạng thái";
+        if ("COMMENT_CREATE".equals(normalized)) return "đã bình luận";
+        if ("COMMENT_UPDATE".equals(normalized)) return "đã chỉnh sửa bình luận";
+        if ("COMMENT_DELETE".equals(normalized)) return "đã xóa bình luận";
+        if ("ADD_REACTION".equals(normalized)) return "đã thêm cảm xúc";
+        if ("REMOVE_REACTION".equals(normalized)) return "đã bỏ cảm xúc";
         if ("DELETE".equals(normalized)) return "đã đưa vào thùng rác";
         if ("RESTORE".equals(normalized)) return "đã khôi phục";
         if ("HARD_DELETE".equals(normalized)) return "đã xóa vĩnh viễn";
@@ -767,6 +733,10 @@ public class TaskDetailActivity extends BaseActivity {
         String newText = newValue != null && !newValue.trim().isEmpty() ? newValue.trim() : "-";
         String normalized = actionType != null ? actionType.trim().toUpperCase(Locale.US) : "";
         if ("CREATE".equals(normalized)) return "Trạng thái ban đầu: " + newText;
+        if ("COMMENT_CREATE".equals(normalized)) return newText;
+        if ("COMMENT_UPDATE".equals(normalized)) return oldText + " -> " + newText;
+        if ("COMMENT_DELETE".equals(normalized)) return oldText;
+        if ("ADD_REACTION".equals(normalized) || "REMOVE_REACTION".equals(normalized)) return newText;
         if ("HARD_DELETE".equals(normalized)) return "Task đã bị xóa";
         if ("UPDATE_STATUS".equals(normalized) || "DELETE".equals(normalized) || "RESTORE".equals(normalized)) {
             return oldText + " -> " + newText;
@@ -874,12 +844,18 @@ public class TaskDetailActivity extends BaseActivity {
                             if (t.getStartDate() != null) {
                                 String rs = t.getStartDate();
                                 tvStartDate.setText(rs.length() >= 10 ? rs.substring(0, 10) : rs);
-                                if (tvStartTime != null && rs.length() > 11) tvStartTime.setText(rs.substring(11));
+                                if (tvStartTime != null && rs.length() > 11) {
+                                    String rawTime = rs.substring(11).trim();
+                                    tvStartTime.setText(rawTime.length() >= 5 ? rawTime.substring(0, 5) : rawTime);
+                                }
                             }
                             if (t.getDueDate() != null) {
                                 String rd = t.getDueDate();
                                 tvDueDate.setText(rd.length() >= 10 ? rd.substring(0, 10) : rd);
-                                if (tvDueTime != null && rd.length() > 11) tvDueTime.setText(rd.substring(11));
+                                if (tvDueTime != null && rd.length() > 11) {
+                                    String rawTime = rd.substring(11).trim();
+                                    tvDueTime.setText(rawTime.length() >= 5 ? rawTime.substring(0, 5) : rawTime);
+                                }
                             }
                             selectedTag = t.getTag();
                             if (selectedTag != null && tvTag != null) tvTag.setText(selectedTag);
@@ -919,27 +895,59 @@ public class TaskDetailActivity extends BaseActivity {
     private void saveTask() {
         String title = etTitle.getText().toString().trim();
         if (title.isEmpty()) { etTitle.setError("Title is required"); return; }
+        String sd = tvStartDate.getText().toString();
+        String st = tvStartTime != null ? tvStartTime.getText().toString() : null;
+        String sc = sd.contains("-") ? (st != null && st.matches("\\d{2}:\\d{2}") ? sd + " " + st : sd) : null;
+        String dd = tvDueDate.getText().toString();
+        String dt = tvDueTime != null ? tvDueTime.getText().toString() : null;
+        String dc = dd.contains("-") ? (dt != null && dt.matches("\\d{2}:\\d{2}") ? dd + " " + dt : dd) : null;
+
+        LocalDateTime startDateTime = parseUiDateTime(sd, st, false);
+        LocalDateTime dueDateTime = parseUiDateTime(dd, dt, true);
+        if (startDateTime != null && dueDateTime != null && startDateTime.isAfter(dueDateTime)) {
+            Toast.makeText(
+                    this,
+                    "Giờ bắt đầu không được lớn hơn giờ kết thúc. Vui lòng chỉnh lại thời gian.",
+                    Toast.LENGTH_LONG
+            ).show();
+            return;
+        }
+
         setLoading(true);
         Task task = new Task(projectId, title);
         task.setAssigneeId(selectedAssigneeName != null ? currentAssigneeId : null);
         task.setDescription(etDescription.getText().toString().trim());
         task.setPriority(selectedPriority);
         task.setStatus(selectedStatus);
-
-        String sd = tvStartDate.getText().toString();
-        String st = tvStartTime != null ? tvStartTime.getText().toString() : null;
-        String sc = sd.contains("-") ? (st != null && st.matches("\\d{2}:\\d{2}") ? sd + " " + st : sd) : null;
         task.setStartDate(sc);
-
-        String dd = tvDueDate.getText().toString();
-        String dt = tvDueTime != null ? tvDueTime.getText().toString() : null;
-        String dc = dd.contains("-") ? (dt != null && dt.matches("\\d{2}:\\d{2}") ? dd + " " + dt : dd) : null;
         task.setDueDate(dc);
         task.setTag(selectedTag);
         task.setParentTaskId(selectedParentTaskId);
 
         if (taskId == null) taskRepository.createTask(task, handleResult());
         else { task.setId(taskId); taskRepository.updateTask(taskId, task, handleResult()); }
+    }
+
+    private LocalDateTime parseUiDateTime(String dateText, String timeText, boolean endOfDayIfNoTime) {
+        if (dateText == null) {
+            return null;
+        }
+
+        String date = dateText.trim();
+        if (!date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return null;
+        }
+
+        try {
+            LocalDate localDate = LocalDate.parse(date, DATE_FORMATTER);
+            String time = timeText != null ? timeText.trim() : "";
+            if (time.matches("\\d{2}:\\d{2}")) {
+                return LocalDateTime.of(localDate, LocalTime.parse(time, TIME_FORMATTER));
+            }
+            return LocalDateTime.of(localDate, endOfDayIfNoTime ? LocalTime.of(23, 59) : LocalTime.MIDNIGHT);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private TaskRepository.TaskCallback<Task> handleResult() {

@@ -124,6 +124,9 @@
         <activity
             android:name=".ui.profile.ProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.profile.ProjectTrashActivity"
+            android:exported="false" />
 
         <!-- Member -->
         <activity android:name=".ui.member.MemberListActivity" />

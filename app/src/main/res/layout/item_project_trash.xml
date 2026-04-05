@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_input"
+    android:padding="@dimen/padding_card"
+    android:layout_marginBottom="@dimen/spacing_md">
+
+    <TextView
+        android:id="@+id/tvProjectName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/theme_text_primary"
+        android:textSize="@dimen/text_md"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/tvProjectDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:textColor="@color/theme_text_secondary"
+        android:textSize="@dimen/text_sm"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/tvDeletedAt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:textColor="@color/text_orange_600"
+        android:textSize="@dimen/text_xs" />
+
+    <TextView
+        android:id="@+id/btnRestore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:background="@drawable/bg_chip_neutral"
+        android:drawableStart="@drawable/ic_restore"
+        android:drawablePadding="@dimen/spacing_xs"
+        android:paddingHorizontal="@dimen/spacing_md"
+        android:paddingVertical="@dimen/spacing_sm"
+        android:text="@string/project_restore_action"
+        android:textAllCaps="false"
+        android:textColor="@color/primary"
+        android:textSize="@dimen/text_sm"
+        android:textStyle="bold" />
+
+</LinearLayout>
