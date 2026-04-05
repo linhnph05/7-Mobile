@@ -200,6 +200,9 @@
     <string name="shortcut_picker_subtitle">Chạm vào dự án để mở nhanh màn tạo task.</string>
     <string name="shortcut_picker_item_hint">Nhấn để tạo tác vụ</string>
     <string name="shortcut_picker_project_fallback">Dự án #%1$d</string>
+    <string name="share_picker_title">Chọn dự án để lưu nội dung đã chia sẻ</string>
+    <string name="share_picker_subtitle">Chạm vào dự án để mở màn thêm task của app.</string>
+    <string name="share_picker_item_hint">Nhấn để thêm task từ nội dung đã chia sẻ</string>
 
     <string name="sticky_title">Task quan trọng nhất</string>
     <string name="sticky_no_task">Hiện chưa có task đang làm</string>

@@ -142,6 +142,14 @@ public class ProjectDetailActivity extends BaseActivity {
             intent.putExtra("project_id", projectId);
             intent.putExtra("project_name", projectName);
             intent.putExtra("project_key", projectKey);
+            String prefillTitle = getIntent().getStringExtra("prefill_title");
+            String prefillDescription = getIntent().getStringExtra("prefill_description");
+            if (prefillTitle != null && !prefillTitle.trim().isEmpty()) {
+                intent.putExtra("prefill_title", prefillTitle);
+            }
+            if (prefillDescription != null && !prefillDescription.trim().isEmpty()) {
+                intent.putExtra("prefill_description", prefillDescription);
+            }
             startActivity(intent);
         };
 
