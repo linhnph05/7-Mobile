@@ -157,7 +157,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             avatar.setLayoutParams(params);
             avatar.setGravity(android.view.Gravity.CENTER);
             avatar.setText(initial);
-            avatar.setTextSize(12f);
+            avatar.setTextSize(14f);
             avatar.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
             avatar.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.white));
 

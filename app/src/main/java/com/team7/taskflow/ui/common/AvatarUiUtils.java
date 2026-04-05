@@ -20,6 +20,8 @@ public final class AvatarUiUtils {
 
     private static final int DEFAULT_AVATAR_SIZE_DP = 40;
     private static final float LETTER_SIZE_RATIO = 0.42f;
+    private static final float SMALL_AVATAR_LETTER_SIZE_RATIO = 0.52f;
+    private static final int SMALL_AVATAR_THRESHOLD_DP = 28;
 
     private AvatarUiUtils() {
     }
@@ -86,7 +88,7 @@ public final class AvatarUiUtils {
 
     private static void styleLetterView(@NonNull TextView letterView, @NonNull ImageView avatarView) {
         int avatarSize = resolveAvatarSizePx(avatarView);
-        float preferredTextSizePx = Math.max(spToPx(12f, letterView), avatarSize * LETTER_SIZE_RATIO);
+        float preferredTextSizePx = Math.max(spToPx(12f, letterView), avatarSize * resolveLetterSizeRatio(avatarView, avatarSize));
         letterView.setTextSize(TypedValue.COMPLEX_UNIT_PX, preferredTextSizePx);
         letterView.setTextColor(ContextCompat.getColor(letterView.getContext(), R.color.white));
         letterView.setTypeface(Typeface.DEFAULT_BOLD);
@@ -112,7 +114,7 @@ public final class AvatarUiUtils {
         paint.setColor(ContextCompat.getColor(avatarView.getContext(), R.color.white));
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setTypeface(Typeface.DEFAULT_BOLD);
-        paint.setTextSize(Math.max(spToPx(12f, avatarView), sizePx * LETTER_SIZE_RATIO));
+        paint.setTextSize(Math.max(spToPx(12f, avatarView), sizePx * resolveLetterSizeRatio(avatarView, sizePx)));
 
         Paint.FontMetrics fontMetrics = paint.getFontMetrics();
         float centerX = sizePx / 2f;
@@ -138,6 +140,15 @@ public final class AvatarUiUtils {
 
         float density = avatarView.getResources().getDisplayMetrics().density;
         return Math.round(DEFAULT_AVATAR_SIZE_DP * density);
+    }
+
+    private static float resolveLetterSizeRatio(@NonNull View view, int avatarSizePx) {
+        float density = view.getResources().getDisplayMetrics().density;
+        int thresholdPx = Math.round(SMALL_AVATAR_THRESHOLD_DP * density);
+        if (avatarSizePx <= thresholdPx) {
+            return SMALL_AVATAR_LETTER_SIZE_RATIO;
+        }
+        return LETTER_SIZE_RATIO;
     }
 
     private static float spToPx(float sp, @NonNull View view) {
