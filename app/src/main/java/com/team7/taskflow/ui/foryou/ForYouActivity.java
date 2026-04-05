@@ -64,6 +64,7 @@ public class ForYouActivity extends BaseActivity {
     private TextView tvProfileAvatarLetter;
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fabAdd;
+    private boolean isBottomNavNavigating = false;
 
     private TaskAdapter taskAdapter;
     private TaskRepository taskRepository;
@@ -91,10 +92,11 @@ public class ForYouActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        isBottomNavNavigating = false;
         // Update bottom navigation selected item to ensure icon highlights correctly
         if (bottomNavigationView != null) {
             bottomNavigationView.setItemIconTintList(null);
-            bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
+            bottomNavigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         }
         loadTasks();
     }
@@ -159,19 +161,24 @@ public class ForYouActivity extends BaseActivity {
         if (bottomNavigationView == null) {
             return;
         }
-        bottomNavigationView.setSelectedItemId(R.id.nav_tasks);
+        bottomNavigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+            if (isBottomNavNavigating) {
+                return true;
+            }
             if (id == R.id.nav_tasks) {
                 return true;
             }
             if (id == R.id.nav_home) {
+                isBottomNavNavigating = true;
                 Intent intent = new Intent(this, DashboardActivity.class);
                 NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
                 finish();
                 return true;
             }
             if (id == R.id.nav_settings) {
+                isBottomNavNavigating = true;
                 Intent intent = new Intent(this, ProfileActivity.class);
                 NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
                 finish();

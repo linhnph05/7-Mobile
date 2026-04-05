@@ -204,6 +204,8 @@
     <string name="widget_today_summary_desc">Ô vuông 2x2 hiển thị số task còn lại hôm nay</string>
     <string name="widget_error">Không thể tải danh sách task</string>
 
+    <string name="widget_reload">Tải lại</string>
+
     <string name="shortcut_add_task_short">Thêm Task mới</string>
     <string name="shortcut_add_task_long">Tạo task mới nhanh</string>
     <string name="shortcut_view_calendar_short">Mở công việc của tôi</string>
@@ -214,6 +216,9 @@
     <string name="shortcut_picker_subtitle">Chạm vào dự án để mở nhanh màn tạo task.</string>
     <string name="shortcut_picker_item_hint">Nhấn để tạo tác vụ</string>
     <string name="shortcut_picker_project_fallback">Dự án #%1$d</string>
+    <string name="share_picker_title">Chọn dự án để lưu nội dung đã chia sẻ</string>
+    <string name="share_picker_subtitle">Chạm vào dự án để mở màn thêm task của app.</string>
+    <string name="share_picker_item_hint">Nhấn để thêm task từ nội dung đã chia sẻ</string>
 
     <string name="sticky_title">Task quan trọng nhất</string>
     <string name="sticky_no_task">Hiện chưa có task đang làm</string>

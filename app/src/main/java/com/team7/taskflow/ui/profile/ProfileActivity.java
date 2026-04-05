@@ -53,6 +53,7 @@ public class ProfileActivity extends BaseActivity {
 
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
     private Uri selectedImageUri;
+    private boolean isBottomNavNavigating = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,11 +79,12 @@ public class ProfileActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        isBottomNavNavigating = false;
         // Update bottom navigation selected item to ensure icon highlights correctly
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
             bottomNav.setItemIconTintList(null);
-            bottomNav.setSelectedItemId(R.id.nav_settings);
+            bottomNav.getMenu().findItem(R.id.nav_settings).setChecked(true);
         }
     }
 
@@ -150,17 +152,22 @@ public class ProfileActivity extends BaseActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
             bottomNav.setItemIconTintList(null);
-            bottomNav.setSelectedItemId(R.id.nav_settings);
+            bottomNav.getMenu().findItem(R.id.nav_settings).setChecked(true);
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
+                if (isBottomNavNavigating) {
+                    return true;
+                }
                 if (id == R.id.nav_settings) {
                     return true;
                 } else if (id == R.id.nav_home) {
+                    isBottomNavNavigating = true;
                     Intent intent = new Intent(this, DashboardActivity.class);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
                     finish();
                     return true;
                 } else if (id == R.id.nav_tasks) {
+                    isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ForYouActivity.class);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_TASKS);
                     finish();

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -35,6 +36,9 @@ import java.util.List;
 
 public class NotificationsActivity extends BaseActivity {
 
+    private static final String PREFS_NOTIFICATION_SEEN = "notification_prefs";
+    private static final String KEY_LAST_SEEN_NOTIFICATION_MS = "last_seen_notification_ms";
+
     private ImageButton btnBack, btnMarkAllRead, btnNotificationSettings;
     private AutoCompleteTextView actvFilterType;
     private Chip chipUnread;
@@ -59,10 +63,24 @@ public class NotificationsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         SessionManager.init(this);
         setContentView(R.layout.activity_notifications);
+        markNotificationsAsSeen();
         initViews();
         setupFilterDropdown();
         setupClickListeners();
         loadNotifications();
+    }
+
+    private void markNotificationsAsSeen() {
+        getSharedPreferences(PREFS_NOTIFICATION_SEEN, MODE_PRIVATE)
+                .edit()
+                .putLong(KEY_LAST_SEEN_NOTIFICATION_MS, System.currentTimeMillis())
+                .commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        markNotificationsAsSeen();
     }
 
     private void initViews() {

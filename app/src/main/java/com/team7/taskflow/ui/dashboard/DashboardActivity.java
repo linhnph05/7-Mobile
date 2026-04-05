@@ -73,6 +73,7 @@ public class DashboardActivity extends BaseActivity {
     private EditText searchBar;
     private RecyclerView rvProjects;
     private BottomNavigationView bottomNavigationView;
+    private boolean isBottomNavNavigating = false;
 
     // Data
     private ProjectAdapter projectAdapter;
@@ -127,10 +128,11 @@ public class DashboardActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        isBottomNavNavigating = false;
         // Update bottom navigation selected item to ensure icon highlights correctly
         if (bottomNavigationView != null) {
             bottomNavigationView.setItemIconTintList(null);
-            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            bottomNavigationView.getMenu().findItem(R.id.nav_home).setChecked(true);
         }
         startStickyServiceSafely();
         loadUnreadNotificationCount();
@@ -233,7 +235,11 @@ public class DashboardActivity extends BaseActivity {
         if (bottomNavigationView != null) {
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
+                if (isBottomNavNavigating) {
+                    return true;
+                }
                 if (id == R.id.nav_settings) {
+                    isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ProfileActivity.class);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_SETTINGS);
                     finish();
@@ -242,6 +248,7 @@ public class DashboardActivity extends BaseActivity {
                     // Already on home
                     return true;
                 } else if (id == R.id.nav_tasks) {
+                    isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ForYouActivity.class);
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
                     finish();

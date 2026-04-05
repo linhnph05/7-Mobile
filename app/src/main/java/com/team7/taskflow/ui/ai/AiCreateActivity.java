@@ -205,6 +205,31 @@ public class AiCreateActivity extends AppCompatActivity {
 
         containerAttachments = findViewById(R.id.containerAttachments);
         renderSubTaskInfo();
+        applyPrefillFromIntent();
+    }
+
+    private void applyPrefillFromIntent() {
+        Intent intent = getIntent();
+        if (intent == null) {
+            return;
+        }
+
+        String prefillTitle = intent.getStringExtra("prefill_title");
+        String prefillDescription = intent.getStringExtra("prefill_description");
+
+        if (prefillTitle != null && !prefillTitle.trim().isEmpty() && etParsedTitle != null) {
+            etParsedTitle.setText(prefillTitle.trim());
+        }
+
+        if (prefillDescription != null && !prefillDescription.trim().isEmpty()) {
+            String trimmed = prefillDescription.trim();
+            if (etParsedDescription != null) {
+                etParsedDescription.setText(trimmed);
+            }
+            if (etPrompt != null && etPrompt.getText().toString().trim().isEmpty()) {
+                etPrompt.setText(trimmed);
+            }
+        }
     }
 
     private void renderSubTaskInfo() {
