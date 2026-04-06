@@ -213,9 +213,20 @@ public class CalendarFragment extends Fragment {
 
     private String formatHistoryRow(TaskActivity activity) {
         String action = activity.getActionType() != null ? activity.getActionType() : "UPDATE";
-        String oldVal = activity.getOldValue() != null ? activity.getOldValue() : "";
-        String newVal = activity.getNewValue() != null ? activity.getNewValue() : "";
+        String oldVal = formatDateTimeValue(activity.getOldValue(), action);
+        String newVal = formatDateTimeValue(activity.getNewValue(), action);
         return formatTimestamp(activity.getCreatedAt()) + " - " + action + " (" + oldVal + " -> " + newVal + ")";
+    }
+
+    private String formatDateTimeValue(String value, String actionType) {
+        if (value == null || value.isEmpty()) return "";
+        
+        // Format if it looks like a date or datetime
+        boolean isDateTimeAction = actionType != null && (actionType.contains("DATE") || actionType.contains("TIME"));
+        if (isDateTimeAction) {
+            return com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(value.trim());
+        }
+        return value;
     }
 
     private String formatTimestamp(String raw) {

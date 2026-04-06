@@ -21,130 +21,287 @@
             android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="16dp"/>
 
-        <!-- QUICK STATS (3 CARDS) -->
+        <!-- QUICK STATS (4 CARDS) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:weightSum="3"
-            android:layout_marginBottom="28dp">
+            android:orientation="vertical"
+            android:layout_marginBottom="@dimen/spacing_xl">
 
-            <!-- Total -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardBackgroundColor="@color/theme_card"
-                app:cardCornerRadius="@dimen/radius_sm"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/theme_border">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="104dp"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overview_total"
-                        android:textColor="@color/slate_400"
-                        android:textSize="11sp"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.08"/>
-                    <TextView
-                        android:id="@+id/tvTotalTasks"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="20sp"
-                        android:fontFamily="sans-serif-bold"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:weightSum="2"
+                android:layout_marginBottom="@dimen/spacing_sm">
 
-            <!-- Done -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardBackgroundColor="@color/theme_card"
-                app:cardCornerRadius="@dimen/radius_sm"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/theme_border">
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:minHeight="104dp"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overview_done"
-                        android:textColor="@color/slate_400"
-                        android:textSize="11sp"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.08"/>
-                    <TextView
-                        android:id="@+id/tvDoneTasks"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/success"
-                        android:textSize="20sp"
-                        android:fontFamily="sans-serif-bold"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/spacing_sm"
+                    app:cardBackgroundColor="@color/theme_card"
+                    app:cardCornerRadius="@dimen/radius_md"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/theme_border">
 
-            <!-- Overdue -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/theme_card"
-                app:cardCornerRadius="@dimen/radius_sm"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/theme_border">
-                <LinearLayout
-                    android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="88dp"
+                        android:orientation="vertical"
+                        android:padding="@dimen/padding_card">
+
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@color/theme_surface_variant">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_task_updated"
+                                app:tint="@color/primary" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/overview_total"
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="@dimen/text_xxs"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                tools:text="Tổng số công việc" />
+
+                            <TextView
+                                android:id="@+id/tvTotalTasks"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/primary"
+                                android:textSize="@dimen/text_md"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                tools:text="24" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:minHeight="104dp"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/theme_card"
+                    app:cardCornerRadius="@dimen/radius_md"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/theme_border">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/overview_overdue"
-                        android:textColor="@color/slate_400"
-                        android:textSize="11sp"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.08"/>
-                    <TextView
-                        android:id="@+id/tvOverdueTasks"
-                        android:layout_width="wrap_content"
+                        android:minHeight="88dp"
+                        android:orientation="vertical"
+                        android:padding="@dimen/padding_card">
+
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@color/theme_surface_variant">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_task_done"
+                                app:tint="@color/success" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/overview_done"
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="@dimen/text_xxs"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                tools:text="Đã hoàn thành" />
+
+                            <TextView
+                                android:id="@+id/tvDoneTasks"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/success"
+                                android:textSize="@dimen/text_md"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                tools:text="9" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:weightSum="2">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/spacing_sm"
+                    app:cardBackgroundColor="@color/theme_card"
+                    app:cardCornerRadius="@dimen/radius_md"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/theme_border">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/danger"
-                        android:textSize="20sp"
-                        android:fontFamily="sans-serif-bold"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:minHeight="88dp"
+                        android:orientation="vertical"
+                        android:padding="@dimen/padding_card">
+
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@color/theme_surface_variant">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_task_new"
+                                app:tint="@color/warning" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/overview_new"
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="@dimen/text_xxs"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                tools:text="Mới hôm nay" />
+
+                            <TextView
+                                android:id="@+id/tvNewTasks"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/warning"
+                                android:textSize="@dimen/text_md"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                tools:text="5" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/theme_card"
+                    app:cardCornerRadius="@dimen/radius_md"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/theme_border">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="88dp"
+                        android:orientation="vertical"
+                        android:padding="@dimen/padding_card">
+
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@color/theme_surface_variant">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_task_overdue"
+                                app:tint="@color/danger" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/overview_overdue"
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="@dimen/text_xxs"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                tools:text="Quá hạn" />
+
+                            <TextView
+                                android:id="@+id/tvOverdueTasks"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/danger"
+                                android:textSize="@dimen/text_md"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                tools:text="3" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -154,6 +311,15 @@
             android:orientation="vertical">
 
             <!-- Chart 1: Status -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_sm"
+                android:text="@string/overview_status_chart_title"
+                android:textColor="@color/theme_text_primary"
+                android:textSize="@dimen/text_md"
+                android:textStyle="bold" />
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -170,15 +336,6 @@
                     android:orientation="vertical"
                     android:padding="24dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overview_status_analysis"
-                        android:textColor="@color/slate_500"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:layout_marginBottom="20dp"/>
-
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pieChartStatus"
                         android:layout_width="match_parent"
@@ -187,6 +344,16 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Chart 2: Member Task Distribution -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="@dimen/spacing_sm"
+                android:text="@string/overview_member_chart_title"
+                android:textColor="@color/theme_text_primary"
+                android:textSize="@dimen/text_md"
+                android:textStyle="bold" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardBarChart"
                 android:layout_width="match_parent"
@@ -203,15 +370,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Project Member Analysis"
-                        android:textColor="@color/slate_500"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:layout_marginBottom="20dp"/>
 
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/barChartProductivity"
@@ -257,7 +415,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/overview_upcoming"
-            android:textColor="#334155"
+            android:textColor="@color/theme_text_primary"
             android:textSize="14sp"
             android:fontFamily="sans-serif-bold"
             android:layout_marginBottom="12dp"

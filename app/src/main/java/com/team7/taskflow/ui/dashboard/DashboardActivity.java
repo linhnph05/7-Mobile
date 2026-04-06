@@ -14,15 +14,11 @@ import android.widget.Toast;
 import com.team7.taskflow.ui.foryou.ForYouActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -105,26 +101,7 @@ public class DashboardActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_dashboard);
-
-        // Xử lý insets cho scrollView: thêm padding top cho status bar
-        View scrollView = findViewById(R.id.scrollView);
-        ViewCompat.setOnApplyWindowInsetsListener(scrollView, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
-            return insets;
-        });
-
-        // Bottom bar được include - fitsSystemWindows="true" sẽ tự động xử lý bottom insets
-        View bottomBarContainer = findViewById(R.id.includeBottomBar);
-        if (bottomBarContainer != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-                return insets;
-            });
-        }
 
         // Initialize session
         SessionManager.init(this);

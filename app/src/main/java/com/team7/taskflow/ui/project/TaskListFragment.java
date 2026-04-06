@@ -178,8 +178,8 @@ public class TaskListFragment extends Fragment {
 
     private String formatHistoryRow(TaskActivity activity) {
         String action = activity.getActionType() != null ? activity.getActionType() : "UPDATE";
-        String oldVal = activity.getOldValue() != null ? activity.getOldValue() : "";
-        String newVal = activity.getNewValue() != null ? activity.getNewValue() : "";
+        String oldVal = formatDateTimeValue(activity.getOldValue(), action);
+        String newVal = formatDateTimeValue(activity.getNewValue(), action);
         return formatTimestamp(activity.getCreatedAt()) + " - " + action + " (" + oldVal + " -> " + newVal + ")";
     }
 
@@ -189,8 +189,20 @@ public class TaskListFragment extends Fragment {
             Date date = java.util.Date.from(java.time.OffsetDateTime.parse(raw).toInstant());
             return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(date);
         } catch (Exception e) {
-            return raw;
+            // Fallback to substring method if timezone parsing fails
+            return com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(raw);
         }
+    }
+
+    private String formatDateTimeValue(String value, String actionType) {
+        if (value == null || value.isEmpty()) return "";
+        
+        // Format if it looks like a date or datetime
+        boolean isDateTimeAction = actionType != null && (actionType.contains("DATE") || actionType.contains("TIME"));
+        if (isDateTimeAction) {
+            return com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(value.trim());
+        }
+        return value;
     }
 
     private void openTrashDialog() {

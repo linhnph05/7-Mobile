@@ -729,9 +729,22 @@ public class TaskDetailActivity extends BaseActivity {
     }
 
     private String resolveTaskDetail(String actionType, String oldValue, String newValue) {
-        String oldText = oldValue != null && !oldValue.trim().isEmpty() ? oldValue.trim() : "-";
-        String newText = newValue != null && !newValue.trim().isEmpty() ? newValue.trim() : "-";
         String normalized = actionType != null ? actionType.trim().toUpperCase(Locale.US) : "";
+        
+        // Format date/time values for date-related actions
+        String oldText, newText;
+        if (normalized.contains("DATE") || normalized.contains("TIME")) {
+            oldText = oldValue != null && !oldValue.trim().isEmpty() 
+                ? com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(oldValue.trim()) 
+                : "-";
+            newText = newValue != null && !newValue.trim().isEmpty() 
+                ? com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(newValue.trim()) 
+                : "-";
+        } else {
+            oldText = oldValue != null && !oldValue.trim().isEmpty() ? oldValue.trim() : "-";
+            newText = newValue != null && !newValue.trim().isEmpty() ? newValue.trim() : "-";
+        }
+        
         if ("CREATE".equals(normalized)) return "Trạng thái ban đầu: " + newText;
         if ("COMMENT_CREATE".equals(normalized)) return newText;
         if ("COMMENT_UPDATE".equals(normalized)) return oldText + " -> " + newText;
@@ -1235,12 +1248,30 @@ public class TaskDetailActivity extends BaseActivity {
     }
 
     private String formatActivityRow(TaskActivity a) {
-        return formatActivityTime(a.getCreatedAt()) + " - " + (a.getActionType() != null ? a.getActionType() : "UPDATE") + " (" + (a.getOldValue() != null ? a.getOldValue() : "") + " -> " + (a.getNewValue() != null ? a.getNewValue() : "") + ")";
+        String action = a.getActionType() != null ? a.getActionType() : "UPDATE";
+        String oldVal = formatActivityDateTimeValue(a.getOldValue(), action);
+        String newVal = formatActivityDateTimeValue(a.getNewValue(), action);
+        return formatActivityTime(a.getCreatedAt()) + " - " + action + " (" + oldVal + " -> " + newVal + ")";
     }
 
     private String formatActivityTime(String raw) {
         if (raw == null || raw.isEmpty()) return getString(R.string.task_history_time_just_now);
-        try { return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(java.util.Date.from(java.time.OffsetDateTime.parse(raw).toInstant())); }
-        catch (Exception e) { return raw; }
+        try {
+            return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(java.util.Date.from(java.time.OffsetDateTime.parse(raw).toInstant()));
+        } catch (Exception e) {
+            // Fallback to substring method if timezone parsing fails
+            return com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(raw);
+        }
+    }
+
+    private String formatActivityDateTimeValue(String value, String actionType) {
+        if (value == null || value.isEmpty()) return "";
+        
+        // Format if it looks like a date or datetime
+        boolean isDateTimeAction = actionType != null && (actionType.contains("DATE") || actionType.contains("TIME"));
+        if (isDateTimeAction) {
+            return com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(value.trim());
+        }
+        return value;
     }
 }

@@ -8,18 +8,13 @@
     android:layout_height="match_parent"
     android:background="@color/theme_background">
 
-    <FrameLayout
-        android:id="@+id/contentContainer"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/scrollView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="@dimen/bottom_nav_padding"
-            android:clipToPadding="false"
-            android:fitsSystemWindows="false">
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/bottom_nav_padding"
+        android:clipToPadding="false"
+        android:fitsSystemWindows="false">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -266,8 +261,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-
-    </FrameLayout>
 
     <!-- Include shared bottom bar layout -->
     <include

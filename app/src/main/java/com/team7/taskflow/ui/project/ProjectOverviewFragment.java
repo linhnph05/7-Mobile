@@ -2,9 +2,6 @@ package com.team7.taskflow.ui.project;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +29,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.github.mikephil.charting.formatter.StackedValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.team7.taskflow.R;
@@ -42,6 +39,9 @@ import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class ProjectOverviewFragment extends Fragment {
     private TaskAdapter taskAdapter;
 
     private NestedScrollView nestedScrollView;
-    private TextView tvTotalTasks, tvDoneTasks, tvOverdueTasks;
+    private TextView tvTotalTasks, tvDoneTasks, tvNewTasks, tvOverdueTasks;
     private PieChart pieChartStatus;
     private BarChart barChartProductivity;
     private RecyclerView rvUpcomingTasks;
@@ -83,6 +83,7 @@ public class ProjectOverviewFragment extends Fragment {
     private static final String STATUS_TODO_KEY = "TODO";
     private static final String STATUS_IN_PROGRESS_KEY = "IN_PROGRESS";
     private static final String STATUS_DONE_KEY = "DONE";
+    private static final DateTimeFormatter ISO_DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
     public static ProjectOverviewFragment newInstance(long projectId, boolean isMyTasksMode, String userId) {
         ProjectOverviewFragment fragment = new ProjectOverviewFragment();
@@ -120,6 +121,7 @@ public class ProjectOverviewFragment extends Fragment {
         nestedScrollView = (NestedScrollView) view;
         tvTotalTasks = view.findViewById(R.id.tvTotalTasks);
         tvDoneTasks = view.findViewById(R.id.tvDoneTasks);
+        tvNewTasks = view.findViewById(R.id.tvNewTasks);
         tvOverdueTasks = view.findViewById(R.id.tvOverdueTasks);
         pieChartStatus = view.findViewById(R.id.pieChartStatus);
         barChartProductivity = view.findViewById(R.id.barChartProductivity);
@@ -310,22 +312,22 @@ public class ProjectOverviewFragment extends Fragment {
         if (isEmpty) {
             tvTotalTasks.setText("0");
             tvDoneTasks.setText("0");
+            tvNewTasks.setText("0");
             tvOverdueTasks.setText("0");
         }
     }
 
     private void processTaskStats(List<Task> tasks) {
-        int todo = 0, inProgress = 0, done = 0, overdue = 0;
-        
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        String todayStr = sdf.format(cal.getTime());
+        int todo = 0;
+        int inProgress = 0;
+        int done = 0;
+        int newTasks = 0;
+        int overdue = 0;
+
+        LocalDate today = LocalDate.now();
 
         for (Task task : tasks) {
-            if (!hasCompleteScheduleRange(task)) {
-                continue;
-            }
-            String status = task.getStatus() != null ? task.getStatus().toUpperCase() : "TODO";
+            String status = normalizeStatus(task != null ? task.getStatus() : null);
             if (status.contains("DONE")) {
                 done++;
             } else if (status.contains("IN_PROGRESS") || status.contains("PROGRESS") || status.contains("DOING")) {
@@ -333,14 +335,19 @@ public class ProjectOverviewFragment extends Fragment {
             } else {
                 todo++;
             }
-            
-            if (task.getDueDate() != null && task.getDueDate().compareTo(todayStr) < 0 && !status.contains("DONE")) {
+
+            if (isTaskCreatedToday(task, today)) {
+                newTasks++;
+            }
+
+            if (isTaskOverdue(task, today, status)) {
                 overdue++;
             }
         }
 
         tvTotalTasks.setText(String.valueOf(tasks.size()));
         tvDoneTasks.setText(String.valueOf(done));
+        tvNewTasks.setText(String.valueOf(newTasks));
         tvOverdueTasks.setText(String.valueOf(overdue));
 
         todoCount = todo;
@@ -351,6 +358,45 @@ public class ProjectOverviewFragment extends Fragment {
         if (!isMyTasksMode) {
             updateBarChart(tasks);
         }
+    }
+
+    private String normalizeStatus(String status) {
+        return status != null ? status.trim().toUpperCase(Locale.US) : STATUS_TODO_KEY;
+    }
+
+    private boolean isTaskCreatedToday(Task task, LocalDate today) {
+        LocalDate createdDate = extractDate(task != null ? task.getCreatedAt() : null);
+        return createdDate != null && createdDate.equals(today);
+    }
+
+    private boolean isTaskOverdue(Task task, LocalDate today, String normalizedStatus) {
+        if (task == null || normalizedStatus == null || normalizedStatus.contains("DONE")) {
+            return false;
+        }
+
+        LocalDate dueDate = extractDate(task.getDueDate());
+        return dueDate != null && dueDate.isBefore(today);
+    }
+
+    private LocalDate extractDate(String rawValue) {
+        if (rawValue == null || rawValue.trim().isEmpty()) {
+            return null;
+        }
+
+        String value = rawValue.trim();
+        try {
+            return OffsetDateTime.parse(value).toLocalDate();
+        } catch (Exception ignored) {
+        }
+
+        if (value.length() >= 10) {
+            try {
+                return LocalDate.parse(value.substring(0, 10), ISO_DATE_FORMATTER);
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
     }
 
     private boolean hasCompleteScheduleRange(Task task) {
@@ -391,12 +437,8 @@ public class ProjectOverviewFragment extends Fragment {
 
         int total = todo + inProgress + done;
         int percent = total > 0 ? (done * 100 / total) : 0;
-        
-        SpannableString centerText = new SpannableString(percent + "%\n" + getString(R.string.overview_done).toUpperCase());
-        centerText.setSpan(new RelativeSizeSpan(2.0f), 0, centerText.length() - 4, 0);
-        centerText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, centerText.length(), 0);
-        
-        pieChartStatus.setCenterText(centerText);
+        pieChartStatus.setCenterText(percent + "%");
+        pieChartStatus.setCenterTextSize(28f);
         pieChartStatus.setCenterTextColor(getThemeColor(com.google.android.material.R.attr.colorOnSurface));
         pieChartStatus.invalidate();
     }
@@ -448,7 +490,7 @@ public class ProjectOverviewFragment extends Fragment {
             }
             entries.add(new BarEntry(i, new float[] {buckets[0], buckets[1], buckets[2]}));
             String label = name;
-            if (label.length() > 10) label = label.substring(0, 8) + "..";
+            if (label.length() > 12) label = label.substring(0, 10) + "..";
             labels.add(label);
             i++;
         }
@@ -467,16 +509,41 @@ public class ProjectOverviewFragment extends Fragment {
         dataSet.setStackLabels(new String[] {
             "Cần làm",
             "Đang làm",
-            "Đã xong"
+            "Hoàn thành"
         });
         dataSet.setDrawValues(true);
         dataSet.setValueTextColor(getThemeColor(com.google.android.material.R.attr.colorOnSurface));
-        dataSet.setValueTextSize(12f);
-        dataSet.setValueFormatter(new StackedValueFormatter(false, "", 0));
+        dataSet.setValueTextSize(11f);
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getBarStackedLabel(float value, BarEntry barEntry) {
+                float[] stackedValues = barEntry.getYVals();
+                if (stackedValues == null || stackedValues.length == 0) {
+                    return value > 0 ? String.valueOf((int) value) : "";
+                }
+
+                float total = 0f;
+                for (float stackedValue : stackedValues) {
+                    total += stackedValue;
+                }
+
+                float topPositiveValue = 0f;
+                for (int index = stackedValues.length - 1; index >= 0; index--) {
+                    if (stackedValues[index] > 0f) {
+                        topPositiveValue = stackedValues[index];
+                        break;
+                    }
+                }
+
+                return value == topPositiveValue ? String.valueOf((int) total) : "";
+            }
+        });
 
         BarData data = new BarData(dataSet);
         data.setBarWidth(0.5f);
         barChartProductivity.setData(data);
+        barChartProductivity.setExtraTopOffset(14f);
+        barChartProductivity.setDrawValueAboveBar(true);
 
         XAxis xAxis = barChartProductivity.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));

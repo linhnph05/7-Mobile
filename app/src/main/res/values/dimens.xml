@@ -30,6 +30,7 @@
     <!-- TEXT SIZE            -->
     <!-- ==================== -->
     <dimen name="text_xs">12sp</dimen>
+    <dimen name="text_xxs">11sp</dimen>
     <dimen name="text_sm">14sp</dimen>
     <dimen name="text_md">16sp</dimen>
     <dimen name="text_lg">18sp</dimen>

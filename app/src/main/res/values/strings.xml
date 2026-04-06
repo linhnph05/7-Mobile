@@ -156,11 +156,15 @@
     <!-- OVERVIEW             -->
     <!-- ==================== -->
     <string name="overview_summary">Tổng quan dự án</string>
-    <string name="overview_total">Tổng số</string>
-    <string name="overview_done">Xong</string>
+    <string name="overview_total">Tổng số công việc</string>
+    <string name="overview_done">Đã hoàn thành</string>
+    <string name="overview_new">Mới hôm nay</string>
     <string name="overview_overdue">Quá hạn</string>
+    <string name="overview_member_analysis">Phân tích thành viên dự án</string>
     <string name="overview_status_analysis">Phân tích trạng thái</string>
     <string name="overview_priority_analysis">Phân tích mức độ ưu tiên</string>
+    <string name="overview_status_chart_title">Biểu đồ trạng thái công việc</string>
+    <string name="overview_member_chart_title">Biểu đồ công việc theo thành viên</string>
     <string name="overview_upcoming">Hạn chót sắp tới</string>
     <string name="overview_no_tasks">Chưa có công việc nào</string>
     <string name="overview_no_tasks_desc">Hãy nhấn nút AI để tạo công việc đầu tiên!</string>
