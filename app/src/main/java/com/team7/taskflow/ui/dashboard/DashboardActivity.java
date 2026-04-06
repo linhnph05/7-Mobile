@@ -117,6 +117,14 @@ public class DashboardActivity extends BaseActivity {
         });
 
         // Bottom bar được include - fitsSystemWindows="true" sẽ tự động xử lý bottom insets
+        View bottomBarContainer = findViewById(R.id.includeBottomBar);
+        if (bottomBarContainer != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+                return insets;
+            });
+        }
 
         // Initialize session
         SessionManager.init(this);
@@ -195,11 +203,6 @@ public class DashboardActivity extends BaseActivity {
 
         View bottomBarContainer = findViewById(R.id.includeBottomBar);
         if (bottomBarContainer != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-                return insets;
-            });
             bottomBarContainer.bringToFront();
         }
         if (fabAdd != null) {
