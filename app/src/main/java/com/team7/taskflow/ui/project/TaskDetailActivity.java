@@ -138,6 +138,7 @@ public class TaskDetailActivity extends BaseActivity {
                 v.setPadding(v.getPaddingLeft(), sys.top, v.getPaddingRight(), v.getPaddingBottom());
                 return insets;
             });
+            header.bringToFront();
         }
 
         taskRepository = TaskRepository.getInstance();
@@ -159,15 +160,14 @@ public class TaskDetailActivity extends BaseActivity {
         loadProjectMembers();
 
         if (taskId != null) {
-            tvToolbarTitle.setText("Edit Task");
-            btnSave.setText("Update");
             loadTaskDetails();
             setupCommentsSection();
         } else {
-            tvToolbarTitle.setText("Create Task");
-            btnSave.setText("Create");
             if (layoutCommentsSection != null) layoutCommentsSection.setVisibility(View.GONE);
         }
+
+        tvToolbarTitle.setText("Chi tiết công việc");
+        btnSave.setText("Lưu");
 
         setupActivityTabs();
         setupSubTaskFab();
@@ -396,7 +396,7 @@ public class TaskDetailActivity extends BaseActivity {
         containerAttachments.removeAllViews();
         if (attachedFileUris.isEmpty() && existingAttachments.isEmpty()) {
             containerAttachments.setVisibility(View.GONE);
-            tvAttachment.setText("Đính kèm");
+            tvAttachment.setText("+");
             setDefault(cardAttachment, tvAttachment, ivAttachment);
             return;
         }
@@ -783,6 +783,64 @@ public class TaskDetailActivity extends BaseActivity {
         });
     }
 
+    private void shareTask() {
+        String title = etTitle != null && etTitle.getText() != null
+                ? etTitle.getText().toString().trim()
+                : "";
+        if (title.isEmpty()) {
+            title = "Task";
+        }
+
+        StringBuilder shareText = new StringBuilder(title);
+
+        String description = etDescription != null && etDescription.getText() != null
+                ? etDescription.getText().toString().trim()
+                : "";
+        if (!description.isEmpty()) {
+            shareText.append("\n\n").append(description);
+        }
+
+        if (tvStatus != null && tvStatus.getText() != null) {
+            String statusText = tvStatus.getText().toString().trim();
+            if (!statusText.isEmpty()) {
+                shareText.append("\nTrạng thái: ").append(statusText);
+            }
+        }
+
+        if (tvPriority != null && tvPriority.getText() != null) {
+            String priorityText = tvPriority.getText().toString().trim();
+            if (!priorityText.isEmpty()) {
+                shareText.append("\nĐộ ưu tiên: ").append(priorityText);
+            }
+        }
+
+        if (tvAssignee != null && tvAssignee.getText() != null) {
+            String assigneeText = tvAssignee.getText().toString().trim();
+            if (!assigneeText.isEmpty() && !"Chọn người".equalsIgnoreCase(assigneeText)) {
+                shareText.append("\nNgười phụ trách: ").append(assigneeText);
+            }
+        }
+
+        if (tvDueDate != null && tvDueDate.getText() != null) {
+            String dueDateText = tvDueDate.getText().toString().trim();
+            if (!dueDateText.isEmpty()) {
+                shareText.append("\nHạn chót: ").append(dueDateText);
+                if (tvDueTime != null && tvDueTime.getText() != null) {
+                    String dueTimeText = tvDueTime.getText().toString().trim();
+                    if (!dueTimeText.isEmpty()) {
+                        shareText.append(" ").append(dueTimeText);
+                    }
+                }
+            }
+        }
+
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        sendIntent.setType("text/plain");
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, shareText.toString());
+        startActivity(Intent.createChooser(sendIntent, "Chia sẻ công việc"));
+    }
+
     private void showEditCommentDialog(Comment comment) {
         if (comment == null || comment.getId() == null) return;
         View dv = LayoutInflater.from(this).inflate(R.layout.dialog_edit_comment, null);
@@ -894,7 +952,7 @@ public class TaskDetailActivity extends BaseActivity {
 
     private void saveTask() {
         String title = etTitle.getText().toString().trim();
-        if (title.isEmpty()) { etTitle.setError("Title is required"); return; }
+        if (title.isEmpty()) { etTitle.setError("Vui lòng nhập tên công việc"); return; }
         String sd = tvStartDate.getText().toString();
         String st = tvStartTime != null ? tvStartTime.getText().toString() : null;
         String sc = sd.contains("-") ? (st != null && st.matches("\\d{2}:\\d{2}") ? sd + " " + st : sd) : null;
@@ -954,12 +1012,12 @@ public class TaskDetailActivity extends BaseActivity {
         return new TaskRepository.TaskCallback<Task>() {
             @Override public void onSuccess(Task r) {
                 runOnUiThread(() -> {
-                    String msg = taskId == null ? "Task Created" : "Task Updated";
+                    String msg = taskId == null ? "Đã tạo công việc" : "Đã cập nhật công việc";
                     if (!attachedFileUris.isEmpty()) { uploadSuccessCount = 0; uploadNextAttachment(0, r.getId(), msg); }
                     else { setLoading(false); Toast.makeText(TaskDetailActivity.this, msg, Toast.LENGTH_SHORT).show(); setResult(RESULT_OK); finish(); }
                 });
             }
-            @Override public void onError(String e) { runOnUiThread(() -> { setLoading(false); Toast.makeText(TaskDetailActivity.this, "Failed: " + e, Toast.LENGTH_SHORT).show(); }); }
+            @Override public void onError(String e) { runOnUiThread(() -> { setLoading(false); Toast.makeText(TaskDetailActivity.this, "Không thành công: " + e, Toast.LENGTH_SHORT).show(); }); }
         };
     }
 
@@ -989,9 +1047,9 @@ public class TaskDetailActivity extends BaseActivity {
     private void setPriority(String priority) {
         if (priority == null) priority = "MEDIUM";
         selectedPriority = priority;
-        String label = "Medium"; int colorRes = R.color.priority_medium;
-        if ("HIGH".equals(priority)) { label = "High"; colorRes = R.color.priority_high; }
-        else if ("LOW".equals(priority)) { label = "Low"; colorRes = R.color.priority_low; }
+        String label = "Trung bình"; int colorRes = R.color.priority_medium;
+        if ("HIGH".equals(priority)) { label = "Cao"; colorRes = R.color.priority_high; }
+        else if ("LOW".equals(priority)) { label = "Thấp"; colorRes = R.color.priority_low; }
         tvPriority.setText(label); setActive(cardPriority, tvPriority, ivPriority, colorRes);
     }
 
@@ -1012,9 +1070,9 @@ public class TaskDetailActivity extends BaseActivity {
     private void setStatus(String status) {
         if (status == null) status = "TODO"; selectedStatus = status;
         int colorRes;
-        if ("DONE".equals(status)) { colorRes = R.color.success; tvStatus.setText("Done"); }
-        else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText("Doing"); }
-        else { colorRes = R.color.theme_text_secondary; tvStatus.setText("To Do"); }
+        if ("DONE".equals(status)) { colorRes = R.color.success; tvStatus.setText("Hoàn thành"); }
+        else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText("Đang làm"); }
+        else { colorRes = R.color.theme_text_secondary; tvStatus.setText("Cần làm"); }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
     }
 
@@ -1102,6 +1160,9 @@ public class TaskDetailActivity extends BaseActivity {
         tv.setTextColor(color);
         if (icon != null) icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
         if (container != null) container.setBackgroundResource(R.drawable.bg_chip_neutral);
+        if (container == cardAttachment) {
+            container.setBackgroundResource(R.drawable.bg_input);
+        }
     }
 
     private TextView createPickerItem(String label, View.OnClickListener listener, int colorRes) {

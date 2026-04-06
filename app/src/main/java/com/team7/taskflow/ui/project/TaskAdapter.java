@@ -17,9 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.remote.SupabaseClient;
+import com.team7.taskflow.data.remote.api.UserApi;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.text.SimpleDateFormat;
@@ -32,6 +35,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
     private List<Task> tasks = new ArrayList<>();
@@ -41,6 +48,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private final Map<Long, List<Comment>> commentsCache = new HashMap<>();
     private final Map<Long, TaskCommentAdapter> inlineCommentAdapters = new HashMap<>();
     private final Set<Long> loadingComments = new HashSet<>();
+    private final Map<String, String> assigneeAvatarUrlMap = new HashMap<>();
+    private final Map<String, String> assigneeDisplayNameMap = new HashMap<>();
+    private final Set<String> pendingAssigneeIds = new HashSet<>();
     private final TaskRepository taskRepository = TaskRepository.getInstance();
     private boolean inlineCommentsEnabled = false;
     private String inlineCommentUserId;
@@ -71,6 +81,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public void setTasks(List<Task> tasks) {
         this.tasks = tasks;
         notifyDataSetChanged();
+        preloadAssigneeProfiles(tasks);
     }
 
     public List<Task> getTasks() {
@@ -140,11 +151,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             tvDueDate.setText(formattedDate);
 
             if (ivAssignee != null) {
+                String assigneeId = task.getAssigneeId();
+                String assigneeAvatarUrl = assigneeAvatarUrlMap.get(assigneeId);
+                String assigneeName = assigneeDisplayNameMap.get(assigneeId);
                 AvatarUiUtils.bindAvatarOrFallback(
                         ivAssignee,
                         null,
-                        null,
-                        task.getAssigneeId());
+                    assigneeAvatarUrl,
+                    assigneeName != null ? assigneeName : assigneeId);
             }
 
             itemView.setOnClickListener(v -> { if (listener != null) listener.onTaskClick(task); });
@@ -357,5 +371,63 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 return rawDate;
             }
         }
+    }
+
+    private void preloadAssigneeProfiles(List<Task> taskList) {
+        if (taskList == null || taskList.isEmpty()) {
+            return;
+        }
+
+        Set<String> idsToLoad = new HashSet<>();
+        for (Task task : taskList) {
+            if (task == null) {
+                continue;
+            }
+            String assigneeId = task.getAssigneeId();
+            if (TextUtils.isEmpty(assigneeId)) {
+                continue;
+            }
+            if (!assigneeAvatarUrlMap.containsKey(assigneeId)
+                    && !assigneeDisplayNameMap.containsKey(assigneeId)
+                    && !pendingAssigneeIds.contains(assigneeId)) {
+                idsToLoad.add(assigneeId);
+            }
+        }
+
+        if (idsToLoad.isEmpty()) {
+            return;
+        }
+
+        pendingAssigneeIds.addAll(idsToLoad);
+        String idsFilter = "in.(" + TextUtils.join(",", idsToLoad) + ")";
+
+        SupabaseClient.getInstance()
+                .getService(UserApi.class)
+                .getUsersByIds(idsFilter, "user_id,display_name,avatar_url")
+                .enqueue(new Callback<List<User>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
+                        pendingAssigneeIds.removeAll(idsToLoad);
+                        if (response.isSuccessful() && response.body() != null) {
+                            for (User user : response.body()) {
+                                if (user == null || TextUtils.isEmpty(user.getUserId())) {
+                                    continue;
+                                }
+                                if (!TextUtils.isEmpty(user.getAvatarUrl())) {
+                                    assigneeAvatarUrlMap.put(user.getUserId(), user.getAvatarUrl());
+                                }
+                                if (!TextUtils.isEmpty(user.getDisplayName())) {
+                                    assigneeDisplayNameMap.put(user.getUserId(), user.getDisplayName());
+                                }
+                            }
+                            notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {
+                        pendingAssigneeIds.removeAll(idsToLoad);
+                    }
+                });
     }
 }
