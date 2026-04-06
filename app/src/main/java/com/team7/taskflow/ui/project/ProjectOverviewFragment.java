@@ -322,6 +322,9 @@ public class ProjectOverviewFragment extends Fragment {
         String todayStr = sdf.format(cal.getTime());
 
         for (Task task : tasks) {
+            if (!hasCompleteScheduleRange(task)) {
+                continue;
+            }
             String status = task.getStatus() != null ? task.getStatus().toUpperCase() : "TODO";
             if (status.contains("DONE")) {
                 done++;
@@ -348,6 +351,16 @@ public class ProjectOverviewFragment extends Fragment {
         if (!isMyTasksMode) {
             updateBarChart(tasks);
         }
+    }
+
+    private boolean hasCompleteScheduleRange(Task task) {
+        if (task == null) {
+            return false;
+        }
+        String startDate = task.getStartDate();
+        String dueDate = task.getDueDate();
+        return startDate != null && !startDate.trim().isEmpty()
+                && dueDate != null && !dueDate.trim().isEmpty();
     }
 
     private void updatePieChart(int todo, int inProgress, int done) {
@@ -397,6 +410,9 @@ public class ProjectOverviewFragment extends Fragment {
         String unassignedLabel = getString(R.string.overview_unassigned_label);
 
         for (Task t : tasks) {
+            if (!hasCompleteScheduleRange(t)) {
+                continue;
+            }
             String assigneeId = t.getAssigneeId();
             String name = (assigneeId == null || !memberNames.containsKey(assigneeId))
                     ? unassignedLabel

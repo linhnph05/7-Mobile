@@ -1,7 +1,6 @@
 package com.team7.taskflow.ui.timeline;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -37,6 +36,7 @@ import com.team7.taskflow.ui.project.TaskListFragment;
 import com.team7.taskflow.ui.project.TimelineFragment;
 import com.team7.taskflow.ui.system.ShortcutRouterActivity;
 import com.team7.taskflow.utils.NavigationUtils;
+import com.team7.taskflow.utils.ProjectColorUtils;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
@@ -57,6 +57,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private String projectName;
     private String projectKey;
     private String projectDesc;
+    private String projectColor;
     private String currentUserId;
     private boolean isMyTasksMode;
     private boolean isViewer = false;
@@ -89,6 +90,7 @@ public class ProjectDetailActivity extends BaseActivity {
         projectName   = getIntent().getStringExtra("project_name");
         projectKey    = getIntent().getStringExtra("project_key");
         projectDesc   = getIntent().getStringExtra("project_desc");
+        projectColor  = getIntent().getStringExtra("project_color");
         isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
         requestedInitialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, TAB_OVERVIEW);
         if (getIntent().hasExtra(EXTRA_OPEN_TASK_ID)) {
@@ -103,9 +105,11 @@ public class ProjectDetailActivity extends BaseActivity {
         currentUserId = SessionManager.getUserId();
 
         initViews();
+        applyHeaderTint();
         setupNavigation();
         setupBottomNavigation();
         loadUserInfo();
+        loadProjectTheme();
 
         View header = findViewById(R.id.layoutHeader);
         if (header != null) {
@@ -461,10 +465,45 @@ public class ProjectDetailActivity extends BaseActivity {
         if (tab == null) return;
         ImageView icon = (ImageView) tab.getChildAt(0);
         TextView  text = (TextView)  tab.getChildAt(1);
-        icon.setColorFilter(Color.parseColor("#888888"));
-        text.setTextColor(Color.parseColor("#888888"));
+        int color = ContextCompat.getColor(this, R.color.theme_text_secondary);
+        icon.setColorFilter(color);
+        text.setTextColor(color);
         text.setTypeface(null, android.graphics.Typeface.NORMAL);
         if (tab.getChildCount() > 2) tab.getChildAt(2).setVisibility(View.GONE);
+    }
+
+    private void loadProjectTheme() {
+        if (projectId <= 0) {
+            return;
+        }
+        ProjectRepository.getInstance().getProjectById(projectId,
+                new ProjectRepository.ProjectCallback<com.team7.taskflow.domain.model.Project>() {
+                    @Override
+                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                        if (result == null) {
+                            return;
+                        }
+                        runOnUiThread(() -> {
+                            projectColor = result.getColor();
+                            applyHeaderTint();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        // Keep fallback from intent/default color when project color cannot be loaded.
+                    }
+                });
+    }
+
+    private void applyHeaderTint() {
+        View header = findViewById(R.id.layoutHeader);
+        if (header == null) {
+            return;
+        }
+        int baseColor = ProjectColorUtils.resolveBaseColor(this, projectColor);
+        int headerTint = ProjectColorUtils.resolveHeaderTintColor(this, baseColor);
+        header.setBackgroundColor(headerTint);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -391,12 +391,6 @@ public class CalendarActivity extends BaseActivity {
         List<Task> filteredList = new ArrayList<>();
 
         for (Task t : allProjectTasks) {
-            String start = null;
-            if (t.getStartDate() != null && !t.getStartDate().isEmpty()) {
-                start = t.getStartDate().length() >= 10
-                        ? t.getStartDate().substring(0, 10)
-                        : t.getStartDate();
-            }
             String due = null;
             if (t.getDueDate() != null && !t.getDueDate().isEmpty()) {
                 due = t.getDueDate().length() >= 10
@@ -404,23 +398,8 @@ public class CalendarActivity extends BaseActivity {
                         : t.getDueDate();
             }
 
-            if (start != null && !start.isEmpty() && due != null && !due.isEmpty()) {
-                boolean isAfterOrEqualStart = selectedDateStr.compareTo(start) >= 0;
-                boolean isBeforeOrEqualDue = selectedDateStr.compareTo(due) <= 0;
-
-                if (isAfterOrEqualStart && isBeforeOrEqualDue) {
-                    filteredList.add(t);
-                }
-            }
-            else if (due != null && !due.isEmpty()) {
-                if (selectedDateStr.equals(due)) {
-                    filteredList.add(t);
-                }
-            }
-            else if (start != null && !start.isEmpty()) {
-                if (selectedDateStr.equals(start)) {
-                    filteredList.add(t);
-                }
+            if (due != null && !due.isEmpty() && selectedDateStr.equals(due)) {
+                filteredList.add(t);
             }
         }
 

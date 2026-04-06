@@ -19,6 +19,8 @@ import com.team7.taskflow.ui.common.AvatarUiUtils;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -105,7 +107,13 @@ public class HistoryEventAdapter extends BaseAdapter {
         holder.bindAvatar(historyItem.getAvatarUrl(), resolveAvatarLetter(actor));
         holder.tvAction.setText(buildActionLine(historyItem.getActionLabel(), taskTitle));
         holder.tvAction.setTextColor(accentColor);
-        holder.tvMeta.setText(formatRelativeTime(historyItem.getCreatedAt()));
+
+        String source = historyItem.getSource();
+        if (ProjectHistoryItem.SOURCE_TASK_ACTIVITY.equals(source)) {
+            holder.tvMeta.setText(formatTaskHistoryTime(historyItem.getCreatedAt()));
+        } else {
+            holder.tvMeta.setText(formatRelativeTime(historyItem.getCreatedAt()));
+        }
 
         String comment = historyItem.getCommentContent() != null ? historyItem.getCommentContent().trim() : "";
         if (comment.isEmpty()) {
@@ -115,7 +123,11 @@ public class HistoryEventAdapter extends BaseAdapter {
             holder.tvComment.setText(comment);
         }
 
-        if (detail.isEmpty() || "Noi dung binh luan".equalsIgnoreCase(detail)) {
+        boolean hideDetail = detail.isEmpty()
+                || "Noi dung binh luan".equalsIgnoreCase(detail)
+                || shouldHideTaskUpdateDetail(historyItem);
+
+        if (hideDetail) {
             holder.tvDetail.setVisibility(View.GONE);
         } else {
             holder.tvDetail.setVisibility(View.VISIBLE);
@@ -333,11 +345,72 @@ public class HistoryEventAdapter extends BaseAdapter {
             return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(date);
         } catch (Exception ignored) {
             try {
-                return DateTimeFormatter.ofPattern("dd/MM HH:mm").format(OffsetDateTime.parse(rawTime));
+                return OffsetDateTime.parse(rawTime)
+                        .atZoneSameInstant(ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
             } catch (Exception secondIgnored) {
                 return rawTime;
             }
         }
+    }
+
+    private String formatTaskHistoryTime(String rawTime) {
+        if (rawTime == null || rawTime.trim().isEmpty()) {
+            return inflater.getContext().getString(R.string.task_history_time_just_now);
+        }
+
+        try {
+            Instant created = OffsetDateTime.parse(rawTime).toInstant();
+            Instant now = Instant.now();
+            if (created.isAfter(now)) {
+                return inflater.getContext().getString(R.string.task_history_time_just_now);
+            }
+
+            Duration duration = Duration.between(created, now);
+            long minutes = duration.toMinutes();
+
+            ZoneId zone = ZoneId.systemDefault();
+            java.time.LocalDate createdDate = created.atZone(zone).toLocalDate();
+            java.time.LocalDate currentDate = now.atZone(zone).toLocalDate();
+
+            if (createdDate.equals(currentDate)) {
+                if (minutes < 1) {
+                    return inflater.getContext().getString(R.string.task_history_time_just_now);
+                }
+                if (minutes < 60) {
+                    return inflater.getContext().getString(R.string.task_history_time_minutes_ago, minutes);
+                }
+                long hours = duration.toHours();
+                return inflater.getContext().getString(R.string.task_history_time_hours_ago, hours);
+            }
+
+            if (createdDate.equals(currentDate.minusDays(1))) {
+                return inflater.getContext().getString(R.string.task_history_time_yesterday);
+            }
+
+            long days = ChronoUnit.DAYS.between(createdDate, currentDate);
+            if (days <= 0) {
+                return inflater.getContext().getString(R.string.task_history_time_just_now);
+            }
+            return inflater.getContext().getString(R.string.task_history_time_days_ago, days);
+        } catch (Exception ignored) {
+            return formatRelativeTime(rawTime);
+        }
+    }
+
+    private boolean shouldHideTaskUpdateDetail(ProjectHistoryItem historyItem) {
+        if (historyItem == null
+                || !ProjectHistoryItem.SOURCE_TASK_ACTIVITY.equals(historyItem.getSource())) {
+            return false;
+        }
+
+        String action = historyItem.getActionLabel();
+        if (action == null || action.trim().isEmpty()) {
+            return false;
+        }
+
+        String normalized = action.trim().toUpperCase(Locale.US);
+        return normalized.contains("CHINH SUA") || normalized.contains("UPDATE") || normalized.contains("CAP NHAT");
     }
 
     private static class ViewHolder {

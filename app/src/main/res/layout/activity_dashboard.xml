@@ -38,7 +38,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:contentDescription="Avatar"
+                    android:contentDescription="@string/dashboard_avatar_content_desc"
                     android:src="@drawable/bg_avatar_grey_bordered" />
 
                 <TextView
@@ -69,12 +69,12 @@
                     android:id="@+id/tvWorkspaceName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nghĩa's Workspace"
                     android:textColor="@color/theme_text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:maxLines="1"
-                    android:ellipsize="end" />
+                    android:ellipsize="end"
+                    tools:text="Workspace" />
             </LinearLayout>
 
             <FrameLayout
@@ -90,7 +90,7 @@
                     android:id="@+id/btnNotification"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="Notifications"
+                    android:contentDescription="@string/dashboard_notifications_content_desc"
                     android:src="@drawable/ic_notification"
                     app:tint="@color/theme_text_primary" />
 
@@ -123,7 +123,7 @@
                 android:background="@drawable/bg_search_bar"
                 android:drawableStart="@android:drawable/ic_menu_search"
                 android:drawablePadding="12dp"
-                android:hint="Search projects or ask AI..."
+                android:hint="@string/dashboard_search_hint"
                 android:textColorHint="@color/theme_text_hint"
                 android:textColor="@color/theme_text_primary"
                 android:padding="12dp"
@@ -151,31 +151,62 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFilterAll"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="✨ AI Insights"
-                        android:backgroundTint="@color/primary"
-                        android:textColor="@color/white"
-                        android:textAllCaps="false"/>
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:checked="true"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/spacing_lg"
+                        android:paddingEnd="@dimen/spacing_lg"
+                        android:backgroundTint="@color/chip_background_selector"
+                        android:text="@string/dashboard_filter_all"
+                        android:textAllCaps="false"
+                        android:textColor="@color/chip_text_selector"
+                        app:strokeColor="@color/chip_stroke_selector"
+                        app:strokeWidth="1dp" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFilterRecent"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="All Projects"
+                        android:layout_height="36dp"
                         android:layout_marginStart="8dp"
-                        android:backgroundTint="@color/theme_surface_variant"
-                        android:textColor="@color/theme_text_secondary"
-                        android:textAllCaps="false"/>
+                        android:checkable="true"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/spacing_lg"
+                        android:paddingEnd="@dimen/spacing_lg"
+                        android:backgroundTint="@color/chip_background_selector"
+                        android:text="@string/dashboard_filter_recent"
+                        android:textAllCaps="false"
+                        android:textColor="@color/chip_text_selector"
+                        app:strokeColor="@color/chip_stroke_selector"
+                        app:strokeWidth="1dp" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFilterOwned"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Recent"
+                        android:layout_height="36dp"
                         android:layout_marginStart="8dp"
-                        android:backgroundTint="@color/theme_surface_variant"
-                        android:textColor="@color/theme_text_secondary"
-                        android:textAllCaps="false"/>
+                        android:checkable="true"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/spacing_lg"
+                        android:paddingEnd="@dimen/spacing_lg"
+                        android:backgroundTint="@color/chip_background_selector"
+                        android:text="@string/dashboard_filter_owned"
+                        android:textAllCaps="false"
+                        android:textColor="@color/chip_text_selector"
+                        app:strokeColor="@color/chip_stroke_selector"
+                        app:strokeWidth="1dp" />
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -200,7 +231,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Focus for today"
+                        android:text="@string/dashboard_focus_title"
                         android:textColor="@color/theme_text_primary"
                         android:textStyle="bold"
                         android:textSize="16sp"/>
@@ -208,7 +239,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days."
+                        android:text="@string/dashboard_focus_desc"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="14sp" />
                 </LinearLayout>

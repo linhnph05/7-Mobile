@@ -1,126 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardNotificationItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/notification_unread_bg"
-    android:padding="16dp">
+    app:cardBackgroundColor="@color/notification_unread_bg"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
 
-    <FrameLayout
-        android:id="@+id/layout_avatar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/iv_avatar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_avatar_grey_bordered"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
-
-        <TextView
-            android:id="@+id/tv_avatar_letter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="A"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-    </FrameLayout>
-
-    <View
-        android:id="@+id/view_unread_dot"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:background="@drawable/bg_circle_blue"
-        android:backgroundTint="@color/primary"
-        app:layout_constraintCircle="@+id/layout_avatar"
-        app:layout_constraintCircleAngle="45"
-        app:layout_constraintCircleRadius="24dp"
-        tools:ignore="MissingConstraints" />
-
-    <TextView
-        android:id="@+id/tv_time"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/theme_text_secondary"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="2h ago" />
+        android:padding="16dp">
 
-    <LinearLayout
-        android:id="@+id/layout_content"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toStartOf="@+id/tv_time"
-        app:layout_constraintStart_toEndOf="@+id/layout_avatar"
-        app:layout_constraintTop_toTopOf="parent">
+        <FrameLayout
+            android:id="@+id/layout_avatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_avatar_grey_bordered"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
+
+            <TextView
+                android:id="@+id/tv_avatar_letter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="A"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+        </FrameLayout>
+
+        <View
+            android:id="@+id/view_unread_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/bg_circle_blue"
+            android:backgroundTint="@color/primary"
+            app:layout_constraintCircle="@+id/layout_avatar"
+            app:layout_constraintCircleAngle="45"
+            app:layout_constraintCircleRadius="24dp"
+            tools:ignore="MissingConstraints" />
 
         <TextView
-            android:id="@+id/tv_content"
-            android:layout_width="match_parent"
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="4dp"
-            android:textColor="@color/theme_text_primary"
-            android:textSize="14sp"
-            tools:text="Nguyễn Văn A invited you to join a project." />
-
-        <TextView
-            android:id="@+id/tv_context"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
             android:textColor="@color/theme_text_secondary"
             android:textSize="12sp"
-            tools:text="Project: Antigravity Mobile" />
-    </LinearLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="2h ago" />
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/layout_content"
-        app:layout_constraintTop_toBottomOf="@+id/layout_content">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_accept"
-            style="@style/Widget.Material3.Button.TextButton"
+        <LinearLayout
+            android:id="@+id/layout_content"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:backgroundTint="@color/primary"
-            android:text="@string/notification_invite_accept"
-            android:textColor="@color/white"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/ic_input_add"
-            app:iconTint="@color/white" />
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/tv_time"
+            app:layout_constraintStart_toEndOf="@+id/layout_avatar"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_decline"
-            style="@style/Widget.Material3.Button.TextButton"
+            <TextView
+                android:id="@+id/tv_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/theme_text_primary"
+                android:textSize="14sp"
+                tools:text="Nguyễn Văn A invited you to join a project." />
+
+            <TextView
+                android:id="@+id/tv_context"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/theme_text_secondary"
+                android:textSize="12sp"
+                tools:text="Project: Antigravity Mobile" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutInviteActions"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="@color/theme_surface_variant"
-            android:text="@string/notification_invite_decline"
-            android:textColor="@color/theme_text_primary"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/ic_delete"
-            app:iconTint="@color/danger" />
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/layout_content"
+            app:layout_constraintTop_toBottomOf="@+id/layout_content">
 
-    </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_accept"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/primary"
+                android:text="@string/notification_invite_accept"
+                android:textColor="@color/white"
+                app:cornerRadius="8dp"
+                app:icon="@android:drawable/ic_input_add"
+                app:iconTint="@color/white" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_decline"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/theme_surface_variant"
+                android:text="@string/notification_invite_decline"
+                android:textColor="@color/theme_text_primary"
+                app:cornerRadius="8dp"
+                app:icon="@android:drawable/ic_delete"
+                app:iconTint="@color/danger" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_invite_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_chip_neutral"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/layout_content"
+            app:layout_constraintTop_toBottomOf="@+id/layout_content"
+            tools:text="Đã tham gia" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

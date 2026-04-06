@@ -30,6 +30,15 @@ public interface InvitationApiService {
             @Query("select") String select
     );
 
+    @GET("project_invitations")
+    Call<List<Map<String, Object>>> findLatestInvitationByProjectAndEmail(
+            @Query("project_id") String projectIdFilter,
+            @Query("email") String emailFilter,
+            @Query("select") String select,
+            @Query("order") String order,
+            @Query("limit") int limit
+    );
+
         // ✅ Cập nhật status invitation (ACCEPTED / DENIED)
     @PATCH("project_invitations")
     Call<Void> updateInvitationStatus(

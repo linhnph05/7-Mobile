@@ -28,10 +28,18 @@
     <string name="dashboard_tab_ai">✨ AI Insights</string>
     <string name="dashboard_tab_all">All Projects</string>
     <string name="dashboard_tab_recent">Recent</string>
+    <string name="dashboard_filter_all">Tất cả</string>
+    <string name="dashboard_filter_recent">Gần đây</string>
+    <string name="dashboard_filter_owned">Của tôi</string>
     <string name="dashboard_focus_title">Focus for today</string>
     <string name="dashboard_focus_desc">AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days.</string>
     <string name="dashboard_workspace_guest">Hello, Guest</string>
     <string name="dashboard_workspace_format">Hello, %1$s</string>
+    <string name="dashboard_avatar_content_desc">Avatar người dùng</string>
+    <string name="dashboard_notifications_content_desc">Thông báo</string>
+    <string name="dashboard_login_required">Vui lòng đăng nhập để xem dự án</string>
+    <string name="dashboard_no_projects_message">Bạn chưa có dự án nào. Nhấn + để tạo mới!</string>
+    <string name="dashboard_load_projects_error">Lỗi tải dự án: %1$s</string>
     <string name="for_you_title">For You</string>
     <string name="for_you_open_settings">Open settings</string>
     <string name="for_you_default_name">Bạn</string>
@@ -88,6 +96,10 @@
     <string name="project_deleted_at_unknown">Deleted time unknown</string>
     <string name="project_deleted_at_format">Deleted at: %1$s</string>
     <string name="project_activity_count_format">%1$d hoạt động mới</string>
+    <string name="project_role_owner">Owner</string>
+    <string name="project_role_admin">Admin</string>
+    <string name="project_role_member">Member</string>
+    <string name="project_role_viewer">Viewer</string>
     <string name="dashboard_task_activities_today">Task activities today</string>
     <string name="dashboard_comment_activities_today">Comment activities today</string>
 
@@ -186,10 +198,16 @@
     <string name="task_attach_chooser">Choose file to attach</string>
     <string name="task_start_date_label">Start</string>
     <string name="ai_task_due_date_label">Due</string>
+    <string name="task_date_placeholder">Chọn ngày</string>
+    <string name="task_time_placeholder">Chọn giờ</string>
     <string name="task_saved_success">Task saved!</string>
 
     <string name="task_history_empty">Chưa có lịch sử thay đổi</string>
     <string name="task_history_time_just_now">Vừa xong</string>
+    <string name="task_history_time_minutes_ago">%1$d phút trước</string>
+    <string name="task_history_time_hours_ago">%1$d giờ trước</string>
+    <string name="task_history_time_yesterday">Hôm qua</string>
+    <string name="task_history_time_days_ago">%1$d ngày trước</string>
     <string name="task_not_found">Task không tồn tại</string>
     <string name="task_load_error">Lỗi tải task</string>
 
@@ -263,8 +281,31 @@
     <string name="notification_related_task_deleted">Task liên quan đã bị xóa</string>
     <string name="notification_reaction_withdrawn">Reaction đã được thu hồi</string>
     <string name="notification_open_task_failed">Không thể mở task từ thông báo</string>
+    <string name="notification_screen_title">Thông báo</string>
+    <string name="notification_mark_all_read">Đã đọc tất cả</string>
+    <string name="notification_mark_all_read_success">Đã đánh dấu tất cả thông báo là đã đọc</string>
+    <string name="notification_filter_all_types">Tất cả loại</string>
+    <string name="notification_filter_me">@tôi</string>
+    <string name="notification_filter_comment">Bình luận</string>
+    <string name="notification_filter_join_request">Lời mời tham gia</string>
+    <string name="notification_filter_system">Hệ thống</string>
+    <string name="notification_filter_unread">Chưa đọc</string>
+    <string name="notification_empty_filtered">Không có thông báo phù hợp với bộ lọc đã chọn.</string>
+    <string name="notification_clear_filters">Xóa bộ lọc</string>
+    <string name="notification_invite_missing_info">Không tìm thấy thông tin lời mời</string>
+    <string name="notification_session_expired">Phiên đăng nhập hết hạn</string>
+    <string name="notification_joined_project_success">Đã tham gia dự án: %1$s</string>
+    <string name="notification_decline_success">Đã từ chối lời mời</string>
+    <string name="notification_decline_error">Lỗi từ chối: %1$s</string>
+    <string name="notification_accept_error_unknown">Lỗi không xác định</string>
+    <string name="notification_accept_error_title">Lỗi tham gia dự án</string>
+    <string name="notification_accept_error_close">Đóng</string>
+    <string name="notification_accept_error_copy">Sao chép</string>
+    <string name="notification_accept_error_copied">Đã sao chép lỗi</string>
     <string name="notification_invite_accept">Chấp nhận</string>
     <string name="notification_invite_decline">Từ chối</string>
+    <string name="notification_invite_status_joined">Đã tham gia</string>
+    <string name="notification_invite_status_declined">Đã từ chối</string>
     <string name="notification_time_just_now">Vừa xong</string>
 
     <plurals name="notification_time_minutes_ago">
@@ -276,6 +317,8 @@
         <item quantity="one">%d giờ trước</item>
         <item quantity="other">%d giờ trước</item>
     </plurals>
+
+    <string name="notification_time_yesterday">Hôm qua</string>
 
     <plurals name="notification_time_days_ago">
         <item quantity="one">%d ngày trước</item>

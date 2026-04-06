@@ -1,5 +1,6 @@
 package com.team7.taskflow.ui.dashboard;
 
+import android.content.res.ColorStateList;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,9 +20,11 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.common.AvatarUiUtils;
+import com.team7.taskflow.utils.ProjectColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Adapter cho RecyclerView hiển thị danh sách projects trên Dashboard
@@ -70,6 +73,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
         private final TextView tvProjectName;
         private final TextView tvProjectDesc;
+        private final TextView tvProjectTag;
         private final TextView tvProgress;
         private final TextView tvTaskCount;
         private final TextView tvCommentCount;
@@ -81,6 +85,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             super(itemView);
             tvProjectName = itemView.findViewById(R.id.tvProjectName);
             tvProjectDesc = itemView.findViewById(R.id.tvProjectDesc);
+            tvProjectTag = itemView.findViewById(R.id.tvProjectTag);
             tvProgress = itemView.findViewById(R.id.tvProgress);
             tvTaskCount = itemView.findViewById(R.id.tvCommentCount);
             tvCommentCount = itemView.findViewById(R.id.tvDaysLeft);
@@ -98,6 +103,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
         public void bind(Project project) {
             tvProjectName.setText(project.getName());
+            bindRoleTag(project);
+            applyProjectAccent(project);
 
             int progressPercent = project.getProgressPercent();
             if (progressBar != null) {
@@ -115,6 +122,63 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             renderMemberAvatars(project.getMemberPreviews());
         }
 
+        private void bindRoleTag(Project project) {
+            if (tvProjectTag == null || project == null) {
+                return;
+            }
+            String role = project.getUserRole();
+            if (role == null) {
+                tvProjectTag.setText(itemView.getContext().getString(R.string.project_role_member));
+                return;
+            }
+
+            String normalized = role.trim().toUpperCase(Locale.US);
+            int labelRes;
+            switch (normalized) {
+                case "OWNER":
+                    labelRes = R.string.project_role_owner;
+                    break;
+                case "ADMIN":
+                    labelRes = R.string.project_role_admin;
+                    break;
+                case "VIEWER":
+                    labelRes = R.string.project_role_viewer;
+                    break;
+                default:
+                    labelRes = R.string.project_role_member;
+                    break;
+            }
+            tvProjectTag.setText(itemView.getContext().getString(labelRes));
+        }
+
+        private void applyProjectAccent(Project project) {
+            if (project == null) {
+                return;
+            }
+
+            Context context = itemView.getContext();
+            int baseColor = ProjectColorUtils.resolveBaseColor(context, project.getColor());
+            int cardBackground = ProjectColorUtils.resolveProjectCardBackgroundColor(context, baseColor);
+            int chipBg = ProjectColorUtils.resolveChipBackgroundColor(context, baseColor);
+            int chipText = ProjectColorUtils.resolveChipTextColor(context, baseColor);
+            int progressTrack = ProjectColorUtils.resolveProgressTrackColor(context, baseColor);
+            int progressFill = ProjectColorUtils.resolveProgressFillColor(context, baseColor);
+
+            if (cardView != null) {
+                cardView.setCardBackgroundColor(cardBackground);
+            }
+
+            if (tvProjectTag != null) {
+                tvProjectTag.setBackgroundTintList(ColorStateList.valueOf(chipBg));
+                tvProjectTag.setTextColor(chipText);
+            }
+
+            if (progressBar != null) {
+                progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(progressTrack));
+                progressBar.setProgressTintList(ColorStateList.valueOf(progressFill));
+            }
+        }
+
         private void renderMemberAvatars(List<User> members) {
             if (layoutAvatars == null) {
                 return;
@@ -126,8 +190,10 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
                 return;
             }
 
-            int limit = Math.min(MAX_PREVIEW_MEMBERS, members.size());
-            for (int i = 0; i < limit; i++) {
+            boolean hasOverflow = members.size() > MAX_PREVIEW_MEMBERS;
+            int visibleMemberCount = hasOverflow ? MAX_PREVIEW_MEMBERS - 1 : Math.min(MAX_PREVIEW_MEMBERS, members.size());
+
+            for (int i = 0; i < visibleMemberCount; i++) {
                 User member = members.get(i);
                 if (member != null && !TextUtils.isEmpty(member.getAvatarUrl())) {
                     layoutAvatars.addView(createAvatarImage(member.getAvatarUrl(), member.getDisplayNameOrEmail(), i));
@@ -135,6 +201,16 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
                     layoutAvatars.addView(createFallbackAvatar(resolveInitial(member), i));
                 }
             }
+
+            if (hasOverflow) {
+                int remainingCount = members.size() - visibleMemberCount;
+                layoutAvatars.addView(createOverflowAvatar(remainingCount, visibleMemberCount));
+            }
+        }
+
+        private View createOverflowAvatar(int remainingCount, int index) {
+            String label = "+" + Math.max(1, remainingCount);
+            return createFallbackAvatar(label, index);
         }
 
         private View createAvatarImage(String avatarUrl, String displayName, int index) {

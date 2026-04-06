@@ -13,17 +13,25 @@ import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Notification;
 import com.team7.taskflow.domain.model.Notification.NotificationType;
 import com.team7.taskflow.ui.common.AvatarUiUtils;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
+import java.util.Map;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Multi-view-type RecyclerView Adapter for Notifications.
@@ -40,8 +48,15 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final int VIEW_TYPE_ME = 2;
     private static final int VIEW_TYPE_REMINDER = 3;
 
+    private enum InviteDecision {
+        NONE,
+        ACCEPTED,
+        DECLINED
+    }
+
     private List<Notification> notificationList = new ArrayList<>();
     private final OnNotificationActionListener listener;
+    private final Map<Long, InviteDecision> inviteDecisions = new HashMap<>();
     private Context appContext;
 
     // ── Listener interface ──────────────────────────────────────────
@@ -60,6 +75,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public void setNotifications(List<Notification> notifications) {
         this.notificationList = notifications != null ? notifications : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    public void markInviteDecision(long notificationId, boolean accepted) {
+        inviteDecisions.put(notificationId, accepted ? InviteDecision.ACCEPTED : InviteDecision.DECLINED);
         notifyDataSetChanged();
     }
 
@@ -128,6 +148,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     abstract class BaseNotificationViewHolder extends RecyclerView.ViewHolder {
         protected TextView tvContent, tvTime, tvContext;
         protected View viewUnreadDot;
+        protected MaterialCardView cardNotificationItem;
 
         public BaseNotificationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -135,6 +156,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tvContext = itemView.findViewById(R.id.tv_context);
             tvTime = itemView.findViewById(R.id.tv_time);
             viewUnreadDot = itemView.findViewById(R.id.view_unread_dot);
+            cardNotificationItem = itemView.findViewById(R.id.cardNotificationItem);
 
             itemView.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
@@ -166,10 +188,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             // Unread dot
             viewUnreadDot.setVisibility(notification.isRead() ? View.GONE : View.VISIBLE);
 
-            // Background: unread → brighter, read → darker
+            applyCardState(notification.isRead());
+        }
+
+        private void applyCardState(boolean isRead) {
+            if (cardNotificationItem == null) {
+                return;
+            }
             int bgColor = ContextCompat.getColor(itemView.getContext(),
-                    notification.isRead() ? R.color.notification_read_bg : R.color.notification_unread_bg);
-            itemView.setBackgroundColor(bgColor);
+                    isRead ? R.color.notification_read_bg : R.color.notification_unread_bg);
+            cardNotificationItem.setCardBackgroundColor(bgColor);
+                cardNotificationItem.setStrokeWidth(0);
         }
     }
 
@@ -180,12 +209,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     class InviteViewHolder extends BaseNotificationViewHolder {
         ShapeableImageView ivAvatar;
         TextView tvAvatarLetter;
+        TextView tvInviteStatus;
         MaterialButton btnAccept, btnDecline;
 
         public InviteViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
             tvAvatarLetter = itemView.findViewById(R.id.tv_avatar_letter);
+            tvInviteStatus = itemView.findViewById(R.id.tv_invite_status);
             btnAccept = itemView.findViewById(R.id.btn_accept);
             btnDecline = itemView.findViewById(R.id.btn_decline);
         }
@@ -193,9 +224,22 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public void bindInvite(Notification notification) {
             bindActorAvatar(ivAvatar, tvAvatarLetter, notification);
 
-            boolean canRespond = true;
+            InviteDecision decision = resolveInviteDecision(notification);
+            boolean canRespond = decision == InviteDecision.NONE;
             btnAccept.setVisibility(canRespond ? View.VISIBLE : View.GONE);
             btnDecline.setVisibility(canRespond ? View.VISIBLE : View.GONE);
+
+            if (tvInviteStatus != null) {
+                if (decision == InviteDecision.ACCEPTED) {
+                    tvInviteStatus.setVisibility(View.VISIBLE);
+                    tvInviteStatus.setText(R.string.notification_invite_status_joined);
+                } else if (decision == InviteDecision.DECLINED) {
+                    tvInviteStatus.setVisibility(View.VISIBLE);
+                    tvInviteStatus.setText(R.string.notification_invite_status_declined);
+                } else {
+                    tvInviteStatus.setVisibility(View.GONE);
+                }
+            }
 
             btnAccept.setOnClickListener(v -> {
                 if (!canRespond) return;
@@ -207,6 +251,29 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 if (listener != null)
                     listener.onDeclineInvite(notification);
             });
+        }
+
+        private InviteDecision resolveInviteDecision(Notification notification) {
+            InviteDecision localDecision = inviteDecisions.getOrDefault(
+                    notification.getNotificationId(),
+                    InviteDecision.NONE);
+            if (localDecision != InviteDecision.NONE) {
+                return localDecision;
+            }
+
+            String inviteStatus = notification.getInviteStatus();
+            if (inviteStatus == null || inviteStatus.trim().isEmpty()) {
+                return InviteDecision.NONE;
+            }
+
+            String normalized = inviteStatus.trim().toUpperCase(Locale.US);
+            if ("ACCEPTED".equals(normalized)) {
+                return InviteDecision.ACCEPTED;
+            }
+            if ("DENIED".equals(normalized)) {
+                return InviteDecision.DECLINED;
+            }
+            return InviteDecision.NONE;
         }
     }
 
@@ -269,16 +336,65 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     // ── Utility ─────────────────────────────────────────────────────
 
+        private static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+        private static final DateTimeFormatter VIETNAM_DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM HH:mm", Locale.getDefault());
+
     /**
-     * Format a Date in Vietnam timezone: HH:mm dd/MM/yyyy.
+     * Relative Vietnamese time like project history: just now, minutes, hours, yesterday, days.
      */
     private String formatRelativeTime(Date date) {
         if (date == null) {
             return "";
         }
-        java.text.SimpleDateFormat vnFormat = new java.text.SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.forLanguageTag("vi-VN"));
-        vnFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        return vnFormat.format(date);
+        try {
+            Instant created = date.toInstant();
+            Instant now = Instant.now();
+            if (created.isAfter(now)) {
+                return appContext.getString(R.string.notification_time_just_now);
+            }
+
+            Duration duration = Duration.between(created, now);
+            long minutes = duration.toMinutes();
+            if (minutes < 1) {
+                return appContext.getString(R.string.notification_time_just_now);
+            }
+
+            LocalDate createdDate = created.atZone(VIETNAM_ZONE).toLocalDate();
+            LocalDate currentDate = now.atZone(VIETNAM_ZONE).toLocalDate();
+
+            if (createdDate.equals(currentDate)) {
+                if (minutes < 60) {
+                    return appContext.getResources().getQuantityString(
+                            R.plurals.notification_time_minutes_ago,
+                            (int) minutes,
+                            minutes);
+                }
+                long hours = duration.toHours();
+                return appContext.getResources().getQuantityString(
+                        R.plurals.notification_time_hours_ago,
+                        (int) hours,
+                        hours);
+            }
+
+            if (createdDate.equals(currentDate.minusDays(1))) {
+                return appContext.getString(R.string.notification_time_yesterday);
+            }
+
+            long days = java.time.temporal.ChronoUnit.DAYS.between(createdDate, currentDate);
+            if (days > 0 && days <= 7) {
+                return appContext.getResources().getQuantityString(
+                        R.plurals.notification_time_days_ago,
+                        (int) days,
+                        days);
+            }
+
+            ZonedDateTime dateTime = created.atZone(VIETNAM_ZONE);
+            return dateTime.format(VIETNAM_DATE_TIME_FORMATTER);
+        } catch (Exception ignored) {
+            ZonedDateTime dateTime = date.toInstant().atZone(VIETNAM_ZONE);
+            return dateTime.format(VIETNAM_DATE_TIME_FORMATTER);
+        }
     }
 
     private void bindActorAvatar(ShapeableImageView avatarView,

@@ -1,7 +1,6 @@
 package com.team7.taskflow.ui.project;
 
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.text.Editable;
@@ -15,22 +14,24 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import androidx.core.content.ContextCompat;
 
 import com.team7.taskflow.utils.SessionManager;
+import com.team7.taskflow.utils.ProjectColorUtils;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.ProjectRepository;
 import com.team7.taskflow.domain.model.Project;
 import com.google.android.material.card.MaterialCardView;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Màn hình tạo Project mới
  * Chức năng:
  * - Nhập tên, mô tả, project key
  * - Chọn visibility (Public/Private)
- * - Chọn template (Kanban/Scrum/Table)
  * - Chọn màu project
  * - Lưu vào Supabase
  */
@@ -48,11 +49,6 @@ public class CreateProjectActivity extends BaseActivity {
     private ImageView icPublic, icPrivate;
     private TextView tvPublic, tvPrivate;
 
-    // Views - Template
-    private LinearLayout btnKanban, btnScrum, btnTable;
-    private ImageView icKanban, icScrum, icTable;
-    private TextView tvKanban, tvScrum, tvTable;
-
     // Views - Color
     private LinearLayout colorPicker;
     private View[] colorViews;
@@ -66,13 +62,7 @@ public class CreateProjectActivity extends BaseActivity {
     // Data
     private ProjectRepository projectRepository;
     private boolean isPrivate = false;
-    private String selectedTemplate = "KANBAN";
-    private String selectedColor = "#6D88FF";
-
-    // Colors
-    private static final String[] COLORS = {
-            "#6D88FF", "#FF9D7E", "#7DD0B3", "#C893EF", "#64DADB"
-    };
+    private String selectedColorToken = ProjectColorUtils.DEFAULT_COLOR_TOKEN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,17 +90,6 @@ public class CreateProjectActivity extends BaseActivity {
         tvPublic = findViewById(R.id.tvPublic);
         tvPrivate = findViewById(R.id.tvPrivate);
 
-        // Template
-        btnKanban = findViewById(R.id.btnKanban);
-        btnScrum = findViewById(R.id.btnScrum);
-        btnTable = findViewById(R.id.btnTable);
-        icKanban = findViewById(R.id.icKanban);
-        icScrum = findViewById(R.id.icScrum);
-        icTable = findViewById(R.id.icTable);
-        tvKanban = findViewById(R.id.tvKanban);
-        tvScrum = findViewById(R.id.tvScrum);
-        tvTable = findViewById(R.id.tvTable);
-
         // Color picker
         colorPicker = findViewById(R.id.colorPicker);
 
@@ -126,11 +105,16 @@ public class CreateProjectActivity extends BaseActivity {
     private void setupColorPicker() {
         int childCount = colorPicker.getChildCount();
         colorViews = new View[childCount];
+        List<ProjectColorUtils.ProjectColorSpec> palette = ProjectColorUtils.getPalette();
 
         for (int i = 0; i < childCount; i++) {
             final int index = i;
             View colorView = colorPicker.getChildAt(i);
             colorViews[i] = colorView;
+
+            if (colorView instanceof MaterialCardView && index < palette.size()) {
+                ((MaterialCardView) colorView).setCardBackgroundColor(Color.parseColor(palette.get(index).getHex()));
+            }
 
             colorView.setOnClickListener(v -> selectColor(index));
         }
@@ -169,9 +153,7 @@ public class CreateProjectActivity extends BaseActivity {
             }
         }
 
-        if (index < COLORS.length) {
-            selectedColor = COLORS[index];
-        }
+        selectedColorToken = ProjectColorUtils.getTokenByIndex(index);
     }
 
     private void setupListeners() {
@@ -203,10 +185,6 @@ public class CreateProjectActivity extends BaseActivity {
         btnPublic.setOnClickListener(v -> selectVisibility(false));
         btnPrivate.setOnClickListener(v -> selectVisibility(true));
 
-        // Template selection
-        btnKanban.setOnClickListener(v -> selectTemplate("KANBAN"));
-        btnScrum.setOnClickListener(v -> selectTemplate("SCRUM"));
-        btnTable.setOnClickListener(v -> selectTemplate("TABLE"));
     }
 
     private String generateProjectKey(String name) {
@@ -261,56 +239,9 @@ public class CreateProjectActivity extends BaseActivity {
         }
     }
 
-    private void selectTemplate(String template) {
-        selectedTemplate = template;
-
-        int colorSelected = ContextCompat.getColor(this, R.color.primary);
-        int colorUnselected = ContextCompat.getColor(this, R.color.theme_text_secondary);
-
-        // Reset all
-        btnKanban.setBackgroundResource(R.drawable.bg_option_unselected);
-        icKanban.setColorFilter(colorUnselected);
-        tvKanban.setTextColor(colorUnselected);
-
-        btnScrum.setBackgroundResource(R.drawable.bg_option_unselected);
-        icScrum.setColorFilter(colorUnselected);
-        tvScrum.setTextColor(colorUnselected);
-
-        btnTable.setBackgroundResource(R.drawable.bg_option_unselected);
-        icTable.setColorFilter(colorUnselected);
-        tvTable.setTextColor(colorUnselected);
-
-        // Select chosen
-        LinearLayout selectedBtn;
-        ImageView selectedIc;
-        TextView selectedTv;
-
-        switch (template) {
-            case "SCRUM":
-                selectedBtn = btnScrum;
-                selectedIc = icScrum;
-                selectedTv = tvScrum;
-                break;
-            case "TABLE":
-                selectedBtn = btnTable;
-                selectedIc = icTable;
-                selectedTv = tvTable;
-                break;
-            default: // KANBAN
-                selectedBtn = btnKanban;
-                selectedIc = icKanban;
-                selectedTv = tvKanban;
-                break;
-        }
-
-        selectedBtn.setBackgroundResource(R.drawable.bg_option_selected);
-        selectedIc.setColorFilter(colorSelected);
-        selectedTv.setTextColor(colorSelected);
-    }
-
     private void createProject() {
         String name = etProjectName.getText().toString().trim();
-        String key = etProjectKey.getText().toString().trim();
+        String key = etProjectKey.getText().toString().trim().toUpperCase(Locale.US);
         String description = etProjectDescription.getText().toString().trim();
 
         // Validation
@@ -335,20 +266,45 @@ public class CreateProjectActivity extends BaseActivity {
             return;
         }
 
-        // Tạo Project object
+        setLoading(true);
+        projectRepository.getAllUserProjects(userId, new ProjectRepository.ProjectCallback<List<Project>>() {
+            @Override
+            public void onSuccess(List<Project> existingProjects) {
+                runOnUiThread(() -> {
+                    if (isDuplicateProjectName(name, existingProjects)) {
+                        setLoading(false);
+                        etProjectName.setError("Tên project đã tồn tại");
+                        etProjectName.requestFocus();
+                        return;
+                    }
+                    if (isDuplicateProjectKey(key, existingProjects)) {
+                        setLoading(false);
+                        etProjectKey.setError("Project key đã tồn tại");
+                        etProjectKey.requestFocus();
+                        return;
+                    }
+                    performCreateProject(name, key, description, userId);
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                // Nếu không check được danh sách hiện có thì vẫn cho tạo,
+                // backend sẽ là lớp bảo vệ cuối cùng.
+                runOnUiThread(() -> performCreateProject(name, key, description, userId));
+            }
+        });
+    }
+
+    private void performCreateProject(String name, String key, String description, String userId) {
         Project project = new Project();
         project.setName(name);
         project.setProjectKey(key);
         project.setDescription(description);
         project.setOwnerId(userId);
-        project.setColor(selectedColor);
+        project.setColor(selectedColorToken);
         project.setPrivate(isPrivate);
-        project.setTemplate(selectedTemplate);
 
-        // Show loading
-        setLoading(true);
-
-        // Gọi API
         projectRepository.createProject(project, new ProjectRepository.ProjectCallback<Project>() {
             @Override
             public void onSuccess(Project result) {
@@ -359,8 +315,6 @@ public class CreateProjectActivity extends BaseActivity {
                             Toast.LENGTH_SHORT).show();
 
                     Log.d(TAG, "Created project: " + result.getId() + " - " + result.getName());
-
-                    // Quay lại Dashboard
                     finish();
                 });
             }
@@ -369,6 +323,14 @@ public class CreateProjectActivity extends BaseActivity {
             public void onError(String error) {
                 runOnUiThread(() -> {
                     setLoading(false);
+                    String normalized = error == null ? "" : error.toLowerCase(Locale.US);
+                    if (normalized.contains("project_key") || normalized.contains("projects_project_key")) {
+                        etProjectKey.setError("Project key đã tồn tại");
+                        etProjectKey.requestFocus();
+                    } else if (normalized.contains("project_name") || normalized.contains("duplicate")) {
+                        etProjectName.setError("Tên project đã tồn tại");
+                        etProjectName.requestFocus();
+                    }
                     Toast.makeText(CreateProjectActivity.this,
                             "Lỗi: " + error, Toast.LENGTH_LONG).show();
 
@@ -376,6 +338,45 @@ public class CreateProjectActivity extends BaseActivity {
                 });
             }
         });
+    }
+
+    private boolean isDuplicateProjectName(String name, List<Project> existingProjects) {
+        if (existingProjects == null || existingProjects.isEmpty()) {
+            return false;
+        }
+        String normalizedName = normalizeProjectName(name);
+        for (Project existing : existingProjects) {
+            if (existing == null || existing.getName() == null) {
+                continue;
+            }
+            if (normalizeProjectName(existing.getName()).equals(normalizedName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isDuplicateProjectKey(String key, List<Project> existingProjects) {
+        if (existingProjects == null || existingProjects.isEmpty()) {
+            return false;
+        }
+        String normalizedKey = key == null ? "" : key.trim().toUpperCase(Locale.US);
+        for (Project existing : existingProjects) {
+            if (existing == null || existing.getProjectKey() == null) {
+                continue;
+            }
+            if (existing.getProjectKey().trim().toUpperCase(Locale.US).equals(normalizedKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String normalizeProjectName(String rawName) {
+        if (rawName == null) {
+            return "";
+        }
+        return rawName.trim().replaceAll("\\s+", " ").toLowerCase(Locale.US);
     }
 
     private void setLoading(boolean loading) {

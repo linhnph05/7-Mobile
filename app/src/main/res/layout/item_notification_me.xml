@@ -1,101 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardNotificationItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/notification_unread_bg"
-    android:padding="16dp">
+    app:cardBackgroundColor="@color/notification_unread_bg"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
 
-    <FrameLayout
-        android:id="@+id/layout_avatar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/iv_avatar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_avatar_grey_bordered"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
-
-        <TextView
-            android:id="@+id/tv_avatar_letter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="A"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-    </FrameLayout>
-
-    <View
-        android:id="@+id/view_unread_dot"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:background="@drawable/bg_circle_blue"
-        android:backgroundTint="@color/primary"
-        app:layout_constraintCircle="@+id/layout_avatar"
-        app:layout_constraintCircleAngle="45"
-        app:layout_constraintCircleRadius="24dp"
-        tools:ignore="MissingConstraints" />
-
-    <ImageView
-        android:id="@+id/iv_badge_comment"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:background="@drawable/bg_circle_blue"
-        android:backgroundTint="@color/primary_dark"
-        android:padding="3dp"
-        android:src="@android:drawable/ic_dialog_email"
-        app:layout_constraintCircle="@+id/layout_avatar"
-        app:layout_constraintCircleAngle="135"
-        app:layout_constraintCircleRadius="24dp"
-        tools:ignore="MissingConstraints" />
-
-    <TextView
-        android:id="@+id/tv_time"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/theme_text_secondary"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="15m ago" />
+        android:padding="16dp">
 
-    <LinearLayout
-        android:id="@+id/layout_content"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toStartOf="@+id/tv_time"
-        app:layout_constraintStart_toEndOf="@+id/layout_avatar"
-        app:layout_constraintTop_toTopOf="parent">
+        <FrameLayout
+            android:id="@+id/layout_avatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_avatar_grey_bordered"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
+
+            <TextView
+                android:id="@+id/tv_avatar_letter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="A"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+        </FrameLayout>
+
+        <View
+            android:id="@+id/view_unread_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/bg_circle_blue"
+            android:backgroundTint="@color/primary"
+            app:layout_constraintCircle="@+id/layout_avatar"
+            app:layout_constraintCircleAngle="45"
+            app:layout_constraintCircleRadius="24dp"
+            tools:ignore="MissingConstraints" />
+
+        <ImageView
+            android:id="@+id/iv_badge_comment"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:background="@drawable/bg_circle_blue"
+            android:backgroundTint="@color/primary_dark"
+            android:padding="3dp"
+            android:src="@android:drawable/ic_dialog_email"
+            app:layout_constraintCircle="@+id/layout_avatar"
+            app:layout_constraintCircleAngle="135"
+            app:layout_constraintCircleRadius="24dp"
+            tools:ignore="MissingConstraints" />
 
         <TextView
-            android:id="@+id/tv_content"
-            android:layout_width="match_parent"
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="4dp"
-            android:textColor="@color/theme_text_primary"
-            android:textSize="14sp"
-            tools:text="Leader assigned task Fix Lỗi Đăng Nhập to you" />
-
-        <TextView
-            android:id="@+id/tv_context"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
             android:textColor="@color/theme_text_secondary"
             android:textSize="12sp"
-            tools:text="Project: Team7 TaskFlow" />
-    </LinearLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="15m ago" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:id="@+id/layout_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/tv_time"
+            app:layout_constraintStart_toEndOf="@+id/layout_avatar"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tv_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/theme_text_primary"
+                android:textSize="14sp"
+                tools:text="Leader assigned task Fix Lỗi Đăng Nhập to you" />
+
+            <TextView
+                android:id="@+id/tv_context"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/theme_text_secondary"
+                android:textSize="12sp"
+                tools:text="Project: Team7 TaskFlow" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

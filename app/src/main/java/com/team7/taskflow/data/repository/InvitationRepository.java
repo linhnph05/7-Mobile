@@ -245,6 +245,42 @@ public class InvitationRepository {
         return email.trim().toLowerCase(Locale.US);
     }
 
+    public void getLatestInvitationStatus(long projectId, String userEmail, ResultCallback<String> cb) {
+        String normalizedUserEmail = normalizeEmail(userEmail);
+        if (normalizedUserEmail.isEmpty()) {
+            cb.onError("Email không hợp lệ");
+            return;
+        }
+
+        api.findLatestInvitationByProjectAndEmail(
+                "eq." + projectId,
+                "eq." + normalizedUserEmail,
+                "status,invitation_id",
+                "invitation_id.desc",
+                1
+        ).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call,
+                                   Response<List<Map<String, Object>>> response) {
+                if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                    cb.onSuccess(STATUS_PENDING);
+                    return;
+                }
+
+                Object statusRaw = response.body().get(0).get("status");
+                String status = statusRaw != null
+                        ? String.valueOf(statusRaw).trim().toUpperCase(Locale.US)
+                        : STATUS_PENDING;
+                cb.onSuccess(status);
+            }
+
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
+                cb.onError(t.getMessage());
+            }
+        });
+    }
+
     private String resolveAuthUserId(String fallbackUserId) {
         String token = SessionManager.getAccessToken();
         if (token != null && !token.trim().isEmpty()) {

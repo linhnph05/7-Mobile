@@ -905,6 +905,13 @@ public class TaskDetailActivity extends BaseActivity {
                                 if (tvStartTime != null && rs.length() > 11) {
                                     String rawTime = rs.substring(11).trim();
                                     tvStartTime.setText(rawTime.length() >= 5 ? rawTime.substring(0, 5) : rawTime);
+                                } else if (tvStartTime != null) {
+                                    tvStartTime.setText(getString(R.string.task_time_placeholder));
+                                }
+                            } else {
+                                tvStartDate.setText(getString(R.string.task_date_placeholder));
+                                if (tvStartTime != null) {
+                                    tvStartTime.setText(getString(R.string.task_time_placeholder));
                                 }
                             }
                             if (t.getDueDate() != null) {
@@ -913,6 +920,13 @@ public class TaskDetailActivity extends BaseActivity {
                                 if (tvDueTime != null && rd.length() > 11) {
                                     String rawTime = rd.substring(11).trim();
                                     tvDueTime.setText(rawTime.length() >= 5 ? rawTime.substring(0, 5) : rawTime);
+                                } else if (tvDueTime != null) {
+                                    tvDueTime.setText(getString(R.string.task_time_placeholder));
+                                }
+                            } else {
+                                tvDueDate.setText(getString(R.string.task_date_placeholder));
+                                if (tvDueTime != null) {
+                                    tvDueTime.setText(getString(R.string.task_time_placeholder));
                                 }
                             }
                             selectedTag = t.getTag();

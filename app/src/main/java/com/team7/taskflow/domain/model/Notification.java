@@ -3,9 +3,6 @@ package com.team7.taskflow.domain.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -87,6 +84,9 @@ public class Notification {
 
     /** Task activity details (fetched from task_activities table for TASK_STATUS_CHANGED) */
     private transient TaskActivity activityDetail;
+
+    /** Invitation status for PROJECT_INVITE notifications: PENDING/ACCEPTED/DENIED */
+    private transient String inviteStatus;
 
     // ── Constructors ────────────────────────────────────────────────
 
@@ -191,6 +191,14 @@ public class Notification {
 
     public void setActivityDetail(TaskActivity activityDetail) {
         this.activityDetail = activityDetail;
+    }
+
+    public String getInviteStatus() {
+        return inviteStatus;
+    }
+
+    public void setInviteStatus(String inviteStatus) {
+        this.inviteStatus = inviteStatus;
     }
 
     // ── Client-enriched field accessors ──────────────────────────────
@@ -343,6 +351,12 @@ public class Notification {
                 return buildStatusChangeContent(actor, activity);
             case "UPDATE_DUE_DATE":
                 return buildDueDateChangeContent(actor, activity);
+            case "UPDATE_TIME":
+            case "UPDATE_DATETIME":
+            case "UPDATE_DATE_TIME":
+            case "UPDATE_START_AND_DUE_DATE":
+            case "UPDATE_TIME_RANGE":
+                return buildDateTimeChangeContent(actor, activity);
             case "UPDATE_PRIORITY":
                 return buildPriorityChangeContent(actor, activity);
             case "UPDATE_START_DATE":
@@ -411,6 +425,18 @@ public class Notification {
         return actor + " changed the start date.";
     }
 
+    private String buildDateTimeChangeContent(String actor, TaskActivity activity) {
+        String oldVal = activity.getOldValue();
+        String newVal = activity.getNewValue();
+
+        if (newVal != null && !newVal.isEmpty()) {
+            return actor + " changed task time to <b>" + formatDateDisplay(newVal) + "</b>.";
+        } else if (oldVal != null && !oldVal.isEmpty()) {
+            return actor + " removed task time.";
+        }
+        return actor + " changed task time.";
+    }
+
     private String buildTitleChangeContent(String actor, TaskActivity activity) {
         String newVal = activity.getNewValue();
 
@@ -463,34 +489,62 @@ public class Notification {
     /**
      * Format date string for display in Vietnam timezone.
      * - Date only: dd/MM/yyyy
-     * - Date-time: HH:mm dd/MM/yyyy
+     * - Date-time: dd/MM/yyyy HH:mm
      */
     private String formatDateDisplay(String dateStr) {
         if (dateStr == null || dateStr.isEmpty()) {
             return dateStr;
         }
 
-        String value = dateStr.trim();
-        ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+        String normalized = dateStr.trim().replace('T', ' ');
+        String datePart = extractDatePart(normalized);
+        if (datePart == null) {
+            return normalized;
+        }
+
+        String formattedDate = formatDatePart(datePart);
+        String timePart = extractTimePart(normalized);
+        if (timePart == null) {
+            return formattedDate;
+        }
+
+        return formattedDate + " " + timePart;
+    }
+
+    private String extractDatePart(String value) {
+        try {
+            if (value != null && value.length() >= 10) {
+                String candidate = value.substring(0, 10);
+                LocalDate.parse(candidate, DateTimeFormatter.ISO_LOCAL_DATE);
+                return candidate;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private String formatDatePart(String datePart) {
+        try {
+            LocalDate localDate = LocalDate.parse(datePart, DateTimeFormatter.ISO_LOCAL_DATE);
+            return localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (Exception ignored) {
+            return datePart;
+        }
+    }
+
+    private String extractTimePart(String value) {
+        if (value == null || value.length() <= 10) {
+            return null;
+        }
 
         try {
-            if (value.contains("T")) {
-                OffsetDateTime offsetDateTime = OffsetDateTime.parse(value, DateTimeFormatter.ISO_DATE_TIME);
-                return offsetDateTime.atZoneSameInstant(vietnamZone).format(dateTimeFormatter);
+            String rawTime = value.substring(11).trim();
+            if (rawTime.isEmpty()) {
+                return null;
             }
-
-            if (value.contains(":")) {
-                DateTimeFormatter inputDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                LocalDateTime localDateTime = LocalDateTime.parse(value, inputDateTime);
-                return localDateTime.atZone(vietnamZone).format(dateTimeFormatter);
-            }
-
-            LocalDate localDate = LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE);
-            return localDate.format(dateFormatter);
-        } catch (Exception e) {
-            return value;
+            return rawTime.length() >= 5 ? rawTime.substring(0, 5) : rawTime;
+        } catch (Exception ignored) {
         }
+        return null;
     }
 }

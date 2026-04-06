@@ -20,15 +20,16 @@
             android:id="@+id/tvProjectTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#1A3B82F6"
+            android:background="@drawable/bg_project_role_chip"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:text="High priority"
-            android:textColor="#3B82F6"
+            android:text="@string/project_role_owner"
+            android:textColor="@color/theme_text_secondary"
             android:textSize="11sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Owner" />
 
         <ImageView
             android:id="@+id/btnOptions"

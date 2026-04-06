@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -46,6 +47,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,6 +78,9 @@ public class DashboardActivity extends BaseActivity {
     private TextView tvAvatarLetter;
     private TextView tvWorkspaceName;
     private EditText searchBar;
+    private MaterialButton btnFilterAll;
+    private MaterialButton btnFilterRecent;
+    private MaterialButton btnFilterOwned;
     private RecyclerView rvProjects;
     private BottomNavigationView bottomNavigationView;
     private boolean isBottomNavNavigating = false;
@@ -80,6 +90,17 @@ public class DashboardActivity extends BaseActivity {
     private ProjectRepository projectRepository;
     private String currentUserId;
     private List<Project> allProjects = new ArrayList<>();
+    private DashboardProjectFilter activeFilter = DashboardProjectFilter.ALL;
+
+    private static final int RECENT_PROJECT_LIMIT = 8;
+    private static final DateTimeFormatter DB_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DB_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private enum DashboardProjectFilter {
+        ALL,
+        RECENT,
+        OWNED
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +183,9 @@ public class DashboardActivity extends BaseActivity {
         tvAvatarLetter = findViewById(R.id.tvAvatarLetter);
         tvWorkspaceName = findViewById(R.id.tvWorkspaceName);
         searchBar = findViewById(R.id.searchBar);
+        btnFilterAll = findViewById(R.id.btnFilterAll);
+        btnFilterRecent = findViewById(R.id.btnFilterRecent);
+        btnFilterOwned = findViewById(R.id.btnFilterOwned);
         rvProjects = findViewById(R.id.projectRecyclerView);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         if (bottomNavigationView != null) {
@@ -171,6 +195,11 @@ public class DashboardActivity extends BaseActivity {
 
         View bottomBarContainer = findViewById(R.id.includeBottomBar);
         if (bottomBarContainer != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomBarContainer, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+                return insets;
+            });
             bottomBarContainer.bringToFront();
         }
         if (fabAdd != null) {
@@ -191,6 +220,7 @@ public class DashboardActivity extends BaseActivity {
             intent.putExtra("project_name", project.getName());
             intent.putExtra("project_key", project.getProjectKey());
             intent.putExtra("project_desc", project.getDescription());
+            intent.putExtra("project_color", project.getColor());
             startActivity(intent);
         });
 
@@ -231,6 +261,8 @@ public class DashboardActivity extends BaseActivity {
             });
         }
 
+        setupFilterButtons();
+
         // Bottom navigation bar
         if (bottomNavigationView != null) {
             bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -258,6 +290,38 @@ public class DashboardActivity extends BaseActivity {
                 return false;
             });
         }
+    }
+
+    private void setupFilterButtons() {
+        if (btnFilterAll == null || btnFilterRecent == null || btnFilterOwned == null) {
+            return;
+        }
+
+        btnFilterAll.setOnClickListener(v -> updateActiveFilter(DashboardProjectFilter.ALL));
+        btnFilterRecent.setOnClickListener(v -> updateActiveFilter(DashboardProjectFilter.RECENT));
+        btnFilterOwned.setOnClickListener(v -> updateActiveFilter(DashboardProjectFilter.OWNED));
+
+        syncFilterButtonState();
+    }
+
+    private void updateActiveFilter(DashboardProjectFilter filter) {
+        if (filter == null || activeFilter == filter) {
+            return;
+        }
+        activeFilter = filter;
+        syncFilterButtonState();
+        applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
+                ? searchBar.getText().toString()
+                : "");
+    }
+
+    private void syncFilterButtonState() {
+        if (btnFilterAll == null || btnFilterRecent == null || btnFilterOwned == null) {
+            return;
+        }
+        btnFilterAll.setChecked(activeFilter == DashboardProjectFilter.ALL);
+        btnFilterRecent.setChecked(activeFilter == DashboardProjectFilter.RECENT);
+        btnFilterOwned.setChecked(activeFilter == DashboardProjectFilter.OWNED);
     }
 
     /**
@@ -352,7 +416,7 @@ public class DashboardActivity extends BaseActivity {
      */
     private void loadProjects() {
         if (currentUserId == null || currentUserId.isEmpty()) {
-            Toast.makeText(this, "Vui lòng đăng nhập để xem projects", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.dashboard_login_required), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -364,9 +428,10 @@ public class DashboardActivity extends BaseActivity {
             public void onSuccess(List<Project> projects) {
                 runOnUiThread(() -> {
                     if (projects == null || projects.isEmpty()) {
-                        Toast.makeText(DashboardActivity.this,
-                                "Bạn chưa có project nào. Nhấn + để tạo mới!",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(
+                            DashboardActivity.this,
+                            getString(R.string.dashboard_no_projects_message),
+                            Toast.LENGTH_SHORT).show();
                         allProjects = new ArrayList<>();
                         projectAdapter.setProjects(new java.util.ArrayList<>());
                     } else {
@@ -384,7 +449,7 @@ public class DashboardActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     Log.d(TAG, "Error loading projects: " + error);
                     Toast.makeText(DashboardActivity.this,
-                            "Lỗi tải projects: " + error, Toast.LENGTH_SHORT).show();
+                            getString(R.string.dashboard_load_projects_error, error), Toast.LENGTH_SHORT).show();
                 });
             }
         });
@@ -439,14 +504,16 @@ public class DashboardActivity extends BaseActivity {
             return;
         }
 
+        List<Project> baseList = applyBaseFilter(allProjects, activeFilter);
+
         if (keyword == null || keyword.trim().isEmpty()) {
-            projectAdapter.setProjects(new ArrayList<>(allProjects));
+            projectAdapter.setProjects(baseList);
             return;
         }
 
         String query = keyword.trim().toLowerCase(Locale.US);
         List<Project> filtered = new ArrayList<>();
-        for (Project project : allProjects) {
+        for (Project project : baseList) {
             if (project == null) {
                 continue;
             }
@@ -456,5 +523,85 @@ public class DashboardActivity extends BaseActivity {
             }
         }
         projectAdapter.setProjects(filtered);
+    }
+
+    private List<Project> applyBaseFilter(List<Project> source, DashboardProjectFilter filter) {
+        List<Project> safeSource = source != null ? source : new ArrayList<>();
+        if (filter == DashboardProjectFilter.OWNED) {
+            List<Project> ownedProjects = new ArrayList<>();
+            for (Project project : safeSource) {
+                if (isOwnedByCurrentUser(project)) {
+                    ownedProjects.add(project);
+                }
+            }
+            return ownedProjects;
+        }
+
+        if (filter == DashboardProjectFilter.RECENT) {
+            List<Project> sortedByRecent = new ArrayList<>();
+            for (Project project : safeSource) {
+                if (project != null) {
+                    sortedByRecent.add(project);
+                }
+            }
+            sortedByRecent.sort((left, right) -> Long.compare(resolveCreatedAtEpoch(right), resolveCreatedAtEpoch(left)));
+
+            int endIndex = Math.min(RECENT_PROJECT_LIMIT, sortedByRecent.size());
+            return new ArrayList<>(sortedByRecent.subList(0, endIndex));
+        }
+
+        List<Project> all = new ArrayList<>();
+        for (Project project : safeSource) {
+            if (project != null) {
+                all.add(project);
+            }
+        }
+        return all;
+    }
+
+    private boolean isOwnedByCurrentUser(Project project) {
+        if (project == null) {
+            return false;
+        }
+        if (project.isOwner()) {
+            return true;
+        }
+        String ownerId = project.getOwnerId();
+        return ownerId != null
+                && currentUserId != null
+                && ownerId.trim().equalsIgnoreCase(currentUserId.trim());
+    }
+
+    private long resolveCreatedAtEpoch(Project project) {
+        if (project == null || project.getCreatedAt() == null) {
+            return Long.MIN_VALUE;
+        }
+        String createdAt = project.getCreatedAt().trim();
+        if (createdAt.isEmpty()) {
+            return Long.MIN_VALUE;
+        }
+
+        try {
+            return Instant.parse(createdAt).toEpochMilli();
+        } catch (DateTimeParseException ignored) {
+        }
+
+        try {
+            return LocalDateTime.parse(createdAt, DB_DATETIME_FORMAT)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+        } catch (DateTimeParseException ignored) {
+        }
+
+        try {
+            return LocalDate.parse(createdAt, DB_DATE_FORMAT)
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+        } catch (DateTimeParseException ignored) {
+        }
+
+        return Long.MIN_VALUE;
     }
 }

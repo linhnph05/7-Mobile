@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
 
 import com.team7.taskflow.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
@@ -33,13 +34,15 @@ import com.team7.taskflow.ui.project.TaskDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NotificationsActivity extends BaseActivity {
 
     private static final String PREFS_NOTIFICATION_SEEN = "notification_prefs";
     private static final String KEY_LAST_SEEN_NOTIFICATION_MS = "last_seen_notification_ms";
 
-    private ImageButton btnBack, btnMarkAllRead, btnNotificationSettings;
+    private ImageButton btnBack, btnMarkAllRead;
     private AutoCompleteTextView actvFilterType;
     private Chip chipUnread;
     private RecyclerView rvNotifications;
@@ -52,10 +55,8 @@ public class NotificationsActivity extends BaseActivity {
     private final InvitationRepository invitationRepo = new InvitationRepository();
     private final TaskRepository taskRepository = TaskRepository.getInstance();
 
-    private static final String[] FILTER_OPTIONS = {
-            "All types", "@me", "Comment", "Join request"
-    };
-    private String currentFilter = "All types";
+        private String[] filterOptions;
+        private String currentFilter;
     private boolean showUnreadOnly = false;
 
     @Override
@@ -86,14 +87,25 @@ public class NotificationsActivity extends BaseActivity {
     private void initViews() {
         btnBack                 = findViewById(R.id.btnBack);
         btnMarkAllRead          = findViewById(R.id.btnMarkAllRead);
-        btnNotificationSettings = findViewById(R.id.btnNotificationSettings);
         actvFilterType          = findViewById(R.id.actvFilterType);
         chipUnread              = findViewById(R.id.chipUnread);
         rvNotifications         = findViewById(R.id.rvNotifications);
         layoutEmptyState        = findViewById(R.id.layoutEmptyState);
         btnClearFilters         = findViewById(R.id.btnClearFilters);
 
+        filterOptions = new String[] {
+            getString(R.string.notification_filter_all_types),
+            getString(R.string.notification_filter_me),
+            getString(R.string.notification_filter_comment),
+            getString(R.string.notification_filter_join_request),
+            getString(R.string.notification_filter_system)
+        };
+        currentFilter = filterOptions[0];
+
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
+        rvNotifications.addItemDecoration(new NotificationItemDividerDecoration(
+            ContextCompat.getColor(this, R.color.theme_divider),
+            Math.max(1, Math.round(getResources().getDisplayMetrics().density))));
         setupAdapter();
     }
 
@@ -127,7 +139,7 @@ public class NotificationsActivity extends BaseActivity {
                 Long projectId = notification.getReferenceId();
                 if (projectId == null) {
                     Toast.makeText(NotificationsActivity.this,
-                            "Không tìm thấy thông tin lời mời", Toast.LENGTH_SHORT).show();
+                            getString(R.string.notification_invite_missing_info), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -135,7 +147,7 @@ public class NotificationsActivity extends BaseActivity {
                 String userEmail = SessionManager.getUserEmail(); // ✅ Cần email để tìm invitation
                 if (userId == null || userId.trim().isEmpty() || userEmail == null || userEmail.trim().isEmpty()) {
                     Toast.makeText(NotificationsActivity.this,
-                            "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show();
+                            getString(R.string.notification_session_expired), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -143,10 +155,14 @@ public class NotificationsActivity extends BaseActivity {
                         new InvitationRepository.ResultCallback<Void>() {
                             @Override
                             public void onSuccess(Void data) {
+                                adapter.markInviteDecision(notification.getNotificationId(), true);
                                 markInviteAsRead(notification);
                                 runOnUiThread(() ->
                                         Toast.makeText(NotificationsActivity.this,
-                                                "Đã tham gia dự án: " + notification.getReferenceName(),
+                                        getString(R.string.notification_joined_project_success,
+                                            notification.getReferenceName() != null
+                                                ? notification.getReferenceName()
+                                                : ""),
                                                 Toast.LENGTH_SHORT).show());
                             }
                             @Override
@@ -161,14 +177,14 @@ public class NotificationsActivity extends BaseActivity {
                 Long projectId = notification.getReferenceId();
                 if (projectId == null) {
                     Toast.makeText(NotificationsActivity.this,
-                            "Không tìm thấy thông tin lời mời", Toast.LENGTH_SHORT).show();
+                            getString(R.string.notification_invite_missing_info), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 String userEmail = SessionManager.getUserEmail(); // ✅ Cần email
                 if (userEmail == null) {
                     Toast.makeText(NotificationsActivity.this,
-                            "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show();
+                            getString(R.string.notification_session_expired), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -176,14 +192,15 @@ public class NotificationsActivity extends BaseActivity {
                         new InvitationRepository.ResultCallback<Void>() {
                             @Override
                             public void onSuccess(Void data) {
+                                adapter.markInviteDecision(notification.getNotificationId(), false);
                                 markInviteAsRead(notification);
                                 runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
-                                        "Đã từ chối lời mời", Toast.LENGTH_SHORT).show());
+                                        getString(R.string.notification_decline_success), Toast.LENGTH_SHORT).show());
                             }
                             @Override
                             public void onError(String message) {
                                 runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
-                                        "Lỗi từ chối: " + message, Toast.LENGTH_SHORT).show());
+                                        getString(R.string.notification_decline_error, message), Toast.LENGTH_SHORT).show());
                             }
                         });
             }
@@ -214,17 +231,19 @@ public class NotificationsActivity extends BaseActivity {
 
     private void setupFilterDropdown() {
         ArrayAdapter<String> dropdownAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, FILTER_OPTIONS);
+                this, android.R.layout.simple_dropdown_item_1line, filterOptions);
         actvFilterType.setAdapter(dropdownAdapter);
-        actvFilterType.setText(FILTER_OPTIONS[0], false);
+        actvFilterType.setText(filterOptions[0], false);
         actvFilterType.setOnItemClickListener((parent, view, position, id) -> {
-            currentFilter = FILTER_OPTIONS[position];
+            currentFilter = filterOptions[position];
             applyFilters();
         });
     }
 
     private void showAcceptInviteErrorDialog(String message, Long projectId, String userId, String userEmail) {
-        String safeMessage = (message == null || message.trim().isEmpty()) ? "Unknown error" : message.trim();
+        String safeMessage = (message == null || message.trim().isEmpty())
+            ? getString(R.string.notification_accept_error_unknown)
+            : message.trim();
         String details = "Accept invite failed"
                 + "\nproject_id: " + (projectId != null ? projectId : "null")
                 + "\nuser_id: " + (userId != null ? userId : "null")
@@ -232,14 +251,14 @@ public class NotificationsActivity extends BaseActivity {
                 + "\n\nerror:\n" + safeMessage;
 
         new AlertDialog.Builder(this)
-                .setTitle("Lỗi tham gia dự án")
+                .setTitle(getString(R.string.notification_accept_error_title))
                 .setMessage(details)
-                .setPositiveButton("Đóng", null)
-                .setNeutralButton("Copy", (d, w) -> {
+                .setPositiveButton(getString(R.string.notification_accept_error_close), null)
+                .setNeutralButton(getString(R.string.notification_accept_error_copy), (d, w) -> {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                     if (clipboard != null) {
                         clipboard.setPrimaryClip(ClipData.newPlainText("accept_invite_error", details));
-                        Toast.makeText(this, "Đã copy lỗi", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.notification_accept_error_copied), Toast.LENGTH_SHORT).show();
                     }
                 })
                 .show();
@@ -248,7 +267,6 @@ public class NotificationsActivity extends BaseActivity {
     private void setupClickListeners() {
         btnBack.setOnClickListener(v -> finish());
         btnMarkAllRead.setOnClickListener(v -> markAllAsRead());
-        btnNotificationSettings.setOnClickListener(v -> openNotificationSettings());
         chipUnread.setOnCheckedChangeListener((btn, isChecked) -> {
             showUnreadOnly = isChecked;
             applyFilters();
@@ -266,7 +284,7 @@ public class NotificationsActivity extends BaseActivity {
                     public void onSuccess(List<Notification> result) {
                         runOnUiThread(() -> {
                             allNotifications = result;
-                            applyFilters();
+                            hydrateInviteStatusesAndApplyFilters();
                         });
                     }
                     @Override
@@ -279,27 +297,94 @@ public class NotificationsActivity extends BaseActivity {
                 });
     }
 
+    private void hydrateInviteStatusesAndApplyFilters() {
+        String userEmail = SessionManager.getUserEmail();
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            applyFilters();
+            return;
+        }
+
+        List<Notification> inviteNotifications = new ArrayList<>();
+        for (Notification notification : allNotifications) {
+            if (notification != null
+                    && notification.getType() == NotificationType.PROJECT_INVITE
+                    && notification.getReferenceId() != null
+                    && notification.getReferenceId() > 0) {
+                inviteNotifications.add(notification);
+            }
+        }
+
+        if (inviteNotifications.isEmpty()) {
+            applyFilters();
+            return;
+        }
+
+        AtomicInteger pending = new AtomicInteger(inviteNotifications.size());
+        String normalizedEmail = userEmail.trim().toLowerCase(Locale.US);
+        for (Notification inviteNotification : inviteNotifications) {
+            invitationRepo.getLatestInvitationStatus(
+                    inviteNotification.getReferenceId(),
+                    normalizedEmail,
+                    new InvitationRepository.ResultCallback<String>() {
+                        @Override
+                        public void onSuccess(String status) {
+                            runOnUiThread(() -> {
+                                inviteNotification.setInviteStatus(status);
+                                if ("ACCEPTED".equalsIgnoreCase(status) || "DENIED".equalsIgnoreCase(status)) {
+                                    markInviteAsRead(inviteNotification);
+                                }
+                                if (pending.decrementAndGet() == 0) {
+                                    applyFilters();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            runOnUiThread(() -> {
+                                if (pending.decrementAndGet() == 0) {
+                                    applyFilters();
+                                }
+                            });
+                        }
+                    });
+        }
+    }
+
     private void applyFilters() {
         List<Notification> filtered = new ArrayList<>();
         for (Notification n : allNotifications) {
-            boolean matchesType = true;
-            if ("@me".equals(currentFilter)) {
-                matchesType = (n.getType() == NotificationType.TASK_ASSIGNED
-                        || n.getType() == NotificationType.MENTION
-                        || n.getType() == NotificationType.REACTION
-                        || n.getType() == NotificationType.DELETED
-                        || n.getType() == NotificationType.TASK_STATUS_CHANGED
-                        || n.getType() == NotificationType.ATTACHMENT_ADDED);
-            } else if ("Comment".equals(currentFilter)) {
-                matchesType = (n.getType() == NotificationType.COMMENT);
-            } else if ("Join request".equals(currentFilter)) {
-                matchesType = (n.getType() == NotificationType.PROJECT_INVITE);
-            }
+            boolean matchesType = matchesTypeFilter(n);
             boolean matchesRead = !showUnreadOnly || !n.isRead();
             if (matchesType && matchesRead) filtered.add(n);
         }
         adapter.setNotifications(filtered);
         showEmptyState(filtered.isEmpty());
+    }
+
+    private boolean matchesTypeFilter(Notification notification) {
+        if (notification == null) {
+            return false;
+        }
+        NotificationType type = notification.getType();
+        if (getString(R.string.notification_filter_me).equals(currentFilter)) {
+            return type == NotificationType.TASK_ASSIGNED
+                    || type == NotificationType.MENTION
+                    || type == NotificationType.REACTION
+                    || type == NotificationType.DELETED
+                    || type == NotificationType.TASK_STATUS_CHANGED
+                    || type == NotificationType.ATTACHMENT_ADDED;
+        }
+        if (getString(R.string.notification_filter_comment).equals(currentFilter)) {
+            return type == NotificationType.COMMENT;
+        }
+        if (getString(R.string.notification_filter_join_request).equals(currentFilter)) {
+            return type == NotificationType.PROJECT_INVITE;
+        }
+        if (getString(R.string.notification_filter_system).equals(currentFilter)) {
+            return type == NotificationType.SYSTEM_ALERT;
+        }
+        return true;
     }
 
     private void markAllAsRead() {
@@ -315,7 +400,7 @@ public class NotificationsActivity extends BaseActivity {
                 new NotificationRepository.NotificationCallback<Void>() {
                     @Override public void onSuccess(Void r) {
                         runOnUiThread(() -> Toast.makeText(NotificationsActivity.this,
-                                "All notifications marked as read", Toast.LENGTH_SHORT).show());
+                                getString(R.string.notification_mark_all_read_success), Toast.LENGTH_SHORT).show());
                     }
                     @Override public void onError(String e) {
                         runOnUiThread(() -> loadNotifications());
@@ -323,12 +408,10 @@ public class NotificationsActivity extends BaseActivity {
                 });
     }
 
-    private void openNotificationSettings() {}
-
     private void clearFilters() {
-        currentFilter = "All types";
+        currentFilter = filterOptions[0];
         showUnreadOnly = false;
-        actvFilterType.setText(FILTER_OPTIONS[0], false);
+        actvFilterType.setText(filterOptions[0], false);
         chipUnread.setChecked(false);
         applyFilters();
     }
