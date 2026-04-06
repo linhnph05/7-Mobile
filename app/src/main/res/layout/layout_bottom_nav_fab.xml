@@ -13,6 +13,7 @@
     android:paddingBottom="0dp"
     android:translationZ="18dp">
 
+    <!-- WARNING: Shared bottom nav shell. Do not change structure/ids without updating all screens. -->
     <FrameLayout
         android:id="@+id/bottomNavSurface"
         android:layout_width="0dp"
@@ -22,6 +23,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- Keep itemIconTint as null here. Icons provide their own checked/unchecked drawables. -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigationView"
             android:layout_width="match_parent"
@@ -39,6 +41,7 @@
 
     </FrameLayout>
 
+    <!-- WARNING: FAB and bottom nav placement are tightly coupled. Avoid changing constraints casually. -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"

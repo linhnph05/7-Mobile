@@ -13,8 +13,8 @@
     <color name="theme_card">#1A1F36</color>
     <color name="theme_input_bg">#1E2235</color>
     <color name="theme_bottom_nav_bg">#1A1F36</color>
-    <color name="theme_bottom_nav_icon_line">#000000</color>
-    <color name="theme_bottom_nav_icon_unchecked">#FFFFFF</color>
+    <color name="theme_bottom_nav_icon_line">#E2E8F0</color>
+    <color name="theme_bottom_nav_icon_unchecked">#E2E8F0</color>
     <color name="theme_bottom_nav_fab_icon">#FFFFFF</color>
 
     <!-- Text -->
