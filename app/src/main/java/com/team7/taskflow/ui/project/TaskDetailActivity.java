@@ -200,6 +200,17 @@ public class TaskDetailActivity extends BaseActivity {
 
         fab.setVisibility(taskId != null ? View.VISIBLE : View.GONE);
         fab.setOnClickListener(v -> openAiCreateSubTask());
+        updateSubTaskFabVisibility();
+    }
+
+    private void updateSubTaskFabVisibility() {
+        View fab = findViewById(R.id.fabAddSubTask);
+        if (fab == null) return;
+        
+        // Hide button if current task is already a subtask (has parent)
+        boolean isSubtask = selectedParentTaskId != null && selectedParentTaskId > 0;
+        boolean canCreateSubtask = taskId != null && !isSubtask;
+        fab.setVisibility(canCreateSubtask ? View.VISIBLE : View.GONE);
     }
 
     private void setupFocusModeFab() {
@@ -1119,6 +1130,7 @@ public class TaskDetailActivity extends BaseActivity {
                             if (selectedTag != null && tvTag != null) tvTag.setText(selectedTag);
                             selectedParentTaskId = t.getParentTaskId();
                             updateDependencyUi();
+                            updateSubTaskFabVisibility();
                             renderSubTaskInfo(t.getParentTaskId() != null ? ("#" + t.getParentTaskId()) : null);
                             if (currentAssigneeId != null) setAssigneeById(currentAssigneeId);
                             setLoading(false);
@@ -1211,14 +1223,38 @@ public class TaskDetailActivity extends BaseActivity {
     private TaskRepository.TaskCallback<Task> handleResult() {
         return new TaskRepository.TaskCallback<Task>() {
             @Override public void onSuccess(Task r) {
-                runOnUiThread(() -> {
-                    String msg = taskId == null ? "Đã tạo công việc" : "Đã cập nhật công việc";
-                    if (!attachedFileUris.isEmpty()) { uploadSuccessCount = 0; uploadNextAttachment(0, r.getId(), msg); }
-                    else { setLoading(false); Toast.makeText(TaskDetailActivity.this, msg, Toast.LENGTH_SHORT).show(); setResult(RESULT_OK); finish(); }
-                });
+                String msg = taskId == null ? "Đã tạo công việc" : "Đã cập nhật công việc";
+                
+                // If status changed to DONE and task has no parent, cascade DONE to all subtasks
+                if ("DONE".equalsIgnoreCase(selectedStatus) && (selectedParentTaskId == null || selectedParentTaskId <= 0)) {
+                    taskRepository.updateSubtasksStatus(r.getId(), new TaskRepository.TaskCallback<Void>() {
+                        @Override public void onSuccess(Void result) {
+                            handleTaskSaveCompletion(r.getId(), msg);
+                        }
+                        @Override public void onError(String error) {
+                            handleTaskSaveCompletion(r.getId(), msg);
+                        }
+                    });
+                } else {
+                    handleTaskSaveCompletion(r.getId(), msg);
+                }
             }
             @Override public void onError(String e) { runOnUiThread(() -> { setLoading(false); Toast.makeText(TaskDetailActivity.this, "Không thành công: " + e, Toast.LENGTH_SHORT).show(); }); }
         };
+    }
+
+    private void handleTaskSaveCompletion(long savedTaskId, String msg) {
+        runOnUiThread(() -> {
+            if (!attachedFileUris.isEmpty()) { 
+                uploadSuccessCount = 0; 
+                uploadNextAttachment(0, savedTaskId, msg); 
+            } else { 
+                setLoading(false); 
+                Toast.makeText(TaskDetailActivity.this, msg, Toast.LENGTH_SHORT).show(); 
+                setResult(RESULT_OK); 
+                finish(); 
+            }
+        });
     }
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1322,20 +1358,7 @@ public class TaskDetailActivity extends BaseActivity {
     }
 
     private void attemptSetStatus(String targetStatus) {
-        if (!"DONE".equalsIgnoreCase(targetStatus) || selectedParentTaskId == null) {
-            setStatus(targetStatus);
-            return;
-        }
-        setLoading(true);
-        taskRepository.getTaskById(selectedParentTaskId, new TaskRepository.TaskCallback<Task>() {
-            @Override public void onSuccess(Task dep) {
-                runOnUiThread(() -> { setLoading(false);
-                    if (dep != null && "DONE".equalsIgnoreCase(dep.getStatus())) setStatus("DONE");
-                    else Toast.makeText(TaskDetailActivity.this, "Task liên kết phải hoàn thành trước khi đóng task này", Toast.LENGTH_LONG).show();
-                });
-            }
-            @Override public void onError(String e) { runOnUiThread(() -> { setLoading(false); Toast.makeText(TaskDetailActivity.this, "Không kiểm tra được trạng thái task liên kết", Toast.LENGTH_SHORT).show(); }); }
-        });
+        setStatus(targetStatus);
     }
 
     private void showDependencyPicker() {

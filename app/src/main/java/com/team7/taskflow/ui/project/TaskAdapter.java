@@ -208,23 +208,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
 
             SubtaskProgress progress = task.getId() != null ? subtaskProgressByParentId.get(task.getId()) : null;
-            if (progress != null && progress.total > 0) {
-                layoutSubtaskProgress.setVisibility(View.VISIBLE);
-                pbSubtaskProgress.setProgress(progress.percent);
-                tvSubtaskProgress.setText(itemView.getContext().getString(
-                        R.string.task_subtask_progress_format,
-                        progress.done,
-                        progress.total,
-                        progress.percent));
+            if (progress == null || progress.total <= 0) {
+                layoutSubtaskProgress.setVisibility(View.GONE);
                 return;
             }
 
             layoutSubtaskProgress.setVisibility(View.VISIBLE);
-            int statusPercent = resolveStatusProgress(task.getStatus());
-            pbSubtaskProgress.setProgress(statusPercent);
+            pbSubtaskProgress.setProgress(progress.percent);
             tvSubtaskProgress.setText(itemView.getContext().getString(
-                    R.string.task_progress_format,
-                    statusPercent));
+                    R.string.task_subtask_progress_format,
+                    progress.done,
+                    progress.total,
+                    progress.percent));
         }
 
         private String formatDate(String rawDate) {
@@ -341,20 +336,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
         String normalized = status.toUpperCase(Locale.US);
         return normalized.contains("DONE") || "COMPLETED".equals(normalized);
-    }
-
-    private int resolveStatusProgress(String status) {
-        if (status == null) {
-            return 0;
-        }
-        String normalized = status.toUpperCase(Locale.US);
-        if (normalized.contains("DONE") || "COMPLETED".equals(normalized)) {
-            return 100;
-        }
-        if (normalized.contains("DOING") || normalized.contains("PROGRESS") || "IN_PROGRESS".equals(normalized)) {
-            return 50;
-        }
-        return 0;
     }
 
     private static class SubtaskProgress {

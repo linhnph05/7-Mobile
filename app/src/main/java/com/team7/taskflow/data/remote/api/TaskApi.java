@@ -58,6 +58,14 @@ public interface TaskApi {
     );
 
     /**
+     * Get tasks by parent task ID (subtasks)
+     */
+    @GET("tasks")
+    Call<List<Task>> getTasksByParentId(
+            @Query("parent_task_id") String parentTaskIdFilter
+    );
+
+    /**
      * Get tasks assigned to a user
      */
     @GET("tasks")

@@ -146,12 +146,43 @@ public class AiCreateActivity extends AppCompatActivity {
         long parentTaskId = getIntent().getLongExtra(EXTRA_PARENT_TASK_ID, -1);
         if (parentTaskId > 0) {
             selectedParentTaskId = parentTaskId;
+            // Validate that parent task doesn't already have a parent (prevent nested subtasks)
+            validateParentTaskHierarchy();
         }
         selectedParentTaskTitle = getIntent().getStringExtra(EXTRA_PARENT_TASK_TITLE);
 
         if (projectId != -1) {
             loadProjectMembers();
         }
+    }
+
+    private void validateParentTaskHierarchy() {
+        if (selectedParentTaskId == null || selectedParentTaskId <= 0) {
+            return;
+        }
+
+        TaskRepository.getInstance().getTaskById(selectedParentTaskId, new TaskRepository.TaskCallback<Task>() {
+            @Override
+            public void onSuccess(Task parentTask) {
+                if (parentTask != null && parentTask.getParentTaskId() != null && parentTask.getParentTaskId() > 0) {
+                    // Parent task already has a parent - disallow nesting beyond 1 level
+                    runOnUiThread(() -> {
+                        Toast.makeText(AiCreateActivity.this, 
+                            "Không thể tạo task con từ một task con. Chỉ cho phép một cấp độ con.", 
+                            Toast.LENGTH_LONG).show();
+                        selectedParentTaskId = null;
+                        selectedParentTaskTitle = null;
+                        closeActivity();
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                // Log error but allow proceeding
+                Log.e("AiCreateActivity", "Error validating parent task: " + error);
+            }
+        });
     }
 
     private void loadProjectMembers() {

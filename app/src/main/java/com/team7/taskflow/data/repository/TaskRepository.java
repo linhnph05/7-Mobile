@@ -139,6 +139,58 @@ public class TaskRepository {
         });
     }
 
+    /**
+     * Update all subtasks of a parent task to DONE status.
+     * Called when parent task is marked as DONE.
+     */
+    public void updateSubtasksStatus(long parentTaskId, TaskCallback<Void> callback) {
+        // First get all tasks with parent_task_id = parentTaskId
+        taskApi.getTasksByParentId("eq." + parentTaskId).enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    List<Task> subtasks = response.body();
+                    // Update each subtask to DONE status
+                    updateSubtasksRecursively(subtasks, 0, callback);
+                } else {
+                    // No subtasks found, success
+                    callback.onSuccess(null);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                // Log error but don't fail - cascading is optional
+                callback.onSuccess(null);
+            }
+        });
+    }
+
+    private void updateSubtasksRecursively(List<Task> subtasks, int index, TaskCallback<Void> callback) {
+        if (index >= subtasks.size()) {
+            callback.onSuccess(null);
+            return;
+        }
+
+        Task subtask = subtasks.get(index);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "DONE");
+
+        taskApi.updateTaskFields("eq." + subtask.getId(), updates, null).enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
+                // Continue to next subtask regardless of success/failure
+                updateSubtasksRecursively(subtasks, index + 1, callback);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
+                // Continue to next subtask
+                updateSubtasksRecursively(subtasks, index + 1, callback);
+            }
+        });
+    }
+
     // ── Delete ──────────────────────────────────────────────────────────
 
     public void softDeleteTask(long taskId, TaskCallback<Void> callback) {
