@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -57,8 +58,12 @@ import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class TaskDetailActivity extends BaseActivity {
 
@@ -115,12 +120,21 @@ public class TaskDetailActivity extends BaseActivity {
 
     private static final int COLOR_DEFAULT = R.color.theme_text_secondary;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
+    private static final String WORKLOG_PREFS = "task_worklog";
+    private static final String WORKLOG_TOTAL_PREFIX = "task_total_";
+    private static final String WORKLOG_LOGS_PREFIX = "task_logs_";
 
     private Calendar startCalendar = Calendar.getInstance();
     private Calendar dueCalendar   = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+
+    private TextView tvPomodoroState;
+    private TextView tvWorklogTotal;
+    private TextView tvWorklogEntries;
+    private View fabFocusMode;
+    private ActivityResultLauncher<Intent> focusModeLauncher;
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // onCreate
@@ -158,6 +172,8 @@ public class TaskDetailActivity extends BaseActivity {
         setupPickers();
         setupDatePickers();
         loadProjectMembers();
+        initFocusModeLauncher();
+        setupWorkLogSection();
 
         if (taskId != null) {
             loadTaskDetails();
@@ -171,29 +187,28 @@ public class TaskDetailActivity extends BaseActivity {
 
         setupActivityTabs();
         setupSubTaskFab();
+        setupFocusModeFab();
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         btnSave.setOnClickListener(v -> saveTask());
     }
 
     private void setupSubTaskFab() {
-        View rootLayout = findViewById(R.id.rootLayout);
         View fab = findViewById(R.id.fabAddSubTask);
-        if (rootLayout == null || fab == null) {
+        if (fab == null) {
             return;
         }
 
         fab.setVisibility(taskId != null ? View.VISIBLE : View.GONE);
         fab.setOnClickListener(v -> openAiCreateSubTask());
+    }
 
-        rootLayout.post(() -> {
-            int rootHeight = rootLayout.getHeight();
-            if (rootHeight <= 0) {
-                return;
-            }
-            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) fab.getLayoutParams();
-            lp.bottomMargin = rootHeight / 3;
-            fab.setLayoutParams(lp);
-        });
+    private void setupFocusModeFab() {
+        if (fabFocusMode == null) {
+            return;
+        }
+
+        fabFocusMode.setVisibility(taskId != null ? View.VISIBLE : View.GONE);
+        fabFocusMode.setOnClickListener(v -> openFocusMode());
     }
 
     private void openAiCreateSubTask() {
@@ -258,6 +273,10 @@ public class TaskDetailActivity extends BaseActivity {
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
         btnSendComment = findViewById(R.id.btnSendComment);
+        tvPomodoroState = findViewById(R.id.tvPomodoroState);
+        tvWorklogTotal = findViewById(R.id.tvWorklogTotal);
+        tvWorklogEntries = findViewById(R.id.tvWorklogEntries);
+        fabFocusMode = findViewById(R.id.fabFocusMode);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -605,6 +624,154 @@ public class TaskDetailActivity extends BaseActivity {
         if (layoutHistorySection  != null) layoutHistorySection.setVisibility(pos == 1 ? View.VISIBLE : View.GONE);
         if (layoutWorkLogSection  != null) layoutWorkLogSection.setVisibility(pos == 2 ? View.VISIBLE : View.GONE);
         if (pos == 1 && taskId != null) loadTaskHistoryIntoSection();
+        if (pos == 2 && taskId != null) refreshWorkLogUi();
+    }
+
+    private void setupWorkLogSection() {
+        refreshWorkLogUi();
+    }
+
+    private void openFocusMode() {
+        if (taskId == null || taskId <= 0) {
+            Toast.makeText(this, getString(R.string.task_not_found), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, FocusModeActivity.class);
+        intent.putExtra("task_id", taskId);
+        intent.putExtra("task_title", etTitle != null ? etTitle.getText().toString().trim() : "Task");
+        intent.putExtra("task_description", etDescription != null ? etDescription.getText().toString().trim() : "");
+        intent.putExtra("task_status", selectedStatus);
+        if (focusModeLauncher != null) {
+            focusModeLauncher.launch(intent);
+        }
+    }
+
+    private void initFocusModeLauncher() {
+        focusModeLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() != RESULT_OK) {
+                        return;
+                    }
+                    Intent data = result.getData();
+                    if (data != null && data.getBooleanExtra("task_done", false)) {
+                        setStatus("DONE");
+                    }
+                    refreshWorkLogUi();
+                });
+    }
+
+    private void refreshWorkLogUi() {
+        if (tvPomodoroState != null) {
+            tvPomodoroState.setText("Focus mode");
+        }
+
+        if (taskId == null) {
+            if (tvWorklogTotal != null) tvWorklogTotal.setText("Total tracked: 0m");
+            if (tvWorklogEntries != null) tvWorklogEntries.setText(getString(R.string.task_worklog_empty));
+            return;
+        }
+
+        SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
+        long totalMs = prefs.getLong(worklogTotalKey(taskId), 0L);
+        if (tvWorklogTotal != null) {
+            tvWorklogTotal.setText("Total tracked: " + formatDurationCompact(totalMs));
+        }
+
+        if (tvWorklogEntries != null) {
+            tvWorklogEntries.setText(buildWorklogEntriesText(taskId));
+        }
+    }
+
+    private void importLegacyWorklogIfNeeded(long safeTaskId) {
+        SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
+        JSONArray entries = readWorklogEntries(prefs, safeTaskId);
+        boolean changed = false;
+        for (int i = 0; i < entries.length(); i++) {
+            JSONObject obj = entries.optJSONObject(i);
+            if (obj == null) {
+                continue;
+            }
+            if (obj.has("started_at")) {
+                continue;
+            }
+            long endedAt = obj.optLong("ended_at", 0L);
+            long durationMs = obj.optLong("duration_ms", 0L);
+            long startedAt = endedAt > 0 && durationMs > 0 ? endedAt - durationMs : endedAt;
+            try {
+                obj.put("started_at", startedAt);
+                changed = true;
+            } catch (Exception ignored) {
+            }
+        }
+        if (changed) {
+            prefs.edit().putString(worklogLogsKey(safeTaskId), entries.toString()).apply();
+        }
+    }
+
+    private String buildWorklogEntriesText(long safeTaskId) {
+        importLegacyWorklogIfNeeded(safeTaskId);
+        SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
+        JSONArray entries = readWorklogEntries(prefs, safeTaskId);
+        if (entries.length() == 0) {
+            return getString(R.string.task_worklog_empty);
+        }
+
+        StringBuilder builder = new StringBuilder();
+        SimpleDateFormat timeFormat = new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault());
+        for (int i = entries.length() - 1; i >= 0; i--) {
+            JSONObject obj = entries.optJSONObject(i);
+            if (obj == null) {
+                continue;
+            }
+            long startedAt = obj.optLong("started_at", 0L);
+            long endedAt = obj.optLong("ended_at", 0L);
+            long durationMs = obj.optLong("duration_ms", 0L);
+            boolean completed = obj.optBoolean("completed", false);
+            String startText = startedAt > 0 ? timeFormat.format(new Date(startedAt)) : "-";
+            String endText = endedAt > 0 ? timeFormat.format(new Date(endedAt)) : "-";
+            String outcome = completed ? "done" : "not done";
+            builder.append("• ")
+                    .append(startText)
+                    .append(" -> ")
+                    .append(endText)
+                    .append("  -  ")
+                    .append(formatDurationCompact(durationMs))
+                    .append("  (")
+                    .append(outcome)
+                    .append(")");
+            if (i > 0) {
+                builder.append("\n");
+            }
+        }
+        return builder.toString();
+    }
+
+    private JSONArray readWorklogEntries(SharedPreferences prefs, long safeTaskId) {
+        String raw = prefs.getString(worklogLogsKey(safeTaskId), "[]");
+        try {
+            return new JSONArray(raw);
+        } catch (Exception ignored) {
+            return new JSONArray();
+        }
+    }
+
+    private String worklogTotalKey(long safeTaskId) {
+        return WORKLOG_TOTAL_PREFIX + safeTaskId;
+    }
+
+    private String worklogLogsKey(long safeTaskId) {
+        return WORKLOG_LOGS_PREFIX + safeTaskId;
+    }
+
+    private String formatDurationCompact(long ms) {
+        long totalMinutes = Math.max(0L, ms / 60000L);
+        long hours = totalMinutes / 60L;
+        long minutes = totalMinutes % 60L;
+        if (hours > 0) {
+            return hours + "h " + minutes + "m";
+        }
+        return minutes + "m";
     }
 
     private void loadTaskHistoryIntoSection() {
@@ -784,6 +951,12 @@ public class TaskDetailActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (taskId != null && commentAdapter != null) loadComments();
+        refreshWorkLogUi();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     private void createComment() {
@@ -945,7 +1118,7 @@ public class TaskDetailActivity extends BaseActivity {
                             selectedTag = t.getTag();
                             if (selectedTag != null && tvTag != null) tvTag.setText(selectedTag);
                             selectedParentTaskId = t.getParentTaskId();
-                            if (selectedParentTaskId != null && tvDependency != null) tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
+                            updateDependencyUi();
                             renderSubTaskInfo(t.getParentTaskId() != null ? ("#" + t.getParentTaskId()) : null);
                             if (currentAssigneeId != null) setAssigneeById(currentAssigneeId);
                             setLoading(false);
@@ -1057,7 +1230,11 @@ public class TaskDetailActivity extends BaseActivity {
         cardAssignee.setOnClickListener(v -> showAssigneePicker());
         cardAttachment.setOnClickListener(v -> openFilePicker());
         if (cardTag != null) cardTag.setOnClickListener(v -> showTagPicker());
-        if (cardDependency != null) cardDependency.setOnClickListener(v -> showDependencyPicker());
+        if (cardDependency != null) {
+            cardDependency.setVisibility(View.VISIBLE);
+            cardDependency.setOnClickListener(v -> showDependencyPicker());
+        }
+        updateDependencyUi();
         setPriority("MEDIUM"); setStatus("TODO"); setAssignee(null, null);
     }
 
@@ -1130,8 +1307,25 @@ public class TaskDetailActivity extends BaseActivity {
         else { tvAssignee.setText("Phân công"); setDefault(cardAssignee, tvAssignee, ivAssignee); }
     }
 
+    private void updateDependencyUi() {
+        if (tvDependency == null) {
+            return;
+        }
+
+        if (selectedParentTaskId != null && selectedParentTaskId > 0) {
+            tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
+            setActive(cardDependency, tvDependency, ivDependency, R.color.project_green);
+        } else {
+            tvDependency.setText("Không liên kết");
+            setDefault(cardDependency, tvDependency, ivDependency);
+        }
+    }
+
     private void attemptSetStatus(String targetStatus) {
-        if (!"DONE".equalsIgnoreCase(targetStatus) || selectedParentTaskId == null) { setStatus(targetStatus); return; }
+        if (!"DONE".equalsIgnoreCase(targetStatus) || selectedParentTaskId == null) {
+            setStatus(targetStatus);
+            return;
+        }
         setLoading(true);
         taskRepository.getTaskById(selectedParentTaskId, new TaskRepository.TaskCallback<Task>() {
             @Override public void onSuccess(Task dep) {
@@ -1156,9 +1350,9 @@ public class TaskDetailActivity extends BaseActivity {
                     for (Task t : tasks) {
                         if (taskId != null && taskId.equals(t.getId())) continue;
                         String label = "#" + t.getId() + " • " + t.getTitle();
-                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); if (tvDependency != null) { tvDependency.setText("Phụ thuộc: " + label); setActive(cardDependency, tvDependency, ivDependency, R.color.project_green); } d.dismiss(); }, R.color.theme_text_primary));
+                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); updateDependencyUi(); d.dismiss(); }, R.color.theme_text_primary));
                     }
-                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; if (tvDependency != null) { tvDependency.setText("Không liên kết"); setDefault(cardDependency, tvDependency, ivDependency); } d.dismiss(); }, R.color.theme_text_secondary));
+                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; updateDependencyUi(); d.dismiss(); }, R.color.theme_text_secondary));
                     d.setContentView(v); d.show();
                 });
             }
@@ -1274,4 +1468,5 @@ public class TaskDetailActivity extends BaseActivity {
         }
         return value;
     }
+
 }

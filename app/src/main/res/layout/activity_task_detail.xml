@@ -719,26 +719,25 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_input"
+                        android:background="@drawable/bg_chip_neutral"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingHorizontal="12dp"
-                        android:paddingVertical="10dp">
+                        android:paddingVertical="4dp">
 
                         <ImageView
-                                android:layout_width="34dp"
-                                android:layout_height="34dp"
-                            android:background="@drawable/bg_circle_outline"
-                            android:contentDescription="@null"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
                             android:src="@drawable/ic_person"
-                            app:tint="@color/theme_text_hint" />
+                            android:background="@drawable/bg_circle_outline"
+                            app:tint="@color/theme_text_hint"/>
 
                         <EditText
                             android:id="@+id/etCommentInput"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
                             android:layout_weight="1"
+                            android:layout_marginStart="8dp"
                             android:background="@null"
                             android:hint="Viết bình luận..."
                             android:inputType="textCapSentences|textMultiLine"
@@ -753,7 +752,6 @@
                             android:layout_width="32dp"
                             android:layout_height="32dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Gửi bình luận"
                             android:src="@drawable/ic_arrow_upward"
                             app:tint="@color/primary" />
                     </LinearLayout>
@@ -802,23 +800,45 @@
                     android:id="@+id/layoutTabWorkLog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:orientation="vertical"
-                    android:paddingVertical="24dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="24dp"
                     android:visibility="gone">
 
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_timer"
-                        app:tint="@color/theme_border" />
+                    <TextView
+                        android:id="@+id/tvPomodoroState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Focus mode"
+                        android:textColor="@color/theme_text_secondary"
+                        android:textStyle="bold"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvWorklogTotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="Tổng thời gian: 0m"
+                        android:textColor="@color/theme_text_primary"
+                        android:textStyle="bold"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvWorklogEntries"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Chưa ghi nhận thời gian làm việc."
+                        android:textColor="@color/theme_text_hint"
+                        android:textSize="13sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Chưa ghi nhận thời gian làm việc."
+                        android:text="Nhấn nút Focus nổi để bắt đầu tập trung 25 phút."
                         android:textColor="@color/theme_text_hint"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -826,20 +846,40 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabFocusMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/spacing_lg"
+        android:layout_marginBottom="152dp"
+        android:text="Start Focus"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:icon="@drawable/ic_timer"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/primary"
+        app:elevation="10dp"
+        app:iconPadding="6dp"
+        app:iconSize="18dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Full" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddSubTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/spacing_lg"
+        android:layout_marginBottom="88dp"
         android:contentDescription="@string/task_add_subtask"
+        android:visibility="gone"
         app:backgroundTint="@color/primary"
         app:borderWidth="0dp"
         app:elevation="10dp"
         app:pressedTranslationZ="14dp"
         app:srcCompat="@drawable/ic_add"
-        app:tint="@color/white"
-        android:visibility="gone" />
+        app:tint="@color/white" />
 
     <ProgressBar
         android:id="@+id/progressBar"

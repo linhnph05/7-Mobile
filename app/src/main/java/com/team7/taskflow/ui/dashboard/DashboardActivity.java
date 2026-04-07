@@ -1,7 +1,13 @@
 package com.team7.taskflow.ui.dashboard;
 
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -43,6 +49,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -80,6 +87,8 @@ public class DashboardActivity extends BaseActivity {
     private RecyclerView rvProjects;
     private BottomNavigationView bottomNavigationView;
     private boolean isBottomNavNavigating = false;
+    private boolean isWhiteNoisePlaying = false;
+    private WhiteNoisePlayer whiteNoisePlayer;
 
     // Data
     private ProjectAdapter projectAdapter;
@@ -123,6 +132,7 @@ public class DashboardActivity extends BaseActivity {
         // Initialize repository
         projectRepository = ProjectRepository.getInstance();
         NotificationPushScheduler.ensureScheduled(this);
+        whiteNoisePlayer = new WhiteNoisePlayer();
 
         initViews();
         NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
@@ -265,11 +275,65 @@ public class DashboardActivity extends BaseActivity {
                     NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
                     finish();
                     return true;
+                } else if (id == R.id.nav_assistant) {
+                    toggleWhiteNoise();
+                    if (bottomNavigationView != null) {
+                        bottomNavigationView.getMenu().findItem(R.id.nav_home).setChecked(true);
+                    }
+                    return false;
                 }
-                // TODO: Handle nav_assistant
                 return false;
             });
         }
+    }
+
+    private void toggleWhiteNoise() {
+        if (whiteNoisePlayer == null) {
+            whiteNoisePlayer = new WhiteNoisePlayer();
+        }
+
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager != null
+                && audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0
+                && !isWhiteNoisePlaying) {
+            Toast.makeText(this, "Media volume is 0. Increase volume to hear white noise.", Toast.LENGTH_LONG).show();
+        }
+
+        if (isWhiteNoisePlaying) {
+            whiteNoisePlayer.stop();
+            isWhiteNoisePlaying = false;
+            Toast.makeText(this, "White noise off", Toast.LENGTH_SHORT).show();
+        } else {
+            isWhiteNoisePlaying = whiteNoisePlayer.start();
+            if (isWhiteNoisePlaying) {
+                Toast.makeText(this, "White noise on", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Unable to start white noise", Toast.LENGTH_SHORT).show();
+            }
+        }
+        syncAssistantIconState();
+    }
+
+    private void syncAssistantIconState() {
+        if (bottomNavigationView == null) {
+            return;
+        }
+        if (bottomNavigationView.getMenu().findItem(R.id.nav_assistant) == null) {
+            return;
+        }
+        bottomNavigationView.getMenu().findItem(R.id.nav_assistant).setIcon(
+                isWhiteNoisePlaying
+                        ? R.drawable.ic_nav_assistant_checked
+                        : R.drawable.ic_nav_assistant_unchecked);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (whiteNoisePlayer != null) {
+            whiteNoisePlayer.stop();
+        }
+        isWhiteNoisePlaying = false;
+        super.onDestroy();
     }
 
     private void setupFilterButtons() {
@@ -583,5 +647,107 @@ public class DashboardActivity extends BaseActivity {
         }
 
         return Long.MIN_VALUE;
+    }
+
+    private static class WhiteNoisePlayer {
+        private static final int SAMPLE_RATE = 22050;
+        private static final float OUTPUT_GAIN = 0.32f;
+        private volatile boolean playing = false;
+        private AudioTrack audioTrack;
+        private Thread audioThread;
+
+        boolean start() {
+            if (playing) {
+                return true;
+            }
+            int minBuffer = AudioTrack.getMinBufferSize(
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT);
+            if (minBuffer <= 0) {
+                return false;
+            }
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    audioTrack = new AudioTrack(
+                            new AudioAttributes.Builder()
+                                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                    .build(),
+                            new AudioFormat.Builder()
+                                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                    .setSampleRate(SAMPLE_RATE)
+                                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                                    .build(),
+                            Math.max(minBuffer, SAMPLE_RATE),
+                            AudioTrack.MODE_STREAM,
+                            AudioManager.AUDIO_SESSION_ID_GENERATE);
+                } else {
+                    audioTrack = new AudioTrack(
+                            AudioManager.STREAM_MUSIC,
+                            SAMPLE_RATE,
+                            AudioFormat.CHANNEL_OUT_MONO,
+                            AudioFormat.ENCODING_PCM_16BIT,
+                            Math.max(minBuffer, SAMPLE_RATE),
+                            AudioTrack.MODE_STREAM);
+                }
+
+                audioTrack.play();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    audioTrack.setVolume(1.0f);
+                }
+                playing = true;
+
+                audioThread = new Thread(() -> {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+                    Random random = new Random();
+                    short[] buffer = new short[1024];
+                    while (playing) {
+                        for (int i = 0; i < buffer.length; i++) {
+                            int sample = random.nextInt(65536) - 32768;
+                            int amplified = (int) (sample * OUTPUT_GAIN);
+                            if (amplified > Short.MAX_VALUE) {
+                                amplified = Short.MAX_VALUE;
+                            } else if (amplified < Short.MIN_VALUE) {
+                                amplified = Short.MIN_VALUE;
+                            }
+                            buffer[i] = (short) amplified;
+                        }
+                        if (audioTrack != null) {
+                            int written = audioTrack.write(buffer, 0, buffer.length);
+                            if (written < 0) {
+                                break;
+                            }
+                        }
+                    }
+                }, "dashboard-white-noise-thread");
+                audioThread.start();
+                return true;
+            } catch (Exception ignored) {
+                stop();
+                return false;
+            }
+        }
+
+        void stop() {
+            playing = false;
+            if (audioThread != null) {
+                try {
+                    audioThread.join(250);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+                audioThread = null;
+            }
+            if (audioTrack != null) {
+                try {
+                    audioTrack.stop();
+                } catch (Exception ignored) {
+                }
+                audioTrack.release();
+                audioTrack = null;
+            }
+        }
     }
 }

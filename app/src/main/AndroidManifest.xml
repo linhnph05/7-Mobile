@@ -117,6 +117,10 @@
             android:name=".ui.project.TaskDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.project.FocusModeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TaskFlow" />
         <!-- Notification -->
         <activity android:name=".ui.notification.NotificationsActivity" />
 
