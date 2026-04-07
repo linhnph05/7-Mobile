@@ -341,6 +341,9 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onSuccess(List<Task> result) {
                 allProjectTasks = result;
+                if (adapter != null) {
+                    adapter.setSubtaskProgressSource(allProjectTasks != null ? allProjectTasks : new ArrayList<>());
+                }
                 filterTasksBySelectedDate();
             }
             @Override

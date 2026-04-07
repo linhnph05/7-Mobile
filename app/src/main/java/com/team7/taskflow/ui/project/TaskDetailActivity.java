@@ -1265,7 +1265,7 @@ public class TaskDetailActivity extends BaseActivity {
         String[] statuses = {"TODO", "DOING", "DONE"};
         for (String s : statuses) {
             String label; int color;
-            switch (s) { case "DONE": label = "Hoàn thành"; color = R.color.success; break; case "DOING": label = "Đang làm"; color = R.color.warning; break; default: label = "Cần làm"; color = R.color.theme_text_primary; }
+            switch (s) { case "DONE": label = "Hoàn thành"; color = R.color.success; break; case "DOING": label = "Đang làm"; color = R.color.warning; break; default: label = "Cần làm"; color = R.color.slate_700; }
             container.addView(createPickerItem(label, x -> { attemptSetStatus(s); d.dismiss(); }, color));
         }
         d.setContentView(v); d.show();
@@ -1276,7 +1276,7 @@ public class TaskDetailActivity extends BaseActivity {
         int colorRes;
         if ("DONE".equals(status)) { colorRes = R.color.success; tvStatus.setText("Hoàn thành"); }
         else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText("Đang làm"); }
-        else { colorRes = R.color.theme_text_secondary; tvStatus.setText("Cần làm"); }
+        else { colorRes = R.color.slate_700; tvStatus.setText("Cần làm"); }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
     }
 

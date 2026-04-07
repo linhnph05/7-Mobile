@@ -168,7 +168,8 @@ public class TaskListActivity extends BaseActivity {
             @Override
             public void onSuccess(List<Task> result) {
                 runOnUiThread(() -> {
-                    allLoadedTasks = result;
+                    allLoadedTasks = result != null ? result : new ArrayList<>();
+                    adapter.setSubtaskProgressSource(allLoadedTasks);
                     filterTasks();
                     swipeRefresh.setRefreshing(false);
                 });

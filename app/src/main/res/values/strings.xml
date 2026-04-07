@@ -151,6 +151,8 @@
     <string name="task_subtask_create_title">Tạo Task Con</string>
     <string name="task_subtask_create_dialog_parent">Task cha: %1$s</string>
     <string name="task_subtask_title_hint">Tên task con...</string>
+    <string name="task_subtask_progress_format">Tiến độ subtask: %1$d/%2$d (%3$d%%)</string>
+    <string name="task_progress_format">Tiến độ: %1$d%%</string>
 
     <!-- ==================== -->
     <!-- OVERVIEW             -->

@@ -314,11 +314,12 @@ public class ProjectBoardActivity extends BaseActivity {
     }
 
     private void processTasks(List<Task> result) {
+        List<Task> allTasks = result != null ? result : new ArrayList<>();
         List<Task> todoList = new ArrayList<>();
         List<Task> doingList = new ArrayList<>();
         List<Task> doneList = new ArrayList<>();
 
-        for (Task t : result) {
+        for (Task t : allTasks) {
             if (t.getStatus() == null) continue;
             String status = t.getStatus().toUpperCase();
             switch (status) {
@@ -332,6 +333,10 @@ public class ProjectBoardActivity extends BaseActivity {
             if (tvCountTodo != null) tvCountTodo.setText(String.valueOf(todoList.size()));
             if (tvCountDoing != null) tvCountDoing.setText(String.valueOf(doingList.size()));
             if (tvCountDone != null) tvCountDone.setText(String.valueOf(doneList.size()));
+
+            adapterTodo.setSubtaskProgressSource(allTasks);
+            adapterDoing.setSubtaskProgressSource(allTasks);
+            adapterDone.setSubtaskProgressSource(allTasks);
 
             adapterTodo.setTasks(todoList);
             adapterDoing.setTasks(doingList);

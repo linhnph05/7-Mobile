@@ -248,7 +248,10 @@ public class CalendarFragment extends Fragment {
                     allTasks.addAll(result);
                 }
                 if (!isAdded()) return;
-                requireActivity().runOnUiThread(CalendarFragment.this::filterTasksBySelectedDate);
+                requireActivity().runOnUiThread(() -> {
+                    adapter.setSubtaskProgressSource(allTasks);
+                    filterTasksBySelectedDate();
+                });
             }
 
             @Override

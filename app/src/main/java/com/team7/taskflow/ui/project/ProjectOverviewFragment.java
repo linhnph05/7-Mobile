@@ -566,6 +566,7 @@ public class ProjectOverviewFragment extends Fragment {
             return Long.compare(parseTaskCreatedTime(t2), parseTaskCreatedTime(t1));
         });
         int limit = Math.min(upcoming.size(), 5);
+        taskAdapter.setSubtaskProgressSource(allTasks);
         taskAdapter.setTasks(upcoming.subList(0, limit));
     }
 

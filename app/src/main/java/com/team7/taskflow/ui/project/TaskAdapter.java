@@ -7,20 +7,17 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.api.UserApi;
-import com.team7.taskflow.data.repository.TaskRepository;
-import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.common.AvatarUiUtils;
@@ -44,16 +41,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private List<Task> tasks = new ArrayList<>();
     private OnTaskClickListener listener;
     private OnTaskLongPressListener longPressListener;
-    private final Map<Long, Boolean> expandedComments = new HashMap<>();
-    private final Map<Long, List<Comment>> commentsCache = new HashMap<>();
-    private final Map<Long, TaskCommentAdapter> inlineCommentAdapters = new HashMap<>();
-    private final Set<Long> loadingComments = new HashSet<>();
     private final Map<String, String> assigneeAvatarUrlMap = new HashMap<>();
     private final Map<String, String> assigneeDisplayNameMap = new HashMap<>();
     private final Set<String> pendingAssigneeIds = new HashSet<>();
-    private final TaskRepository taskRepository = TaskRepository.getInstance();
-    private boolean inlineCommentsEnabled = false;
-    private String inlineCommentUserId;
+    private final Map<Long, SubtaskProgress> subtaskProgressByParentId = new HashMap<>();
+    private List<Task> subtaskProgressSource = new ArrayList<>();
 
     public interface OnTaskClickListener {
         void onTaskClick(Task task);
@@ -73,15 +65,20 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     public void setInlineCommentsEnabled(boolean enabled, String currentUserId) {
-        inlineCommentsEnabled = enabled;
-        inlineCommentUserId = currentUserId;
+        // Kept for API compatibility with existing call sites.
+    }
+
+    public void setSubtaskProgressSource(List<Task> tasksSource) {
+        subtaskProgressSource = tasksSource != null ? new ArrayList<>(tasksSource) : new ArrayList<>();
+        rebuildSubtaskProgressMap();
         notifyDataSetChanged();
     }
 
     public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+        this.tasks = tasks != null ? tasks : new ArrayList<>();
+        rebuildSubtaskProgressMap();
         notifyDataSetChanged();
-        preloadAssigneeProfiles(tasks);
+        preloadAssigneeProfiles(this.tasks);
     }
 
     public List<Task> getTasks() {
@@ -107,12 +104,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvDescription, tvPriority, tvDueDate, tvStatus, tvProjectBadge;
+        TextView tvSubtaskProgress;
         ImageView btnMenu, ivAssignee;
-        ImageView btnToggleComments, btnSendInlineComment;
-        TextView tvInlineCommentLabel;
-        EditText etInlineComment;
-        RecyclerView rvInlineComments;
-        View layoutCommentToggle, layoutInlineComments;
+        ProgressBar pbSubtaskProgress;
+        View layoutSubtaskProgress;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -122,15 +117,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             tvDueDate = itemView.findViewById(R.id.tvDueDate);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             tvProjectBadge = itemView.findViewById(R.id.tvProjectBadge);
+            tvSubtaskProgress = itemView.findViewById(R.id.tvSubtaskProgress);
             btnMenu = itemView.findViewById(R.id.btnMenu);
             ivAssignee = itemView.findViewById(R.id.ivAssignee);
-            btnToggleComments = itemView.findViewById(R.id.btnToggleComments);
-            btnSendInlineComment = itemView.findViewById(R.id.btnSendInlineComment);
-            tvInlineCommentLabel = itemView.findViewById(R.id.tvInlineCommentLabel);
-            etInlineComment = itemView.findViewById(R.id.etInlineComment);
-            rvInlineComments = itemView.findViewById(R.id.rvInlineComments);
-            layoutCommentToggle = itemView.findViewById(R.id.layoutCommentToggle);
-            layoutInlineComments = itemView.findViewById(R.id.layoutInlineComments);
+            pbSubtaskProgress = itemView.findViewById(R.id.pbSubtaskProgress);
+            layoutSubtaskProgress = itemView.findViewById(R.id.layoutSubtaskProgress);
         }
 
         public void bind(Task task, OnTaskClickListener listener, OnTaskLongPressListener longPressListener) {
@@ -171,7 +162,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 return false;
             });
 
-            bindInlineComments(task);
+            bindTaskProgress(task);
 
             // Priority Colors
             String priority = task.getPriority() != null ? task.getPriority().toUpperCase() : "LOW";
@@ -207,157 +198,33 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
         }
 
-        private void bindInlineComments(Task task) {
-            if (layoutCommentToggle == null || layoutInlineComments == null || btnToggleComments == null
-                    || rvInlineComments == null || etInlineComment == null || btnSendInlineComment == null
-                    || task.getId() == null) {
+        private void bindTaskProgress(Task task) {
+            if (layoutSubtaskProgress == null || pbSubtaskProgress == null || tvSubtaskProgress == null) {
+                return;
+            }
+            if (task == null) {
+                layoutSubtaskProgress.setVisibility(View.GONE);
                 return;
             }
 
-            if (!inlineCommentsEnabled) {
-                layoutCommentToggle.setVisibility(View.GONE);
-                layoutInlineComments.setVisibility(View.GONE);
+            SubtaskProgress progress = task.getId() != null ? subtaskProgressByParentId.get(task.getId()) : null;
+            if (progress != null && progress.total > 0) {
+                layoutSubtaskProgress.setVisibility(View.VISIBLE);
+                pbSubtaskProgress.setProgress(progress.percent);
+                tvSubtaskProgress.setText(itemView.getContext().getString(
+                        R.string.task_subtask_progress_format,
+                        progress.done,
+                        progress.total,
+                        progress.percent));
                 return;
             }
 
-            layoutCommentToggle.setVisibility(View.VISIBLE);
-            long taskId = task.getId();
-            boolean expanded = expandedComments.getOrDefault(taskId, false);
-            layoutInlineComments.setVisibility(expanded ? View.VISIBLE : View.GONE);
-            btnToggleComments.setRotation(expanded ? 180f : 0f);
-
-            if (rvInlineComments.getLayoutManager() == null) {
-                rvInlineComments.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
-            }
-
-            TaskCommentAdapter commentAdapter = inlineCommentAdapters.get(taskId);
-            if (commentAdapter == null) {
-                commentAdapter = new TaskCommentAdapter(inlineCommentUserId, new TaskCommentAdapter.Listener() {
-                    @Override
-                    public void onEdit(Comment comment) {
-                        // Inline panel is optimized for quick chat flow.
-                    }
-
-                    @Override
-                    public void onDelete(Comment comment) {
-                        // Inline panel is optimized for quick chat flow.
-                    }
-
-                    @Override
-                    public void onReact(Comment comment, String reactionType) {
-                        if (comment == null || comment.getId() == null || TextUtils.isEmpty(inlineCommentUserId)) {
-                            return;
-                        }
-
-                        // Optimistic UI update: update count/state immediately on screen.
-                        TaskCommentAdapter localAdapter = inlineCommentAdapters.get(taskId);
-                        if (localAdapter != null) {
-                            localAdapter.applyLocalReactionToggle(comment.getId(), reactionType);
-                        }
-
-                        taskRepository.toggleCommentReaction(comment.getId(), inlineCommentUserId, reactionType,
-                                new TaskRepository.TaskCallback<Void>() {
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        // Keep optimistic state; no full reload needed on success.
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                        // Reload only when backend failed to restore correct state.
-                                        itemView.post(() -> loadComments(taskId));
-                                    }
-                                });
-                    }
-                });
-                commentAdapter.setAllowManageActions(false);
-                inlineCommentAdapters.put(taskId, commentAdapter);
-            }
-            rvInlineComments.setAdapter(commentAdapter);
-
-            if (expanded) {
-                renderInlineComments(taskId);
-                if (!commentsCache.containsKey(taskId) && !loadingComments.contains(taskId)) {
-                    loadComments(taskId);
-                }
-            }
-
-            btnToggleComments.setOnClickListener(v -> {
-                boolean nextExpanded = !expandedComments.getOrDefault(taskId, false);
-                expandedComments.put(taskId, nextExpanded);
-                notifyItemChanged(getBindingAdapterPosition());
-            });
-
-            btnSendInlineComment.setOnClickListener(v -> {
-                if (TextUtils.isEmpty(inlineCommentUserId)) {
-                    return;
-                }
-                String content = etInlineComment.getText() != null ? etInlineComment.getText().toString().trim() : "";
-                if (content.isEmpty()) {
-                    return;
-                }
-                btnSendInlineComment.setEnabled(false);
-                taskRepository.createTaskComment(taskId, inlineCommentUserId, content,
-                        new TaskRepository.TaskCallback<Comment>() {
-                            @Override
-                            public void onSuccess(Comment result) {
-                                itemView.post(() -> {
-                                    etInlineComment.setText("");
-                                    btnSendInlineComment.setEnabled(true);
-                                    loadComments(taskId);
-                                });
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                itemView.post(() -> btnSendInlineComment.setEnabled(true));
-                            }
-                        });
-            });
-        }
-
-        private void loadComments(long taskId) {
-            loadingComments.add(taskId);
-            taskRepository.getTaskComments(taskId, new TaskRepository.TaskCallback<List<Comment>>() {
-                @Override
-                public void onSuccess(List<Comment> result) {
-                    itemView.post(() -> {
-                        loadingComments.remove(taskId);
-                        commentsCache.put(taskId, result != null ? result : new ArrayList<>());
-                        renderInlineComments(taskId);
-                    });
-                }
-
-                @Override
-                public void onError(String error) {
-                    itemView.post(() -> {
-                        loadingComments.remove(taskId);
-                        renderInlineComments(taskId);
-                    });
-                }
-            });
-        }
-
-        private void renderInlineComments(long taskId) {
-            List<Comment> comments = commentsCache.get(taskId);
-            if (loadingComments.contains(taskId)) {
-                TaskCommentAdapter adapter = inlineCommentAdapters.get(taskId);
-                if (adapter != null) adapter.setComments(new ArrayList<>());
-                if (tvInlineCommentLabel != null) tvInlineCommentLabel.setText("Bình luận (đang tải...)");
-                return;
-            }
-            if (comments == null || comments.isEmpty()) {
-                TaskCommentAdapter adapter = inlineCommentAdapters.get(taskId);
-                if (adapter != null) adapter.setComments(new ArrayList<>());
-                if (tvInlineCommentLabel != null) tvInlineCommentLabel.setText("Bình luận (0)");
-                return;
-            }
-
-            TaskCommentAdapter adapter = inlineCommentAdapters.get(taskId);
-            if (adapter != null) {
-                adapter.setComments(comments);
-            }
-            if (tvInlineCommentLabel != null) tvInlineCommentLabel.setText("Bình luận (" + comments.size() + ")");
+            layoutSubtaskProgress.setVisibility(View.VISIBLE);
+            int statusPercent = resolveStatusProgress(task.getStatus());
+            pbSubtaskProgress.setProgress(statusPercent);
+            tvSubtaskProgress.setText(itemView.getContext().getString(
+                    R.string.task_progress_format,
+                    statusPercent));
         }
 
         private String formatDate(String rawDate) {
@@ -429,5 +296,70 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         pendingAssigneeIds.removeAll(idsToLoad);
                     }
                 });
+    }
+
+    private void rebuildSubtaskProgressMap() {
+        subtaskProgressByParentId.clear();
+        List<Task> source = (subtaskProgressSource != null && !subtaskProgressSource.isEmpty())
+                ? subtaskProgressSource
+                : tasks;
+        if (source == null || source.isEmpty()) {
+            return;
+        }
+
+        for (Task task : source) {
+            if (task == null || task.getParentTaskId() == null) {
+                continue;
+            }
+            Long parentId = task.getParentTaskId();
+            if (parentId == null) {
+                continue;
+            }
+
+            SubtaskProgress progress = subtaskProgressByParentId.get(parentId);
+            if (progress == null) {
+                progress = new SubtaskProgress();
+                subtaskProgressByParentId.put(parentId, progress);
+            }
+
+            progress.total++;
+            if (isDoneStatus(task.getStatus())) {
+                progress.done++;
+            }
+        }
+
+        for (SubtaskProgress progress : subtaskProgressByParentId.values()) {
+            progress.percent = progress.total == 0
+                    ? 0
+                    : (int) Math.round((progress.done * 100.0) / progress.total);
+        }
+    }
+
+    private boolean isDoneStatus(String status) {
+        if (status == null) {
+            return false;
+        }
+        String normalized = status.toUpperCase(Locale.US);
+        return normalized.contains("DONE") || "COMPLETED".equals(normalized);
+    }
+
+    private int resolveStatusProgress(String status) {
+        if (status == null) {
+            return 0;
+        }
+        String normalized = status.toUpperCase(Locale.US);
+        if (normalized.contains("DONE") || "COMPLETED".equals(normalized)) {
+            return 100;
+        }
+        if (normalized.contains("DOING") || normalized.contains("PROGRESS") || "IN_PROGRESS".equals(normalized)) {
+            return 50;
+        }
+        return 0;
+    }
+
+    private static class SubtaskProgress {
+        int total;
+        int done;
+        int percent;
     }
 }
