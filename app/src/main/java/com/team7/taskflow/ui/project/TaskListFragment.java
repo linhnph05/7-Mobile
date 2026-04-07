@@ -433,6 +433,7 @@ public class TaskListFragment extends Fragment {
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
                     if (taskAdapter != null) {
+                        taskAdapter.setSubtaskProgressSource(result != null ? result : new ArrayList<>());
                         List<Task> visibleTasks = new ArrayList<>();
                         if (result != null) {
                             for (Task task : result) {

@@ -246,6 +246,7 @@ public class ForYouActivity extends BaseActivity {
             public void onSuccess(List<Task> result) {
                 runOnUiThread(() -> {
                     allTasks = result != null ? result : new ArrayList<>();
+                    taskAdapter.setSubtaskProgressSource(allTasks);
                     updateOverview(allTasks);
                     applyFilter(activeFilter);
                 });
