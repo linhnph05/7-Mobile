@@ -37,6 +37,7 @@ android {
         buildConfigField("String", "SUPABASE_URL",         "\"${env("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY",    "\"${env("SUPABASE_ANON_KEY")}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${env("GOOGLE_WEB_CLIENT_ID")}\"")
+        buildConfigField("String", "GITHUB_REDIRECT_URI",  "\"${env("GITHUB_REDIRECT_URI")}\"")
         buildConfigField("String", "GEMINI_API_KEY",       "\"${env("GEMINI_API_KEY")}\"")
     }
 

@@ -30,4 +30,5 @@ public class SupabaseConfig {
     public static final String PREFER_TIMEZONE_VIETNAM = "timezone=" + TIMEZONE_ASIA_HO_CHI_MINH;
 
     public static final String GOOGLE_WEB_CLIENT_ID = BuildConfig.GOOGLE_WEB_CLIENT_ID;
+    public static final String GITHUB_REDIRECT_URI = BuildConfig.GITHUB_REDIRECT_URI;
 }

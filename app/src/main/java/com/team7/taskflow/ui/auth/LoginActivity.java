@@ -52,6 +52,7 @@ public class LoginActivity extends BaseActivity {
     private Button btnLogin;
     private ProgressBar progressBar;
     private AppCompatButton btnGoogle;
+    private AppCompatButton btnGitHub;
     private ActivityResultLauncher<Intent> googleSignInLauncher;
 
     @Override
@@ -90,6 +91,7 @@ public class LoginActivity extends BaseActivity {
         btnLogin = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progressBar);
         btnGoogle = findViewById(R.id.btnGoogle);
+        btnGitHub = findViewById(R.id.btnGitHub);
 
         // Back button
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -160,6 +162,27 @@ public class LoginActivity extends BaseActivity {
             }
             setGoogleLoading(true);
             googleSignInLauncher.launch(signInIntent);
+        });
+
+        btnGitHub.setOnClickListener(v -> {
+            setGithubLoading(true);
+            GithubAuthHelper.startOAuth(this, new GithubAuthHelper.GithubAuthCallback() {
+                @Override
+                public void onSuccess(String userId) {
+                    runOnUiThread(() -> {
+                        setGithubLoading(false);
+                        goToMain();
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                    runOnUiThread(() -> {
+                        setGithubLoading(false);
+                        Toast.makeText(LoginActivity.this, message, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
         });
 
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
@@ -239,12 +262,28 @@ public class LoginActivity extends BaseActivity {
         btnLogin.setEnabled(!loading);
         btnLogin.setText(loading ? "" : "Log In");
         btnGoogle.setEnabled(!loading);
+        btnGitHub.setEnabled(!loading);
     }
 
     private void setGoogleLoading(boolean loading) {
         btnGoogle.setEnabled(!loading);
         btnGoogle.setText(loading ? "Signing in…" : "Google");
         btnLogin.setEnabled(!loading);
+        btnGitHub.setEnabled(!loading);
+        if (!loading) {
+            btnGitHub.setText("GitHub");
+        }
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void setGithubLoading(boolean loading) {
+        btnGitHub.setEnabled(!loading);
+        btnGitHub.setText(loading ? "Connecting…" : "GitHub");
+        btnGoogle.setEnabled(!loading);
+        btnLogin.setEnabled(!loading);
+        if (!loading) {
+            btnGoogle.setText("Google");
+        }
         progressBar.setVisibility(View.GONE);
     }
 
