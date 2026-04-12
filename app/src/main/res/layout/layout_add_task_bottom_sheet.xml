@@ -13,13 +13,13 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="20dp"
-        android:background="@color/slate_200" />
+        android:background="@color/theme_border" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Quick Add Task"
-        android:textColor="@color/slate_900"
+        android:textColor="@color/theme_text_primary"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -59,7 +59,7 @@
             android:paddingHorizontal="12dp"
             android:paddingVertical="6dp"
             android:text="MEDIUM"
-            android:textColor="#C2410C"
+            android:textColor="@color/text_orange_600"
             android:textSize="12sp"
             android:textStyle="bold" />
 

@@ -9,7 +9,7 @@
         android:id="@+id/taskBar"
         android:layout_width="160dp"
         android:layout_height="32dp"
-        android:background="#10b981"
+        android:background="@color/success"
         android:gravity="center_vertical"
         android:paddingHorizontal="8dp">
 

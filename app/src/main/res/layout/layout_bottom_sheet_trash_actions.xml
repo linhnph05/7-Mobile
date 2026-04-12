@@ -39,7 +39,7 @@
         android:gravity="center"
         android:minHeight="44dp"
         android:text="Hủy"
-        android:textColor="@color/slate_600"
+        android:textColor="@color/theme_text_secondary"
         android:textSize="14sp" />
 
 </LinearLayout>

@@ -79,7 +79,7 @@ public class HistoryEventAdapter extends BaseAdapter {
             holder.tvComment.setVisibility(View.GONE);
             holder.tvDetail.setVisibility(View.GONE);
             holder.bindAvatar(null, "?");
-            holder.viewAccent.setBackgroundColor(Color.parseColor("#475569"));
+            holder.viewAccent.setBackgroundColor(ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary));
             return;
         }
 
@@ -260,13 +260,13 @@ public class HistoryEventAdapter extends BaseAdapter {
             if (isNightMode()) {
                 return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_primary);
             }
-            return ContextCompat.getColor(inflater.getContext(), R.color.slate_700);
+            return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
         }
 
         if (isNightMode()) {
             return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
         }
-        return Color.parseColor("#475569");
+        return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
     }
 
     private int resolveLegacyAccentColor(String actionRaw, String detailRaw) {
@@ -305,13 +305,13 @@ public class HistoryEventAdapter extends BaseAdapter {
             if (isNightMode()) {
                 return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_primary);
             }
-            return ContextCompat.getColor(inflater.getContext(), R.color.slate_700);
+            return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
         }
 
         if (isNightMode()) {
             return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
         }
-        return Color.parseColor("#475569");
+        return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary);
     }
 
     private boolean isNightMode() {

@@ -1,0 +1,112 @@
+Thuyet trinh nhom 7 - Ung dung quan ly cong viec
+Lop 23KTPM2 - Phat trien phan mem cho thiet bi di dong
+
+1. Muc tieu bai thuyet trinh
+- Trinh bay day du 16 nhom chuc nang cua app.
+- Tap trung vao nhung tinh nang quan trong, co chieu sau ky thuat.
+- Moi slide nen co: muc tieu, luong xu ly, ky thuat ap dung, hinh minh hoa, ma gia.
+- Tong thoi luong de xuat: 35-40 phut.
+
+2. Nhan xet ve ke hoach trinh bay
+- Khong nen noi lan man toan bo chi tiet theo kieu ke lai tung dong code.
+- Nen chon cach trinh bay theo tung phan he, moi phan he co nhom tinh nang va ky thuat lien quan.
+- Cac ky thuat co ban nhu Fragment back stack, Intent, CRUD nen noi ngan gon, chi noi de giai thich UX/luong hoat dong.
+- Uu tien cac diem the hien dung ky thuat rieng cua app: Clean Architecture, Repository, AI parsing, Notification, Timeline, Calendar, Chart, Cache, Theme, i18n.
+
+3. Cau truc slide de xuat
+
+A. Mo dau va tong quan (4 slide)
+Slide 1: Tieu de de tai, nhom, giang vien, muc tieu app.
+Slide 2: so sánh với app tương tự về các chức năng
+Slide 3: Tong quan 16 nhom chuc nang theo 4 phan he.
+
+
+G. So sanh voi app chuyen nghiep (3 slide)
+Slide 27: Tieu chi so sanh: kien truc, UX, hieu nang, on dinh.
+Slide 28: App minh da lam duoc gi so voi app chuyen nghiep.
+Slide 29: Con thieu gi va huong phat trien tiep.
+
+
+B. Kien truc va nen tang ky thuat chung (6 slide)
+Slide 5: Kien truc tong the: UI -> Domain -> Data -> Backend.
+Slide 7: Cau truc thu muc project va quan he cac lop chinh.
+
+Slide 8: Co che dieu huong, stack fragment, xu ly back.
+Slide 9: State management, cache, xu ly vong doi man hinh.
+Slide 10: Chuan code da ap dung: i18n, dark/light theme, semantic color, tach trach nhiem.
+
+Mỗi slide cần có kỹ thuật, bên phải sẽ là ảnh minh họa hoặc mã giả, hoặc sơ đồ đi của dữ liệu, của thao tác
+không nhất thiết mỗi chức năng nhỏ trong các phân hệ đều phải đúng 1 slide, có thể gộp nhiều cái lại chung 1 slide.
+
+C. Phan he 1: Nguoi dung va he thong (4 slide)
+Slide 11: Xac thuc - Email/Password, Google, GitHub, quen mat khau, auto-login.
+Slide 12: Ho so ca nhan - avatar, bio, so dien thoai, dark mode, ngon ngu.
+Slide 13: Quan ly du an - tao, sua, xoa/khoi phuc, list/grid.
+Slide 14: Quan ly thanh vien - moi, phan quyen, xoa, danh sach thanh vien.
+
+D. Phan he 2: Quan ly cong viec cot loi (4 slide)
+Slide 15: CRUD Task - quick add, soft delete, drag & drop, history.
+Slide 16: Chi tiet Task - label, priority, description, deadline, done/reopen, dependency.
+Slide 17: Sub-task va checklist - progress bar tu dong tinh %.
+Slide 18: Dinh kem va da phuong tien - anh, file, preview, download.
+
+E. Phan he 3: Tuong tac va tien ich (4 slide)
+Slide 19: Binh luan va thao luan - comment, edit/delete, time ago, reaction.
+Slide 20: Thong bao - push notification, local notification, notification center.
+Slide 21: Tim kiem va loc - search, filter, sort, ForYou.
+Slide 22: Lich lam viec - month/week, task theo ngay, chấm mau deadline.
+
+F. Phan he 4: Nang cao va AI (4 slide)
+Slide 23: Thong ke va bao cao - pie chart, bar chart, productivity score.
+Slide 24: Widget va loi tat - widget, shortcuts, sticky notification, share intent.
+Slide 25: Tien ich tap trung - Pomodoro, time tracking, white noise, work log.
+Slide 26: AI - smart date parsing / NLP.
+
+H. Demo chinh thuc (3-4 slide)
+Slide 30: Demo scenario 1 - nguoi dung ca nhan.
+Slide 31: Demo scenario 2 - lam viec nhom.
+Slide 32: Demo scenario 3 - AI + timeline + chart.
+Slide 33: Demo scenario 4 - widget / notification / shortcut / pomodoro.
+
+I. Ket luan va Q&A (2 slide)
+Slide 34: Tong ket thanh qua ky thuat theo 4 phan he.
+Slide 35: Roadmap phien ban tiep theo.
+
+4. Khung moi slide nen co
+- Muc tieu chuc nang.
+- Luong xu ly 3-5 buoc.
+- Ky thuat chinh.
+- Ma gia ngan.
+- Anh minh hoa hoac so do.
+- Vi tri ap dung trong code.
+
+5. Phan bo do sau trinh bay
+- Di sau: CRUD Task, Chi tiet Task, Notification, Search/Filter, Calendar, Chart, AI.
+- Di vua: Auth, Profile, Project, Member, Sub-task, Attachment, Pomodoro.
+- Noi ngan gon: Fragment back stack, shortcuts, sticky notification, share intent.
+
+6. Ghi chu thuyet trinh
+- Khong noi theo kieu doc code.
+- Noi theo luong nguoi dung va ky thuat giai quyet van de.
+- Moi phan nen co 1 anh minh hoa va 1 ma gia ngan de hoi dong de theo doi.
+- Neu co the, dung so do mui ten de the hien quan he giua cac lop.
+
+7. Danh sach 16 nhom chuc nang
+1. Xac thuc.
+2. Ho so ca nhan.
+3. Quan ly du an/nhom viec.
+4. Quan ly thanh vien.
+5. CRUD Task.
+6. Chi tiet Task.
+7. Sub-task va Checklist.
+8. Dinh kem va da phuong tien.
+9. Binh luan va thao luan.
+10. Thong bao.
+11. Tim kiem va loc.
+12. Lich lam viec.
+13. Thong ke va bao cao.
+14. Widget va loi tat.
+15. Tien ich tap trung.
+16. AI smart date parsing.
+
+

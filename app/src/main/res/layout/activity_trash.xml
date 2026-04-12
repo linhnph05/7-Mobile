@@ -191,7 +191,7 @@
             android:layout_height="64dp"
             android:contentDescription="Empty"
             android:src="@drawable/ic_trash"
-            android:tint="@color/slate_400"
+            android:tint="@color/theme_text_hint"
             android:alpha="0.5" />
 
         <TextView

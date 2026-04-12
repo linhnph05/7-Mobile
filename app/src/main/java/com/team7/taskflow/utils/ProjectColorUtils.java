@@ -162,6 +162,13 @@ public final class ProjectColorUtils {
         return ColorUtils.blendARGB(surface, baseColor, ratio);
     }
 
+    @ColorInt
+    public static int resolveContentTintColor(@NonNull Context context, @ColorInt int baseColor) {
+        int background = colorFromRes(context, R.color.theme_background);
+        float ratio = isDarkMode(context) ? 0.26f : 0.14f;
+        return ColorUtils.blendARGB(background, baseColor, ratio);
+    }
+
     private static int colorFromRes(@NonNull Context context, int colorRes) {
         return androidx.core.content.ContextCompat.getColor(context, colorRes);
     }

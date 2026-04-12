@@ -36,6 +36,10 @@ import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.utils.SessionManager;
 import android.util.Log;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * AI-powered task creation screen.
@@ -61,6 +65,8 @@ public class AiCreateActivity extends AppCompatActivity {
     private static final String PRIORITY_HIGH = "HIGH";
     private static final String PRIORITY_MEDIUM = "MEDIUM";
     private static final String PRIORITY_LOW = "LOW";
+    private static final String PRIORITY_NONE = "NONE";
+    private static final long PARSE_DEBOUNCE_DELAY_MS = 5000L;
 
     // ── Views ────────────────────────────────────────────────────────────
 
@@ -100,8 +106,9 @@ public class AiCreateActivity extends AppCompatActivity {
 
     // AI parsing
     private final Handler parseHandler = new Handler(Looper.getMainLooper());
-    private Runnable parseRunnable;
-    private boolean aiParsingDone = false;
+    private Runnable parseDebounceRunnable;
+    private boolean isAiParseInFlight = false;
+    private String lastParsedPrompt = "";
 
     // File picker
     private ActivityResultLauncher<Intent> filePickerLauncher;
@@ -332,50 +339,81 @@ public class AiCreateActivity extends AppCompatActivity {
     // ── AI Parsing (Gemini) ──────────────────────────────────────────────
 
     private void setupAiParsing() {
-        parseRunnable = this::callAiParse;
+        parseDebounceRunnable = this::requestAiParseIfNeeded;
+
+        etPrompt.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                parseHandler.removeCallbacks(parseDebounceRunnable);
+                requestAiParseIfNeeded();
+            }
+        });
+
         etPrompt.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                parseHandler.removeCallbacks(parseRunnable);
-                aiParsingDone = false;
-                if (s.length() > 5) {
-                    parseHandler.postDelayed(parseRunnable, 800); // Faster 0.8s debounce
-                }
+                parseHandler.removeCallbacks(parseDebounceRunnable);
+                parseHandler.postDelayed(parseDebounceRunnable, PARSE_DEBOUNCE_DELAY_MS);
             }
             @Override public void afterTextChanged(Editable s) {}
         });
     }
 
-    private void callAiParse() {
-        String prompt = etPrompt.getText().toString().trim();
-        if (prompt.isEmpty() || aiParsingDone) return;
+    private void requestAiParseIfNeeded() {
+        if (etPrompt == null) {
+            return;
+        }
 
-        // Show subtle loading indicator
+        String prompt = etPrompt.getText().toString().trim();
+        if (prompt.length() <= 5) {
+            return;
+        }
+        if (prompt.equals(lastParsedPrompt) || isAiParseInFlight) {
+            return;
+        }
+
+        callAiParse(prompt);
+    }
+
+    private void callAiParse(String prompt) {
+        if (prompt.isEmpty()) return;
+        isAiParseInFlight = true;
+
         tvTaskId.setText("AI đang phân tích...");
 
-        // Build members CSV for AI context
-        StringBuilder sb = new StringBuilder();
+        // 1. Members
+        StringBuilder sbMembers = new StringBuilder();
         for (ProjectMember m : projectMembers) {
             if (m.getUser() != null) {
-                if (sb.length() > 0) sb.append(", ");
-                sb.append(m.getUser().getDisplayNameOrEmail());
+                if (sbMembers.length() > 0) sbMembers.append(", ");
+                sbMembers.append(m.getUser().getDisplayNameOrEmail());
             }
         }
-        String membersCsv = sb.toString();
+        
+        // 2. Tags (Using the same list as the picker)
+        String tagsCsv = "Backend, Frontend, Design, Bug";
+        
+        // 3. Parent Task Context
+        String parentTitle = (selectedParentTaskId != null) ? selectedParentTaskTitle : "";
 
-        AiService.getInstance().parsePrompt(prompt, membersCsv, new AiCallback() {
+        AiService.getInstance().parsePrompt(prompt, sbMembers.toString(), tagsCsv, parentTitle, new AiCallback() {
             @Override
             public void onSuccess(AiService.ParsedTask result) {
-                runOnUiThread(() -> applyAiResult(result));
+                runOnUiThread(() -> {
+                    isAiParseInFlight = false;
+                    lastParsedPrompt = prompt;
+                    applyAiResult(prompt, result);
+                });
             }
 
             @Override
             public void onError(String error) {
                 // If AI fails, fall back to local simple parsing
                 runOnUiThread(() -> {
+                    isAiParseInFlight = false;
+                    lastParsedPrompt = prompt;
                     fallbackLocalParse(prompt);
                     if (error.contains("429")) {
-                        tvTaskId.setText("⚠ Hết lượt AI - Hãy thử lại sau");
+                        tvTaskId.setText("⚠ Đã hết lượt gợi ý bằng AI");
                         tvTaskId.setBackgroundResource(R.drawable.bg_task_id_red); 
                     } else if (error.contains("Safety")) {
                         tvTaskId.setText("❌ AI từ chối (Gợi ý nhạy cảm)");
@@ -392,8 +430,7 @@ public class AiCreateActivity extends AppCompatActivity {
     }
 
     /** Apply AI-parsed result to all form fields */
-    private void applyAiResult(AiService.ParsedTask result) {
-        aiParsingDone = true;
+    private void applyAiResult(String sourcePrompt, AiService.ParsedTask result) {
         resetStatusBadge();
 
         if (!result.title.isEmpty() && etParsedTitle.getText().toString().isEmpty()) {
@@ -423,9 +460,11 @@ public class AiCreateActivity extends AppCompatActivity {
         }
 
         // Due date
-        if (!result.dueDate.isEmpty()) {
-            selectedDueDate = result.dueDate;
-            tvDueDate.setText(formatDateForDisplay(result.dueDate));
+        String explicitDueDate = extractExplicitDueDateTime(sourcePrompt);
+        String resolvedDueDate = explicitDueDate != null ? explicitDueDate : result.dueDate;
+        if (resolvedDueDate != null && !resolvedDueDate.isEmpty()) {
+            selectedDueDate = resolvedDueDate;
+            tvDueDate.setText(formatDateForDisplay(resolvedDueDate));
             setActive(cardDueDate, tvDueDate, ivDueDate, R.color.project_blue);
         }
 
@@ -463,19 +502,9 @@ public class AiCreateActivity extends AppCompatActivity {
             setPriority(PRIORITY_LOW);
         }
 
-        // Basic date detection
-        java.util.Calendar c = java.util.Calendar.getInstance();
-        if (text.contains("ngày mai") || text.contains("mai")) {
-            c.add(java.util.Calendar.DAY_OF_YEAR, 1);
-            c.set(java.util.Calendar.HOUR_OF_DAY, 8); c.set(java.util.Calendar.MINUTE, 0);
-            selectedDueDate = String.format("%04d-%02d-%02dT%02d:%02d:00", 
-                c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH)+1, c.get(java.util.Calendar.DAY_OF_MONTH), 8, 0);
-            tvDueDate.setText(formatDateForDisplay(selectedDueDate));
-            setActive(cardDueDate, tvDueDate, ivDueDate, R.color.project_blue);
-        } else if (text.contains("chiều")) {
-            c.set(java.util.Calendar.HOUR_OF_DAY, 15); c.set(java.util.Calendar.MINUTE, 0);
-            selectedDueDate = String.format("%04d-%02d-%02dT%02d:%02d:00", 
-                c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH)+1, c.get(java.util.Calendar.DAY_OF_MONTH), 15, 0);
+        String explicitDueDate = extractExplicitDueDateTime(prompt);
+        if (explicitDueDate != null) {
+            selectedDueDate = explicitDueDate;
             tvDueDate.setText(formatDateForDisplay(selectedDueDate));
             setActive(cardDueDate, tvDueDate, ivDueDate, R.color.project_blue);
         }
@@ -610,9 +639,7 @@ public class AiCreateActivity extends AppCompatActivity {
             setPriority(PRIORITY_LOW); dialog.dismiss();
         });
         view.findViewById(R.id.optNone).setOnClickListener(v -> {
-            selectedPriority = PRIORITY_MEDIUM;
-            tvPriority.setText(getString(R.string.task_priority_label));
-            setDefault(cardPriority, tvPriority, ivPriority);
+            setPriority(PRIORITY_NONE);
             dialog.dismiss();
         });
 
@@ -626,6 +653,7 @@ public class AiCreateActivity extends AppCompatActivity {
         if (PRIORITY_HIGH.equals(priority)) colorRes = R.color.priority_high;
         else if (PRIORITY_MEDIUM.equals(priority)) colorRes = R.color.priority_medium;
         else if (PRIORITY_LOW.equals(priority)) colorRes = R.color.priority_low;
+        else if (PRIORITY_NONE.equals(priority)) colorRes = R.color.theme_text_secondary;
         setActive(cardPriority, tvPriority, ivPriority, colorRes);
     }
 
@@ -821,6 +849,7 @@ public class AiCreateActivity extends AppCompatActivity {
         switch (priority) {
             case PRIORITY_HIGH:   return getString(R.string.task_priority_high);
             case PRIORITY_LOW:    return getString(R.string.task_priority_low);
+            case PRIORITY_NONE:   return getString(R.string.task_priority_none);
             default:              return getString(R.string.task_priority_medium);
         }
     }
@@ -901,6 +930,76 @@ public class AiCreateActivity extends AppCompatActivity {
         return (int) (value * getResources().getDisplayMetrics().density);
     }
 
+    private String extractExplicitDueDateTime(String prompt) {
+        if (prompt == null || prompt.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalized = prompt.toLowerCase(Locale.ROOT);
+        Integer dayOffset = null;
+        if (normalized.contains("ngày kia")) {
+            dayOffset = 2;
+        } else if (normalized.contains("ngày mai") || normalized.matches(".*\\bmai\\b.*")) {
+            dayOffset = 1;
+        } else if (normalized.contains("hôm nay") || normalized.contains("today")) {
+            dayOffset = 0;
+        }
+
+        Pattern timePattern = Pattern.compile("\\b(\\d{1,2})(?:\\s*[:h]\\s*(\\d{1,2}))?\\s*(giờ|h)?\\s*(am|pm|sáng|trưa|chiều|tối|đêm)?\\b", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        Matcher matcher = timePattern.matcher(normalized);
+        if (dayOffset == null) {
+            return null;
+        }
+
+        while (matcher.find()) {
+            String matched = matcher.group(0);
+            String hourToken = matcher.group(3);
+            String periodToken = matcher.group(4);
+            boolean hasExplicitTimeSignal = (matched != null && matched.contains(":"))
+                    || (hourToken != null && !hourToken.isEmpty())
+                    || (periodToken != null && !periodToken.isEmpty());
+            if (!hasExplicitTimeSignal) {
+                continue;
+            }
+
+            int hour;
+            int minute = 0;
+            try {
+                hour = Integer.parseInt(matcher.group(1));
+                if (matcher.group(2) != null && !matcher.group(2).isEmpty()) {
+                    minute = Integer.parseInt(matcher.group(2));
+                }
+            } catch (NumberFormatException ex) {
+                continue;
+            }
+
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                continue;
+            }
+
+            String period = periodToken != null ? periodToken.toLowerCase(Locale.ROOT) : "";
+            if ("pm".equals(period) || "chiều".equals(period) || "tối".equals(period) || "đêm".equals(period)) {
+                if (hour >= 1 && hour <= 11) {
+                    hour += 12;
+                }
+            } else if (("am".equals(period) || "sáng".equals(period)) && hour == 12) {
+                hour = 0;
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, dayOffset);
+
+            return String.format(Locale.getDefault(), "%04d-%02d-%02dT%02d:%02d:00",
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    hour,
+                    minute);
+        }
+
+        return null;
+    }
+
     private void hideKeyboard() {
         etPrompt.clearFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -940,5 +1039,11 @@ public class AiCreateActivity extends AppCompatActivity {
             finish();
             overridePendingTransition(0, 0);
         }).start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        parseHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 }

@@ -29,6 +29,33 @@
         android:visibility="gone"
         android:background="@drawable/bg_chip_neutral" />
 
+    <!-- CÁC NÚT THAO TÁC (Dời lên trước để tránh nút Xóa) -->
+    <!-- Nút xem trước -->
+    <ImageView
+        android:id="@+id/btnPreview"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginEnd="8dp"
+        android:padding="2dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_eye"
+        app:tint="@color/primary" />
+
+    <!-- Nút tải xuống -->
+    <ImageView
+        android:id="@+id/btnDownload"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginEnd="8dp"
+        android:padding="2dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_download"
+        app:tint="@color/success" />
+
     <TextView
         android:id="@+id/tvFileName"
         android:layout_width="0dp"
@@ -40,25 +67,15 @@
         android:textColor="@color/theme_text_primary"
         android:textSize="13sp" />
 
-    <!-- Nút xem trước -->
-    <ImageView
-        android:id="@+id/btnPreview"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="6dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_eye"
-        app:tint="@color/primary" />
-
-    <!-- Nút xóa -->
+    <!-- Nút xóa (Giữ ở cuối - biệt lập) -->
     <ImageView
         android:id="@+id/btnRemoveFile"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginStart="6dp"
+        android:layout_marginStart="8dp"
         android:clickable="true"
         android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         app:tint="@color/theme_text_hint" />
 

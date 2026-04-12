@@ -62,7 +62,7 @@ public class ProfileActivity extends BaseActivity {
 
         // Khởi tạo SessionManager
         SessionManager.init(this);
-        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
+        applyNavTransitionIfNeeded();
 
         initViews();
         setupThemeSwitch();
@@ -77,15 +77,39 @@ public class ProfileActivity extends BaseActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        applyNavTransitionIfNeeded();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         isBottomNavNavigating = false;
+        applyNavTransitionIfNeeded();
         // Update bottom navigation selected item to ensure icon highlights correctly
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
             bottomNav.setItemIconTintList(null);
             bottomNav.getMenu().findItem(R.id.nav_settings).setChecked(true);
         }
+    }
+
+    private void applyNavTransitionIfNeeded() {
+        Intent intent = getIntent();
+        if (intent == null) {
+            return;
+        }
+        if (!intent.hasExtra(NavigationUtils.EXTRA_NAV_FROM)
+                || !intent.hasExtra(NavigationUtils.EXTRA_NAV_TO)) {
+            return;
+        }
+
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
+
+        intent.removeExtra(NavigationUtils.EXTRA_NAV_FROM);
+        intent.removeExtra(NavigationUtils.EXTRA_NAV_TO);
     }
 
     private void initViews() {
@@ -163,14 +187,20 @@ public class ProfileActivity extends BaseActivity {
                 } else if (id == R.id.nav_home) {
                     isBottomNavNavigating = true;
                     Intent intent = new Intent(this, DashboardActivity.class);
-                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
-                    finish();
+                    boolean started = NavigationUtils.startActivityWithNavAnimation(
+                            this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_HOME);
+                    if (!started) {
+                        isBottomNavNavigating = false;
+                    }
                     return true;
                 } else if (id == R.id.nav_tasks) {
                     isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ForYouActivity.class);
-                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_TASKS);
-                    finish();
+                    boolean started = NavigationUtils.startActivityWithNavAnimation(
+                            this, intent, NavigationUtils.NAV_SETTINGS, NavigationUtils.NAV_TASKS);
+                    if (!started) {
+                        isBottomNavNavigating = false;
+                    }
                     return true;
                 }
                 return false;

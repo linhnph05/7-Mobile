@@ -379,22 +379,44 @@ public class TaskRepository {
                         String publicUrl = SupabaseConfig.SUPABASE_URL + "/storage/v1/object/public/" + bucket + "/"
                                 + path;
 
-                        // Insert into attachments table with resolution=merge-duplicates to avoid 409
-                        com.team7.taskflow.domain.model.Attachment attachment = new com.team7.taskflow.domain.model.Attachment(
-                                taskId, SessionManager.getUserId(), publicUrl, fileName, mimeType);
+                        // Đảm bảo Token luôn mới nhất để vượt qua Policy RLS (auth.uid() = uploader_id)
+                        String currentToken = SessionManager.getAccessToken();
+                        String currentUserId = SessionManager.getUserId();
+                        
+                        if (currentToken != null && !currentToken.isEmpty()) {
+                            SupabaseClient.getInstance().setAccessToken(currentToken);
+                        }
 
-                        taskApi.addAttachment(attachment, "resolution=merge-duplicates").enqueue(new Callback<Void>() {
+                        if (currentUserId == null || currentUserId.isEmpty()) {
+                            callback.onError("Session expired. Please login again.");
+                            return;
+                        }
+
+                        // Sử dụng Map thay vì Model để tránh lỗi gửi kèm "attachment_id": null
+                        // Vì SupabaseClient cấu hình serializeNulls nên Model sẽ gửi cả ID=null làm DB báo lỗi.
+                        java.util.Map<String, Object> attachmentData = new java.util.HashMap<>();
+                        attachmentData.put("task_id", taskId);
+                        attachmentData.put("uploader_id", currentUserId);
+                        attachmentData.put("file_url", publicUrl);
+                        attachmentData.put("file_name", fileName);
+                        attachmentData.put("file_type", mimeType);
+
+                        com.team7.taskflow.domain.model.Attachment attachment = new com.team7.taskflow.domain.model.Attachment(
+                                taskId, currentUserId, publicUrl, fileName, mimeType);
+
+                        taskApi.addAttachment(attachmentData, "return=minimal").enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
-                                if (response.isSuccessful())
+                                if (response.isSuccessful()) {
                                     callback.onSuccess(attachment);
-                                else
-                                    callback.onError("Failed to link attachment to task: " + response.code());
+                                } else {
+                                    callback.onError("Database Error: " + response.code());
+                                }
                             }
 
                             @Override
                             public void onFailure(Call<Void> call, Throwable t) {
-                                callback.onError(t.getMessage());
+                                callback.onError("Network error linking attachment: " + t.getMessage());
                             }
                         });
                     } else {

@@ -274,7 +274,7 @@ public class CalendarActivity extends BaseActivity {
                 tv.setBackgroundResource(R.drawable.bg_tag); // Dùng bg bo góc của bạn
                 tv.getBackground().setTint(ContextCompat.getColor(this, R.color.primary));
             } else {
-                tv.setTextColor(ContextCompat.getColor(this, R.color.slate_700));
+                tv.setTextColor(ContextCompat.getColor(this, R.color.theme_text_primary));
                 tv.setBackground(null);
             }
 
@@ -299,7 +299,7 @@ public class CalendarActivity extends BaseActivity {
             tv.setText(day);
             tv.setGravity(android.view.Gravity.CENTER);
             tv.setTextSize(11f);
-            tv.setTextColor(ContextCompat.getColor(this, R.color.slate_400));
+            tv.setTextColor(ContextCompat.getColor(this, R.color.theme_text_secondary));
             tv.setMinHeight(dp(24));
 
             androidx.gridlayout.widget.GridLayout.LayoutParams params = new androidx.gridlayout.widget.GridLayout.LayoutParams();

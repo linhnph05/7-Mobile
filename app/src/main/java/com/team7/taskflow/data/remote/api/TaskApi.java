@@ -124,7 +124,7 @@ public interface TaskApi {
      */
     @POST("attachments")
     Call<Void> addAttachment(
-            @Body com.team7.taskflow.domain.model.Attachment attachment,
+            @Body java.util.Map<String, Object> attachmentData,
             @Header("Prefer") String prefer
     );
 

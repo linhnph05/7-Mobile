@@ -98,8 +98,13 @@ public class DashboardActivity extends BaseActivity {
     private DashboardProjectFilter activeFilter = DashboardProjectFilter.ALL;
 
     private static final int RECENT_PROJECT_LIMIT = 8;
+    private static final long PROJECTS_CACHE_TTL_MS = 20_000L;
     private static final DateTimeFormatter DB_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter DB_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private static List<Project> cachedProjects = new ArrayList<>();
+    private static long cachedProjectsAtMs = 0L;
+    private static String cachedProjectsUserId;
 
     private enum DashboardProjectFilter {
         ALL,
@@ -135,16 +140,24 @@ public class DashboardActivity extends BaseActivity {
         whiteNoisePlayer = new WhiteNoisePlayer();
 
         initViews();
-        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
+        applyNavTransitionIfNeeded();
         setupRecyclerView();
         setupListeners();
         loadUserInfo();
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        applyNavTransitionIfNeeded();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         isBottomNavNavigating = false;
+        applyNavTransitionIfNeeded();
         // Update bottom navigation selected item to ensure icon highlights correctly
         if (bottomNavigationView != null) {
             bottomNavigationView.setItemIconTintList(null);
@@ -157,6 +170,33 @@ public class DashboardActivity extends BaseActivity {
         if (currentUserId != null && !currentUserId.isEmpty()) {
             loadProjects();
         }
+    }
+
+    private void applyNavTransitionIfNeeded() {
+        Intent intent = getIntent();
+        if (intent == null) {
+            return;
+        }
+        if (!intent.hasExtra(NavigationUtils.EXTRA_NAV_FROM)
+                || !intent.hasExtra(NavigationUtils.EXTRA_NAV_TO)) {
+            return;
+        }
+
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.scrollView));
+
+        intent.removeExtra(NavigationUtils.EXTRA_NAV_FROM);
+        intent.removeExtra(NavigationUtils.EXTRA_NAV_TO);
+    }
+
+    private boolean canUseProjectsCache() {
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            return false;
+        }
+        if (cachedProjectsUserId == null || !currentUserId.equals(cachedProjectsUserId)) {
+            return false;
+        }
+        long ageMs = System.currentTimeMillis() - cachedProjectsAtMs;
+        return ageMs >= 0L && ageMs <= PROJECTS_CACHE_TTL_MS;
     }
 
     private void startStickyServiceSafely() {
@@ -239,7 +279,8 @@ public class DashboardActivity extends BaseActivity {
         if (searchBar != null) {
             searchBar.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -247,7 +288,8 @@ public class DashboardActivity extends BaseActivity {
                 }
 
                 @Override
-                public void afterTextChanged(Editable s) {}
+                public void afterTextChanged(Editable s) {
+                }
             });
         }
 
@@ -263,8 +305,11 @@ public class DashboardActivity extends BaseActivity {
                 if (id == R.id.nav_settings) {
                     isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ProfileActivity.class);
-                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_SETTINGS);
-                    finish();
+                    boolean started = NavigationUtils.startActivityWithNavAnimation(
+                            this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_SETTINGS);
+                    if (!started) {
+                        isBottomNavNavigating = false;
+                    }
                     return true;
                 } else if (id == R.id.nav_home) {
                     // Already on home
@@ -272,8 +317,11 @@ public class DashboardActivity extends BaseActivity {
                 } else if (id == R.id.nav_tasks) {
                     isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ForYouActivity.class);
-                    NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
-                    finish();
+                    boolean started = NavigationUtils.startActivityWithNavAnimation(
+                            this, intent, NavigationUtils.NAV_HOME, NavigationUtils.NAV_TASKS);
+                    if (!started) {
+                        isBottomNavNavigating = false;
+                    }
                     return true;
                 } else if (id == R.id.nav_assistant) {
                     toggleWhiteNoise();
@@ -354,6 +402,13 @@ public class DashboardActivity extends BaseActivity {
         }
         activeFilter = filter;
         syncFilterButtonState();
+        
+        // Kích hoạt animation cho danh sách dự án
+        if (rvProjects != null) {
+            rvProjects.setLayoutAnimation(android.view.animation.AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_fall_down));
+            rvProjects.scheduleLayoutAnimation();
+        }
+
         applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
                 ? searchBar.getText().toString()
                 : "");
@@ -464,6 +519,14 @@ public class DashboardActivity extends BaseActivity {
             return;
         }
 
+        if (canUseProjectsCache()) {
+            allProjects = new ArrayList<>(cachedProjects);
+            applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
+                    ? searchBar.getText().toString()
+                    : "");
+            return;
+        }
+
         Log.d(TAG, "Loading projects for user: " + currentUserId);
 
         // Gọi API lấy tất cả projects mà user tham gia
@@ -473,13 +536,16 @@ public class DashboardActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     if (projects == null || projects.isEmpty()) {
                         Toast.makeText(
-                            DashboardActivity.this,
-                            getString(R.string.dashboard_no_projects_message),
-                            Toast.LENGTH_SHORT).show();
+                                DashboardActivity.this,
+                                getString(R.string.dashboard_no_projects_message),
+                                Toast.LENGTH_SHORT).show();
                         allProjects = new ArrayList<>();
                         projectAdapter.setProjects(new java.util.ArrayList<>());
                     } else {
                         allProjects = new ArrayList<>(projects);
+                        cachedProjects = new ArrayList<>(projects);
+                        cachedProjectsAtMs = System.currentTimeMillis();
+                        cachedProjectsUserId = currentUserId;
                         applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
                                 ? searchBar.getText().toString()
                                 : "");
@@ -588,7 +654,8 @@ public class DashboardActivity extends BaseActivity {
                     sortedByRecent.add(project);
                 }
             }
-            sortedByRecent.sort((left, right) -> Long.compare(resolveCreatedAtEpoch(right), resolveCreatedAtEpoch(left)));
+            sortedByRecent
+                    .sort((left, right) -> Long.compare(resolveCreatedAtEpoch(right), resolveCreatedAtEpoch(left)));
 
             int endIndex = Math.min(RECENT_PROJECT_LIMIT, sortedByRecent.size());
             return new ArrayList<>(sortedByRecent.subList(0, endIndex));

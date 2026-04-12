@@ -140,19 +140,30 @@
     <string name="task_priority_low">Thấp</string>
     <string name="task_priority_medium">Trung bình</string>
     <string name="task_priority_high">Cao</string>
+    <string name="task_priority_none">Không ưu tiên</string>
     <string name="task_add_subtask">Tạo subtask</string>
     <string name="task_activity_comments_tab">Bình luận</string>
     <string name="task_activity_history_tab">Lịch sử</string>
     <string name="task_activity_time_tab">Thời gian</string>
     <string name="task_worklog_empty">Chưa ghi nhận thời gian làm việc.</string>
-    <string name="task_subtask_of_format">Task con của: %1$s</string>
-    <string name="task_subtask_parent_label">Đang tạo task con của</string>
-    <string name="task_add_subtask_from_parent">Tạo subtask từ task này</string>
-    <string name="task_subtask_create_title">Tạo Task Con</string>
-    <string name="task_subtask_create_dialog_parent">Task cha: %1$s</string>
-    <string name="task_subtask_title_hint">Tên task con...</string>
-    <string name="task_subtask_progress_format">Tiến độ subtask: %1$d/%2$d (%3$d%%)</string>
+    <string name="task_subtask_of_format">Thuộc công việc chính: %1$s</string>
+    <string name="task_add_parent_prompt">Chưa thuộc công việc chính ‧ Nhấn để gán</string>
+    <string name="task_link_parent_title">Gán vào công việc chính</string>
+    <string name="task_unlink_parent">Gỡ khỏi công việc chính</string>
+    <string name="task_cannot_nest_subtasks">Không thể gán vì công việc này đang có các công việc phụ.</string>
+    <string name="task_subtask_count_format">Danh sách công việc phụ (%1$d)</string>
+    <string name="task_view_subtasks_prompt">Nhấn để xem danh sách chi tiết</string>
+    <string name="task_subtask_list_title">Các công việc phụ chi tiết</string>
+    <string name="task_subtask_parent_label">Đang tạo công việc phụ cho</string>
+    <string name="task_add_subtask_from_parent">Tạo công việc phụ từ đây</string>
+    <string name="task_subtask_create_title">Tạo công việc phụ</string>
+    <string name="task_subtask_create_dialog_parent">Công việc chính: %1$s</string>
+    <string name="task_subtask_title_hint">Tên công việc phụ...</string>
+    <string name="task_subtask_progress_format">Tiến độ công việc phụ: %1$d/%2$d (%3$d%%)</string>
     <string name="task_progress_format">Tiến độ: %1$d%%</string>
+    <string name="calendar_month_year_placeholder">Tháng %1$d năm %2$d</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_tasks_in_selected_date">Tasks in selected date</string>
 
     <!-- ==================== -->
     <!-- OVERVIEW             -->
@@ -168,12 +179,15 @@
     <string name="overview_status_chart_title">Biểu đồ trạng thái công việc</string>
     <string name="overview_member_chart_title">Biểu đồ công việc theo thành viên</string>
     <string name="overview_upcoming">Hạn chót sắp tới</string>
+    <string name="overview_upcoming_empty">Hiện chưa có công việc nào sắp đến hạn.</string>
     <string name="overview_no_tasks">Chưa có công việc nào</string>
-    <string name="overview_no_tasks_desc">Hãy nhấn nút AI để tạo công việc đầu tiên!</string>
+    <string name="overview_no_tasks_desc">Nhấn nút Tạo mới việc để thêm công việc đầu tiên của bạn.</string>
     <string name="overview_status_todo_count">Cần làm: %1$d</string>
     <string name="overview_status_in_progress_count">Đang làm: %1$d</string>
     <string name="overview_status_done_count">Đã xong: %1$d</string>
     <string name="overview_unassigned_label">Chưa phân công</string>
+    <string name="timeline_no_schedule_title">Chưa có công việc đủ lịch trình</string>
+    <string name="timeline_no_schedule_desc">Đã có công việc, nhưng cần nhập đầy đủ ngày bắt đầu và kết thúc hợp lệ để hiển thị trong Tiến độ.</string>
 
     <!-- ==================== -->
     <!-- BOTTOM NAV           -->

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ public class TaskListFragment extends Fragment {
     private static final String ARG_PROJECT_ID = "project_id";
     private static final String ARG_IS_MY_TASKS = "is_my_tasks";
     private static final String ARG_USER_ID = "user_id";
+    private static final String STATUS_TRASH = "TRASH";
 
     private long projectId;
     private boolean isMyTasksMode;
@@ -43,6 +45,7 @@ public class TaskListFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView rvTasks;
+    private LinearLayout layoutEmptyState;
     private TaskAdapter taskAdapter;
     private TaskRepository taskRepository;
 
@@ -81,6 +84,7 @@ public class TaskListFragment extends Fragment {
     private void initViews(View view) {
         swipeRefresh = view.findViewById(R.id.swipeRefresh);
         rvTasks = view.findViewById(R.id.rvTasks);
+        layoutEmptyState = view.findViewById(R.id.layoutEmptyStateTaskList);
 
         if (swipeRefresh != null) {
             swipeRefresh.setOnRefreshListener(this::loadTasks);
@@ -437,8 +441,7 @@ public class TaskListFragment extends Fragment {
                         List<Task> visibleTasks = new ArrayList<>();
                         if (result != null) {
                             for (Task task : result) {
-                                String status = task.getStatus() != null ? task.getStatus().toUpperCase() : "";
-                                if (!"TRASH".equals(status)) {
+                                if (!isTrashTask(task)) {
                                     visibleTasks.add(task);
                                 }
                             }
@@ -447,6 +450,7 @@ public class TaskListFragment extends Fragment {
                                 parseTaskCreatedTime(right),
                                 parseTaskCreatedTime(left)));
                         taskAdapter.setTasks(visibleTasks);
+                        updateEmptyState(visibleTasks.isEmpty());
                     }
                     if (swipeRefresh != null) {
                         swipeRefresh.setRefreshing(false);
@@ -482,5 +486,24 @@ public class TaskListFragment extends Fragment {
         } catch (Exception ignored) {
             return 0L;
         }
+    }
+
+    private void updateEmptyState(boolean isEmpty) {
+        if (rvTasks != null) {
+            rvTasks.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        }
+        if (layoutEmptyState != null) {
+            layoutEmptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private boolean isTrashTask(Task task) {
+        if (task == null) {
+            return false;
+        }
+        String status = task.getStatus() != null
+                ? task.getStatus().trim().toUpperCase(Locale.US)
+                : "";
+        return STATUS_TRASH.equals(status);
     }
 }

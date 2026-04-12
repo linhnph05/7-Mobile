@@ -165,7 +165,7 @@
                 android:layout_height="32dp"
                 android:layout_alignParentStart="true"
                 android:src="@drawable/ic_chevron_left"
-                app:tint="@color/slate_500" />
+                app:tint="@color/theme_text_secondary" />
 
             <TextView
                 android:id="@+id/tvMonthYear"
@@ -173,7 +173,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="October 2023"
-                android:textColor="@color/slate_800"
+                android:textColor="@color/theme_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -183,7 +183,7 @@
                 android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/ic_chevron_right"
-                app:tint="@color/slate_500" />
+                app:tint="@color/theme_text_secondary" />
         </RelativeLayout>
         <androidx.gridlayout.widget.GridLayout
             android:id="@+id/glCalendar"
@@ -192,13 +192,13 @@
             app:columnCount="7"
             android:paddingHorizontal="16dp"
             android:paddingBottom="8dp">
-            <TextView android:text="S" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
-            <TextView android:text="M" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
-            <TextView android:text="T" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
-            <TextView android:text="W" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
-            <TextView android:text="T" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
-            <TextView android:text="F" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
-            <TextView android:text="S" android:gravity="center" android:textColor="@color/slate_400" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1" android:layout_marginBottom="8dp"/>
+            <TextView android:text="S" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
+            <TextView android:text="M" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
+            <TextView android:text="T" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
+            <TextView android:text="W" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
+            <TextView android:text="T" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
+            <TextView android:text="F" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1"/>
+            <TextView android:text="S" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="12sp" android:layout_width="0dp" app:layout_columnWeight="1" android:layout_marginBottom="8dp"/>
 
         </androidx.gridlayout.widget.GridLayout>
 

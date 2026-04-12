@@ -91,6 +91,24 @@
                             android:contentDescription="Project activity"
                             android:src="@drawable/ic_history"
                             app:tint="?attr/colorOnSurface" />
+
+                        <TextView
+                            android:id="@+id/tvProjectActivityBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="-2dp"
+                            android:layout_marginEnd="-2dp"
+                            android:background="@drawable/bg_history_badge"
+                            android:gravity="center"
+                            android:includeFontPadding="false"
+                            android:minWidth="20dp"
+                            android:paddingHorizontal="4dp"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:visibility="gone"
+                            android:importantForAccessibility="no" />
                     </FrameLayout>
 
                     <ImageButton
@@ -249,7 +267,9 @@
                 android:id="@+id/fabAddAI"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center_horizontal"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="@dimen/spacing_lg"
+                android:layout_marginBottom="248dp"
                 android:contentDescription="@string/task_create_title"
                 app:backgroundTint="@color/primary"
                 app:tint="@color/white"

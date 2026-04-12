@@ -15,13 +15,13 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@color/white"
+            android:background="@color/theme_surface"
             android:paddingHorizontal="16dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="My Tasks"
-                android:textColor="@color/slate_900"
+                android:textColor="@color/theme_text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -34,15 +34,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/white"
+            android:background="@color/theme_surface"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp">
             <TextView android:id="@+id/tabToDo" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="To Do" android:textColor="@color/primary" android:textStyle="bold" />
-            <TextView android:id="@+id/tabDoing" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Doing" android:textColor="@color/slate_400" />
-            <TextView android:id="@+id/tabDone" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Done" android:textColor="@color/slate_400" />
+            <TextView android:id="@+id/tabDoing" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Doing" android:textColor="@color/theme_text_secondary" />
+            <TextView android:id="@+id/tabDone" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Done" android:textColor="@color/theme_text_secondary" />
         </LinearLayout>
-        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/slate_200" />
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/theme_border" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"

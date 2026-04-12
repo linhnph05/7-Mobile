@@ -12,14 +12,14 @@
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:background="@color/slate_200" />
+        android:background="@color/theme_border" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Quick New Task"
-        android:textColor="@color/slate_900"
+        android:textColor="@color/theme_text_primary"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Status"
-        android:textColor="@color/slate_500"
+        android:textColor="@color/theme_text_secondary"
         android:textSize="12sp"
         android:textStyle="bold" />
 

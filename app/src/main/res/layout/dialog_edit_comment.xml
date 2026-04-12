@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:text="Cập nhật nội dung bình luận"
-        android:textColor="@color/slate_500"
+        android:textColor="@color/theme_text_secondary"
         android:textSize="13sp" />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:hint="Nội dung bình luận"
         app:boxStrokeColor="@color/indigo_500"
-        app:hintTextColor="@color/slate_400">
+        app:hintTextColor="@color/theme_text_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEditComment"
@@ -37,7 +37,7 @@
             android:minLines="3"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
-            android:textColor="@color/slate_900"
+            android:textColor="@color/theme_text_primary"
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 

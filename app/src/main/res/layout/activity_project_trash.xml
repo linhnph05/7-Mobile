@@ -71,7 +71,7 @@
             android:layout_height="@dimen/icon_lg"
             android:alpha="0.6"
             android:src="@drawable/ic_trash"
-            android:tint="@color/slate_400"
+            android:tint="@color/theme_text_hint"
             android:contentDescription="@string/project_trash_empty_title" />
 
         <TextView

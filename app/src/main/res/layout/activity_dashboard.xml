@@ -101,7 +101,7 @@
                     android:layout_gravity="end|top"
                     android:layout_marginTop="-2dp"
                     android:layout_marginEnd="-2dp"
-                    android:background="@drawable/bg_circle_blue"
+                    android:background="@drawable/bg_circle_danger"
                     android:gravity="center"
                     android:minWidth="18dp"
                     android:paddingHorizontal="3dp"
@@ -167,6 +167,7 @@
                         android:text="@string/dashboard_filter_all"
                         android:textAllCaps="false"
                         android:textColor="@color/chip_text_selector"
+                        app:cornerRadius="8dp"
                         app:strokeColor="@color/chip_stroke_selector"
                         app:strokeWidth="1dp" />
 
@@ -186,6 +187,7 @@
                         android:text="@string/dashboard_filter_recent"
                         android:textAllCaps="false"
                         android:textColor="@color/chip_text_selector"
+                        app:cornerRadius="8dp"
                         app:strokeColor="@color/chip_stroke_selector"
                         app:strokeWidth="1dp" />
 
@@ -205,6 +207,7 @@
                         android:text="@string/dashboard_filter_owned"
                         android:textAllCaps="false"
                         android:textColor="@color/chip_text_selector"
+                        app:cornerRadius="8dp"
                         app:strokeColor="@color/chip_stroke_selector"
                         app:strokeWidth="1dp" />
                 </LinearLayout>

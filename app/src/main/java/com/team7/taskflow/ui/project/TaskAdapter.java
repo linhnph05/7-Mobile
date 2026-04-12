@@ -164,20 +164,30 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             bindTaskProgress(task);
 
-            // Priority Colors
-            String priority = task.getPriority() != null ? task.getPriority().toUpperCase() : "LOW";
+            // Priority text + badge
+            String priority = task.getPriority() != null
+                    ? task.getPriority().trim().toUpperCase(Locale.US)
+                    : "NONE";
             switch (priority) {
                 case "HIGH":
+                    tvPriority.setText("HIGH");
                     tvPriority.setBackgroundResource(R.drawable.bg_badge_red);
-                    tvPriority.setTextColor(0xFFEF4444); // Bright Red
+                    tvPriority.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.priority_high));
                     break;
                 case "MEDIUM":
+                    tvPriority.setText("MEDIUM");
                     tvPriority.setBackgroundResource(R.drawable.bg_badge_orange);
-                    tvPriority.setTextColor(0xFFF59E0B); // Amber/Orange
+                    tvPriority.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.priority_medium));
                     break;
-                default: 
+                case "LOW":
+                    tvPriority.setText("LOW");
                     tvPriority.setBackgroundResource(R.drawable.bg_badge_blue);
-                    tvPriority.setTextColor(0xFF3B82F6); // Blue
+                    tvPriority.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.priority_low));
+                    break;
+                default:
+                    tvPriority.setText("NONE");
+                    tvPriority.setBackgroundResource(R.drawable.bg_chip_neutral);
+                    tvPriority.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.theme_text_secondary));
                     break;
             }
 

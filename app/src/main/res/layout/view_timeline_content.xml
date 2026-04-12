@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/theme_background"
-    android:scrollbars="none">
+    android:background="@android:color/transparent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:scrollbars="none">
 
     <LinearLayout
+        android:id="@+id/layoutTimelineContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -14,7 +21,7 @@
         <LinearLayout
             android:layout_width="120dp"
             android:layout_height="match_parent"
-            android:background="@color/theme_card"
+            android:background="@android:color/transparent"
             android:orientation="vertical">
 
             <LinearLayout
@@ -26,8 +33,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tasks"
-                    android:textSize="13sp"
+                    android:text="@string/task_list_title"
+                    android:textSize="@dimen/text_xs"
                     android:textStyle="bold"
                     android:textColor="@color/theme_text_primary" />
             </LinearLayout>
@@ -55,7 +62,7 @@
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@color/theme_background">
+                android:background="@android:color/transparent">
 
                 <LinearLayout
                     android:id="@+id/containerGanttGrid"
@@ -113,4 +120,42 @@
             </FrameLayout>
         </HorizontalScrollView>
     </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/layoutEmptyStateTimeline"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_xl"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/avatar_lg"
+            android:layout_height="@dimen/avatar_lg"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:src="@drawable/ic_summary"
+            app:tint="@color/theme_text_hint" />
+
+        <TextView
+            android:id="@+id/tvTimelineEmptyTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/overview_no_tasks"
+            android:textColor="@color/theme_text_primary"
+            android:textSize="@dimen/text_md"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTimelineEmptyDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:gravity="center"
+            android:text="@string/overview_no_tasks_desc"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="@dimen/text_xs" />
+    </LinearLayout>
+
+</FrameLayout>

@@ -26,7 +26,7 @@ public class AiService {
 
     private static final String TAG = "AiService";
     private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent";
 
     private static AiService instance;
     private final OkHttpClient client;
@@ -47,21 +47,16 @@ public class AiService {
 
     /**
      * Parse a natural language prompt into structured task fields.
-     *
-     * @param prompt     Raw text from user (e.g. "Gửi email cho Đức ngày mai, khẩn cấp")
-     * @param membersCsv Comma-separated list of project member names for assignee matching
-     * @param callback   Returns a ParsedTask on success
      */
-    public void parsePrompt(String prompt, String membersCsv, AiCallback callback) {
+    public void parsePrompt(String prompt, String membersCsv, String tagsCsv, String parentTaskTitle, AiCallback callback) {
         String apiKey = BuildConfig.GEMINI_API_KEY;
         if (apiKey == null || apiKey.isEmpty() || apiKey.equals("PASTE_YOUR_GEMINI_KEY_HERE")) {
-            // Fallback to local parsing if no API key configured
             callback.onError("GEMINI_API_KEY not configured");
             return;
         }
 
-        String systemPrompt = buildSystemPrompt(membersCsv);
-
+        String systemPrompt = buildSystemPrompt(membersCsv, tagsCsv, parentTaskTitle);
+// ... existing code for building JSON ...
         try {
             JSONObject requestJson = new JSONObject();
 
@@ -82,7 +77,7 @@ public class AiService {
             contents.put(userContent);
             requestJson.put("contents", contents);
 
-            // Generation config — force JSON output
+            // Generation config
             JSONObject genConfig = new JSONObject();
             genConfig.put("temperature", 0.1);
             genConfig.put("response_mime_type", "application/json");
@@ -102,7 +97,6 @@ public class AiService {
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    Log.e(TAG, "Gemini API call failed", e);
                     callback.onError("Network error: " + e.getMessage());
                 }
 
@@ -111,41 +105,21 @@ public class AiService {
                     try {
                         String responseBody = response.body() != null ? response.body().string() : "";
                         if (!response.isSuccessful()) {
-                            Log.e(TAG, "Gemini API error: " + response.code() + " — " + responseBody);
                             callback.onError("AI error: " + response.code());
                             return;
                         }
-
                         JSONObject json = new JSONObject(responseBody);
-
-                        // Check for safety block or missing candidates
                         if (json.has("promptFeedback") && json.getJSONObject("promptFeedback").has("blockReason")) {
-                            callback.onError("Nội dung bị chặn (Safety filter)");
+                            callback.onError("Safety block");
                             return;
                         }
-
                         if (!json.has("candidates") || json.getJSONArray("candidates").length() == 0) {
-                            callback.onError("AI không trả về kết quả");
+                            callback.onError("No result");
                             return;
                         }
-
                         JSONObject candidate = json.getJSONArray("candidates").getJSONObject(0);
-                        
-                        // Check if candidate was blocked post-generation
-                        if (candidate.has("finishReason") && candidate.getString("finishReason").equals("SAFETY")) {
-                            callback.onError("Kết quả bị chặn (Safety filter)");
-                            return;
-                        }
-
-                        String text = candidate
-                                .getJSONObject("content")
-                                .getJSONArray("parts")
-                                .getJSONObject(0)
-                                .getString("text");
-
-                        // Clean potential markdown formatting
+                        String text = candidate.getJSONObject("content").getJSONArray("parts").getJSONObject(0).getString("text");
                         text = cleanJsonString(text);
-
                         JSONObject parsed = new JSONObject(text);
                         ParsedTask result = new ParsedTask();
                         result.title = parsed.optString("title", "");
@@ -155,23 +129,13 @@ public class AiService {
                         result.tag = parsed.optString("tag", "");
                         result.startDate = parsed.optString("start_date", "");
                         result.dueDate = parsed.optString("due_date", "");
-
-                        // Validate priority
-                        if (!result.priority.equals("HIGH") && !result.priority.equals("MEDIUM") && !result.priority.equals("LOW")) {
-                            result.priority = "MEDIUM";
-                        }
-
                         callback.onSuccess(result);
-
                     } catch (Exception e) {
-                        Log.e(TAG, "Failed to parse Gemini response", e);
                         callback.onError("Parse error: " + e.getMessage());
                     }
                 }
             });
-
         } catch (Exception e) {
-            Log.e(TAG, "Failed to build Gemini request", e);
             callback.onError("Request error: " + e.getMessage());
         }
     }
@@ -179,48 +143,66 @@ public class AiService {
     private String cleanJsonString(String input) {
         String result = input.trim();
         if (result.startsWith("```")) {
-            // Remove ```json and ```
             result = result.replaceAll("^```[a-z]*\\n?", "").replaceAll("\\n?```$", "");
         }
         return result.trim();
     }
 
-    private String buildSystemPrompt(String membersCsv) {
+    private String buildSystemPrompt(String membersCsv, String tagsCsv, String parentTitle) {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, yyyy-MM-dd HH:mm", java.util.Locale.ENGLISH);
         String currentDateTime = sdf.format(cal.getTime());
 
-        return "You are a task extraction assistant for a project management app called TaskFlow. " +
-                "The user writes a sentence in Vietnamese or English. " +
-                "Extract structured task information and return ONLY valid JSON. " +
-                "\n\nJSON schema:\n" +
-                "{\n" +
-                "  \"title\": \"string (A short, summarized task title. DO NOT just copy the user's input. Make it concise and actionable)\",\n" +
-                "  \"description\": \"string (additional details or the full original prompt if the title is too short)\",\n" +
-                "  \"priority\": \"HIGH | MEDIUM | LOW\",\n" +
-                "  \"assignee_name\": \"string (matched from team members list)\",\n" +
-                "  \"tag\": \"string (Backend, Frontend, Design, Bug, or empty)\",\n" +
-                "  \"start_date\": \"string (ISO 8601 yyyy-MM-ddTHH:mm:ss)\",\n" +
-                "  \"due_date\": \"string (ISO 8601 yyyy-MM-ddTHH:mm:ss)\"\n" +
-                "}\n\n" +
-                "Example:\n" +
-                "Input: 'Nhắn tin cho anh Đức bảo fix bug login gấp chiều mai'\n" +
-                "Output: {\n" +
-                "  \"title\": \"Fix bug login\",\n" +
-                "  \"description\": \"Nhắn tin cho anh Đức bảo fix bug login gấp\",\n" +
-                "  \"priority\": \"HIGH\",\n" +
-                "  \"assignee_name\": \"Đức\",\n" +
-                "  \"tag\": \"Bug\",\n" +
-                "  \"start_date\": \"\",\n" +
-                "  \"due_date\": \"[Calculate correctly based on tomorrow afternoon]\"\n" +
-                "}\n\n" +
-                "Context:\n" +
-                "- Current date and time: " + currentDateTime + "\n" +
-                "- Team members: " + (membersCsv.isEmpty() ? "unknown" : membersCsv) + "\n\n" +
-                "Strict Rules:\n" +
-                "- TITLE: Summarize. If input is 'Hôm nay đi chợ mua rau', title should be 'Mua rau'.\n" +
-                "- DATES: Relative dates (tomorrow, next week, chiều, tối) MUST be converted to absolute ISO 8601 format using the current context.\n" +
-                "- Return ONLY raw JSON.";
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are a task extraction assistant for 'TaskFlow'. ");
+        sb.append("The user writes in Vietnamese or English. Extract ONLY what is explicitly stated or clearly implied.\n\n");
+
+        // Core principle
+        sb.append("## GOLDEN RULE\n");
+        sb.append("Do NOT guess or fabricate. If the user does not mention something, leave the field as empty string \"\".\n");
+        sb.append("Only fill a field if you are confident the user intended it.\n\n");
+
+        // Available values
+        sb.append("## AVAILABLE VALUES (only use these if applicable)\n");
+        sb.append("- Priorities: HIGH, MEDIUM, LOW, NONE\n");
+        sb.append("- Members: [").append(membersCsv.isEmpty() ? "None" : membersCsv).append("]\n");
+        sb.append("- Tags: [").append(tagsCsv.isEmpty() ? "None" : tagsCsv).append("]\n\n");
+
+        if (parentTitle != null && !parentTitle.isEmpty()) {
+            sb.append("## CONTEXT\n");
+            sb.append("This is a SUBTASK of: '").append(parentTitle).append("'.\n\n");
+        }
+
+        // Field-by-field rules
+        sb.append("## FIELD RULES\n");
+        sb.append("- title: Short, actionable summary. Do NOT copy the entire input. E.g. 'Đi chợ mua rau cho mẹ' → 'Mua rau'.\n");
+        sb.append("- description: Provide helpful context or details ONLY if the user's input contains extra info beyond the title. ");
+        sb.append("Do NOT just repeat the title. If there is nothing extra to say, leave it as \"\".\n");
+        sb.append("- priority: Set ONLY if the user explicitly mentions urgency (gấp, khẩn, quan trọng → HIGH; chậm, khi nào rảnh → LOW). ");
+        sb.append("Otherwise leave as \"\".\n");
+        sb.append("- assignee_name: Set ONLY if the user explicitly names a person AND that person is in the Members list. Otherwise \"\".\n");
+        sb.append("- tag: Set ONLY if the user's task clearly relates to a tag (e.g. fix bug → Bug, code API → Backend, thiết kế → Design). ");
+        sb.append("Do NOT guess. Otherwise \"\".\n");
+        sb.append("- start_date / due_date: Set ONLY if the user mentions a specific time/date (ngày mai, chiều nay, thứ 2, 15/4...). ");
+        sb.append("Use ISO 8601 format (yyyy-MM-ddTHH:mm:ss). If only one date is mentioned, put it in due_date. ");
+        sb.append("IMPORTANT: due_date MUST be after start_date. If both are the same day, due_date's time must be later. ");
+        sb.append("If no time/date is mentioned at all, leave both as \"\".\n\n");
+
+        // JSON schema
+        sb.append("## JSON OUTPUT (return ONLY this, no markdown, no explanation)\n");
+        sb.append("{\n");
+        sb.append("  \"title\": \"\",\n");
+        sb.append("  \"description\": \"\",\n");
+        sb.append("  \"priority\": \"\",\n");
+        sb.append("  \"assignee_name\": \"\",\n");
+        sb.append("  \"tag\": \"\",\n");
+        sb.append("  \"start_date\": \"\",\n");
+        sb.append("  \"due_date\": \"\"\n");
+        sb.append("}\n\n");
+
+        sb.append("Current date/time: ").append(currentDateTime).append("\n");
+
+        return sb.toString();
     }
 
     // ── Data classes ────────────────────────────────────────────────────

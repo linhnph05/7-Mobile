@@ -123,11 +123,11 @@ public class TaskListActivity extends BaseActivity {
 
     private void updateTabUI() {
         tabToDo.setTextColor(currentStatus.equals("TODO") ? 
-                ContextCompat.getColor(this, R.color.primary) : ContextCompat.getColor(this, R.color.slate_400));
+            ContextCompat.getColor(this, R.color.primary) : ContextCompat.getColor(this, R.color.theme_text_secondary));
         tabDoing.setTextColor(currentStatus.equals("DOING") ? 
-                ContextCompat.getColor(this, R.color.primary) : ContextCompat.getColor(this, R.color.slate_400));
+            ContextCompat.getColor(this, R.color.primary) : ContextCompat.getColor(this, R.color.theme_text_secondary));
         tabDone.setTextColor(currentStatus.equals("DONE") ? 
-                ContextCompat.getColor(this, R.color.primary) : ContextCompat.getColor(this, R.color.slate_400));
+            ContextCompat.getColor(this, R.color.primary) : ContextCompat.getColor(this, R.color.theme_text_secondary));
     }
 
     private void setupBottomNavigation() {
@@ -144,17 +144,21 @@ public class TaskListActivity extends BaseActivity {
                     isBottomNavNavigating = true;
                     Intent intent = new Intent(this, DashboardActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    NavigationUtils.startActivityWithNavAnimation(this, intent,
-                            NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
-                    finish();
+                    boolean started = NavigationUtils.startActivityWithNavAnimation(
+                            this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                    if (!started) {
+                        isBottomNavNavigating = false;
+                    }
                     return true;
                 } else if (id == R.id.nav_settings) {
                     isBottomNavNavigating = true;
                     Intent intent = new Intent(this, ProfileActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    NavigationUtils.startActivityWithNavAnimation(this, intent,
-                            NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
-                    finish();
+                    boolean started = NavigationUtils.startActivityWithNavAnimation(
+                            this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                    if (!started) {
+                        isBottomNavNavigating = false;
+                    }
                     return true;
                 }
                 return id == R.id.nav_tasks;

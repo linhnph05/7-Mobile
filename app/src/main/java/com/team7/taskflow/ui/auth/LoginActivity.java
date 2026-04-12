@@ -57,9 +57,6 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Restore saved dark/light preference before any view is inflated
-        ProfileActivity.applySavedTheme(this);
-
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 

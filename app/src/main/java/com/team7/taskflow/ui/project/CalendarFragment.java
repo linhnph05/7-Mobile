@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ public class CalendarFragment extends Fragment {
     private static final String ARG_PROJECT_ID = "project_id";
     private static final String ARG_IS_MY_TASKS = "is_my_tasks";
     private static final String ARG_USER_ID = "user_id";
+    private static final String STATUS_TRASH = "TRASH";
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private String selectedDateStr;
@@ -49,6 +51,7 @@ public class CalendarFragment extends Fragment {
 
     private GridLayout glCalendar;
     private RecyclerView rvTasks;
+    private LinearLayout layoutEmptyState;
     private TaskAdapter adapter;
     private TaskRepository taskRepository;
 
@@ -88,6 +91,7 @@ public class CalendarFragment extends Fragment {
         View view = inflater.inflate(R.layout.view_calendar_content, container, false);
         glCalendar = view.findViewById(R.id.glCalendar);
         rvTasks = view.findViewById(R.id.rvTasks);
+        layoutEmptyState = view.findViewById(R.id.layoutEmptyStateCalendar);
 
         TextView tvMonthYear = view.findViewById(R.id.tvMonthYear);
         View btnToday = view.findViewById(R.id.btnToday);
@@ -245,11 +249,16 @@ public class CalendarFragment extends Fragment {
             public void onSuccess(List<Task> result) {
                 allTasks.clear();
                 if (result != null) {
-                    allTasks.addAll(result);
+                    for (Task task : result) {
+                        if (!isTrashTask(task)) {
+                            allTasks.add(task);
+                        }
+                    }
                 }
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
                     adapter.setSubtaskProgressSource(allTasks);
+                    updateEmptyState(allTasks.isEmpty());
                     filterTasksBySelectedDate();
                 });
             }
@@ -349,7 +358,7 @@ public class CalendarFragment extends Fragment {
                 tv.setBackgroundResource(R.drawable.bg_tag);
                 tv.getBackground().setTint(ContextCompat.getColor(requireContext(), R.color.primary));
             } else {
-                tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.slate_700));
+                tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.theme_text_primary));
                 tv.setBackground(null);
             }
 
@@ -373,7 +382,7 @@ public class CalendarFragment extends Fragment {
             tv.setText(day);
             tv.setGravity(android.view.Gravity.CENTER);
             tv.setTextSize(11f);
-            tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.slate_400));
+            tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.theme_text_secondary));
             tv.setMinHeight(dp(24));
 
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
@@ -385,5 +394,24 @@ public class CalendarFragment extends Fragment {
 
     private int dp(int value) {
         return (int) (value * requireContext().getResources().getDisplayMetrics().density);
+    }
+
+    private void updateEmptyState(boolean isEmpty) {
+        if (rvTasks != null) {
+            rvTasks.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        }
+        if (layoutEmptyState != null) {
+            layoutEmptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private boolean isTrashTask(Task task) {
+        if (task == null) {
+            return true;
+        }
+        String status = task.getStatus() != null
+                ? task.getStatus().trim().toUpperCase(Locale.US)
+                : "";
+        return STATUS_TRASH.equals(status);
     }
 }

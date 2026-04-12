@@ -31,16 +31,21 @@ public class SupabaseClient {
                 .addInterceptor(loggingInterceptor)
                 .build();
 
+        // Cấu hình Gson để gửi cả các giá trị NULL lên server (giúp xóa dữ liệu)
+        com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+                .serializeNulls()
+                .create();
+
         restRetrofit = new Retrofit.Builder()
                 .baseUrl(SupabaseConfig.REST_URL)
                 .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
         storageRetrofit = new Retrofit.Builder()
                 .baseUrl(SupabaseConfig.STORAGE_URL)
                 .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
     }
 

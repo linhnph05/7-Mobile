@@ -8,14 +8,23 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Bundle;
+import com.team7.taskflow.ui.profile.ProfileActivity;
+
 /**
  * BaseActivity — tất cả Activity kế thừa class này sẽ tự động:
  * - Ẩn bàn phím khi nhấn ra ngoài vùng EditText
  * - Xóa focus khỏi EditText
- *
- * Cách dùng: đổi "extends AppCompatActivity" → "extends BaseActivity"
+ * - Áp dụng theme (Light/Dark) từ cài đặt
  */
 public abstract class BaseActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // Áp dụng theme lưu trong SharedPreferences TRƯỚC khi gọi super.onCreate()
+        ProfileActivity.applySavedTheme(this);
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {

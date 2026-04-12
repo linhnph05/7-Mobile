@@ -52,7 +52,7 @@
         android:paddingHorizontal="14dp"
         android:paddingVertical="12dp"
         android:text="Cancel"
-        android:textColor="@color/slate_500"
+        android:textColor="@color/theme_text_secondary"
         android:textSize="14sp" />
 
 </LinearLayout>

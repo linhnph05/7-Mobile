@@ -21,6 +21,7 @@
     <color name="theme_text_primary">#FFFFFF</color>
     <color name="theme_text_secondary">#A0A0A0</color>
     <color name="theme_text_hint">#606060</color>
+    <color name="theme_timeline_todo">#64748B</color>
     <color name="theme_board_count_text">#000000</color>
 
     <!-- Borders & dividers -->

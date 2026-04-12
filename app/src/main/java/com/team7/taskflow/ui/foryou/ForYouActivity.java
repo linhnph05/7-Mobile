@@ -44,6 +44,11 @@ import retrofit2.Response;
 
 public class ForYouActivity extends BaseActivity {
 
+    private static final long TASKS_CACHE_TTL_MS = 20_000L;
+    private static List<Task> cachedMyTasks = new ArrayList<>();
+    private static long cachedMyTasksAtMs = 0L;
+    private static String cachedMyTasksUserId;
+
     private enum TaskFilter {
         ALL,
         TODAY,
@@ -80,8 +85,7 @@ public class ForYouActivity extends BaseActivity {
         taskRepository = TaskRepository.getInstance();
 
         bindViews();
-        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.appBarLayout));
-        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.contentScrollView));
+        applyNavTransitionIfNeeded();
         setupRecycler();
         setupActions();
         setupBottomNavigation();
@@ -90,15 +94,39 @@ public class ForYouActivity extends BaseActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        applyNavTransitionIfNeeded();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         isBottomNavNavigating = false;
+        applyNavTransitionIfNeeded();
         // Update bottom navigation selected item to ensure icon highlights correctly
         if (bottomNavigationView != null) {
             bottomNavigationView.setItemIconTintList(null);
             bottomNavigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         }
         loadTasks();
+    }
+
+    private void applyNavTransitionIfNeeded() {
+        Intent intent = getIntent();
+        if (intent == null) {
+            return;
+        }
+        if (!intent.hasExtra(NavigationUtils.EXTRA_NAV_FROM)
+                || !intent.hasExtra(NavigationUtils.EXTRA_NAV_TO)) {
+            return;
+        }
+
+        NavigationUtils.applyTopContentSlideAnimation(this, findViewById(R.id.contentScrollView));
+
+        intent.removeExtra(NavigationUtils.EXTRA_NAV_FROM);
+        intent.removeExtra(NavigationUtils.EXTRA_NAV_TO);
     }
 
     private void bindViews() {
@@ -173,15 +201,21 @@ public class ForYouActivity extends BaseActivity {
             if (id == R.id.nav_home) {
                 isBottomNavNavigating = true;
                 Intent intent = new Intent(this, DashboardActivity.class);
-                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
-                finish();
+                boolean started = NavigationUtils.startActivityWithNavAnimation(
+                        this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                if (!started) {
+                    isBottomNavNavigating = false;
+                }
                 return true;
             }
             if (id == R.id.nav_settings) {
                 isBottomNavNavigating = true;
                 Intent intent = new Intent(this, ProfileActivity.class);
-                NavigationUtils.startActivityWithNavAnimation(this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
-                finish();
+                boolean started = NavigationUtils.startActivityWithNavAnimation(
+                        this, intent, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                if (!started) {
+                    isBottomNavNavigating = false;
+                }
                 return true;
             }
             return id == R.id.nav_assistant;
@@ -221,10 +255,10 @@ public class ForYouActivity extends BaseActivity {
                     return;
                 }
                 runOnUiThread(() -> AvatarUiUtils.bindAvatarOrFallback(
-                    ivProfilePic,
-                    tvProfileAvatarLetter,
-                    user.getAvatarUrl(),
-                    user.getDisplayNameOrEmail()));
+                        ivProfilePic,
+                        tvProfileAvatarLetter,
+                        user.getAvatarUrl(),
+                        user.getDisplayNameOrEmail()));
             }
 
             @Override
@@ -241,11 +275,22 @@ public class ForYouActivity extends BaseActivity {
             return;
         }
 
+        if (canUseTaskCache(currentUserId)) {
+            allTasks = new ArrayList<>(cachedMyTasks);
+            taskAdapter.setSubtaskProgressSource(allTasks);
+            updateOverview(allTasks);
+            applyFilter(activeFilter);
+            return;
+        }
+
         taskRepository.getMyTasksWithProjectName(currentUserId, new TaskRepository.TaskCallback<List<Task>>() {
             @Override
             public void onSuccess(List<Task> result) {
                 runOnUiThread(() -> {
                     allTasks = result != null ? result : new ArrayList<>();
+                    cachedMyTasks = new ArrayList<>(allTasks);
+                    cachedMyTasksAtMs = System.currentTimeMillis();
+                    cachedMyTasksUserId = currentUserId;
                     taskAdapter.setSubtaskProgressSource(allTasks);
                     updateOverview(allTasks);
                     applyFilter(activeFilter);
@@ -257,6 +302,17 @@ public class ForYouActivity extends BaseActivity {
                 runOnUiThread(() -> Toast.makeText(ForYouActivity.this, error, Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    private boolean canUseTaskCache(String userId) {
+        if (TextUtils.isEmpty(userId)) {
+            return false;
+        }
+        if (TextUtils.isEmpty(cachedMyTasksUserId) || !userId.equals(cachedMyTasksUserId)) {
+            return false;
+        }
+        long ageMs = System.currentTimeMillis() - cachedMyTasksAtMs;
+        return ageMs >= 0L && ageMs <= TASKS_CACHE_TTL_MS;
     }
 
     private void updateOverview(List<Task> tasks) {
@@ -295,14 +351,80 @@ public class ForYouActivity extends BaseActivity {
         activeFilter = filter;
         updateFilterUi();
 
+        // Kích hoạt animation cho danh sách công việc
+        if (rvMyTasks != null) {
+            rvMyTasks.setLayoutAnimation(android.view.animation.AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_fall_down));
+            rvMyTasks.scheduleLayoutAnimation();
+        }
+
         List<Task> filtered = new ArrayList<>();
         for (Task task : allTasks) {
             if (matchesFilter(task, filter)) {
                 filtered.add(task);
             }
         }
-        filtered.sort((left, right) -> Long.compare(parseTaskCreatedTime(right), parseTaskCreatedTime(left)));
+        filtered.sort(this::compareTasksForDisplayOrder);
         taskAdapter.setTasks(filtered);
+    }
+
+    private int compareTasksForDisplayOrder(Task left, Task right) {
+        int leftStatusRank = getStatusRank(left);
+        int rightStatusRank = getStatusRank(right);
+        if (leftStatusRank != rightStatusRank) {
+            return Integer.compare(leftStatusRank, rightStatusRank);
+        }
+
+        int leftPriorityRank = getPriorityRank(left);
+        int rightPriorityRank = getPriorityRank(right);
+        if (leftPriorityRank != rightPriorityRank) {
+            return Integer.compare(leftPriorityRank, rightPriorityRank);
+        }
+
+        LocalDate leftDueDate = parseIsoDate(left != null ? left.getDueDate() : null);
+        LocalDate rightDueDate = parseIsoDate(right != null ? right.getDueDate() : null);
+        if (leftDueDate != null && rightDueDate != null) {
+            int byDueDate = leftDueDate.compareTo(rightDueDate);
+            if (byDueDate != 0) {
+                return byDueDate;
+            }
+        } else if (leftDueDate != null) {
+            return -1;
+        } else if (rightDueDate != null) {
+            return 1;
+        }
+
+        return Long.compare(parseTaskCreatedTime(right), parseTaskCreatedTime(left));
+    }
+
+    private int getStatusRank(Task task) {
+        if (task == null || task.getStatus() == null) {
+            return 1;
+        }
+        String status = task.getStatus().trim().toUpperCase(Locale.US);
+        if (status.contains("DOING") || status.contains("IN_PROGRESS") || status.contains("PROGRESS")) {
+            return 0;
+        }
+        if (status.contains("DONE") || "COMPLETED".equals(status)) {
+            return 2;
+        }
+        return 1;
+    }
+
+    private int getPriorityRank(Task task) {
+        if (task == null || task.getPriority() == null) {
+            return 3;
+        }
+        String priority = task.getPriority().trim().toUpperCase(Locale.US);
+        switch (priority) {
+            case "HIGH":
+                return 0;
+            case "MEDIUM":
+                return 1;
+            case "LOW":
+                return 2;
+            default:
+                return 3;
+        }
     }
 
     private long parseTaskCreatedTime(Task task) {

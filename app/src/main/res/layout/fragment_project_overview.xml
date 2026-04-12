@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/theme_background">
+    android:background="@android:color/transparent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -392,20 +392,20 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:src="@drawable/ic_summary"
-                app:tint="@color/slate_200"
+                app:tint="@color/theme_text_hint"
                 android:layout_marginBottom="16dp"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/overview_no_tasks"
-                android:textColor="@color/slate_500"
+                android:textColor="@color/theme_text_primary"
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-medium"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/overview_no_tasks_desc"
-                android:textColor="@color/slate_400"
+                android:textColor="@color/theme_text_secondary"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
                 android:gravity="center"/>
@@ -427,6 +427,17 @@
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
             tools:listitem="@layout/item_task"/>
+
+        <TextView
+            android:id="@+id/tvUpcomingEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/overview_upcoming_empty"
+            android:textColor="@color/theme_text_secondary"
+            android:textSize="13sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <!-- Bottom space for FAB -->
         <View android:layout_width="match_parent" android:layout_height="80dp" />

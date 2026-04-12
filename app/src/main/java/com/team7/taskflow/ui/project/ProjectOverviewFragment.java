@@ -68,7 +68,7 @@ public class ProjectOverviewFragment extends Fragment {
     private TaskAdapter taskAdapter;
 
     private NestedScrollView nestedScrollView;
-    private TextView tvTotalTasks, tvDoneTasks, tvNewTasks, tvOverdueTasks;
+    private TextView tvTotalTasks, tvDoneTasks, tvNewTasks, tvOverdueTasks, tvUpcomingEmpty;
     private PieChart pieChartStatus;
     private BarChart barChartProductivity;
     private RecyclerView rvUpcomingTasks;
@@ -127,6 +127,7 @@ public class ProjectOverviewFragment extends Fragment {
         barChartProductivity = view.findViewById(R.id.barChartProductivity);
         cardBarChart = view.findViewById(R.id.cardBarChart);
         rvUpcomingTasks = view.findViewById(R.id.rvUpcomingTasks);
+        tvUpcomingEmpty = view.findViewById(R.id.tvUpcomingEmpty);
         layoutEmptyState = view.findViewById(R.id.layoutEmptyState);
         layoutCharts = view.findViewById(R.id.layoutCharts);
 
@@ -270,6 +271,7 @@ public class ProjectOverviewFragment extends Fragment {
                 List<Task> activeTasks = filterOutTrashTasks(tasks);
                 if (activeTasks.isEmpty()) {
                     showEmptyState(true);
+                    updateUpcomingTasks(Collections.emptyList());
                     return;
                 }
                 showEmptyState(false);
@@ -416,7 +418,7 @@ public class ProjectOverviewFragment extends Fragment {
 
         if (todo > 0) {
             entries.add(new PieEntry(todo, getString(R.string.overview_status_todo_count, todo)));
-            colors.add(ContextCompat.getColor(requireContext(), R.color.slate_400));
+            colors.add(ContextCompat.getColor(requireContext(), R.color.theme_text_secondary));
         }
         if (inProgress > 0) {
             entries.add(new PieEntry(inProgress, getString(R.string.overview_status_in_progress_count, inProgress)));
@@ -452,19 +454,20 @@ public class ProjectOverviewFragment extends Fragment {
         String unassignedLabel = getString(R.string.overview_unassigned_label);
 
         for (Task t : tasks) {
-            if (!hasCompleteScheduleRange(t)) {
+            if (t == null) {
                 continue;
             }
+            String status = t.getStatus() != null ? t.getStatus().toUpperCase(Locale.US) : STATUS_TODO_KEY;
+            if ("TRASH".equals(status)) {
+                continue;
+            }
+
             String assigneeId = t.getAssigneeId();
             String name = (assigneeId == null || !memberNames.containsKey(assigneeId))
                     ? unassignedLabel
                     : memberNames.get(assigneeId);
 
             int[] buckets = stats.computeIfAbsent(name, k -> new int[] {0, 0, 0});
-            String status = t.getStatus() != null ? t.getStatus().toUpperCase(Locale.US) : STATUS_TODO_KEY;
-            if ("TRASH".equals(status)) {
-                continue;
-            }
 
             if (status.contains("DONE")) {
                 buckets[2]++;
@@ -502,7 +505,7 @@ public class ProjectOverviewFragment extends Fragment {
 
         BarDataSet dataSet = new BarDataSet(entries, "");
         dataSet.setColors(new int[] {
-                ContextCompat.getColor(requireContext(), R.color.slate_400),
+            ContextCompat.getColor(requireContext(), R.color.theme_text_secondary),
                 ContextCompat.getColor(requireContext(), R.color.primary),
                 ContextCompat.getColor(requireContext(), R.color.green_500)
         });
@@ -555,19 +558,52 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void updateUpcomingTasks(List<Task> allTasks) {
+        LocalDate today = LocalDate.now();
         List<Task> upcoming = new ArrayList<>();
         for (Task t : allTasks) {
-            String status = t.getStatus() != null ? t.getStatus() : "";
-            if (!"DONE".equalsIgnoreCase(status) && !"TRASH".equalsIgnoreCase(status)) {
+            if (shouldIncludeUpcomingTask(t, today)) {
                 upcoming.add(t);
             }
         }
         Collections.sort(upcoming, (t1, t2) -> {
+            LocalDate due1 = extractDate(t1 != null ? t1.getDueDate() : null);
+            LocalDate due2 = extractDate(t2 != null ? t2.getDueDate() : null);
+
+            if (due1 != null && due2 != null) {
+                int byDueDate = due1.compareTo(due2);
+                if (byDueDate != 0) {
+                    return byDueDate;
+                }
+            }
+
+            // Tie-break: newer tasks first when same due date.
             return Long.compare(parseTaskCreatedTime(t2), parseTaskCreatedTime(t1));
         });
         int limit = Math.min(upcoming.size(), 5);
         taskAdapter.setSubtaskProgressSource(allTasks);
         taskAdapter.setTasks(upcoming.subList(0, limit));
+
+        boolean isUpcomingEmpty = limit == 0;
+        if (tvUpcomingEmpty != null) {
+            tvUpcomingEmpty.setVisibility(isUpcomingEmpty ? View.VISIBLE : View.GONE);
+        }
+        if (rvUpcomingTasks != null) {
+            rvUpcomingTasks.setVisibility(isUpcomingEmpty ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    private boolean shouldIncludeUpcomingTask(Task task, LocalDate today) {
+        if (task == null) {
+            return false;
+        }
+
+        String status = normalizeStatus(task.getStatus());
+        if (status.contains("DONE") || status.contains("TRASH")) {
+            return false;
+        }
+
+        LocalDate dueDate = extractDate(task.getDueDate());
+        return dueDate != null && !dueDate.isBefore(today);
     }
 
     private long parseTaskCreatedTime(Task task) {

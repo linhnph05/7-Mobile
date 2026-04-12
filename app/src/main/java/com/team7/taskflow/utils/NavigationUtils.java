@@ -30,24 +30,24 @@ public class NavigationUtils {
      * - Nếu target > current: item ở phía phải → activity slide in từ phải (slide_in_right, slide_out_left)
      * - Nếu target < current: item ở phía trái → activity slide in từ trái (slide_in_left, slide_out_right)
      */
-    public static void startActivityWithNavAnimation(
+    public static boolean startActivityWithNavAnimation(
             Activity currentActivity,
             Intent intent,
             int currentNavIndex,
             int targetNavIndex
     ) {
         if (currentActivity == null || intent == null) {
-            return;
+            return false;
         }
 
         long now = SystemClock.elapsedRealtime();
         if (now - lastNavigationAtMs < NAVIGATION_DEBOUNCE_MS) {
-            return;
+            return false;
         }
 
         if (intent.getComponent() != null
                 && currentActivity.getClass().getName().equals(intent.getComponent().getClassName())) {
-            return;
+            return false;
         }
 
         lastNavigationAtMs = now;
@@ -57,6 +57,7 @@ public class NavigationUtils {
         currentActivity.startActivity(intent);
         // Disable whole-activity transition so bottom bar does not slide.
         currentActivity.overridePendingTransition(0, 0);
+        return true;
     }
 
     public static void applyTopContentSlideAnimation(Activity activity, View contentView) {

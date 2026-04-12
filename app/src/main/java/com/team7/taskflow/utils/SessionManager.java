@@ -1,9 +1,12 @@
 package com.team7.taskflow.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+
 import com.team7.taskflow.data.remote.SupabaseClient;
+import com.team7.taskflow.ui.auth.LoginActivity;
 
 /**
  * Quản lý session người dùng (Token, ID, Email, Name)
@@ -20,10 +23,13 @@ public class SessionManager {
     private static final String KEY_EXPIRES_AT = "expires_at";
 
     private static SharedPreferences prefs;
+    private static Context appContext;
+    private static boolean redirectingToLogin;
 
     public static void init(Context context) {
         if (prefs == null) {
-            prefs = context.getApplicationContext()
+            appContext = context.getApplicationContext();
+            prefs = appContext
                     .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
             
             String token = getAccessToken();
@@ -35,6 +41,7 @@ public class SessionManager {
 
     public static void saveSession(String accessToken, String refreshToken, String userId, String email, String displayName) {
         ensureInit();
+        redirectingToLogin = false;
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(KEY_ACCESS_TOKEN, accessToken);
         editor.putString(KEY_REFRESH_TOKEN, refreshToken);
@@ -52,6 +59,10 @@ public class SessionManager {
 
     public static String getAccessToken() {
         ensureInit();
+        if (isExpired()) {
+            handleExpiredSession();
+            return "";
+        }
         return prefs.getString(KEY_ACCESS_TOKEN, "");
     }
 
@@ -62,16 +73,28 @@ public class SessionManager {
 
     public static String getUserId() {
         ensureInit();
+        if (isExpired()) {
+            handleExpiredSession();
+            return "";
+        }
         return prefs.getString(KEY_USER_ID, "");
     }
 
     public static String getUserEmail() {
         ensureInit();
+        if (isExpired()) {
+            handleExpiredSession();
+            return "";
+        }
         return prefs.getString(KEY_USER_EMAIL, "");
     }
 
     public static String getDisplayName() {
         ensureInit();
+        if (isExpired()) {
+            handleExpiredSession();
+            return "";
+        }
         return prefs.getString(KEY_DISPLAY_NAME, "");
     }
 
@@ -84,10 +107,9 @@ public class SessionManager {
         }
 
         // Kiểm tra Token đã hết hạn chưa (Supabase Token sống 1 tiếng)
-        long expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0);
-        if (expiresAt > 0 && System.currentTimeMillis() >= expiresAt) {
+        if (isExpired()) {
             Log.w(TAG, "Access token expired! Auto-clearing session...");
-            clearSession();
+            handleExpiredSession();
             return false;
         }
 
@@ -96,8 +118,33 @@ public class SessionManager {
 
     public static void clearSession() {
         ensureInit();
+        redirectingToLogin = false;
         prefs.edit().clear().apply();
         SupabaseClient.getInstance().clearAccessToken();
+    }
+
+    private static boolean isExpired() {
+        if (prefs == null) {
+            return false;
+        }
+        long expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0);
+        return expiresAt > 0 && System.currentTimeMillis() >= expiresAt;
+    }
+
+    private static void handleExpiredSession() {
+        if (redirectingToLogin) {
+            return;
+        }
+        redirectingToLogin = true;
+        clearSession();
+
+        if (appContext == null) {
+            return;
+        }
+
+        Intent intent = new Intent(appContext, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        appContext.startActivity(intent);
     }
 
     private static void ensureInit() {

@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.timeline;
 
 import android.content.Intent;
+import android.text.TextUtils;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -40,6 +41,9 @@ import com.team7.taskflow.utils.ProjectColorUtils;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 public class ProjectDetailActivity extends BaseActivity {
 
@@ -68,6 +72,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private BottomNavigationView bottomNavigationView;
     private View btnMore;
     private View btnProjectActivity;
+    private TextView tvProjectActivityBadge;
     private boolean isBottomNavNavigating = false;
     private int currentTabIndex = -1;
     private int requestedInitialTab = TAB_OVERVIEW;
@@ -110,6 +115,7 @@ public class ProjectDetailActivity extends BaseActivity {
         setupBottomNavigation();
         loadUserInfo();
         loadProjectTheme();
+        refreshProjectActivityBadge();
 
         View header = findViewById(R.id.layoutHeader);
         if (header != null) {
@@ -196,7 +202,12 @@ public class ProjectDetailActivity extends BaseActivity {
         tabCalendar          = findViewById(R.id.tabCalendar);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         btnProjectActivity   = findViewById(R.id.btnProjectActivity);
+        tvProjectActivityBadge = findViewById(R.id.tvProjectActivityBadge);
         btnMore              = findViewById(R.id.btnMoreOptions);
+
+        if (tvProjectActivityBadge != null) {
+            tvProjectActivityBadge.setVisibility(View.GONE);
+        }
 
         View fragmentContainer = findViewById(R.id.fragment_container);
         View bottomBar         = findViewById(R.id.includeBottomBar);
@@ -270,8 +281,11 @@ public class ProjectDetailActivity extends BaseActivity {
             }
 
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) rawParams;
-            params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-            params.bottomMargin = (bottomBarHeight > 0 ? bottomBarHeight : bottomInset) + spacing;
+            params.gravity = Gravity.BOTTOM | Gravity.END;
+            int alignedBottomMargin = getResources().getDimensionPixelSize(R.dimen.spacing_xl) * 11;
+            params.bottomMargin = Math.max((bottomBarHeight > 0 ? bottomBarHeight : bottomInset) + spacing,
+                    alignedBottomMargin);
+            params.setMarginEnd(spacing);
             fabAddAI.setLayoutParams(params);
         });
     }
@@ -307,17 +321,21 @@ public class ProjectDetailActivity extends BaseActivity {
             if (id == R.id.nav_home) {
                 isBottomNavNavigating = true;
                     Intent i = new Intent(this, DashboardActivity.class);
-                NavigationUtils.startActivityWithNavAnimation(this, i,
-                        NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
-                finish();
+                boolean started = NavigationUtils.startActivityWithNavAnimation(
+                        this, i, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
+                if (!started) {
+                    isBottomNavNavigating = false;
+                }
                 return true;
             }
             if (id == R.id.nav_settings) {
                 isBottomNavNavigating = true;
                     Intent i = new Intent(this, ProfileActivity.class);
-                NavigationUtils.startActivityWithNavAnimation(this, i,
-                        NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
-                finish();
+                boolean started = NavigationUtils.startActivityWithNavAnimation(
+                        this, i, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
+                if (!started) {
+                    isBottomNavNavigating = false;
+                }
                 return true;
             }
             return id == R.id.nav_assistant;
@@ -496,14 +514,113 @@ public class ProjectDetailActivity extends BaseActivity {
                 });
     }
 
-    private void applyHeaderTint() {
-        View header = findViewById(R.id.layoutHeader);
-        if (header == null) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshProjectActivityBadge();
+    }
+
+    private void refreshProjectActivityBadge() {
+        if (tvProjectActivityBadge == null || projectId <= 0 || isMyTasksMode) {
+            updateProjectActivityBadge(0);
             return;
         }
+
+        ProjectRepository.getInstance().getProjectHistoryFeed(projectId,
+                new ProjectRepository.ProjectCallback<List<com.team7.taskflow.domain.model.ProjectHistoryItem>>() {
+                    @Override
+                    public void onSuccess(List<com.team7.taskflow.domain.model.ProjectHistoryItem> result) {
+                        runOnUiThread(() -> updateProjectActivityBadge(countTodayHistoryItems(result)));
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> updateProjectActivityBadge(0));
+                    }
+                });
+    }
+
+    private int countTodayHistoryItems(List<com.team7.taskflow.domain.model.ProjectHistoryItem> items) {
+        if (items == null || items.isEmpty()) {
+            return 0;
+        }
+
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        int count = 0;
+        for (com.team7.taskflow.domain.model.ProjectHistoryItem item : items) {
+            if (item == null) {
+                continue;
+            }
+            LocalDate createdDate = extractHistoryDate(item.getCreatedAt());
+            if (today.equals(createdDate)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private LocalDate extractHistoryDate(String createdAt) {
+        if (TextUtils.isEmpty(createdAt)) {
+            return null;
+        }
+
+        String normalized = createdAt.trim();
+        try {
+            return OffsetDateTime.parse(normalized)
+                    .atZoneSameInstant(ZoneId.systemDefault())
+                    .toLocalDate();
+        } catch (Exception ignored) {
+        }
+
+        try {
+            return java.time.LocalDateTime.parse(normalized).toLocalDate();
+        } catch (Exception ignored) {
+        }
+
+        try {
+            if (normalized.length() >= 10) {
+                return LocalDate.parse(normalized.substring(0, 10));
+            }
+        } catch (Exception ignored) {
+        }
+
+        return null;
+    }
+
+    private void updateProjectActivityBadge(int count) {
+        if (tvProjectActivityBadge == null) {
+            return;
+        }
+
+        if (count <= 0) {
+            tvProjectActivityBadge.setVisibility(View.GONE);
+            tvProjectActivityBadge.setText("");
+            return;
+        }
+
+        tvProjectActivityBadge.setVisibility(View.VISIBLE);
+        tvProjectActivityBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+    }
+
+    private void applyHeaderTint() {
+        View header = findViewById(R.id.layoutHeader);
         int baseColor = ProjectColorUtils.resolveBaseColor(this, projectColor);
         int headerTint = ProjectColorUtils.resolveHeaderTintColor(this, baseColor);
-        header.setBackgroundColor(headerTint);
+        int contentTint = ProjectColorUtils.resolveContentTintColor(this, baseColor);
+
+        if (header != null) {
+            header.setBackgroundColor(headerTint);
+        }
+
+        View fragmentContainer = findViewById(R.id.fragment_container);
+        if (fragmentContainer != null) {
+            fragmentContainer.setBackgroundColor(contentTint);
+        }
+
+        View rootLayout = findViewById(R.id.rootLayout);
+        if (rootLayout != null) {
+            rootLayout.setBackgroundColor(contentTint);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -632,12 +749,17 @@ public class ProjectDetailActivity extends BaseActivity {
                                                         bottomSheet.dismiss();
                                                         Intent intent = new Intent(ProjectDetailActivity.this,
                                                                 DashboardActivity.class);
-                                                        NavigationUtils.startActivityWithNavAnimation(
+                                                        boolean started = NavigationUtils.startActivityWithNavAnimation(
                                                                 ProjectDetailActivity.this,
                                                                 intent,
                                                                 NavigationUtils.NAV_TASKS,
                                                                 NavigationUtils.NAV_HOME);
-                                                        finish();
+                                                        if (started) {
+                                                            finish();
+                                                        } else {
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
                                                     });
                                                 }
 

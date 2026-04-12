@@ -33,6 +33,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -71,9 +72,9 @@ public class TaskDetailActivity extends BaseActivity {
     private static final String EXTRA_PARENT_TASK_TITLE = "parent_task_title";
 
     private EditText etTitle, etDescription;
-    private TextView tvPriority, tvStatus, tvAssignee, tvTag, tvDependency;
-    private ImageView ivPriority, ivStatus, ivAssignee, ivTag, ivDependency;
-    private View cardPriority, cardStatus, cardAssignee, cardAttachment, cardTag, cardDependency;
+    private TextView tvPriority, tvStatus, tvAssignee, tvTag;
+    private ImageView ivPriority, ivStatus, ivAssignee, ivTag;
+    private View cardPriority, cardStatus, cardAssignee, cardAttachment, cardTag;
     private TextView tvAttachment;
     private ImageView ivAttachment;
     private LinearLayout containerAttachments;
@@ -85,6 +86,7 @@ public class TaskDetailActivity extends BaseActivity {
 
     private List<Uri> attachedFileUris = new ArrayList<>();
     private List<com.team7.taskflow.domain.model.Attachment> existingAttachments = new ArrayList<>();
+    private List<Task> currentSubTasks = new ArrayList<>();
     private int uploadSuccessCount = 0;
 
     private String selectedPriority = "MEDIUM";
@@ -93,6 +95,7 @@ public class TaskDetailActivity extends BaseActivity {
 
     private TextView tvStartDate, tvDueDate, tvStartTime, tvDueTime, btnSave, tvToolbarTitle;
     private TextView tvSubTaskInfo;
+    private ImageView ivSubTaskInfo;
     private View cardSubTaskInfo;
     private ProgressBar progressBar;
     
@@ -134,6 +137,8 @@ public class TaskDetailActivity extends BaseActivity {
     private TextView tvWorklogTotal;
     private TextView tvWorklogEntries;
     private View fabFocusMode;
+    private View layoutHeader;
+    private NestedScrollView scrollTaskDetail;
     private ActivityResultLauncher<Intent> focusModeLauncher;
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -145,14 +150,15 @@ public class TaskDetailActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_task_detail);
 
-        View header = findViewById(R.id.layoutHeader);
-        if (header != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(header, (v, insets) -> {
+        layoutHeader = findViewById(R.id.layoutHeader);
+        if (layoutHeader != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(layoutHeader, (v, insets) -> {
                 Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                 v.setPadding(v.getPaddingLeft(), sys.top, v.getPaddingRight(), v.getPaddingBottom());
+                updateSubTaskBannerSpacing();
                 return insets;
             });
-            header.bringToFront();
+            layoutHeader.bringToFront();
         }
 
         taskRepository = TaskRepository.getInstance();
@@ -185,7 +191,11 @@ public class TaskDetailActivity extends BaseActivity {
         tvToolbarTitle.setText("Chi tiết công việc");
         btnSave.setText("Lưu");
 
-        setupActivityTabs();
+        // Dependency Section - Redirect to Subtask Banner logic
+        if (cardSubTaskInfo != null) {
+            cardSubTaskInfo.setOnClickListener(v -> showParentTaskPicker());
+        }
+
         setupSubTaskFab();
         setupFocusModeFab();
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -256,11 +266,8 @@ public class TaskDetailActivity extends BaseActivity {
         cardAssignee       = findViewById(R.id.cardAssignee);
         cardAttachment     = findViewById(R.id.cardAttachment);
         cardTag            = findViewById(R.id.cardTag);
-        cardDependency     = findViewById(R.id.cardDependency);
         ivTag              = findViewById(R.id.ivTag);
-        ivDependency       = findViewById(R.id.ivDependency);
         tvTag              = findViewById(R.id.tvTag);
-        tvDependency       = findViewById(R.id.tvDependency);
         tvAttachment       = findViewById(R.id.tvAttachment);
         ivAttachment       = findViewById(R.id.ivAttachment);
         containerAttachments = findViewById(R.id.containerAttachments);
@@ -273,6 +280,9 @@ public class TaskDetailActivity extends BaseActivity {
         progressBar        = findViewById(R.id.progressBar);
         tvSubTaskInfo      = findViewById(R.id.tvSubTaskInfo);
         cardSubTaskInfo    = findViewById(R.id.cardSubTaskInfo);
+        ivSubTaskInfo      = findViewById(R.id.ivSubTaskIcon);
+        scrollTaskDetail   = findViewById(R.id.scrollTaskDetail);
+        layoutHeader       = findViewById(R.id.layoutHeader);
         layoutCommentsSection = findViewById(R.id.layoutCommentsSection);
         
         // ÄÃ£ gá»™p conflict khá»Ÿi táº¡o view
@@ -301,7 +311,7 @@ public class TaskDetailActivity extends BaseActivity {
     private void applySubTaskContextFromIntent() {
         Intent intent = getIntent();
         if (intent == null) {
-            renderSubTaskInfo(null);
+            renderSubTaskInfo(null, null);
             return;
         }
 
@@ -313,26 +323,93 @@ public class TaskDetailActivity extends BaseActivity {
         }
 
         String parentTaskTitle = intent.getStringExtra(EXTRA_PARENT_TASK_TITLE);
-        renderSubTaskInfo(parentTaskTitle);
+        renderSubTaskInfo(selectedParentTaskId, parentTaskTitle);
     }
 
-    private void renderSubTaskInfo(String parentTaskTitle) {
-        if (tvSubTaskInfo == null || cardSubTaskInfo == null) {
+    private void renderSubTaskInfo(Long parentId, String parentTaskTitle) {
+        if (tvSubTaskInfo == null || cardSubTaskInfo == null || ivSubTaskInfo == null) {
             return;
         }
 
-        if (selectedParentTaskId == null || selectedParentTaskId <= 0) {
-            cardSubTaskInfo.setVisibility(View.GONE);
-            return;
-        }
-
-        String safeTitle = parentTaskTitle != null ? parentTaskTitle.trim() : "";
-        if (safeTitle.isEmpty()) {
-            safeTitle = "#" + selectedParentTaskId;
-        }
-
+        // Đảm bảo Banner luôn hiển thị khi có dữ liệu
         cardSubTaskInfo.setVisibility(View.VISIBLE);
-        tvSubTaskInfo.setText(getString(R.string.task_subtask_of_format, safeTitle));
+
+        if (parentId != null && parentId > 0) {
+            // Case 1: Current task is a subtask -> Show its main task (parent)
+            String safeTitle = (parentTaskTitle != null && !parentTaskTitle.trim().isEmpty()) ? parentTaskTitle.trim() : ("#" + parentId);
+            tvSubTaskInfo.setText(getString(R.string.task_subtask_of_format, safeTitle));
+            ivSubTaskInfo.setImageResource(R.drawable.ic_grid_view);
+            tvSubTaskInfo.setTextColor(ContextCompat.getColor(this, R.color.theme_text_primary));
+            cardSubTaskInfo.setOnClickListener(v -> showParentTaskPicker());
+        } else if (!currentSubTasks.isEmpty()) {
+            // Case 2: Current task is a main task with subtasks -> Show subtask count & navigator
+            tvSubTaskInfo.setText(getString(R.string.task_subtask_count_format, currentSubTasks.size()));
+            ivSubTaskInfo.setImageResource(R.drawable.ic_account_tree);
+            tvSubTaskInfo.setTextColor(ContextCompat.getColor(this, R.color.theme_text_primary));
+            cardSubTaskInfo.setOnClickListener(v -> showSubTaskListPicker());
+        } else {
+            // Case 3: Standalone task -> Show prompt to assign a main task
+            tvSubTaskInfo.setText(getString(R.string.task_add_parent_prompt));
+            ivSubTaskInfo.setImageResource(R.drawable.ic_grid_view);
+            tvSubTaskInfo.setTextColor(ContextCompat.getColor(this, R.color.theme_text_hint));
+            cardSubTaskInfo.setOnClickListener(v -> showParentTaskPicker());
+        }
+        updateSubTaskBannerSpacing();
+    }
+
+    private void showSubTaskListPicker() {
+        if (currentSubTasks.isEmpty()) return;
+        
+        BottomSheetDialog d = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        View v = getLayoutInflater().inflate(R.layout.dialog_simple_list, null);
+        TextView tvTitle = v.findViewById(R.id.tvTitle);
+        LinearLayout container = v.findViewById(R.id.containerItems);
+        
+        if (tvTitle != null) tvTitle.setText(getString(R.string.task_subtask_list_title));
+        
+        for (Task sub : currentSubTasks) {
+            String label = "#" + sub.getId() + " • " + sub.getTitle();
+            container.addView(createPickerItem(label, x -> {
+                d.dismiss();
+                // Navigate to subtask's detail screen
+                Intent intent = new Intent(this, TaskDetailActivity.class);
+                intent.putExtra("task_id", sub.getId());
+                intent.putExtra("project_id", projectId);
+                startActivity(intent);
+            }, R.color.theme_text_primary));
+        }
+        
+        // Contextual hint for user
+        TextView hint = new TextView(this);
+        hint.setText(R.string.task_view_subtasks_prompt);
+        hint.setTextSize(12);
+        hint.setPadding(48, 8, 48, 32);
+        hint.setTextColor(ContextCompat.getColor(this, R.color.theme_text_secondary));
+        hint.setGravity(android.view.Gravity.CENTER);
+        container.addView(hint);
+
+        d.setContentView(v);
+        d.show();
+    }
+
+    private void updateSubTaskBannerSpacing() {
+        if (scrollTaskDetail == null || layoutHeader == null) {
+            return;
+        }
+
+        layoutHeader.post(() -> {
+            ViewGroup.LayoutParams currentParams = scrollTaskDetail.getLayoutParams();
+            if (!(currentParams instanceof ViewGroup.MarginLayoutParams)) {
+                return;
+            }
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) currentParams;
+            int targetTopMargin = layoutHeader.getHeight();
+            if (params.topMargin != targetTopMargin) {
+                params.topMargin = targetTopMargin;
+                scrollTaskDetail.setLayoutParams(params);
+            }
+        });
     }
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -438,31 +515,39 @@ public class TaskDetailActivity extends BaseActivity {
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        // Render existing attachments (Ä‘Ã£ upload)
+        // Render existing attachments (đã upload)
         for (com.team7.taskflow.domain.model.Attachment attachment : existingAttachments) {
             View itemView = inflater.inflate(R.layout.item_attachment_chip, containerAttachments, false);
             bindAttachmentChip(itemView,
                     attachment.getFileName(),
                     attachment.getFileType(),
-                    null, // khÃ´ng cÃ³ URI local
+                    null, // không có URI local
                     attachment.getFileUrl(),
                     v -> {
                         if (attachment.getId() != null) {
-                            Toast.makeText(this, "Đang xóa...", Toast.LENGTH_SHORT).show();
-                            TaskRepository.getInstance().deleteTaskAttachment(attachment.getId(),
-                                    new TaskRepository.TaskCallback<Void>() {
-                                        @Override public void onSuccess(Void r) {
-                                            runOnUiThread(() -> {
-                                                existingAttachments.remove(attachment);
-                                                updateAttachmentUi();
-                                            });
-                                        }
-                                        @Override public void onError(String err) {
-                                            runOnUiThread(() -> Toast.makeText(
-                                                    TaskDetailActivity.this,
-                                                    "Xóa lỗi: " + err, Toast.LENGTH_SHORT).show());
-                                        }
-                                    });
+                            // Thêm hộp thoại xác nhận xóa để tránh bấm nhầm
+                            new androidx.appcompat.app.AlertDialog.Builder(this)
+                                    .setTitle("Xác nhận xóa")
+                                    .setMessage("Bạn có chắc chắn muốn xóa vĩnh viễn tệp này khỏi hệ thống không?")
+                                    .setPositiveButton("Xóa", (dialog, which) -> {
+                                        Toast.makeText(this, "Đang xóa...", Toast.LENGTH_SHORT).show();
+                                        TaskRepository.getInstance().deleteTaskAttachment(attachment.getId(),
+                                                new TaskRepository.TaskCallback<Void>() {
+                                                    @Override public void onSuccess(Void r) {
+                                                        runOnUiThread(() -> {
+                                                            existingAttachments.remove(attachment);
+                                                            updateAttachmentUi();
+                                                        });
+                                                    }
+                                                    @Override public void onError(String err) {
+                                                        runOnUiThread(() -> Toast.makeText(
+                                                                TaskDetailActivity.this,
+                                                                "Xóa lỗi: " + err, Toast.LENGTH_SHORT).show());
+                                                    }
+                                                });
+                                    })
+                                    .setNegativeButton("Hủy", null)
+                                    .show();
                         }
                     });
             containerAttachments.addView(itemView);
@@ -494,9 +579,19 @@ public class TaskDetailActivity extends BaseActivity {
         ImageView ivIcon   = itemView.findViewById(R.id.ivFileIcon);
         ImageView ivThumb  = itemView.findViewById(R.id.ivImageThumb);
         ImageView btnPreview = itemView.findViewById(R.id.btnPreview);
+        ImageView btnDownload = itemView.findViewById(R.id.btnDownload);
         ImageView btnRemove  = itemView.findViewById(R.id.btnRemoveFile);
 
         tvName.setText(fileName != null ? fileName : "file");
+
+        // Chỉ hiện nút download nếu là file đã có trên server (remoteUrl != null)
+        if (btnDownload != null) {
+            boolean isRemote = (remoteUrl != null && !remoteUrl.isEmpty());
+            btnDownload.setVisibility(isRemote ? View.VISIBLE : View.GONE);
+            if (isRemote) {
+                btnDownload.setOnClickListener(v -> downloadFile(remoteUrl, fileName));
+            }
+        }
 
         boolean isImage = mimeType != null && mimeType.startsWith("image/");
         boolean isPdf   = mimeType != null && mimeType.equals("application/pdf");
@@ -581,8 +676,7 @@ public class TaskDetailActivity extends BaseActivity {
                     }
                     @Override public void onError(String error) {
                         runOnUiThread(() -> {
-                            Toast.makeText(TaskDetailActivity.this,
-                                    "Lỗi file " + (index + 1) + ": " + error, Toast.LENGTH_LONG).show();
+                            Toast.makeText(TaskDetailActivity.this, "Lỗi file " + (index + 1) + ": " + error, Toast.LENGTH_SHORT).show();
                             uploadNextAttachment(index + 1, targetTaskId, baseMsg);
                         });
                     }
@@ -1129,9 +1223,30 @@ public class TaskDetailActivity extends BaseActivity {
                             selectedTag = t.getTag();
                             if (selectedTag != null && tvTag != null) tvTag.setText(selectedTag);
                             selectedParentTaskId = t.getParentTaskId();
-                            updateDependencyUi();
                             updateSubTaskFabVisibility();
-                            renderSubTaskInfo(t.getParentTaskId() != null ? ("#" + t.getParentTaskId()) : null);
+                            
+                            // Load subtasks of CURRENT task
+                            currentSubTasks.clear();
+                            for (Task potentialSub : result) {
+                                if (taskId != null && taskId.equals(potentialSub.getParentTaskId())) {
+                                    currentSubTasks.add(potentialSub);
+                                }
+                            }
+
+                            if (selectedParentTaskId != null) {
+                                // Case: Current task is a subtask (has a parent)
+                                String parentT = "#" + selectedParentTaskId;
+                                for (Task potentialParent : result) {
+                                    if (selectedParentTaskId.equals(potentialParent.getId())) {
+                                        parentT = potentialParent.getTitle();
+                                        break;
+                                    }
+                                }
+                                renderSubTaskInfo(selectedParentTaskId, parentT);
+                            } else {
+                                // Case: Current task is either a main task with children OR a standalone task
+                                renderSubTaskInfo(null, null);
+                            }
                             if (currentAssigneeId != null) setAssigneeById(currentAssigneeId);
                             setLoading(false);
                             loadAttachments();
@@ -1266,11 +1381,6 @@ public class TaskDetailActivity extends BaseActivity {
         cardAssignee.setOnClickListener(v -> showAssigneePicker());
         cardAttachment.setOnClickListener(v -> openFilePicker());
         if (cardTag != null) cardTag.setOnClickListener(v -> showTagPicker());
-        if (cardDependency != null) {
-            cardDependency.setVisibility(View.VISIBLE);
-            cardDependency.setOnClickListener(v -> showDependencyPicker());
-        }
-        updateDependencyUi();
         setPriority("MEDIUM"); setStatus("TODO"); setAssignee(null, null);
     }
 
@@ -1280,16 +1390,25 @@ public class TaskDetailActivity extends BaseActivity {
         v.findViewById(R.id.optHigh).setOnClickListener(x -> { setPriority("HIGH"); d.dismiss(); });
         v.findViewById(R.id.optMedium).setOnClickListener(x -> { setPriority("MEDIUM"); d.dismiss(); });
         v.findViewById(R.id.optLow).setOnClickListener(x -> { setPriority("LOW"); d.dismiss(); });
-        v.findViewById(R.id.optNone).setOnClickListener(x -> { setPriority("MEDIUM"); d.dismiss(); });
+        v.findViewById(R.id.optNone).setOnClickListener(x -> { setPriority("NONE"); d.dismiss(); });
         d.show();
     }
 
     private void setPriority(String priority) {
         if (priority == null) priority = "MEDIUM";
         selectedPriority = priority;
-        String label = "Trung bình"; int colorRes = R.color.priority_medium;
-        if ("HIGH".equals(priority)) { label = "Cao"; colorRes = R.color.priority_high; }
-        else if ("LOW".equals(priority)) { label = "Thấp"; colorRes = R.color.priority_low; }
+        String label = getString(R.string.task_priority_medium);
+        int colorRes = R.color.priority_medium;
+        if ("HIGH".equals(priority)) {
+            label = getString(R.string.task_priority_high);
+            colorRes = R.color.priority_high;
+        } else if ("LOW".equals(priority)) {
+            label = getString(R.string.task_priority_low);
+            colorRes = R.color.priority_low;
+        } else if ("NONE".equals(priority)) {
+            label = getString(R.string.task_priority_none);
+            colorRes = R.color.theme_text_secondary;
+        }
         tvPriority.setText(label); setActive(cardPriority, tvPriority, ivPriority, colorRes);
     }
 
@@ -1301,8 +1420,8 @@ public class TaskDetailActivity extends BaseActivity {
         String[] statuses = {"TODO", "DOING", "DONE"};
         for (String s : statuses) {
             String label; int color;
-            switch (s) { case "DONE": label = "Hoàn thành"; color = R.color.success; break; case "DOING": label = "Đang làm"; color = R.color.warning; break; default: label = "Cần làm"; color = R.color.slate_700; }
-            container.addView(createPickerItem(label, x -> { attemptSetStatus(s); d.dismiss(); }, color));
+            switch (s) { case "DONE": label = "Hoàn thành"; color = R.color.success; break; case "DOING": label = "Đang làm"; color = R.color.warning; break; default: label = "Cần làm"; color = R.color.theme_text_secondary; }
+            container.addView(createPickerItem(label, x -> { setStatus(s); d.dismiss(); }, color));
         }
         d.setContentView(v); d.show();
     }
@@ -1312,7 +1431,7 @@ public class TaskDetailActivity extends BaseActivity {
         int colorRes;
         if ("DONE".equals(status)) { colorRes = R.color.success; tvStatus.setText("Hoàn thành"); }
         else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText("Đang làm"); }
-        else { colorRes = R.color.slate_700; tvStatus.setText("Cần làm"); }
+        else { colorRes = R.color.theme_text_secondary; tvStatus.setText("Cần làm"); }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
     }
 
@@ -1343,44 +1462,74 @@ public class TaskDetailActivity extends BaseActivity {
         else { tvAssignee.setText("Phân công"); setDefault(cardAssignee, tvAssignee, ivAssignee); }
     }
 
-    private void updateDependencyUi() {
-        if (tvDependency == null) {
-            return;
-        }
-
-        if (selectedParentTaskId != null && selectedParentTaskId > 0) {
-            tvDependency.setText("Phụ thuộc: #" + selectedParentTaskId);
-            setActive(cardDependency, tvDependency, ivDependency, R.color.project_green);
-        } else {
-            tvDependency.setText("Không liên kết");
-            setDefault(cardDependency, tvDependency, ivDependency);
-        }
-    }
-
-    private void attemptSetStatus(String targetStatus) {
-        setStatus(targetStatus);
-    }
-
-    private void showDependencyPicker() {
+    private void showParentTaskPicker() {
         if (projectId <= 0) return;
         BottomSheetDialog d = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
         View v = getLayoutInflater().inflate(R.layout.dialog_simple_list, null);
         TextView tvTitle = v.findViewById(R.id.tvTitle); LinearLayout container = v.findViewById(R.id.containerItems);
-        if (tvTitle != null) tvTitle.setText("Liên kết tác vụ");
+        if (tvTitle != null) tvTitle.setText(getString(R.string.task_link_parent_title));
+        
         taskRepository.getTasksByProject(projectId, new TaskRepository.TaskCallback<List<Task>>() {
             @Override public void onSuccess(List<Task> tasks) {
-                runOnUiThread(() -> {
+                // 1. Check if current task has children (to avoid grandchildren)
+                boolean hasChildren = false;
+                if (taskId != null) {
                     for (Task t : tasks) {
-                        if (taskId != null && taskId.equals(t.getId())) continue;
-                        String label = "#" + t.getId() + " • " + t.getTitle();
-                        container.addView(createPickerItem(label, x -> { selectedParentTaskId = t.getId(); updateDependencyUi(); d.dismiss(); }, R.color.theme_text_primary));
+                        if (taskId.equals(t.getParentTaskId())) {
+                            hasChildren = true;
+                            break;
+                        }
                     }
-                    container.addView(createPickerItem("Không liên kết", x -> { selectedParentTaskId = null; updateDependencyUi(); d.dismiss(); }, R.color.theme_text_secondary));
+                }
+                
+                final boolean finalHasChildren = hasChildren;
+                
+                // Sort by ID as requested
+                tasks.sort((t1, t2) -> Long.compare(t1.getId(), t2.getId()));
+                
+                runOnUiThread(() -> {
+                    if (finalHasChildren) {
+                        Toast.makeText(TaskDetailActivity.this, getString(R.string.task_cannot_nest_subtasks), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    for (Task t : tasks) {
+                        // 1. Mandatory: Cannot be parent of itself
+                        if (taskId != null && taskId.longValue() == t.getId().longValue()) continue;
+                        
+                        // 2. Hierarchy Check: Candidate parent 't' must NOT have a parent itself to avoid 3-level nesting
+                        if (t.getParentTaskId() != null && t.getParentTaskId() > 0) continue;
+
+                        String label = "#" + t.getId() + " • " + t.getTitle();
+                        container.addView(createPickerItem(label, x -> { 
+                            selectedParentTaskId = t.getId(); 
+                            renderSubTaskInfo(selectedParentTaskId, t.getTitle());
+                            updateSubTaskFabVisibility();
+                            d.dismiss(); 
+                        }, R.color.theme_text_primary));
+                    }
+                    
+                    // "khi nhấn không liên kết thì phải xóa đi id cha trong db"
+                    container.addView(createPickerItem(getString(R.string.task_unlink_parent), x -> { 
+                        selectedParentTaskId = null; 
+                        renderSubTaskInfo(null, null);
+                        updateSubTaskFabVisibility();
+                        d.dismiss(); 
+                    }, R.color.theme_text_secondary));
+                    
                     d.setContentView(v); d.show();
                 });
             }
             @Override public void onError(String e) { runOnUiThread(() -> Toast.makeText(TaskDetailActivity.this, "Không tải được danh sách task", Toast.LENGTH_SHORT).show()); }
         });
+    }
+
+    private void updateDependencyUi() {
+        // Redundant - Logic merged into Subtask banner
+    }
+
+    private void showDependencyPicker() {
+        showParentTaskPicker();
     }
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1409,15 +1558,10 @@ public class TaskDetailActivity extends BaseActivity {
         }
     }
 
-    private TextView createPickerItem(String label, View.OnClickListener listener, int colorRes) {
-        TextView tv = new TextView(this);
-        tv.setText(label); tv.setTextSize(16);
+    private View createPickerItem(String label, View.OnClickListener listener, int colorRes) {
+        TextView tv = (TextView) getLayoutInflater().inflate(R.layout.item_picker_text, null);
+        tv.setText(label);
         tv.setTextColor(ContextCompat.getColor(this, colorRes));
-        int pad = (int)(16 * getResources().getDisplayMetrics().density);
-        tv.setPadding(pad, pad, pad, pad);
-        android.util.TypedValue bg = new android.util.TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, bg, true);
-        if (bg.resourceId != 0) tv.setBackgroundResource(bg.resourceId);
         tv.setOnClickListener(listener);
         return tv;
     }
@@ -1490,6 +1634,29 @@ public class TaskDetailActivity extends BaseActivity {
             return com.team7.taskflow.util.DateTimeFormatterUtil.formatDateDisplay(value.trim());
         }
         return value;
+    }
+
+    private void downloadFile(String url, String fileName) {
+        if (url == null || url.isEmpty()) return;
+        
+        Toast.makeText(this, "Đang bắt đầu tải: " + fileName, Toast.LENGTH_SHORT).show();
+        
+        try {
+            android.app.DownloadManager.Request request = new android.app.DownloadManager.Request(Uri.parse(url));
+            request.setTitle("TaskFlow Download");
+            request.setDescription("Đang tải: " + fileName);
+            request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, fileName);
+            request.setAllowedOverMetered(true);
+            request.setAllowedOverRoaming(true);
+
+            android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            if (dm != null) {
+                dm.enqueue(request);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi khi tải: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

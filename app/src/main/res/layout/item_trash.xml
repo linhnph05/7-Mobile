@@ -72,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Deleted 2 days ago"
-                    android:textColor="@color/slate_600"
+                    android:textColor="@color/theme_text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
         </LinearLayout>
