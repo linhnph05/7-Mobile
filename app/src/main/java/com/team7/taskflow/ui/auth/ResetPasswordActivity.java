@@ -48,7 +48,7 @@ public class ResetPasswordActivity extends BaseActivity {
             String recoveryToken = extractRecoveryToken(intent);
             if (TextUtils.isEmpty(recoveryToken)) {
                 Toast.makeText(this,
-                        "Invalid or expired reset link. Please request a new one.",
+                        R.string.auth_reset_link_invalid,
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -73,12 +73,12 @@ public class ResetPasswordActivity extends BaseActivity {
 
     private void submit() {
         if (verifyingLink) {
-            Toast.makeText(this, "Please wait while verifying recovery link.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.auth_reset_wait_verifying, Toast.LENGTH_SHORT).show();
             return;
         }
         if (TextUtils.isEmpty(accessToken)) {
             Toast.makeText(this,
-                    "Recovery session not found. Please open the reset link again.",
+                    R.string.auth_reset_session_missing,
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -87,17 +87,17 @@ public class ResetPasswordActivity extends BaseActivity {
         String confirm = etConfirmPassword.getText().toString();
 
         if (password.length() < 8) {
-            etNewPassword.setError("Password must be at least 8 characters");
+            etNewPassword.setError(getString(R.string.auth_password_min_error));
             etNewPassword.requestFocus();
             return;
         }
         if (!password.matches(".*\\d.*")) {
-            etNewPassword.setError("Password must contain at least one number");
+            etNewPassword.setError(getString(R.string.auth_password_number_error));
             etNewPassword.requestFocus();
             return;
         }
         if (!password.equals(confirm)) {
-            etConfirmPassword.setError("Passwords do not match");
+            etConfirmPassword.setError(getString(R.string.auth_passwords_not_match));
             etConfirmPassword.requestFocus();
             return;
         }
@@ -110,7 +110,7 @@ public class ResetPasswordActivity extends BaseActivity {
                     setLoading(false);
                     SessionManager.clearSession();
                     Toast.makeText(ResetPasswordActivity.this,
-                            "Password updated successfully. Please log in.",
+                            R.string.auth_password_updated_login,
                             Toast.LENGTH_LONG).show();
                     goToLogin();
                 });
@@ -129,7 +129,7 @@ public class ResetPasswordActivity extends BaseActivity {
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnResetPassword.setEnabled(!loading);
-        btnResetPassword.setText(loading ? "" : "Update Password");
+        btnResetPassword.setText(loading ? "" : getString(R.string.auth_update_password));
     }
 
     private void verifyRecoveryToken(String token) {

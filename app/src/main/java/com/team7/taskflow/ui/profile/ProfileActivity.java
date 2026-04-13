@@ -1,6 +1,4 @@
 package com.team7.taskflow.ui.profile;
-
-import com.bumptech.glide.Glide;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.repository.UserRepository;
@@ -11,8 +9,10 @@ import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.foryou.ForYouActivity;
 import com.team7.taskflow.ui.notification.NotificationPushScheduler;
+import com.team7.taskflow.utils.LanguageManager;
 import com.team7.taskflow.utils.SessionManager;
 import com.team7.taskflow.utils.NavigationUtils;
+import com.team7.taskflow.BuildConfig;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.cardview.widget.CardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,12 +43,13 @@ public class ProfileActivity extends BaseActivity {
     private static final String KEY_DARK_MODE = "dark_mode";
 
     private SwitchCompat switchDarkMode;
-    private TextView tvProfileName, btnSave;
+    private TextView tvProfileName, btnSave, tvVersion, tvLanguageValue;
     private EditText etName, etBio, etEmail;
     private ImageView ivAvatar;
     private CardView avatarCard;
     private Button btnLogout;
     private View rowProjectTrash;
+    private View rowLanguage;
     private FloatingActionButton fabAdd;
     private UserRepository userRepository;
 
@@ -66,6 +68,7 @@ public class ProfileActivity extends BaseActivity {
 
         initViews();
         setupThemeSwitch();
+        setupLanguageRow();
         setupBottomNavigation();
         setupLogout();
         setupSaveButton();
@@ -88,6 +91,10 @@ public class ProfileActivity extends BaseActivity {
         super.onResume();
         isBottomNavNavigating = false;
         applyNavTransitionIfNeeded();
+        updateLanguageLabel();
+        if (tvVersion != null) {
+            tvVersion.setText(getString(R.string.profile_version_format, BuildConfig.VERSION_NAME));
+        }
         // Update bottom navigation selected item to ensure icon highlights correctly
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
@@ -116,6 +123,8 @@ public class ProfileActivity extends BaseActivity {
         switchDarkMode = findViewById(R.id.switchDarkMode);
         tvProfileName = findViewById(R.id.tvProfileName);
         btnSave = findViewById(R.id.btnSave);
+        tvVersion = findViewById(R.id.tvVersion);
+        tvLanguageValue = findViewById(R.id.tvLanguageValue);
         etName = findViewById(R.id.etName);
         etBio = findViewById(R.id.etBio);
         etEmail = findViewById(R.id.etEmail);
@@ -123,6 +132,7 @@ public class ProfileActivity extends BaseActivity {
         avatarCard = findViewById(R.id.avatarCard);
         btnLogout = findViewById(R.id.btnLogout);
         fabAdd = findViewById(R.id.fabAdd);
+        rowLanguage = findViewById(R.id.rowLanguage);
         rowProjectTrash = findViewById(R.id.rowProjectTrash);
 
         // Hiển thị email từ session ngay lập tức
@@ -136,6 +146,16 @@ public class ProfileActivity extends BaseActivity {
             null,
             null,
             SessionManager.getDisplayName());
+
+        if (btnSave != null) {
+            btnSave.setText(R.string.profile_save);
+        }
+
+        if (tvVersion != null) {
+            tvVersion.setText(getString(R.string.profile_version_format, BuildConfig.VERSION_NAME));
+        }
+
+        updateLanguageLabel();
     }
 
     private void setupImagePicker() {
@@ -170,6 +190,39 @@ public class ProfileActivity extends BaseActivity {
                     isChecked ? AppCompatDelegate.MODE_NIGHT_YES
                             : AppCompatDelegate.MODE_NIGHT_NO);
         });
+    }
+
+    private void setupLanguageRow() {
+        if (rowLanguage != null) {
+            rowLanguage.setOnClickListener(v -> showLanguageDialog());
+        }
+    }
+
+    private void updateLanguageLabel() {
+        if (tvLanguageValue != null) {
+            tvLanguageValue.setText(LanguageManager.getCurrentLanguageLabel(this));
+        }
+    }
+
+    private void showLanguageDialog() {
+        final String[] languageTags = new String[] {
+                LanguageManager.LANGUAGE_ENGLISH,
+                LanguageManager.LANGUAGE_VIETNAMESE
+        };
+        final String[] languageLabels = new String[] {
+                getString(R.string.language_english),
+                getString(R.string.language_vietnamese)
+        };
+        int checkedItem = LanguageManager.getSelectedIndex(this);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.profile_language_dialog_title)
+                .setSingleChoiceItems(languageLabels, checkedItem, (dialog, which) -> {
+                    LanguageManager.setLanguage(ProfileActivity.this, languageTags[which]);
+                    dialog.dismiss();
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private void setupBottomNavigation() {
@@ -242,7 +295,7 @@ public class ProfileActivity extends BaseActivity {
             if (userId == null || userId.isEmpty()) return;
 
             btnSave.setEnabled(false);
-            btnSave.setText("...");
+            btnSave.setText(R.string.profile_saving);
 
             if (selectedImageUri != null) {
                 // 1. Upload ảnh lên Supabase Storage
@@ -257,8 +310,10 @@ public class ProfileActivity extends BaseActivity {
                     public void onError(String message) {
                         runOnUiThread(() -> {
                             btnSave.setEnabled(true);
-                            btnSave.setText("Save");
-                            Toast.makeText(ProfileActivity.this, "Image upload failed: " + message, Toast.LENGTH_SHORT).show();
+                            btnSave.setText(R.string.profile_save);
+                            Toast.makeText(ProfileActivity.this,
+                                    getString(R.string.profile_image_upload_failed, message),
+                                    Toast.LENGTH_SHORT).show();
                         });
                     }
                 });
@@ -275,10 +330,12 @@ public class ProfileActivity extends BaseActivity {
             public void onSuccess() {
                 runOnUiThread(() -> {
                     btnSave.setEnabled(true);
-                    btnSave.setText("Save");
+                    btnSave.setText(R.string.profile_save);
                     tvProfileName.setText(name);
                     selectedImageUri = null;
-                    Toast.makeText(ProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfileActivity.this,
+                            R.string.profile_updated_successfully,
+                            Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -286,8 +343,10 @@ public class ProfileActivity extends BaseActivity {
             public void onError(String message) {
                 runOnUiThread(() -> {
                     btnSave.setEnabled(true);
-                    btnSave.setText("Save");
-                    Toast.makeText(ProfileActivity.this, "Update failed: " + message, Toast.LENGTH_SHORT).show();
+                    btnSave.setText(R.string.profile_save);
+                    Toast.makeText(ProfileActivity.this,
+                            getString(R.string.profile_update_failed, message),
+                            Toast.LENGTH_SHORT).show();
                 });
             }
         });
@@ -323,7 +382,9 @@ public class ProfileActivity extends BaseActivity {
                 // Không hiển thị lỗi nếu chỉ là do profile chưa được tạo
                 if (!"Profile not found".equals(message)) {
                     runOnUiThread(() -> {
-                        Toast.makeText(ProfileActivity.this, "Error fetching profile: " + message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProfileActivity.this,
+                                getString(R.string.profile_fetch_failed, message),
+                                Toast.LENGTH_SHORT).show();
                     });
                 }
             }

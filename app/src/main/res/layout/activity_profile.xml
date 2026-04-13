@@ -28,7 +28,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="My Profile"
+                android:text="@string/profile_title"
                 android:textColor="@color/text_slate_900"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -41,7 +41,7 @@
                 android:id="@+id/btnSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save"
+                android:text="@string/profile_save"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -83,6 +83,7 @@
                         android:id="@+id/ivAvatar"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:contentDescription="@string/profile_avatar_content_desc"
                         android:scaleType="centerCrop"
                         android:src="@drawable/bg_avatar_grey_bordered" /> </androidx.cardview.widget.CardView>
 
@@ -127,7 +128,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Tap to edit profile photo"
+                android:text="@string/profile_edit_photo_hint"
                 android:textColor="@color/text_slate_500"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -141,7 +142,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Display Name"
+                android:text="@string/profile_display_name"
                 android:textColor="@color/text_slate_900"
                 android:textStyle="bold" />
 
@@ -154,14 +155,14 @@
                 android:drawableEnd="@drawable/ic_person"
                 android:drawablePadding="12dp"
                 android:paddingHorizontal="16dp"
-                android:hint="Enter your name"
+                android:hint="@string/profile_name_hint"
                 android:textColor="@color/text_slate_900" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Bio"
+                android:text="@string/profile_bio_label"
                 android:textColor="@color/text_slate_900"
                 android:textStyle="bold" />
 
@@ -173,14 +174,14 @@
                 android:background="@drawable/bg_input"
                 android:gravity="top|start"
                 android:padding="16dp"
-                android:hint="Tell us about yourself"
+                android:hint="@string/profile_bio_hint"
                 android:textColor="@color/text_slate_900" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Email Address"
+                android:text="@string/profile_email_label"
                 android:textColor="@color/text_slate_900"
                 android:textStyle="bold" />
 
@@ -209,7 +210,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:layout_marginStart="4dp"
-                android:text="APP SETTINGS"
+                android:text="@string/profile_settings_section"
                 android:textColor="@color/text_slate_500"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -248,7 +249,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/iconDark"
                         android:layout_marginStart="12dp"
-                        android:text="Dark Mode"
+                        android:text="@string/profile_dark_mode"
                         android:textColor="@color/text_slate_900"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -265,6 +266,7 @@
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_slate_300" />
 
                 <RelativeLayout
+                    android:id="@+id/rowLanguage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
@@ -292,7 +294,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/iconLang"
                         android:layout_marginStart="12dp"
-                        android:text="Language"
+                        android:text="@string/profile_language"
                         android:textColor="@color/text_slate_900"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -307,7 +309,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="English"
+                            android:id="@+id/tvLanguageValue"
+                            android:text="@string/language_english"
                             android:textColor="@color/text_slate_500" />
                         <ImageView
                             android:layout_width="20dp"
@@ -348,7 +351,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/iconNoti"
                         android:layout_marginStart="12dp"
-                        android:text="Notifications"
+                        android:text="@string/profile_notifications"
                         android:textColor="@color/text_slate_900"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -422,17 +425,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:backgroundTint="@color/bg_red_50"
-                android:text="Log Out"
+                android:text="@string/profile_logout"
                 android:textAllCaps="false"
                 android:textColor="@color/text_red_600"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvVersion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="Version 1.0.2"
+                android:text="@string/profile_version_placeholder"
                 android:textColor="@color/text_slate_500"
                 android:textSize="12sp" />
         </LinearLayout>

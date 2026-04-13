@@ -20,7 +20,7 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_arrow_back"
             android:tint="@color/theme_text_primary"
-            android:contentDescription="Back" />
+            android:contentDescription="@string/auth_back_content_desc" />
 
         <TextView
             android:id="@+id/tvTitle"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
-            android:text="Project Activity"
+            android:text="@string/project_activity_title"
             android:textColor="@color/theme_text_primary"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -57,7 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="No activity yet"
+        android:text="@string/project_activity_empty"
         android:textColor="@color/theme_text_secondary"
         android:textSize="14sp"
         android:padding="24dp"

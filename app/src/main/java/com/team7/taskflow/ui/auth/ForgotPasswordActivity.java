@@ -40,7 +40,7 @@ public class ForgotPasswordActivity extends BaseActivity {
     private void submit() {
         String email = etEmail.getText().toString().trim();
         if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Enter a valid email address");
+            etEmail.setError(getString(R.string.auth_invalid_email));
             etEmail.requestFocus();
             return;
         }
@@ -52,7 +52,7 @@ public class ForgotPasswordActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     setLoading(false);
                     Toast.makeText(ForgotPasswordActivity.this,
-                            "Reset link sent. Please check your email.",
+                            R.string.auth_reset_link_sent,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -73,6 +73,6 @@ public class ForgotPasswordActivity extends BaseActivity {
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnSendReset.setEnabled(!loading);
-        btnSendReset.setText(loading ? "" : "Send Reset Link");
+        btnSendReset.setText(loading ? "" : getString(R.string.auth_send_reset_link));
     }
 }

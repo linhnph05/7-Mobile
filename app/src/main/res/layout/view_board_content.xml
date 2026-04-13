@@ -34,7 +34,7 @@
                     android:id="@+id/tvTodoTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="To Do"
+                    android:text="@string/project_board_todo_title"
                     android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -82,7 +82,7 @@
                     android:id="@+id/tvDoingTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Doing"
+                    android:text="@string/project_board_doing_title"
                     android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -129,7 +129,7 @@
                     android:id="@+id/tvDoneTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Done"
+                    android:text="@string/project_board_done_title"
                     android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
