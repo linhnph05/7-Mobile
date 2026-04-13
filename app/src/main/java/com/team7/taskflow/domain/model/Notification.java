@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Model class representing a Notification from the database.
@@ -263,9 +264,11 @@ public class Notification {
 
     public String getContextText() {
         String ref = (referenceName != null && !referenceName.isEmpty()) ? referenceName : "";
+        String projectPrefix = isVietnameseLocale() ? "Dự án: " : "Project: ";
+        String taskPrefix = isVietnameseLocale() ? "Công việc: " : "Task: ";
         switch (getType()) {
             case PROJECT_INVITE:
-                return "Project: " + ref;
+                return projectPrefix + ref;
             case TASK_ASSIGNED:
             case MENTION:
             case COMMENT:
@@ -274,7 +277,7 @@ public class Notification {
             case DELETED:
             case ATTACHMENT_ADDED:
             case DEADLINE_REMINDER:
-                return "Task: " + ref;
+                return taskPrefix + ref;
             default:
                 return "";
         }
@@ -291,45 +294,60 @@ public class Notification {
      */
     public String buildDisplayContent() {
         String actor = "<b>" + getActorName() + "</b>";
+        boolean vi = isVietnameseLocale();
 
         switch (getType()) {
             case PROJECT_INVITE:
-                displayContent = actor + " invited you to join a project.";
+                displayContent = actor + (vi
+                        ? " đã mời bạn tham gia dự án."
+                        : " invited you to join a project.");
                 break;
             case TASK_ASSIGNED:
-                displayContent = actor + " assigned a task to you.";
+                displayContent = actor + (vi
+                        ? " đã giao một công việc cho bạn."
+                        : " assigned a task to you.");
                 break;
             case MENTION:
-                displayContent = actor + " mentioned you in a task.";
+                displayContent = actor + (vi
+                        ? " đã nhắc đến bạn trong một công việc."
+                        : " mentioned you in a task.");
                 break;
             case COMMENT:
-                displayContent = actor + " commented on a task.";
+                displayContent = actor + (vi
+                        ? " đã bình luận về một công việc."
+                        : " commented on a task.");
                 break;
             case TASK_STATUS_CHANGED:
                 // Route to specific builders based on activity details
                 if (activityDetail != null && activityDetail.getActionType() != null) {
                     displayContent = buildActivityContent(actor, activityDetail);
                 } else {
-                    displayContent = actor + " updated task.";
+                    displayContent = actor + (vi ? " đã cập nhật công việc." : " updated task.");
                 }
                 break;
             case REACTION:
-                displayContent = actor + " reacted to your comment.";
+                displayContent = actor + (vi
+                        ? " đã phản ứng với bình luận của bạn."
+                        : " reacted to your comment.");
                 break;
             case DELETED:
-                displayContent = actor + " withdrew a reaction.";
+                displayContent = actor + (vi
+                        ? " đã thu hồi một phản ứng."
+                        : " withdrew a reaction.");
                 break;
             case ATTACHMENT_ADDED:
-                displayContent = actor + " added an attachment.";
+                displayContent = actor + (vi
+                        ? " đã thêm một tệp đính kèm."
+                        : " added an attachment.");
                 break;
             case DEADLINE_REMINDER:
-                displayContent = "A task is due soon!";
+                displayContent = vi ? "Một công việc sắp đến hạn!" : "A task is due soon!";
                 break;
             case SYSTEM_ALERT:
-                displayContent = "System alert";
+                displayContent = vi ? "Cảnh báo hệ thống" : "System alert";
                 break;
             default:
-                displayContent = "You have a new notification.";
+                displayContent = vi ? "Bạn có một thông báo mới." : "You have a new notification.";
         }
         return displayContent;
     }
@@ -340,8 +358,9 @@ public class Notification {
      */
     private String buildActivityContent(String actor, TaskActivity activity) {
         String actionType = activity.getActionType();
+        boolean vi = isVietnameseLocale();
         if (actionType == null) {
-            return actor + " updated task.";
+            return actor + (vi ? " đã cập nhật công việc." : " updated task.");
         }
 
         actionType = actionType.toUpperCase().trim();
@@ -371,107 +390,150 @@ public class Notification {
                 return buildDescriptionChangeContent(actor, activity);
             case "DELETE":
             case "CREATE":
-                return actor + " updated task.";
+                return actor + (vi ? " đã cập nhật công việc." : " updated task.");
             default:
-                return actor + " updated task.";
+                return actor + (vi ? " đã cập nhật công việc." : " updated task.");
         }
     }
 
     private String buildStatusChangeContent(String actor, TaskActivity activity) {
         String oldVal = activity.getOldValue();
         String newVal = activity.getNewValue();
+        boolean vi = isVietnameseLocale();
 
         if (oldVal != null && newVal != null) {
-            return actor + " changed status from <b>" + oldVal + "</b> to <b>" + newVal + "</b>.";
+            return vi
+                    ? actor + " đã đổi trạng thái từ <b>" + oldVal + "</b> sang <b>" + newVal + "</b>."
+                    : actor + " changed status from <b>" + oldVal + "</b> to <b>" + newVal + "</b>.";
         }
-        return actor + " changed task status to <b>" + (newVal != null ? newVal : "?") + "</b>.";
+        return vi
+                ? actor + " đã đổi trạng thái công việc thành <b>" + (newVal != null ? newVal : "?") + "</b>."
+                : actor + " changed task status to <b>" + (newVal != null ? newVal : "?") + "</b>.";
     }
 
     private String buildDueDateChangeContent(String actor, TaskActivity activity) {
         String oldVal = activity.getOldValue();
         String newVal = activity.getNewValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty()) {
-            return actor + " changed due date to <b>" + formatDateDisplay(newVal) + "</b>.";
+            return vi
+                    ? actor + " đã đổi hạn chót thành <b>" + formatDateDisplay(newVal) + "</b>."
+                    : actor + " changed due date to <b>" + formatDateDisplay(newVal) + "</b>.";
         } else if (oldVal != null && !oldVal.isEmpty()) {
-            return actor + " removed the due date.";
+            return vi ? actor + " đã xóa hạn chót." : actor + " removed the due date.";
         }
-        return actor + " changed the due date.";
+        return vi ? actor + " đã thay đổi hạn chót." : actor + " changed the due date.";
     }
 
     private String buildPriorityChangeContent(String actor, TaskActivity activity) {
         String oldVal = activity.getOldValue();
         String newVal = activity.getNewValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty() && (oldVal == null || oldVal.isEmpty())) {
-            return actor + " added priority <b>" + newVal + "</b>.";
+            return vi
+                    ? actor + " đã thêm mức ưu tiên <b>" + newVal + "</b>."
+                    : actor + " added priority <b>" + newVal + "</b>.";
         } else if ((newVal == null || newVal.isEmpty()) && oldVal != null && !oldVal.isEmpty()) {
-            return actor + " removed priority <b>" + oldVal + "</b>.";
+            return vi
+                    ? actor + " đã bỏ mức ưu tiên <b>" + oldVal + "</b>."
+                    : actor + " removed priority <b>" + oldVal + "</b>.";
         } else if (newVal != null && !newVal.isEmpty()) {
-            return actor + " changed priority to <b>" + newVal + "</b>.";
+            return vi
+                    ? actor + " đã đổi mức ưu tiên thành <b>" + newVal + "</b>."
+                    : actor + " changed priority to <b>" + newVal + "</b>.";
         }
-        return actor + " changed task priority.";
+        return vi ? actor + " đã thay đổi mức ưu tiên công việc." : actor + " changed task priority.";
     }
 
     private String buildStartDateChangeContent(String actor, TaskActivity activity) {
         String oldVal = activity.getOldValue();
         String newVal = activity.getNewValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty()) {
-            return actor + " changed start date to <b>" + formatDateDisplay(newVal) + "</b>.";
+            return vi
+                    ? actor + " đã đổi ngày bắt đầu thành <b>" + formatDateDisplay(newVal) + "</b>."
+                    : actor + " changed start date to <b>" + formatDateDisplay(newVal) + "</b>.";
         } else if (oldVal != null && !oldVal.isEmpty()) {
-            return actor + " removed the start date.";
+            return vi ? actor + " đã xóa ngày bắt đầu." : actor + " removed the start date.";
         }
-        return actor + " changed the start date.";
+        return vi ? actor + " đã thay đổi ngày bắt đầu." : actor + " changed the start date.";
     }
 
     private String buildDateTimeChangeContent(String actor, TaskActivity activity) {
         String oldVal = activity.getOldValue();
         String newVal = activity.getNewValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty()) {
-            return actor + " changed task time to <b>" + formatDateDisplay(newVal) + "</b>.";
+            return vi
+                    ? actor + " đã đổi thời gian công việc thành <b>" + formatDateDisplay(newVal) + "</b>."
+                    : actor + " changed task time to <b>" + formatDateDisplay(newVal) + "</b>.";
         } else if (oldVal != null && !oldVal.isEmpty()) {
-            return actor + " removed task time.";
+            return vi ? actor + " đã xóa thời gian công việc." : actor + " removed task time.";
         }
-        return actor + " changed task time.";
+        return vi ? actor + " đã thay đổi thời gian công việc." : actor + " changed task time.";
     }
 
     private String buildTitleChangeContent(String actor, TaskActivity activity) {
         String newVal = activity.getNewValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty()) {
-            return actor + " changed task title to <b>" + escapeHtml(newVal) + "</b>.";
+            return vi
+                    ? actor + " đã đổi tiêu đề công việc thành <b>" + escapeHtml(newVal) + "</b>."
+                    : actor + " changed task title to <b>" + escapeHtml(newVal) + "</b>.";
         }
-        return actor + " changed task title.";
+        return vi ? actor + " đã thay đổi tiêu đề công việc." : actor + " changed task title.";
     }
 
     private String buildAssigneeChangeContent(String actor, TaskActivity activity) {
         String newVal = activity.getNewValue();
         String oldVal = activity.getOldValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty()) {
-            return actor + " assigned task to <b>" + newVal + "</b>.";
+            return vi
+                    ? actor + " đã giao công việc cho <b>" + newVal + "</b>."
+                    : actor + " assigned task to <b>" + newVal + "</b>.";
         } else if (oldVal != null && !oldVal.isEmpty()) {
-            return actor + " removed task assignment.";
+            return vi ? actor + " đã gỡ người được giao công việc." : actor + " removed task assignment.";
         }
-        return actor + " changed task assignee.";
+        return vi ? actor + " đã thay đổi người được giao công việc." : actor + " changed task assignee.";
     }
 
     private String buildTagChangeContent(String actor, TaskActivity activity) {
         String newVal = activity.getNewValue();
         String oldVal = activity.getOldValue();
+        boolean vi = isVietnameseLocale();
 
         if (newVal != null && !newVal.isEmpty()) {
-            return actor + " added tag <b>" + newVal + "</b>.";
+            return vi
+                    ? actor + " đã thêm nhãn <b>" + newVal + "</b>."
+                    : actor + " added tag <b>" + newVal + "</b>.";
         } else if (oldVal != null && !oldVal.isEmpty()) {
-            return actor + " removed tag <b>" + oldVal + "</b>.";
+            return vi
+                    ? actor + " đã gỡ nhãn <b>" + oldVal + "</b>."
+                    : actor + " removed tag <b>" + oldVal + "</b>.";
         }
-        return actor + " changed task tag.";
+        return vi ? actor + " đã thay đổi nhãn công việc." : actor + " changed task tag.";
     }
 
     private String buildDescriptionChangeContent(String actor, TaskActivity activity) {
-        return actor + " changed task description.";
+        return isVietnameseLocale()
+                ? actor + " đã thay đổi mô tả công việc."
+                : actor + " changed task description.";
+    }
+
+    private boolean isVietnameseLocale() {
+        Locale locale = Locale.getDefault();
+        if (locale == null) {
+            return false;
+        }
+        String language = locale.getLanguage();
+        return language != null && language.toLowerCase(Locale.US).startsWith("vi");
     }
 
     /**

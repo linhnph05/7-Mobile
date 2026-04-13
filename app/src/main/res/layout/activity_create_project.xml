@@ -32,7 +32,7 @@
                     android:id="@+id/btnBack"
                     android:layout_width="32dp"
                     android:layout_height="match_parent"
-                    android:contentDescription="Back"
+                    android:contentDescription="@string/back"
                     android:src="@drawable/ic_back"
                     app:tint="@color/theme_text_primary" />
 
@@ -41,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:text="Create Project"
+                    android:text="@string/project_create_title"
                     android:textColor="@color/theme_text_primary"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="Project Name"
+                android:text="@string/project_name_label"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="14sp" />
 
@@ -62,7 +62,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_search_bar"
-                android:hint="Enter project name"
+                android:hint="@string/project_name_hint"
                 android:textColorHint="@color/theme_text_hint"
                 android:textColor="@color/theme_text_primary"
                 android:padding="12dp"
@@ -73,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Project Key"
+                android:text="@string/project_space_key_label"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="14sp" />
 
@@ -83,7 +83,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_search_bar"
-                android:hint="e.g., PRJ"
+                android:hint="@string/project_key_hint"
                 android:textColorHint="@color/theme_text_hint"
                 android:textColor="@color/primary"
                 android:textStyle="bold"
@@ -95,7 +95,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Auto-generated from project name (max 5 characters)"
+                android:text="@string/project_key_helper"
                 android:textColor="@color/theme_text_hint"
                 android:textSize="12sp" />
 
@@ -104,7 +104,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Description"
+                android:text="@string/project_description_label"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="14sp" />
 
@@ -114,7 +114,7 @@
                 android:layout_height="120dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_search_bar"
-                android:hint="Enter project description"
+                android:hint="@string/project_description_hint"
                 android:textColorHint="@color/theme_text_hint"
                 android:textColor="@color/theme_text_primary"
                 android:padding="12dp"
@@ -126,7 +126,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Visibility"
+                android:text="@string/project_visibility_label"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="14sp" />
 
@@ -160,7 +160,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Public"
+                        android:text="@string/project_visibility_public"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -169,7 +169,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Anyone can view"
+                        android:text="@string/project_visibility_public_desc"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -198,7 +198,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Private"
+                        android:text="@string/project_visibility_private"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -207,7 +207,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Only members"
+                        android:text="@string/project_visibility_private_desc"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -218,7 +218,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Project Color"
+                android:text="@string/project_color_label"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="14sp" />
 
@@ -328,7 +328,7 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
-                    android:text="Cancel"
+                    android:text="@string/cancel"
                     android:textColor="@color/theme_text_primary"
                     android:backgroundTint="@color/theme_surface_variant"
                     android:textAllCaps="false" />
@@ -339,7 +339,7 @@
                     android:layout_height="50dp"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:text="Create Project"
+                    android:text="@string/project_create_button"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/primary"
                     android:textAllCaps="false" />

@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Project Settings"
+                android:text="@string/project_setting_title"
                 android:textColor="@color/theme_text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -88,7 +88,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@null"
-                            android:hint="Tên dự án"
+                            android:hint="@string/project_name_hint"
                             android:inputType="text"
                             android:singleLine="true"
                             android:textColor="@color/theme_text_primary"
@@ -102,7 +102,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:background="@null"
-                        android:hint="Mô tả dự án..."
+                        android:hint="@string/project_description_hint"
                         android:inputType="textMultiLine"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="13sp"
@@ -160,7 +160,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Pin"
+                    android:text="@string/project_settings_action_pin"
                     android:textColor="@color/theme_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -184,7 +184,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Share"
+                    android:text="@string/project_settings_action_share"
                     android:textColor="@color/theme_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -208,7 +208,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Mute"
+                    android:text="@string/project_settings_action_mute"
                     android:textColor="@color/theme_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -217,7 +217,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="MANAGEMENT"
+            android:text="@string/project_settings_management"
             android:textColor="@color/theme_text_secondary"
             android:textSize="12sp"
             android:textStyle="bold"
@@ -263,14 +263,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Manage Members"
+                            android:text="@string/project_settings_manage_members_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Add or remove project members"
+                            android:text="@string/project_settings_manage_members_subtitle"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -314,14 +314,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Project Activity"
+                            android:text="@string/project_activity_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="View team activity timeline"
+                            android:text="@string/project_settings_activity_subtitle"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -365,14 +365,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Edit Labels"
+                            android:text="@string/project_settings_edit_labels_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Customize labels and colors"
+                            android:text="@string/project_settings_edit_labels_subtitle"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -416,14 +416,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="View Archived Items"
+                            android:text="@string/project_settings_view_archived_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Restore or permanently delete"
+                            android:text="@string/project_settings_view_archived_subtitle"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -471,7 +471,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Delete Project"
+                    android:text="@string/project_delete_button"
                     android:textColor="#EF4444"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -482,7 +482,7 @@
             android:id="@+id/tvProjectMetadata"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Created by Hữu Nghĩa on Feb 26, 2024"
+            android:text="@string/project_settings_metadata_placeholder"
             android:textColor="@color/theme_text_secondary"
             android:textSize="12sp"
             android:gravity="center"

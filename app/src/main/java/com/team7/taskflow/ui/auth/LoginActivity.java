@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import java.util.Locale;
 
 public class LoginActivity extends BaseActivity {
 
@@ -144,7 +145,7 @@ public class LoginActivity extends BaseActivity {
 
                     if (result.getResultCode() != RESULT_CANCELED) {
                         Toast.makeText(LoginActivity.this,
-                                "Google sign-in failed before receiving account data.",
+                                R.string.auth_google_failed_before_account_data,
                                 Toast.LENGTH_LONG).show();
                     }
                 });
@@ -153,7 +154,7 @@ public class LoginActivity extends BaseActivity {
             Intent signInIntent = GoogleAuthHelper.getSignInIntent(this);
             if (signInIntent == null) {
                 Toast.makeText(this,
-                        "Google Sign-In chưa được cấu hình. Vui lòng thêm GOOGLE_WEB_CLIENT_ID vào file .env",
+                        R.string.auth_google_not_configured,
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -188,10 +189,10 @@ public class LoginActivity extends BaseActivity {
 
         // "Don't have an account? Sign Up" link
         TextView tvSignUp = findViewById(R.id.tvSignUp);
-        String text = "Don't have an account? Sign Up";
+        String text = getString(R.string.auth_no_account_sign_up);
         SpannableString spannable = new SpannableString(text);
-        int start = text.indexOf("Sign Up");
-        int end = start + "Sign Up".length();
+        int start = text.indexOf(getString(R.string.auth_register_button));
+        int end = start + getString(R.string.auth_register_button).length();
         spannable.setSpan(new ForegroundColorSpan(
                 ContextCompat.getColor(this, R.color.primary)),
                 start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -214,17 +215,17 @@ public class LoginActivity extends BaseActivity {
         Log.d(TAG, "attemptLogin: email=" + email + " passLen=" + password.length());
 
         if (TextUtils.isEmpty(email)) {
-            etEmail.setError("Vui lòng nhập email");
+            etEmail.setError(getString(R.string.auth_email_required));
             etEmail.requestFocus();
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Định dạng email không hợp lệ");
+            etEmail.setError(getString(R.string.auth_invalid_email));
             etEmail.requestFocus();
             return;
         }
         if (TextUtils.isEmpty(password)) {
-            etPassword.setError("Vui lòng nhập mật khẩu");
+            etPassword.setError(getString(R.string.auth_password_required));
             etPassword.requestFocus();
             return;
         }
@@ -238,8 +239,8 @@ public class LoginActivity extends BaseActivity {
             public void onSuccess(String userId, String displayName) {
                 runOnUiThread(() -> {
                     setLoading(false);
-                    Toast.makeText(LoginActivity.this,
-                            "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this,
+                            R.string.auth_login_success, Toast.LENGTH_SHORT).show();
                     goToMain();
                 });
             }
@@ -257,29 +258,29 @@ public class LoginActivity extends BaseActivity {
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnLogin.setEnabled(!loading);
-        btnLogin.setText(loading ? "" : "Log In");
+        btnLogin.setText(loading ? "" : getString(R.string.auth_login_button));
         btnGoogle.setEnabled(!loading);
         btnGitHub.setEnabled(!loading);
     }
 
     private void setGoogleLoading(boolean loading) {
         btnGoogle.setEnabled(!loading);
-        btnGoogle.setText(loading ? "Signing in…" : "Google");
+        btnGoogle.setText(loading ? R.string.auth_signing_in : R.string.auth_google);
         btnLogin.setEnabled(!loading);
         btnGitHub.setEnabled(!loading);
         if (!loading) {
-            btnGitHub.setText("GitHub");
+            btnGitHub.setText(R.string.auth_github);
         }
         progressBar.setVisibility(View.GONE);
     }
 
     private void setGithubLoading(boolean loading) {
         btnGitHub.setEnabled(!loading);
-        btnGitHub.setText(loading ? "Connecting…" : "GitHub");
+        btnGitHub.setText(loading ? R.string.auth_connecting : R.string.auth_github);
         btnGoogle.setEnabled(!loading);
         btnLogin.setEnabled(!loading);
         if (!loading) {
-            btnGoogle.setText("Google");
+            btnGoogle.setText(R.string.auth_google);
         }
         progressBar.setVisibility(View.GONE);
     }

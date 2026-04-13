@@ -78,7 +78,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="16dp"
             android:background="@null"
-            android:hint="Thêm tác vụ (Ví dụ: Nhắn tin cho Đức lúc 3h chiều mai...)"
+            android:hint="@string/ai_create_prompt_hint"
             android:inputType="textMultiLine"
             android:minLines="1"
             android:maxLines="4"
@@ -107,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:background="@drawable/bg_field_outline"
-                android:hint="Tên tác vụ"
+                android:hint="@string/ai_create_title_hint"
                 android:inputType="text"
                 android:singleLine="true"
                 android:paddingHorizontal="12dp"
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_field_outline"
-                android:hint="Mô tả tác vụ (tùy chọn)"
+                android:hint="@string/ai_create_desc_hint"
                 android:inputType="textMultiLine"
                 android:minHeight="60dp"
                 android:paddingHorizontal="12dp"
@@ -151,7 +151,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bắt đầu"
+                        android:text="@string/task_start_date_label"
                         android:textColor="@color/theme_text_hint"
                         android:textSize="12sp"
                         android:layout_marginBottom="4dp"
@@ -180,7 +180,7 @@
                             android:id="@+id/tvParsedStartDate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Chọn ngày"
+                            android:text="@string/task_date_placeholder"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -197,7 +197,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Kết thúc"
+                        android:text="@string/ai_task_due_date_label"
                         android:textColor="@color/theme_text_hint"
                         android:textSize="12sp"
                         android:layout_marginBottom="4dp"
@@ -226,7 +226,7 @@
                             android:id="@+id/tvParsedDueDate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Chọn ngày"
+                            android:text="@string/task_date_placeholder"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -267,7 +267,7 @@
                         android:id="@+id/tvParsedPriority"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ưu tiên"
+                        android:text="@string/task_priority_label"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -298,7 +298,7 @@
                         android:id="@+id/tvParsedAssignee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Phân công"
+                        android:text="@string/task_assignee_label"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -338,7 +338,7 @@
                         android:id="@+id/tvParsedTag"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nhãn"
+                        android:text="@string/task_tag_label"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -369,7 +369,7 @@
                         android:id="@+id/tvAttachment"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Đính kèm"
+                        android:text="@string/task_attach_label"
                         android:textColor="@color/theme_text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -401,7 +401,7 @@
                     android:background="@drawable/bg_task_id"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="6dp"
-                    android:text="✨ Tạo task với AI"
+                    android:text="@string/ai_create_badge"
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     android:textSize="12sp"

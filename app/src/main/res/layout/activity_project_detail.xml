@@ -52,7 +52,7 @@
                         android:id="@+id/tvProjectName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Project Name"
+                        android:text="@string/project_name_label"
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="17sp"
                         android:textStyle="bold" />
@@ -88,7 +88,7 @@
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:clickable="true"
                             android:focusable="true"
-                            android:contentDescription="Project activity"
+                            android:contentDescription="@string/project_activity_title"
                             android:src="@drawable/ic_history"
                             app:tint="?attr/colorOnSurface" />
 
@@ -116,7 +116,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Options"
+                        android:contentDescription="@string/options"
                         android:src="@drawable/ic_more_vert"
                         app:tint="?attr/colorOnSurface" />
                 </LinearLayout>
@@ -148,7 +148,7 @@
                         android:id="@+id/tvTabOverview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tổng quan"
+                        android:text="@string/project_tab_overview"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -173,7 +173,7 @@
                         android:id="@+id/tvTabBoard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bảng"
+                        android:text="@string/project_tab_board"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -198,7 +198,7 @@
                         android:id="@+id/tvTabList"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Danh sách"
+                        android:text="@string/project_tab_list"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -223,7 +223,7 @@
                         android:id="@+id/tvTabTimeline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tiến độ"
+                        android:text="@string/project_tab_timeline"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>
@@ -248,7 +248,7 @@
                         android:id="@+id/tvTabCalendar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Lịch"
+                        android:text="@string/project_tab_calendar"
                         android:textColor="?attr/android:textColorSecondary"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-medium"/>

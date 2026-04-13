@@ -33,7 +33,6 @@ public class TrashActivity extends BaseActivity {
     private ImageView btnBack;
     private TextView btnEmptyTrash;
     private TextView tvTotalItems;
-    private TextView tvAutoCleanup;
     private RecyclerView rvTrashItems;
     private LinearLayout emptyState;
     private TrashItemAdapter adapter;
@@ -71,7 +70,6 @@ public class TrashActivity extends BaseActivity {
         btnBack = findViewById(R.id.btnBack);
         btnEmptyTrash = findViewById(R.id.btnEmptyTrash);
         tvTotalItems = findViewById(R.id.tvTotalItems);
-        tvAutoCleanup = findViewById(R.id.tvAutoCleanup);
         rvTrashItems = findViewById(R.id.rvTrashItems);
         emptyState = findViewById(R.id.emptyState);
     }
@@ -136,8 +134,6 @@ public class TrashActivity extends BaseActivity {
 
     private void updateUI() {
         tvTotalItems.setText(String.valueOf(trashedTasks.size()));
-        // Calculate cleanup time (30 days from now, simplified to "12 Hours 45 Mins" for demo)
-        tvAutoCleanup.setText("12 Hours 45 Mins");
 
         if (trashedTasks.isEmpty()) {
             rvTrashItems.setVisibility(View.GONE);
@@ -189,12 +185,12 @@ public class TrashActivity extends BaseActivity {
     private void emptyAllTrash() {
         // Show confirmation dialog
         new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Empty Trash")
-                .setMessage("This will permanently delete all items in trash. This action cannot be undone.")
-                .setPositiveButton("Empty", (dialog, which) -> {
+                .setTitle(R.string.trash_empty_confirm_title)
+                .setMessage(R.string.trash_empty_confirm_message)
+                .setPositiveButton(R.string.trash_empty_confirm_action, (dialog, which) -> {
                     performEmptyTrash();
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> {
+                .setNegativeButton(R.string.cancel, (dialog, which) -> {
                     dialog.dismiss();
                 })
                 .show();

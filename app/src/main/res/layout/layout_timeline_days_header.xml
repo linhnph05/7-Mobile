@@ -10,7 +10,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MON" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_mon" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/theme_text_primary" />
         </LinearLayout>
         <!-- Vertical Grid Line -->
@@ -26,7 +26,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TUE" android:textSize="10sp" android:textColor="@color/primary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_tue" android:textSize="10sp" android:textColor="@color/primary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="13" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/primary" />
         </LinearLayout>
         <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
@@ -41,7 +41,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WED" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_wed" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="14" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/theme_text_primary" />
         </LinearLayout>
         <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
@@ -56,7 +56,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="THU" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_thu" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="15" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/theme_text_primary" />
         </LinearLayout>
         <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
@@ -71,7 +71,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FRI" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_fri" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="16" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/theme_text_primary" />
         </LinearLayout>
         <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
@@ -86,7 +86,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SAT" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_sat" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="17" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/theme_text_primary" />
         </LinearLayout>
         <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />
@@ -101,7 +101,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SUN" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timeline_weekday_sun" android:textSize="10sp" android:textColor="@color/theme_text_secondary" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="18" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/theme_text_primary" />
         </LinearLayout>
         <View android:layout_width="1dp" android:layout_height="match_parent" android:background="?attr/colorOutlineVariant" android:alpha="0.3" android:layout_gravity="end" />

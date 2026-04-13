@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/calendar_month_year_placeholder"
+            android:text="@string/calendar_month_placeholder"
             android:textColor="@color/theme_text_primary"
             android:textSize="@dimen/text_lg"
             android:textStyle="bold" />
@@ -60,13 +60,13 @@
             android:paddingHorizontal="4dp"
             app:columnCount="7">
 
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="S" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="M" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="T" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="W" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="T" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="F" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="S" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_sun" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_mon" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_tue" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_wed" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_thu" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_fri" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1" android:text="@string/calendar_weekday_sat" android:gravity="center" android:textColor="@color/theme_text_secondary" android:textSize="11sp" />
         </androidx.gridlayout.widget.GridLayout>
 
         <ImageView

@@ -83,10 +83,11 @@ public class SignUpActivity extends BaseActivity {
         });
 
         TextView tvLogin = findViewById(R.id.tvLogin);
-        String fullText = "Already have an account? Log In";
+        String fullText = getString(R.string.auth_have_account_log_in);
         SpannableString spannable = new SpannableString(fullText);
-        int start = fullText.indexOf("Log In");
-        int end = start + "Log In".length();
+        String actionText = getString(R.string.auth_login_button);
+        int start = fullText.indexOf(actionText);
+        int end = start + actionText.length();
         spannable.setSpan(
                 new ForegroundColorSpan(ContextCompat.getColor(this, R.color.primary)),
                 start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -135,7 +136,7 @@ public class SignUpActivity extends BaseActivity {
 
                     if (result.getResultCode() != RESULT_CANCELED) {
                         Toast.makeText(SignUpActivity.this,
-                                "Google sign-in failed before receiving account data.",
+                                R.string.auth_google_failed_before_account_data,
                                 Toast.LENGTH_LONG).show();
                     }
                 });
@@ -144,7 +145,7 @@ public class SignUpActivity extends BaseActivity {
             Intent signInIntent = GoogleAuthHelper.getSignInIntent(this);
             if (signInIntent == null) {
                 Toast.makeText(this,
-                        "Google Sign-In chưa được cấu hình. Vui lòng thêm GOOGLE_WEB_CLIENT_ID vào file .env",
+                        R.string.auth_google_not_configured,
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -180,22 +181,22 @@ public class SignUpActivity extends BaseActivity {
         String password = etPassword.getText().toString();
 
         if (TextUtils.isEmpty(name)) {
-            etFullName.setError("Full name is required");
+            etFullName.setError(getString(R.string.auth_full_name_required));
             etFullName.requestFocus();
             return;
         }
         if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Enter a valid email address");
+            etEmail.setError(getString(R.string.auth_invalid_email));
             etEmail.requestFocus();
             return;
         }
         if (password.length() < 8) {
-            etPassword.setError("Password must be at least 8 characters");
+            etPassword.setError(getString(R.string.auth_password_min_error));
             etPassword.requestFocus();
             return;
         }
         if (!password.matches(".*\\d.*")) {
-            etPassword.setError("Password must contain at least one number");
+            etPassword.setError(getString(R.string.auth_password_number_error));
             etPassword.requestFocus();
             return;
         }
@@ -209,7 +210,7 @@ public class SignUpActivity extends BaseActivity {
                     setLoading(false);
                     Toast.makeText(
                             SignUpActivity.this,
-                            "Account created! Please check your email to confirm.",
+                            R.string.auth_account_created_check_email,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -232,18 +233,18 @@ public class SignUpActivity extends BaseActivity {
             progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         }
         btnSignUp.setEnabled(!loading);
-        btnSignUp.setText(loading ? "" : "Sign Up");
+        btnSignUp.setText(loading ? "" : getString(R.string.auth_register_button));
         btnGoogle.setEnabled(!loading);
         btnGitHub.setEnabled(!loading);
     }
 
     private void setGoogleLoading(boolean loading) {
         btnGoogle.setEnabled(!loading);
-        btnGoogle.setText(loading ? "Signing in…" : "Google");
+        btnGoogle.setText(loading ? R.string.auth_signing_in : R.string.auth_google);
         btnSignUp.setEnabled(!loading);
         btnGitHub.setEnabled(!loading);
         if (!loading) {
-            btnGitHub.setText("GitHub");
+            btnGitHub.setText(R.string.auth_github);
         }
         if (progressBar != null) {
             progressBar.setVisibility(View.GONE);
@@ -252,11 +253,11 @@ public class SignUpActivity extends BaseActivity {
 
     private void setGithubLoading(boolean loading) {
         btnGitHub.setEnabled(!loading);
-        btnGitHub.setText(loading ? "Connecting…" : "GitHub");
+        btnGitHub.setText(loading ? R.string.auth_connecting : R.string.auth_github);
         btnGoogle.setEnabled(!loading);
         btnSignUp.setEnabled(!loading);
         if (!loading) {
-            btnGoogle.setText("Google");
+            btnGoogle.setText(R.string.auth_google);
         }
         if (progressBar != null) {
             progressBar.setVisibility(View.GONE);

@@ -650,7 +650,11 @@ public class ProjectDetailActivity extends BaseActivity {
 
         if (etName != null && projectName != null) etName.setText(projectName);
         if (etDesc != null && projectDesc  != null) etDesc.setText(projectDesc);
-        if (tvKey  != null) tvKey.setText(projectKey != null ? "KEY: " + projectKey : "N/A");
+        if (tvKey  != null) {
+            tvKey.setText(projectKey != null
+                ? getString(R.string.project_settings_key_format, projectKey)
+                : getString(R.string.project_settings_key_na));
+        }
 
         if (btnSave != null) {
             btnSave.setOnClickListener(v -> {
@@ -658,7 +662,7 @@ public class ProjectDetailActivity extends BaseActivity {
                 String newName = etName.getText().toString().trim();
                 String newDesc = etDesc.getText().toString().trim();
                 if (newName.isEmpty()) {
-                    Toast.makeText(this, "Tên dự án không được bỏ trống!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.project_name_required), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 com.team7.taskflow.domain.model.Project p =
@@ -676,7 +680,7 @@ public class ProjectDetailActivity extends BaseActivity {
                                             projectDesc = newDesc;
                                             tvProjectName.setText(newName);
                                             Toast.makeText(ProjectDetailActivity.this,
-                                                    "Cập nhật dự án thành công!", Toast.LENGTH_SHORT).show();
+                                                    getString(R.string.project_saved_success), Toast.LENGTH_SHORT).show();
                                             bottomSheet.dismiss();
                                         });
                                     }
@@ -778,6 +782,11 @@ public class ProjectDetailActivity extends BaseActivity {
 
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
         if (btnCollapse != null) btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
+
+        TextView tvProjectMetadata = sheetView.findViewById(R.id.tvProjectMetadata);
+        if (tvProjectMetadata != null) {
+            tvProjectMetadata.setText(getString(R.string.project_settings_metadata_placeholder));
+        }
 
         bottomSheet.show();
     }

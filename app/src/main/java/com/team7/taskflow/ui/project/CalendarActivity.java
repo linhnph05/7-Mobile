@@ -293,7 +293,15 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void addWeekdayHeaders() {
-        String[] days = {"S", "M", "T", "W", "T", "F", "S"};
+        String[] days = {
+                getString(R.string.calendar_weekday_sun),
+                getString(R.string.calendar_weekday_mon),
+                getString(R.string.calendar_weekday_tue),
+                getString(R.string.calendar_weekday_wed),
+                getString(R.string.calendar_weekday_thu),
+                getString(R.string.calendar_weekday_fri),
+                getString(R.string.calendar_weekday_sat)
+        };
         for (String day : days) {
             TextView tv = new TextView(this);
             tv.setText(day);

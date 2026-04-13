@@ -25,7 +25,7 @@
             android:id="@+id/btnBack"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="Back"
+            android:contentDescription="@string/trash_back_content_desc"
             android:src="@drawable/ic_back"
             android:tint="@color/theme_text_primary" />
 
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
-            android:text="Trash Bin"
+            android:text="@string/trash_bin_title"
             android:textColor="@color/theme_text_primary"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -44,7 +44,7 @@
             android:id="@+id/btnEmptyTrash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EMPTY TRASH"
+            android:text="@string/trash_empty_action"
             android:textColor="@color/text_red_600"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -81,7 +81,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TOTAL ITEMS"
+                android:text="@string/trash_total_items_label"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="10sp"
                 android:textStyle="bold"
@@ -101,63 +101,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Pending Purge"
+                android:text="@string/trash_pending_purge"
                 android:textColor="@color/primary"
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Auto Cleanup Card -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="12dp"
-            android:background="@drawable/bg_input"
-            android:layout_marginStart="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="NEXT AUTO-CLEANUP"
-                android:textColor="@color/theme_text_secondary"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.05" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:contentDescription="Clock"
-                    android:src="@drawable/ic_clock"
-                    android:tint="@color/theme_text_primary" />
-
-                <TextView
-                    android:id="@+id/tvAutoCleanup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text="12 Hours 45 Mins"
-                    android:textColor="@color/theme_text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
     </LinearLayout>
 
     <!-- Info Text -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Items in the trash will be permanently deleted after 30 days. Action wisely."
+        android:text="@string/trash_info_text"
         android:textColor="@color/theme_text_secondary"
         android:textSize="12sp"
         android:gravity="center"
@@ -189,7 +144,7 @@
         <ImageView
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:contentDescription="Empty"
+            android:contentDescription="@string/trash_empty_state_content_desc"
             android:src="@drawable/ic_trash"
             android:tint="@color/theme_text_hint"
             android:alpha="0.5" />
@@ -198,7 +153,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Trash is empty"
+            android:text="@string/trash_empty_state_title"
             android:textColor="@color/theme_text_secondary"
             android:textSize="16sp"
             android:textStyle="bold" />

@@ -32,7 +32,7 @@
                 android:layout_height="36dp"
                 android:layout_marginStart="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Back"
+                android:contentDescription="@string/back"
                 android:src="@drawable/ic_chevron_left"
                 app:tint="@color/theme_text_primary"
                 app:layout_constraintStart_toEndOf="@id/imgUserAvatar"
@@ -53,7 +53,7 @@
                     android:id="@+id/tvProjectName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Project Name"
+                    android:text="@string/project_name_label"
                     android:textColor="@color/theme_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -83,7 +83,7 @@
                     android:layout_height="36dp"
                     android:layout_marginStart="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Options"
+                    android:contentDescription="@string/options"
                     android:src="@drawable/ic_more_vert"
                     app:tint="@color/theme_text_secondary" />
             </LinearLayout>
@@ -105,7 +105,7 @@
                 android:background="@drawable/bg_tab_inactive"
                 android:gravity="center"
                 android:paddingHorizontal="18dp"
-                android:text="Timeline"
+                android:text="@string/project_tab_timeline"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="13sp" />
 
@@ -118,7 +118,7 @@
                 android:background="@drawable/bg_tab_active"
                 android:gravity="center"
                 android:paddingHorizontal="18dp"
-                android:text="Board"
+                android:text="@string/project_tab_board"
                 android:textColor="@color/white"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -132,7 +132,7 @@
                 android:background="@drawable/bg_tab_inactive"
                 android:gravity="center"
                 android:paddingHorizontal="18dp"
-                android:text="Calendar"
+                android:text="@string/project_tab_calendar"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="13sp" />
         </LinearLayout>
@@ -167,7 +167,7 @@
                             android:id="@+id/tvTodoTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="To Do"
+                            android:text="@string/project_board_todo_title"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -210,7 +210,7 @@
                             android:id="@+id/tvDoingTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Doing"
+                            android:text="@string/project_board_doing_title"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -251,7 +251,7 @@
                             android:id="@+id/tvDoneTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Done"
+                            android:text="@string/project_board_done_title"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 

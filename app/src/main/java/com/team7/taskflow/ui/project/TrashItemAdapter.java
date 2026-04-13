@@ -74,13 +74,13 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
         }
 
         public void bind(Task task, OnRestoreClickListener onRestoreClick, OnDeleteClickListener onDeleteClick) {
-            tvName.setText(task.getTitle() != null ? task.getTitle() : "Untitled Task");
+            tvName.setText(task.getTitle() != null ? task.getTitle() : itemView.getContext().getString(R.string.trash_item_untitled));
 
             // Set category (project name or default)
             if (task.getProjectInfo() != null && task.getProjectInfo().getName() != null) {
                 tvCategory.setText(task.getProjectInfo().getName().toUpperCase());
             } else {
-                tvCategory.setText("TASK");
+                tvCategory.setText(R.string.trash_item_category_task);
             }
 
             // Set deleted date
@@ -106,14 +106,14 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
 
         private String getRelativeDeleteDate(String updatedAtStr) {
             if (updatedAtStr == null || updatedAtStr.isEmpty()) {
-                return "Recently deleted";
+                return itemView.getContext().getString(R.string.trash_deleted_recently);
             }
 
             try {
                 // Parse ISO format timestamp
                 SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
                 Date deletedDate = isoFormat.parse(updatedAtStr);
-                if (deletedDate == null) return "Recently deleted";
+                if (deletedDate == null) return itemView.getContext().getString(R.string.trash_deleted_recently);
 
                 long diffMs = System.currentTimeMillis() - deletedDate.getTime();
                 long diffDays = diffMs / (1000 * 60 * 60 * 24);
@@ -121,16 +121,16 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
                 if (diffDays == 0) {
                     long diffHours = diffMs / (1000 * 60 * 60);
                     if (diffHours == 0) {
-                        return "Deleted just now";
+                        return itemView.getContext().getString(R.string.trash_deleted_just_now);
                     }
-                    return "Deleted " + diffHours + " hour" + (diffHours > 1 ? "s" : "") + " ago";
+                    return itemView.getContext().getString(R.string.trash_deleted_hours_ago, diffHours);
                 } else if (diffDays == 1) {
-                    return "Deleted yesterday";
+                    return itemView.getContext().getString(R.string.trash_deleted_yesterday);
                 } else {
-                    return "Deleted " + diffDays + " days ago";
+                    return itemView.getContext().getString(R.string.trash_deleted_days_ago, diffDays);
                 }
             } catch (Exception e) {
-                return "Recently deleted";
+                return itemView.getContext().getString(R.string.trash_deleted_recently);
             }
         }
     }

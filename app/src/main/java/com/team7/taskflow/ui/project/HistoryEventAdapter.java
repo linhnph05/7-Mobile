@@ -199,11 +199,11 @@ public class HistoryEventAdapter extends BaseAdapter {
     private String buildActionLine(String actionLabel, String taskTitle) {
         String action = actionLabel != null && !actionLabel.trim().isEmpty()
                 ? actionLabel.trim()
-                : "da cap nhat";
+                : inflater.getContext().getString(R.string.task_history_action_updated);
         if (taskTitle == null || taskTitle.isEmpty()) {
             return action;
         }
-        return action + " trong " + taskTitle;
+        return inflater.getContext().getString(R.string.task_history_action_in_task_format, action, taskTitle);
     }
 
     private String resolveAvatarLetter(String actor) {
