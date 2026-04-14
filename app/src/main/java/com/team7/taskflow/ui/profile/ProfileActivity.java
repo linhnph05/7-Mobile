@@ -43,11 +43,11 @@ public class ProfileActivity extends BaseActivity {
     private static final String KEY_DARK_MODE = "dark_mode";
 
     private SwitchCompat switchDarkMode;
-    private TextView tvProfileName, btnSave, tvVersion, tvLanguageValue;
+    private TextView tvProfileName, btnSave, tvJoinedDate, tvLanguageValue;
     private EditText etName, etBio, etEmail;
     private ImageView ivAvatar;
     private CardView avatarCard;
-    private Button btnLogout;
+    private View btnLogout;
     private View rowProjectTrash;
     private View rowLanguage;
     private FloatingActionButton fabAdd;
@@ -92,9 +92,7 @@ public class ProfileActivity extends BaseActivity {
         isBottomNavNavigating = false;
         applyNavTransitionIfNeeded();
         updateLanguageLabel();
-        if (tvVersion != null) {
-            tvVersion.setText(getString(R.string.profile_version_format, BuildConfig.VERSION_NAME));
-        }
+        
         // Update bottom navigation selected item to ensure icon highlights correctly
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         if (bottomNav != null) {
@@ -123,7 +121,7 @@ public class ProfileActivity extends BaseActivity {
         switchDarkMode = findViewById(R.id.switchDarkMode);
         tvProfileName = findViewById(R.id.tvProfileName);
         btnSave = findViewById(R.id.btnSave);
-        tvVersion = findViewById(R.id.tvVersion);
+        tvJoinedDate = findViewById(R.id.tvJoinedDate);
         tvLanguageValue = findViewById(R.id.tvLanguageValue);
         etName = findViewById(R.id.etName);
         etBio = findViewById(R.id.etBio);
@@ -137,7 +135,7 @@ public class ProfileActivity extends BaseActivity {
 
         // Hiển thị email từ session ngay lập tức
         String email = SessionManager.getUserEmail();
-        if (etEmail != null && !email.isEmpty()) {
+        if (etEmail != null && !android.text.TextUtils.isEmpty(email)) {
             etEmail.setText(email);
         }
 
@@ -151,8 +149,9 @@ public class ProfileActivity extends BaseActivity {
             btnSave.setText(R.string.profile_save);
         }
 
-        if (tvVersion != null) {
-            tvVersion.setText(getString(R.string.profile_version_format, BuildConfig.VERSION_NAME));
+        if (tvJoinedDate != null) {
+            // Placeholder initially
+            tvJoinedDate.setText("");
         }
 
         updateLanguageLabel();
@@ -168,9 +167,11 @@ public class ProfileActivity extends BaseActivity {
 
         if (avatarCard != null) {
             avatarCard.setOnClickListener(v -> {
-                pickMedia.launch(new PickVisualMediaRequest.Builder()
-                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
-                        .build());
+                if (pickMedia != null) {
+                    pickMedia.launch(new PickVisualMediaRequest.Builder()
+                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                            .build());
+                }
             });
         }
 
@@ -182,14 +183,15 @@ public class ProfileActivity extends BaseActivity {
     private void setupThemeSwitch() {
         SharedPreferences prefs = getSharedPreferences(PREFS_THEME, MODE_PRIVATE);
         boolean isDark = prefs.getBoolean(KEY_DARK_MODE, false);
-        switchDarkMode.setChecked(isDark);
-
-        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean(KEY_DARK_MODE, isChecked).apply();
-            AppCompatDelegate.setDefaultNightMode(
-                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES
-                            : AppCompatDelegate.MODE_NIGHT_NO);
-        });
+        if (switchDarkMode != null) {
+            switchDarkMode.setChecked(isDark);
+            switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                prefs.edit().putBoolean(KEY_DARK_MODE, isChecked).apply();
+                AppCompatDelegate.setDefaultNightMode(
+                        isChecked ? AppCompatDelegate.MODE_NIGHT_YES
+                                : AppCompatDelegate.MODE_NIGHT_NO);
+            });
+        }
     }
 
     private void setupLanguageRow() {
@@ -286,42 +288,43 @@ public class ProfileActivity extends BaseActivity {
     }
 
     private void setupSaveButton() {
-        btnSave.setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
-            String bio = etBio.getText().toString().trim();
-            String email = etEmail.getText().toString().trim();
-            String userId = SessionManager.getUserId();
+        if (btnSave != null) {
+            btnSave.setOnClickListener(v -> {
+                if (etName == null || etBio == null || etEmail == null) return;
+                
+                String name = etName.getText().toString().trim();
+                String bio = etBio.getText().toString().trim();
+                String email = etEmail.getText().toString().trim();
+                String userId = SessionManager.getUserId();
 
-            if (userId == null || userId.isEmpty()) return;
+                if (android.text.TextUtils.isEmpty(userId)) return;
 
-            btnSave.setEnabled(false);
-            btnSave.setText(R.string.profile_saving);
+                btnSave.setEnabled(false);
+                btnSave.setText(R.string.profile_saving);
 
-            if (selectedImageUri != null) {
-                // 1. Upload ảnh lên Supabase Storage
-                userRepository.uploadAvatar(userId, selectedImageUri, getContentResolver(), new UserRepository.UploadCallback() {
-                    @Override
-                    public void onSuccess(String publicUrl) {
-                        // 2. Cập nhật profile với URL ảnh mới và Email
-                        updateProfile(userId, email, name, bio, publicUrl);
-                    }
+                if (selectedImageUri != null) {
+                    userRepository.uploadAvatar(userId, selectedImageUri, getContentResolver(), new UserRepository.UploadCallback() {
+                        @Override
+                        public void onSuccess(String publicUrl) {
+                            updateProfile(userId, email, name, bio, publicUrl);
+                        }
 
-                    @Override
-                    public void onError(String message) {
-                        runOnUiThread(() -> {
-                            btnSave.setEnabled(true);
-                            btnSave.setText(R.string.profile_save);
-                            Toast.makeText(ProfileActivity.this,
-                                    getString(R.string.profile_image_upload_failed, message),
-                                    Toast.LENGTH_SHORT).show();
-                        });
-                    }
-                });
-            } else {
-                // Chỉ cập nhật text và Email
-                updateProfile(userId, email, name, bio, null);
-            }
-        });
+                        @Override
+                        public void onError(String message) {
+                            runOnUiThread(() -> {
+                                btnSave.setEnabled(true);
+                                btnSave.setText(R.string.profile_save);
+                                Toast.makeText(ProfileActivity.this,
+                                        getString(R.string.profile_image_upload_failed, message),
+                                        Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    });
+                } else {
+                    updateProfile(userId, email, name, bio, null);
+                }
+            });
+        }
     }
 
     private void updateProfile(String userId, String email, String name, String bio, String avatarUrl) {
@@ -374,6 +377,11 @@ public class ProfileActivity extends BaseActivity {
                             null,
                             user.getAvatarUrl(),
                             user.getDisplayNameOrEmail());
+                    
+                    if (tvJoinedDate != null && user.getCreatedAt() != null) {
+                        tvJoinedDate.setText(getString(R.string.profile_joined_date_format, 
+                                formatDisplayDate(user.getCreatedAt())));
+                    }
                 });
             }
 
@@ -397,5 +405,22 @@ public class ProfileActivity extends BaseActivity {
         AppCompatDelegate.setDefaultNightMode(
                 isDark ? AppCompatDelegate.MODE_NIGHT_YES
                         : AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    private String formatDisplayDate(String isoDate) {
+        try {
+            // isoDate looks like "2024-04-14T09:22:15.123456+00:00"
+            // We just need the YYYY-MM-DD part for a quick parse
+            if (isoDate.length() >= 10) {
+                String datePart = isoDate.substring(0, 10);
+                String[] parts = datePart.split("-");
+                if (parts.length == 3) {
+                    return parts[2] + "/" + parts[1] + "/" + parts[0];
+                }
+            }
+            return isoDate;
+        } catch (Exception e) {
+            return isoDate;
+        }
     }
 }

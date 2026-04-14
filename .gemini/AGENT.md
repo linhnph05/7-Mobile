@@ -167,7 +167,22 @@ Toast.makeText(this, getString(R.string.task_saved_success), ...);
 
 ---
 
-## 9. Lưu ý quan trọng cho AI assistant
+## 10. Debugging & Error Tracking — "Logcat First"
+
+### 10.1 Quy trình khi gặp lỗi (Crash / Bug)
+1. **Mở Logcat**: Filter theo package `com.team7.taskflow` và mức độ `Error`.
+2. **Tìm "Caused by"**: Đây là dòng chứa nguyên nhân gốc rễ.
+3. **Click link màu xanh**: Android Studio sẽ đưa bạn đến đúng dòng code bị lỗi.
+4. **Báo cáo cho AI**: Khi hỏi, hãy copy đoạn stack trace từ dòng `FATAL EXCEPTION` đến hết khối `Caused by` đầu tiên.
+
+### 10.2 Tiêu chuẩn Logging
+- Dùng `Log.e(TAG, "Message", e)` để log lỗi kèm theo Exception (giúp hiện đủ stack trace).
+- Định nghĩa `private static final String TAG = "FeatureNameActivity";` ở đầu mỗi class.
+- KHÔNG để lại `System.out.println()` trong code.
+
+---
+
+## 11. Lưu ý quan trọng cho AI assistant
 
 1. **Trả lời bằng tiếng Việt** trừ khi user hỏi bằng tiếng Anh.
 2. **Ưu tiên sửa ít file nhất** có thể — tránh refactor cả dự án khi chỉ cần thay đổi nhỏ.
@@ -176,3 +191,7 @@ Toast.makeText(this, getString(R.string.task_saved_success), ...);
 5. Khi build: dùng `.\gradlew.bat assembleDebug` trên Windows để verify.
 6. **KHÔNG tạo file thừa** — trước khi tạo drawable/style mới, kiểm tra xem đã có file tương tự chưa.
 7. Tôn trọng kiến trúc hiện tại: `data/` → `domain/` → `ui/`. KHÔNG đặt logic API trong Activity.
+8. **Hướng dẫn User**: Khi gặp lỗi Crash, hãy hướng dẫn User cách dùng Logcat để lấy stack trace thay vì tự đoán mò.
+9. **Sự nhất quán giao diện (UI Consistency)**: Khi chỉnh sửa màn hình Profile hoặc Cài đặt, PHẢI dùng phong cách: CardView bao bọc các hàng (Rows), Icon bo góc có màu nền nhẹ, và mũi tên chỉ hướng (chevron). Tránh dùng các nút bấm (Button) thô cứng cho điều hướng.
+10. **Thông tin thực tế (Metadata)**: Ưu tiên hiển thị thông tin từ DB (như "Ngày tham gia") thay vì chỉ hiện số phiên bản (Version).
+11. **Đa ngôn ngữ & Chế độ tối**: Mọi UI mới phải check kỹ ở cả Light/Dark Mode và Anh-Việt.

@@ -165,10 +165,10 @@ public class DashboardActivity extends BaseActivity {
         }
         startStickyServiceSafely();
         loadUnreadNotificationCount();
-        // Reload projects khi quay lại từ CreateProjectActivity
-        // Chỉ load nếu đã có currentUserId
         if (currentUserId != null && !currentUserId.isEmpty()) {
-            loadProjects();
+            // Khi quay lại từ Detail, buộc reload để cập nhật trạng thái Ghim và nội dung
+            // mới nhất
+            loadProjects(true);
         }
     }
 
@@ -402,10 +402,11 @@ public class DashboardActivity extends BaseActivity {
         }
         activeFilter = filter;
         syncFilterButtonState();
-        
+
         // Kích hoạt animation cho danh sách dự án
         if (rvProjects != null) {
-            rvProjects.setLayoutAnimation(android.view.animation.AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_fall_down));
+            rvProjects.setLayoutAnimation(
+                    android.view.animation.AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_fall_down));
             rvProjects.scheduleLayoutAnimation();
         }
 
@@ -434,7 +435,7 @@ public class DashboardActivity extends BaseActivity {
             if (tvWorkspaceName != null) {
                 tvWorkspaceName.setText(getString(R.string.dashboard_workspace_guest));
             }
-            loadProjects();
+            loadProjects(false);
             return;
         }
 
@@ -494,7 +495,7 @@ public class DashboardActivity extends BaseActivity {
                     }
 
                     // Load projects (luôn chạy dù API user thành công hay thất bại)
-                    loadProjects();
+                    loadProjects(false);
                 });
             }
 
@@ -504,7 +505,7 @@ public class DashboardActivity extends BaseActivity {
                     Log.d(TAG, "Error fetching user (sẽ dùng tên từ session): " + t.getMessage());
                     // Không đổi text vì đã hiển thị tên từ session
                     // Vẫn load projects
-                    loadProjects();
+                    loadProjects(false);
                 });
             }
         });
@@ -513,14 +514,17 @@ public class DashboardActivity extends BaseActivity {
     /**
      * Load danh sách projects từ Supabase
      */
-    private void loadProjects() {
+    private void loadProjects(boolean forceReload) {
         if (currentUserId == null || currentUserId.isEmpty()) {
             Toast.makeText(this, getString(R.string.dashboard_login_required), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (canUseProjectsCache()) {
+        if (!forceReload && canUseProjectsCache()) {
             allProjects = new ArrayList<>(cachedProjects);
+            // Vẫn phải cập nhật Pin Status vì nó lưu ở Local, cache có thể chứa Pin Status
+            // cũ
+            updateLocalPinStatus(allProjects);
             applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
                     ? searchBar.getText().toString()
                     : "");
@@ -534,6 +538,10 @@ public class DashboardActivity extends BaseActivity {
             @Override
             public void onSuccess(List<Project> projects) {
                 runOnUiThread(() -> {
+                    if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                        return;
+                    }
+
                     if (projects == null || projects.isEmpty()) {
                         Toast.makeText(
                                 DashboardActivity.this,
@@ -542,6 +550,9 @@ public class DashboardActivity extends BaseActivity {
                         allProjects = new ArrayList<>();
                         projectAdapter.setProjects(new java.util.ArrayList<>());
                     } else {
+                        // Cập nhật trạng thái Ghim từ ProjectPrefsManager
+                        updateLocalPinStatus(projects);
+
                         allProjects = new ArrayList<>(projects);
                         cachedProjects = new ArrayList<>(projects);
                         cachedProjectsAtMs = System.currentTimeMillis();
@@ -549,7 +560,7 @@ public class DashboardActivity extends BaseActivity {
                         applyProjectSearchFilter(searchBar != null && searchBar.getText() != null
                                 ? searchBar.getText().toString()
                                 : "");
-                        Log.d(TAG, "Loaded " + projects.size() + " projects from database");
+                        Log.d(TAG, "Loaded " + projects.size() + " projects from database with pin states");
                     }
                 });
             }
@@ -557,12 +568,27 @@ public class DashboardActivity extends BaseActivity {
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> {
+                    if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                        return;
+                    }
                     Log.d(TAG, "Error loading projects: " + error);
                     Toast.makeText(DashboardActivity.this,
                             getString(R.string.dashboard_load_projects_error, error), Toast.LENGTH_SHORT).show();
                 });
             }
         });
+    }
+
+    private void updateLocalPinStatus(List<Project> projects) {
+        if (projects == null)
+            return;
+        com.team7.taskflow.utils.ProjectPrefsManager prefsManager = new com.team7.taskflow.utils.ProjectPrefsManager(
+                this);
+        for (Project p : projects) {
+            if (p != null) {
+                p.setPinned(prefsManager.isProjectPinned(p.getId()));
+            }
+        }
     }
 
     private void loadUnreadNotificationCount() {

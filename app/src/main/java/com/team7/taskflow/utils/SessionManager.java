@@ -73,47 +73,23 @@ public class SessionManager {
 
     public static String getUserId() {
         ensureInit();
-        if (isExpired()) {
-            handleExpiredSession();
-            return "";
-        }
         return prefs.getString(KEY_USER_ID, "");
     }
 
     public static String getUserEmail() {
         ensureInit();
-        if (isExpired()) {
-            handleExpiredSession();
-            return "";
-        }
         return prefs.getString(KEY_USER_EMAIL, "");
     }
 
     public static String getDisplayName() {
         ensureInit();
-        if (isExpired()) {
-            handleExpiredSession();
-            return "";
-        }
         return prefs.getString(KEY_DISPLAY_NAME, "");
     }
 
     public static boolean isLoggedIn() {
         ensureInit();
-        
         String userId = getUserId();
-        if (userId.isEmpty()) {
-            return false;
-        }
-
-        // Kiểm tra Token đã hết hạn chưa (Supabase Token sống 1 tiếng)
-        if (isExpired()) {
-            Log.w(TAG, "Access token expired! Auto-clearing session...");
-            handleExpiredSession();
-            return false;
-        }
-
-        return true;
+        return !userId.isEmpty() && !isExpired();
     }
 
     public static void clearSession() {

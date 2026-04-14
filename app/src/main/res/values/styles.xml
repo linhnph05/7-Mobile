@@ -123,6 +123,11 @@
     <style name="BottomNavIndicator_Transparent" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@android:color/transparent</item>
     </style>
+
+    <style name="ShapeAppearance_Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
 </resources>
 
 

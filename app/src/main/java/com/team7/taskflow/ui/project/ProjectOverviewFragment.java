@@ -320,6 +320,7 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void processTaskStats(List<Task> tasks) {
+        if (!isAdded() || tasks == null) return;
         int todo = 0;
         int inProgress = 0;
         int done = 0;
@@ -412,21 +413,24 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void updatePieChart(int todo, int inProgress, int done) {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
         pieChartStatus.setBackgroundColor(Color.TRANSPARENT);
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
         if (todo > 0) {
             entries.add(new PieEntry(todo, getString(R.string.overview_status_todo_count, todo)));
-            colors.add(ContextCompat.getColor(requireContext(), R.color.theme_text_secondary));
+            colors.add(ContextCompat.getColor(getContext(), R.color.theme_text_secondary));
         }
         if (inProgress > 0) {
             entries.add(new PieEntry(inProgress, getString(R.string.overview_status_in_progress_count, inProgress)));
-            colors.add(ContextCompat.getColor(requireContext(), R.color.primary));
+            colors.add(ContextCompat.getColor(getContext(), R.color.primary));
         }
         if (done > 0) {
             entries.add(new PieEntry(done, getString(R.string.overview_status_done_count, done)));
-            colors.add(ContextCompat.getColor(requireContext(), R.color.green_500));
+            colors.add(ContextCompat.getColor(getContext(), R.color.green_500));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -446,6 +450,9 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void updateBarChart(List<Task> tasks) {
+        if (!isAdded() || getContext() == null || tasks == null) {
+            return;
+        }
         barChartProductivity.setBackgroundColor(Color.TRANSPARENT);
         ArrayList<BarEntry> entries = new ArrayList<>();
         ArrayList<String> labels = new ArrayList<>();
@@ -518,27 +525,39 @@ public class ProjectOverviewFragment extends Fragment {
         dataSet.setValueTextColor(getThemeColor(com.google.android.material.R.attr.colorOnSurface));
         dataSet.setValueTextSize(11f);
         dataSet.setValueFormatter(new ValueFormatter() {
+            private BarEntry lastEntry = null;
+            private int segmentIndex = 0;
+
             @Override
             public String getBarStackedLabel(float value, BarEntry barEntry) {
-                float[] stackedValues = barEntry.getYVals();
-                if (stackedValues == null || stackedValues.length == 0) {
+                // Reset index if we moved to a new bar
+                if (barEntry != lastEntry) {
+                    lastEntry = barEntry;
+                    segmentIndex = 0;
+                } else {
+                    segmentIndex++;
+                }
+
+                float[] vals = barEntry.getYVals();
+                if (vals == null || vals.length == 0) {
                     return value > 0 ? String.valueOf((int) value) : "";
                 }
 
+                // Find the index of the highest segment that actually has a value > 0
+                int lastNonZeroIndex = -1;
                 float total = 0f;
-                for (float stackedValue : stackedValues) {
-                    total += stackedValue;
-                }
-
-                float topPositiveValue = 0f;
-                for (int index = stackedValues.length - 1; index >= 0; index--) {
-                    if (stackedValues[index] > 0f) {
-                        topPositiveValue = stackedValues[index];
-                        break;
+                for (int i = 0; i < vals.length; i++) {
+                    total += vals[i];
+                    if (vals[i] > 0) {
+                        lastNonZeroIndex = i;
                     }
                 }
 
-                return value == topPositiveValue ? String.valueOf((int) total) : "";
+                // Only show the total value on the topmost non-zero segment
+                if (segmentIndex == lastNonZeroIndex) {
+                    return total > 0 ? String.valueOf((int) total) : "";
+                }
+                return "";
             }
         });
 
@@ -558,6 +577,7 @@ public class ProjectOverviewFragment extends Fragment {
     }
 
     private void updateUpcomingTasks(List<Task> allTasks) {
+        if (!isAdded() || allTasks == null) return;
         LocalDate today = LocalDate.now();
         List<Task> upcoming = new ArrayList<>();
         for (Task t : allTasks) {

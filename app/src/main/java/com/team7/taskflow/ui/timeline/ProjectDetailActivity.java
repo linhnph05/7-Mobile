@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import androidx.cardview.widget.CardView;
 
 import com.team7.taskflow.R;
 import com.team7.taskflow.ui.base.BaseActivity;
@@ -38,9 +39,13 @@ import com.team7.taskflow.ui.project.TimelineFragment;
 import com.team7.taskflow.ui.system.ShortcutRouterActivity;
 import com.team7.taskflow.utils.NavigationUtils;
 import com.team7.taskflow.utils.ProjectColorUtils;
+import com.team7.taskflow.utils.ProjectPrefsManager;
 import com.team7.taskflow.utils.SessionManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import com.team7.taskflow.domain.model.Project;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -52,8 +57,8 @@ public class ProjectDetailActivity extends BaseActivity {
     public static final int INITIAL_TAB_TIMELINE = 3;
 
     private static final int TAB_OVERVIEW = 0;
-    private static final int TAB_BOARD    = 1;
-    private static final int TAB_LIST     = 2;
+    private static final int TAB_BOARD = 1;
+    private static final int TAB_LIST = 2;
     private static final int TAB_TIMELINE = 3;
     private static final int TAB_CALENDAR = 4;
 
@@ -66,9 +71,11 @@ public class ProjectDetailActivity extends BaseActivity {
     private boolean isMyTasksMode;
     private boolean isViewer = false;
     private boolean isOwner = false;
+    private boolean isPrivate = false;
+    private String projectCreatedAt;
 
     private LinearLayout tabOverview, tabBoard, tabList, tabTimeline, tabCalendar;
-    private TextView tvProjectName, tvMonth;
+    private TextView tvProjectName, tvProjectDescription;
     private BottomNavigationView bottomNavigationView;
     private View btnMore;
     private View btnProjectActivity;
@@ -85,17 +92,19 @@ public class ProjectDetailActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_project_detail);
 
-        projectId     = readLongExtraFlexible(getIntent(), "project_id", -1L);
+        projectId = readLongExtraFlexible(getIntent(), "project_id", -1L);
         if (projectId <= 0) {
             projectId = readLongExtraFlexible(getIntent(), "projectId", -1L);
         }
         if (projectId <= 0) {
             projectId = readLongExtraFlexible(getIntent(), "id", -1L);
         }
-        projectName   = getIntent().getStringExtra("project_name");
-        projectKey    = getIntent().getStringExtra("project_key");
-        projectDesc   = getIntent().getStringExtra("project_desc");
-        projectColor  = getIntent().getStringExtra("project_color");
+        projectName = getIntent().getStringExtra("project_name");
+        projectKey = getIntent().getStringExtra("project_key");
+        projectDesc = getIntent().getStringExtra("project_desc");
+        projectColor = getIntent().getStringExtra("project_color");
+        String userRole = getIntent().getStringExtra("user_role");
+        isOwner = "OWNER".equalsIgnoreCase(userRole);
         isMyTasksMode = getIntent().getBooleanExtra("is_my_tasks", false);
         requestedInitialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, TAB_OVERVIEW);
         if (getIntent().hasExtra(EXTRA_OPEN_TASK_ID)) {
@@ -183,34 +192,37 @@ public class ProjectDetailActivity extends BaseActivity {
     // ─────────────────────────────────────────────────────────────────────────
     private void initViews() {
         tvProjectName = findViewById(R.id.tvProjectName);
-        tvMonth       = findViewById(R.id.tvMonth);
+        tvProjectDescription = findViewById(R.id.tvProjectDescription);
+        
+        tabOverview = findViewById(R.id.tabOverview);
+        tabBoard = findViewById(R.id.tabBoard);
+        tabList = findViewById(R.id.tabList);
+        tabTimeline = findViewById(R.id.tabTimeline);
+        tabCalendar = findViewById(R.id.tabCalendar);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        btnProjectActivity = findViewById(R.id.btnProjectActivity);
+        tvProjectActivityBadge = findViewById(R.id.tvProjectActivityBadge);
+        btnMore = findViewById(R.id.btnMoreOptions);
 
         if (tvProjectName != null) {
             tvProjectName.setText(isMyTasksMode ? "My Assigned Tasks"
                     : (projectName != null ? projectName : "Project"));
         }
-        if (tvMonth != null) {
-            java.text.SimpleDateFormat sdf =
-                    new java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault());
-            tvMonth.setText(sdf.format(java.util.Calendar.getInstance().getTime()));
+        if (tvProjectDescription != null) {
+            if (projectDesc != null && !projectDesc.trim().isEmpty()) {
+                tvProjectDescription.setText(projectDesc);
+                tvProjectDescription.setVisibility(View.VISIBLE);
+            } else {
+                tvProjectDescription.setVisibility(View.GONE);
+            }
         }
-
-        tabOverview          = findViewById(R.id.tabOverview);
-        tabBoard             = findViewById(R.id.tabBoard);
-        tabList              = findViewById(R.id.tabList);
-        tabTimeline          = findViewById(R.id.tabTimeline);
-        tabCalendar          = findViewById(R.id.tabCalendar);
-        bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        btnProjectActivity   = findViewById(R.id.btnProjectActivity);
-        tvProjectActivityBadge = findViewById(R.id.tvProjectActivityBadge);
-        btnMore              = findViewById(R.id.btnMoreOptions);
 
         if (tvProjectActivityBadge != null) {
             tvProjectActivityBadge.setVisibility(View.GONE);
         }
 
         View fragmentContainer = findViewById(R.id.fragment_container);
-        View bottomBar         = findViewById(R.id.includeBottomBar);
+        View bottomBar = findViewById(R.id.includeBottomBar);
         if (bottomBar != null) {
             bottomBar.setVisibility(isMyTasksMode ? View.VISIBLE : View.GONE);
         }
@@ -227,11 +239,15 @@ public class ProjectDetailActivity extends BaseActivity {
         View btnBack = findViewById(R.id.btnBack);
         positionCreateTaskButton();
         if (isMyTasksMode) {
-            if (btnBack != null) btnBack.setVisibility(View.INVISIBLE);
-            if (btnMore != null) btnMore.setVisibility(View.GONE);
+            if (btnBack != null)
+                btnBack.setVisibility(View.INVISIBLE);
+            if (btnMore != null)
+                btnMore.setVisibility(View.GONE);
         } else {
-            if (btnBack != null) btnBack.setOnClickListener(v -> finish());
-            if (btnMore != null) btnMore.setOnClickListener(v -> showProjectSettingsPanel());
+            if (btnBack != null)
+                btnBack.setOnClickListener(v -> finish());
+            if (btnMore != null)
+                btnMore.setOnClickListener(v -> showProjectSettingsPanel());
         }
 
         if (btnProjectActivity != null) {
@@ -294,11 +310,16 @@ public class ProjectDetailActivity extends BaseActivity {
     // Navigation
     // ─────────────────────────────────────────────────────────────────────────
     private void setupNavigation() {
-        if (tabOverview != null) tabOverview.setOnClickListener(v -> openTab(TAB_OVERVIEW));
-        if (tabBoard    != null) tabBoard.setOnClickListener(v    -> openTab(TAB_BOARD));
-        if (tabList     != null) tabList.setOnClickListener(v     -> openTab(TAB_LIST));
-        if (tabTimeline != null) tabTimeline.setOnClickListener(v -> openTab(TAB_TIMELINE));
-        if (tabCalendar != null) tabCalendar.setOnClickListener(v -> openTab(TAB_CALENDAR));
+        if (tabOverview != null)
+            tabOverview.setOnClickListener(v -> openTab(TAB_OVERVIEW));
+        if (tabBoard != null)
+            tabBoard.setOnClickListener(v -> openTab(TAB_BOARD));
+        if (tabList != null)
+            tabList.setOnClickListener(v -> openTab(TAB_LIST));
+        if (tabTimeline != null)
+            tabTimeline.setOnClickListener(v -> openTab(TAB_TIMELINE));
+        if (tabCalendar != null)
+            tabCalendar.setOnClickListener(v -> openTab(TAB_CALENDAR));
 
         View fabAddAI = findViewById(R.id.fabAddAI);
         if (fabAddAI != null) {
@@ -312,15 +333,18 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void setupBottomNavigation() {
-        if (!isMyTasksMode || bottomNavigationView == null) return;
+        if (!isMyTasksMode || bottomNavigationView == null)
+            return;
         bottomNavigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (isBottomNavNavigating) return true;
-            if (id == R.id.nav_tasks) return true;
+            if (isBottomNavNavigating)
+                return true;
+            if (id == R.id.nav_tasks)
+                return true;
             if (id == R.id.nav_home) {
                 isBottomNavNavigating = true;
-                    Intent i = new Intent(this, DashboardActivity.class);
+                Intent i = new Intent(this, DashboardActivity.class);
                 boolean started = NavigationUtils.startActivityWithNavAnimation(
                         this, i, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_HOME);
                 if (!started) {
@@ -330,7 +354,7 @@ public class ProjectDetailActivity extends BaseActivity {
             }
             if (id == R.id.nav_settings) {
                 isBottomNavNavigating = true;
-                    Intent i = new Intent(this, ProfileActivity.class);
+                Intent i = new Intent(this, ProfileActivity.class);
                 boolean started = NavigationUtils.startActivityWithNavAnimation(
                         this, i, NavigationUtils.NAV_TASKS, NavigationUtils.NAV_SETTINGS);
                 if (!started) {
@@ -346,7 +370,8 @@ public class ProjectDetailActivity extends BaseActivity {
     // Role loading
     // ─────────────────────────────────────────────────────────────────────────
     private void loadUserInfo() {
-        if (currentUserId == null || currentUserId.isEmpty()) return;
+        if (currentUserId == null || currentUserId.isEmpty())
+            return;
 
         com.team7.taskflow.data.remote.SupabaseClient.getInstance()
                 .getService(com.team7.taskflow.data.remote.api.MemberApiService.class)
@@ -356,7 +381,8 @@ public class ProjectDetailActivity extends BaseActivity {
                     public void onResponse(
                             @NonNull retrofit2.Call<List<com.team7.taskflow.domain.model.ProjectMember>> call,
                             @NonNull retrofit2.Response<List<com.team7.taskflow.domain.model.ProjectMember>> r) {
-                        if (!r.isSuccessful() || r.body() == null) return;
+                        if (!r.isSuccessful() || r.body() == null)
+                            return;
                         for (com.team7.taskflow.domain.model.ProjectMember m : r.body()) {
                             if (currentUserId.equals(m.getUserId())) {
                                 isViewer = m.isViewer();
@@ -377,16 +403,19 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void applyRoleRestrictions() {
-        if (!isViewer) return;
+        if (!isViewer)
+            return;
         View fabAddAI = findViewById(R.id.fabAddAI);
-        if (fabAddAI != null) fabAddAI.setVisibility(View.GONE);
+        if (fabAddAI != null)
+            fabAddAI.setVisibility(View.GONE);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Tab management
     // ─────────────────────────────────────────────────────────────────────────
     private void openTab(int idx) {
-        if (idx == TAB_OVERVIEW && isMyTasksMode && tabOverview == null) return;
+        if (idx == TAB_OVERVIEW && isMyTasksMode && tabOverview == null)
+            return;
 
         Fragment fragment;
         String tag;
@@ -394,21 +423,32 @@ public class ProjectDetailActivity extends BaseActivity {
 
         switch (idx) {
             case TAB_OVERVIEW:
-                fragment  = ProjectOverviewFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag       = "OVERVIEW"; activeTab = tabOverview; break;
+                fragment = ProjectOverviewFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "OVERVIEW";
+                activeTab = tabOverview;
+                break;
             case TAB_BOARD:
-                fragment  = BoardFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag       = "BOARD";    activeTab = tabBoard;    break;
+                fragment = BoardFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "BOARD";
+                activeTab = tabBoard;
+                break;
             case TAB_LIST:
-                fragment  = TaskListFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag       = "LIST";     activeTab = tabList;     break;
+                fragment = TaskListFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "LIST";
+                activeTab = tabList;
+                break;
             case TAB_TIMELINE:
-                fragment  = TimelineFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag       = "TIMELINE"; activeTab = tabTimeline; break;
+                fragment = TimelineFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "TIMELINE";
+                activeTab = tabTimeline;
+                break;
             case TAB_CALENDAR:
-                fragment  = CalendarFragment.newInstance(projectId, isMyTasksMode, currentUserId);
-                tag       = "CALENDAR"; activeTab = tabCalendar; break;
-            default: return;
+                fragment = CalendarFragment.newInstance(projectId, isMyTasksMode, currentUserId);
+                tag = "CALENDAR";
+                activeTab = tabCalendar;
+                break;
+            default:
+                return;
         }
 
         if (idx == currentTabIndex) {
@@ -429,8 +469,7 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void switchFragment(Fragment fragment, String tag, int idx) {
-        androidx.fragment.app.FragmentTransaction tx =
-                getSupportFragmentManager().beginTransaction();
+        androidx.fragment.app.FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
         if (currentTabIndex != -1) {
             if (idx > currentTabIndex)
                 tx.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -454,7 +493,8 @@ public class ProjectDetailActivity extends BaseActivity {
 
         View container = findViewById(R.id.fragment_container);
         Runnable openTask = () -> {
-            Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.project.TaskDetailActivity.class);
+            Intent intent = new Intent(ProjectDetailActivity.this,
+                    com.team7.taskflow.ui.project.TaskDetailActivity.class);
             intent.putExtra("project_id", projectId);
             intent.putExtra("task_id", taskId);
             startActivity(intent);
@@ -468,26 +508,33 @@ public class ProjectDetailActivity extends BaseActivity {
     }
 
     private void updateTabUI(LinearLayout activeTab) {
-        resetTab(tabOverview); resetTab(tabBoard); resetTab(tabList);
-        resetTab(tabTimeline); resetTab(tabCalendar);
-        if (activeTab == null) return;
+        resetTab(tabOverview);
+        resetTab(tabBoard);
+        resetTab(tabList);
+        resetTab(tabTimeline);
+        resetTab(tabCalendar);
+        if (activeTab == null)
+            return;
         ImageView icon = (ImageView) activeTab.getChildAt(0);
-        TextView  text = (TextView)  activeTab.getChildAt(1);
+        TextView text = (TextView) activeTab.getChildAt(1);
         icon.setColorFilter(ContextCompat.getColor(this, R.color.primary));
         text.setTextColor(ContextCompat.getColor(this, R.color.primary));
         text.setTypeface(null, android.graphics.Typeface.BOLD);
-        if (activeTab.getChildCount() > 2) activeTab.getChildAt(2).setVisibility(View.VISIBLE);
+        if (activeTab.getChildCount() > 2)
+            activeTab.getChildAt(2).setVisibility(View.VISIBLE);
     }
 
     private void resetTab(LinearLayout tab) {
-        if (tab == null) return;
+        if (tab == null)
+            return;
         ImageView icon = (ImageView) tab.getChildAt(0);
-        TextView  text = (TextView)  tab.getChildAt(1);
+        TextView text = (TextView) tab.getChildAt(1);
         int color = ContextCompat.getColor(this, R.color.theme_text_secondary);
         icon.setColorFilter(color);
         text.setTextColor(color);
         text.setTypeface(null, android.graphics.Typeface.NORMAL);
-        if (tab.getChildCount() > 2) tab.getChildAt(2).setVisibility(View.GONE);
+        if (tab.getChildCount() > 2)
+            tab.getChildAt(2).setVisibility(View.GONE);
     }
 
     private void loadProjectTheme() {
@@ -502,8 +549,30 @@ public class ProjectDetailActivity extends BaseActivity {
                             return;
                         }
                         runOnUiThread(() -> {
+                            if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                                return;
+                            }
                             projectColor = result.getColor();
+                            isPrivate = result.isPrivate();
+                            // Only update isOwner if result has a specific role, otherwise keep current
+                            if (result.getUserRole() != null) {
+                                isOwner = result.isOwner();
+                            }
+                            projectKey = result.getProjectKey();
+                            projectCreatedAt = result.getCreatedAt();
+                            projectDesc = result.getDescription();
                             applyHeaderTint();
+                            if (tvProjectName != null && result.getName() != null) {
+                                tvProjectName.setText(result.getName());
+                            }
+                            if (tvProjectDescription != null) {
+                                if (projectDesc != null && !projectDesc.trim().isEmpty()) {
+                                    tvProjectDescription.setText(projectDesc);
+                                    tvProjectDescription.setVisibility(View.VISIBLE);
+                                } else {
+                                    tvProjectDescription.setVisibility(View.GONE);
+                                }
+                            }
                         });
                     }
 
@@ -530,12 +599,22 @@ public class ProjectDetailActivity extends BaseActivity {
                 new ProjectRepository.ProjectCallback<List<com.team7.taskflow.domain.model.ProjectHistoryItem>>() {
                     @Override
                     public void onSuccess(List<com.team7.taskflow.domain.model.ProjectHistoryItem> result) {
-                        runOnUiThread(() -> updateProjectActivityBadge(countTodayHistoryItems(result)));
+                        runOnUiThread(() -> {
+                            if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                                return;
+                            }
+                            updateProjectActivityBadge(countTodayHistoryItems(result));
+                        });
                     }
 
                     @Override
                     public void onError(String error) {
-                        runOnUiThread(() -> updateProjectActivityBadge(0));
+                        runOnUiThread(() -> {
+                            if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                                return;
+                            }
+                            updateProjectActivityBadge(0);
+                        });
                     }
                 });
     }
@@ -627,8 +706,7 @@ public class ProjectDetailActivity extends BaseActivity {
     // Project Settings Panel
     // ─────────────────────────────────────────────────────────────────────────
     private void showProjectSettingsPanel() {
-        BottomSheetDialog bottomSheet =
-                new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        BottomSheetDialog bottomSheet = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
         View sheetView = getLayoutInflater()
                 .inflate(R.layout.layout_project_settings_panel, null);
         bottomSheet.setContentView(sheetView);
@@ -643,62 +721,133 @@ public class ProjectDetailActivity extends BaseActivity {
                     .from(bsl).setSkipCollapsed(true);
         }
 
-        android.widget.EditText etName  = sheetView.findViewById(R.id.etProjectName);
-        android.widget.EditText etDesc  = sheetView.findViewById(R.id.etProjectDesc);
-        TextView                tvKey   = sheetView.findViewById(R.id.tvProjectKey);
-        android.widget.ImageView btnSave = sheetView.findViewById(R.id.btnSaveProject);
+        // Action Buttons (Pin, Share)
+        View btnActionPin = sheetView.findViewById(R.id.btnActionPin);
+        CardView cdPinBackground = sheetView.findViewById(R.id.cdPinBackground);
+        ImageView ivPinIcon = sheetView.findViewById(R.id.ivPinIcon);
+        TextView tvPinLabel = sheetView.findViewById(R.id.tvPinLabel);
 
-        if (etName != null && projectName != null) etName.setText(projectName);
-        if (etDesc != null && projectDesc  != null) etDesc.setText(projectDesc);
-        if (tvKey  != null) {
-            tvKey.setText(projectKey != null
-                ? getString(R.string.project_settings_key_format, projectKey)
-                : getString(R.string.project_settings_key_na));
-        }
+        final ProjectPrefsManager prefsManager = new ProjectPrefsManager(this);
+        boolean isPinned = prefsManager.isProjectPinned(projectId);
+        updatePinStatusUI(isPinned, cdPinBackground, ivPinIcon, tvPinLabel);
 
-        if (btnSave != null) {
-            btnSave.setOnClickListener(v -> {
-                if (projectId == -1) return;
-                String newName = etName.getText().toString().trim();
-                String newDesc = etDesc.getText().toString().trim();
-                if (newName.isEmpty()) {
-                    Toast.makeText(this, getString(R.string.project_name_required), Toast.LENGTH_SHORT).show();
-                    return;
+        if (btnActionPin != null) {
+            btnActionPin.setOnClickListener(v -> {
+                boolean currentlyPinned = prefsManager.isProjectPinned(projectId);
+                boolean newValue = !currentlyPinned;
+                prefsManager.setProjectPinned(projectId, newValue);
+                updatePinStatusUI(newValue, cdPinBackground, ivPinIcon, tvPinLabel);
+                
+                // Hiệu ứng scale nhẹ cho nút ghim khi nhấn
+                if (cdPinBackground != null) {
+                    cdPinBackground.animate().scaleX(1.1f).scaleY(1.1f).setDuration(100)
+                        .withEndAction(() -> cdPinBackground.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start())
+                        .start();
                 }
-                com.team7.taskflow.domain.model.Project p =
-                        new com.team7.taskflow.domain.model.Project();
-                p.setName(newName);
-                p.setDescription(newDesc);
-                com.team7.taskflow.data.repository.ProjectRepository.getInstance()
-                        .updateProject(projectId, p,
-                                new com.team7.taskflow.data.repository.ProjectRepository
-                                        .ProjectCallback<com.team7.taskflow.domain.model.Project>() {
-                                    @Override
-                                    public void onSuccess(com.team7.taskflow.domain.model.Project r) {
-                                        runOnUiThread(() -> {
-                                            projectName = newName;
-                                            projectDesc = newDesc;
-                                            tvProjectName.setText(newName);
-                                            Toast.makeText(ProjectDetailActivity.this,
-                                                    getString(R.string.project_saved_success), Toast.LENGTH_SHORT).show();
-                                            bottomSheet.dismiss();
-                                        });
-                                    }
-                                    @Override
-                                    public void onError(String error) {
-                                        runOnUiThread(() -> Toast.makeText(
-                                                ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
-                                    }
-                                });
+
+                String message = newValue ? getString(R.string.project_pinned_success)
+                        : getString(R.string.project_unpinned_success);
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             });
         }
 
+        View btnActionShare = sheetView.findViewById(R.id.btnActionShare);
+        if (btnActionShare != null) {
+            btnActionShare.setOnClickListener(v -> {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT,
+                        "Tham gia dự án " + projectName + " trên TaskFlow với mã: " + projectKey);
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, "Chia sẻ dự án"));
+            });
+        }
+
+        // Project Info views
+        TextView tvNameDisplay = sheetView.findViewById(R.id.tvProjectNameDisplay);
+        TextView tvDescDisplay = sheetView.findViewById(R.id.tvProjectDescDisplay);
+        TextView tvKey = sheetView.findViewById(R.id.tvProjectKey);
+        TextView tvInitial = sheetView.findViewById(R.id.tvProjectInitial);
+        View cardColor = sheetView.findViewById(R.id.cardProjectColor);
+        View btnEditDesc = sheetView.findViewById(R.id.btnEditDescription);
+
+        if (tvNameDisplay != null && projectName != null)
+            tvNameDisplay.setText(projectName);
+        if (tvDescDisplay != null) {
+            if (projectDesc != null && !projectDesc.trim().isEmpty()) {
+                tvDescDisplay.setText(projectDesc);
+                tvDescDisplay.setAlpha(1.0f);
+            } else {
+                tvDescDisplay.setText("Hãy thêm mô tả cho project");
+                tvDescDisplay.setAlpha(0.5f);
+            }
+        }
+        if (tvKey != null)
+            tvKey.setText(projectKey != null ? "Project Key: " + projectKey : "N/A");
+        if (tvInitial != null && projectName != null && !projectName.isEmpty()) {
+            tvInitial.setText(projectName.substring(0, 1).toUpperCase());
+        }
+        if (cardColor != null) {
+            int color = ProjectColorUtils.resolveBaseColor(this, projectColor);
+            cardColor.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
+        }
+
+        // Edit Project Prompt
+        if (btnEditDesc != null) {
+            btnEditDesc.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+            btnEditDesc.setOnClickListener(v -> showEditProjectDialog(tvNameDisplay, tvDescDisplay));
+        }
+
+        // Status Management (Private vs Public)
+        TextView tvStatusValue = sheetView.findViewById(R.id.tvProjectStatusValue);
+        TextView tvStatusLabel = sheetView.findViewById(R.id.tvProjectStatusLabel);
+        if (tvStatusLabel != null)
+            tvStatusLabel.setText("Quyền riêng tư");
+
+        // Use isPrivate from the project model instead of local storage
+        boolean currentIsPrivate = false;
+        // In ProjectDetailActivity, we should have a way to get the latest project
+        // state.
+        // Let's assume the activity's 'isPrivate' matches what we loaded.
+        // Wait, I need to check if ProjectDetailActivity has an 'isPrivate' field.
+        // Looking at the code, it has projectId, projectName, etc. but maybe not
+        // isPrivate.
+        // I will use a local variable to track and update it.
+        if (tvStatusValue != null)
+            tvStatusValue.setText(isPrivateMode() ? "Riêng tư" : "Công khai");
+
+        View btnStatus = sheetView.findViewById(R.id.btnProjectStatus);
+        if (btnStatus != null) {
+            // ONLY Owner can change privacy
+            btnStatus.setEnabled(isOwner);
+            if (!isOwner) {
+                btnStatus.setAlpha(0.5f);
+            }
+            btnStatus.setOnClickListener(v -> {
+                if (!isOwner) {
+                    Toast.makeText(this, "Chỉ chủ dự án mới có quyền thay đổi quyền riêng tư", Toast.LENGTH_SHORT)
+                            .show();
+                    return;
+                }
+                String[] modes = { "Công khai (Mọi thành viên đều thấy)", "Riêng tư (Chỉ mình bạn thấy)" };
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Quyền riêng tư dự án")
+                        .setItems(modes, (dialog, which) -> {
+                            boolean targetPrivate = (which == 1);
+                            updateProjectPrivacy(targetPrivate, tvStatusValue);
+                        })
+                        .show();
+            });
+        }
+
+        // Notification Preferences - REMOVED
+
+        // Management Actions
         View btnMembers = sheetView.findViewById(R.id.btnManageMembers);
         if (btnMembers != null) {
             btnMembers.setOnClickListener(v -> {
-                bottomSheet.dismiss();
-                com.team7.taskflow.ui.member.MemberListBottomSheet sheet =
-                        com.team7.taskflow.ui.member.MemberListBottomSheet.newInstance(projectId);
+                com.team7.taskflow.ui.member.MemberListBottomSheet sheet = com.team7.taskflow.ui.member.MemberListBottomSheet
+                        .newInstance(projectId);
                 sheet.show(getSupportFragmentManager(), "members");
             });
         }
@@ -706,7 +855,6 @@ public class ProjectDetailActivity extends BaseActivity {
         View btnProjectActivityHistory = sheetView.findViewById(R.id.btnProjectActivityHistory);
         if (btnProjectActivityHistory != null) {
             btnProjectActivityHistory.setOnClickListener(v -> {
-                bottomSheet.dismiss();
                 Intent intent = new Intent(ProjectDetailActivity.this,
                         com.team7.taskflow.ui.project.ProjectActivityHistoryActivity.class);
                 intent.putExtra("project_id", projectId);
@@ -715,11 +863,18 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
+        View btnEditLabels = sheetView.findViewById(R.id.btnEditLabels);
+        if (btnEditLabels != null) {
+            btnEditLabels.setOnClickListener(v -> {
+                Toast.makeText(this, "Tính năng đang được phát triển", Toast.LENGTH_SHORT).show();
+            });
+        }
+
         View btnViewArchived = sheetView.findViewById(R.id.btnViewArchived);
         if (btnViewArchived != null) {
             btnViewArchived.setOnClickListener(v -> {
-                bottomSheet.dismiss();
-                Intent intent = new Intent(ProjectDetailActivity.this, com.team7.taskflow.ui.project.TrashActivity.class);
+                Intent intent = new Intent(ProjectDetailActivity.this,
+                        com.team7.taskflow.ui.project.TrashActivity.class);
                 intent.putExtra("project_id", projectId);
                 intent.putExtra("project_name", projectName);
                 intent.putExtra("is_my_tasks", isMyTasksMode);
@@ -727,61 +882,50 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
+        // Leave Project
+        View btnLeave = sheetView.findViewById(R.id.btnLeaveProject);
+        if (btnLeave != null) {
+            btnLeave.setVisibility(isOwner ? View.GONE : View.VISIBLE);
+            btnLeave.setOnClickListener(v -> {
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Rời dự án")
+                        .setMessage("Bạn có chắc chắn muốn rời khỏi dự án này?")
+                        .setNegativeButton("Hủy", null)
+                        .setPositiveButton("Rời đi", (dialog, which) -> {
+                            performLeaveProject(bottomSheet);
+                        })
+                        .show();
+            });
+        }
+
+        // Delete Project
         View btnDeleteProject = sheetView.findViewById(R.id.btnDeleteProject);
         if (btnDeleteProject != null) {
             btnDeleteProject.setVisibility(isOwner ? View.VISIBLE : View.GONE);
             btnDeleteProject.setOnClickListener(v -> {
-                if (!isOwner) {
-                    Toast.makeText(this, getString(R.string.project_delete_owner_only), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
                 new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle(getString(R.string.project_delete_confirm_title))
+                        .setTitle("Xóa dự án")
                         .setMessage(getString(R.string.project_delete_confirm_message))
                         .setNegativeButton(getString(R.string.cancel), null)
                         .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
-                            com.team7.taskflow.data.repository.ProjectRepository.getInstance()
-                                    .deleteProject(projectId,
-                                            new com.team7.taskflow.data.repository.ProjectRepository.ProjectCallback<Void>() {
-                                                @Override
-                                                public void onSuccess(Void result) {
-                                                    runOnUiThread(() -> {
-                                                        Toast.makeText(ProjectDetailActivity.this,
-                                                                getString(R.string.project_deleted_success),
-                                                                Toast.LENGTH_SHORT).show();
-                                                        bottomSheet.dismiss();
-                                                        Intent intent = new Intent(ProjectDetailActivity.this,
-                                                                DashboardActivity.class);
-                                                        boolean started = NavigationUtils.startActivityWithNavAnimation(
-                                                                ProjectDetailActivity.this,
-                                                                intent,
-                                                                NavigationUtils.NAV_TASKS,
-                                                                NavigationUtils.NAV_HOME);
-                                                        if (started) {
-                                                            finish();
-                                                        } else {
-                                                            startActivity(intent);
-                                                            finish();
-                                                        }
-                                                    });
-                                                }
-
-                                                @Override
-                                                public void onError(String error) {
-                                                    runOnUiThread(() -> Toast.makeText(
-                                                            ProjectDetailActivity.this,
-                                                            error,
-                                                            Toast.LENGTH_SHORT).show());
-                                                }
-                                            });
+                            performDeleteProject(bottomSheet);
                         })
                         .show();
             });
         }
 
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
-        if (btnCollapse != null) btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
+        if (btnCollapse != null)
+            btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
+
+        TextView tvMetadata = sheetView.findViewById(R.id.tvProjectMetadata);
+        if (tvMetadata != null && projectCreatedAt != null) {
+            LocalDate date = extractHistoryDate(projectCreatedAt);
+            if (date != null) {
+                String dateStr = date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                tvMetadata.setText("Kiến tạo từ ngày " + dateStr);
+            }
+        }
 
         TextView tvProjectMetadata = sheetView.findViewById(R.id.tvProjectMetadata);
         if (tvProjectMetadata != null) {
@@ -789,6 +933,185 @@ public class ProjectDetailActivity extends BaseActivity {
         }
 
         bottomSheet.show();
+    }
+
+    private void showEditProjectDialog(TextView tvNameDisp, TextView tvDescDisp) {
+        android.view.View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_text, null);
+        TextView tvSubtitle = dialogView.findViewById(R.id.tvDialogSubtitle);
+        com.google.android.material.textfield.TextInputLayout til = dialogView.findViewById(R.id.tilInput);
+        android.widget.EditText et = dialogView.findViewById(R.id.etInput);
+
+        if (tvSubtitle != null)
+            tvSubtitle.setText(R.string.project_edit_description_subtitle);
+        if (til != null)
+            til.setHint(getString(R.string.project_edit_description_hint));
+        if (et != null) {
+            et.setText(projectDesc);
+            et.setSelection(et.getText().length());
+        }
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.project_edit_description_title)
+                .setView(dialogView)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, (d, w) -> {
+                    String newDesc = et.getText().toString().trim();
+                    updateProjectInfo(null, newDesc, null, tvDescDisp);
+                })
+                .show();
+    }
+
+    private void updateProjectInfo(String newName, String newDesc, TextView tvNameDisp, TextView tvDescDisp) {
+        com.team7.taskflow.domain.model.Project p = new com.team7.taskflow.domain.model.Project();
+        if (newName != null)
+            p.setName(newName);
+        if (newDesc != null)
+            p.setDescription(newDesc);
+
+        ProjectRepository.getInstance().updateProject(projectId, p,
+                new ProjectRepository.ProjectCallback<com.team7.taskflow.domain.model.Project>() {
+                    @Override
+                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                        runOnUiThread(() -> {
+                            if (newName != null) {
+                                projectName = newName;
+                                if (tvNameDisp != null) tvNameDisp.setText(newName);
+                                if (tvProjectName != null) tvProjectName.setText(newName);
+                            }
+                            if (newDesc != null) {
+                                projectDesc = newDesc;
+                                if (tvDescDisp != null) {
+                                    if (!newDesc.trim().isEmpty()) {
+                                        tvDescDisp.setText(newDesc);
+                                        tvDescDisp.setAlpha(1.0f);
+                                    } else {
+                                        tvDescDisp.setText("Hãy thêm mô tả cho dự án");
+                                        tvDescDisp.setAlpha(0.5f);
+                                    }
+                                }
+                                if (tvProjectDescription != null) {
+                                    if (!newDesc.trim().isEmpty()) {
+                                        tvProjectDescription.setText(newDesc);
+                                        tvProjectDescription.setVisibility(View.VISIBLE);
+                                    } else {
+                                        tvProjectDescription.setVisibility(View.GONE);
+                                    }
+                                }
+                            }
+                            Toast.makeText(ProjectDetailActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT)
+                                    .show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(
+                                () -> Toast.makeText(ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void updateProjectPrivacy(boolean targetPrivate, TextView tvStatusValue) {
+        com.team7.taskflow.domain.model.Project p = new com.team7.taskflow.domain.model.Project();
+        p.setPrivate(targetPrivate);
+
+        ProjectRepository.getInstance().updateProject(projectId, p,
+                new ProjectRepository.ProjectCallback<com.team7.taskflow.domain.model.Project>() {
+                    @Override
+                    public void onSuccess(com.team7.taskflow.domain.model.Project result) {
+                        runOnUiThread(() -> {
+                            isPrivate = targetPrivate;
+                            if (tvStatusValue != null)
+                                tvStatusValue.setText(targetPrivate ? "Riêng tư" : "Công khai");
+                            Toast.makeText(ProjectDetailActivity.this,
+                                    targetPrivate ? "Dự án đã được chuyển sang Riêng tư" : "Dự án hiện đã Công khai",
+                                    Toast.LENGTH_SHORT).show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> Toast
+                                .makeText(ProjectDetailActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void updatePinStatusUI(boolean isPinned, CardView cdBackground, ImageView ivIcon, TextView tvLabel) {
+        int activeColor = ContextCompat.getColor(this, R.color.primary);
+        int inactiveColor = ContextCompat.getColor(this, R.color.theme_text_secondary);
+        int inactiveBg = ContextCompat.getColor(this, R.color.theme_icon_slate);
+
+        if (cdBackground != null) {
+            cdBackground.setCardBackgroundColor(
+                    android.content.res.ColorStateList.valueOf(isPinned ? activeColor : inactiveBg));
+        }
+        if (ivIcon != null) {
+            ivIcon.setColorFilter(ContextCompat.getColor(this, R.color.white));
+        }
+        if (tvLabel != null) {
+            tvLabel.setText(
+                    isPinned ? getString(R.string.project_pinned_label) : getString(R.string.project_pin_label));
+            tvLabel.setTextColor(isPinned ? activeColor : inactiveColor);
+            tvLabel.setTypeface(null, isPinned ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        }
+    }
+
+    private boolean isPrivateMode() {
+        return isPrivate;
+    }
+
+    private void performLeaveProject(BottomSheetDialog bottomSheet) {
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("role", "REMOVED");
+
+        com.team7.taskflow.data.remote.SupabaseClient.getInstance()
+                .getService(com.team7.taskflow.data.remote.api.MemberApiService.class)
+                .updateMember("eq." + projectId, "eq." + currentUserId, body)
+                .enqueue(new retrofit2.Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> r) {
+                        if (r.isSuccessful()) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(ProjectDetailActivity.this, "Bạn đã rời dự án", Toast.LENGTH_SHORT)
+                                        .show();
+                                bottomSheet.dismiss();
+                                finish();
+                            });
+                        } else {
+                            runOnUiThread(() -> Toast
+                                    .makeText(ProjectDetailActivity.this, "Lỗi khi rời dự án", Toast.LENGTH_SHORT)
+                                    .show());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                        runOnUiThread(() -> Toast
+                                .makeText(ProjectDetailActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void performDeleteProject(BottomSheetDialog bottomSheet) {
+        ProjectRepository.getInstance().deleteProject(projectId, new ProjectRepository.ProjectCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                runOnUiThread(() -> {
+                    Toast.makeText(ProjectDetailActivity.this, getString(R.string.project_deleted_success),
+                            Toast.LENGTH_SHORT).show();
+                    bottomSheet.dismiss();
+                    Intent intent = new Intent(ProjectDetailActivity.this, DashboardActivity.class);
+                    startActivity(intent);
+                    finish();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(ProjectDetailActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────

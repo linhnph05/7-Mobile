@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -33,6 +34,7 @@ public class TrashActivity extends BaseActivity {
     private ImageView btnBack;
     private TextView btnEmptyTrash;
     private TextView tvTotalItems;
+    private TextView tvAutoCleanup;
     private RecyclerView rvTrashItems;
     private LinearLayout emptyState;
     private TrashItemAdapter adapter;
@@ -70,6 +72,7 @@ public class TrashActivity extends BaseActivity {
         btnBack = findViewById(R.id.btnBack);
         btnEmptyTrash = findViewById(R.id.btnEmptyTrash);
         tvTotalItems = findViewById(R.id.tvTotalItems);
+        tvAutoCleanup = findViewById(R.id.tvAutoCleanup);
         rvTrashItems = findViewById(R.id.rvTrashItems);
         emptyState = findViewById(R.id.emptyState);
     }
@@ -134,6 +137,9 @@ public class TrashActivity extends BaseActivity {
 
     private void updateUI() {
         tvTotalItems.setText(String.valueOf(trashedTasks.size()));
+        if (tvAutoCleanup != null) {
+            tvAutoCleanup.setText(getString(R.string.trash_auto_cleanup_demo));
+        }
 
         if (trashedTasks.isEmpty()) {
             rvTrashItems.setVisibility(View.GONE);
@@ -151,6 +157,7 @@ public class TrashActivity extends BaseActivity {
             @Override
             public void onSuccess(Void result) {
                 Log.d(TAG, "Task restored: " + task.getId());
+                Toast.makeText(TrashActivity.this, getString(R.string.trash_restore_success), Toast.LENGTH_SHORT).show();
                 trashedTasks.remove(task);
                 adapter.notifyDataSetChanged();
                 updateUI();
@@ -170,6 +177,7 @@ public class TrashActivity extends BaseActivity {
             @Override
             public void onSuccess(Void result) {
                 Log.d(TAG, "Task deleted permanently: " + task.getId());
+                Toast.makeText(TrashActivity.this, getString(R.string.trash_delete_success), Toast.LENGTH_SHORT).show();
                 trashedTasks.remove(task);
                 adapter.notifyDataSetChanged();
                 updateUI();
@@ -209,6 +217,7 @@ public class TrashActivity extends BaseActivity {
                         trashedTasks.clear();
                         adapter.notifyDataSetChanged();
                         updateUI();
+                        Toast.makeText(TrashActivity.this, getString(R.string.trash_empty_success), Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "All trash emptied");
                     }
                 }

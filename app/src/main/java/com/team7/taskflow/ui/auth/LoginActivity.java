@@ -192,20 +192,25 @@ public class LoginActivity extends BaseActivity {
         String text = getString(R.string.auth_no_account_sign_up);
         SpannableString spannable = new SpannableString(text);
         int start = text.indexOf(getString(R.string.auth_register_button));
-        int end = start + getString(R.string.auth_register_button).length();
-        spannable.setSpan(new ForegroundColorSpan(
-                ContextCompat.getColor(this, R.color.primary)),
-                start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new StyleSpan(Typeface.BOLD),
-                start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-            }
-        }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        tvSignUp.setText(spannable);
-        tvSignUp.setMovementMethod(LinkMovementMethod.getInstance());
+        if (start != -1) {
+            int end = start + getString(R.string.auth_register_button).length();
+            spannable.setSpan(new ForegroundColorSpan(
+                    ContextCompat.getColor(this, R.color.primary)),
+                    start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new StyleSpan(Typeface.BOLD),
+                    start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
+                }
+            }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            tvSignUp.setText(spannable);
+            tvSignUp.setMovementMethod(LinkMovementMethod.getInstance());
+        } else {
+            tvSignUp.setText(text);
+            tvSignUp.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, SignUpActivity.class)));
+        }
     }
 
     private void attemptLogin() {

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- ════════════════════════════════════════════
          BRAND COLORS (same in light & dark)
@@ -83,6 +83,12 @@
     <color name="theme_icon_blue_bg">#DBEAFE</color>
     <color name="theme_icon_purple_bg">#F3E8FF</color>
     <color name="theme_icon_orange_bg">#FFEDD5</color>
+    
+    <color name="theme_icon_blue">#3B82F6</color>
+    <color name="theme_icon_green">#10B981</color>
+    <color name="theme_icon_orange">#F59E0B</color>
+    <color name="theme_icon_purple">#8B5CF6</color>
+    <color name="theme_icon_slate">#64748B</color>
     <color name="theme_btn_danger_bg">#FEF2F2</color>
     <color name="theme_btn_danger_text">#DC2626</color>
      <color name="chip_selected_bg">#1A2945FF</color>

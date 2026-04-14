@@ -126,7 +126,7 @@ public interface ProjectApi {
     @PATCH("projects")
     Call<List<Project>> updateProject(
             @Query("project_id") String projectIdFilter,
-            @Body Project project,
+            @Body java.util.Map<String, Object> body,
             @Header("Prefer") String prefer
     );
 

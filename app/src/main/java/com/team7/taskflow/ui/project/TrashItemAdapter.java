@@ -74,7 +74,7 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
         }
 
         public void bind(Task task, OnRestoreClickListener onRestoreClick, OnDeleteClickListener onDeleteClick) {
-            tvName.setText(task.getTitle() != null ? task.getTitle() : itemView.getContext().getString(R.string.trash_item_untitled));
+            tvName.setText(task.getTitle() != null ? task.getTitle() : itemView.getContext().getString(R.string.trash_untitled_task));
 
             // Set category (project name or default)
             if (task.getProjectInfo() != null && task.getProjectInfo().getName() != null) {
@@ -106,14 +106,14 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
 
         private String getRelativeDeleteDate(String updatedAtStr) {
             if (updatedAtStr == null || updatedAtStr.isEmpty()) {
-                return itemView.getContext().getString(R.string.trash_deleted_recently);
+                return itemView.getContext().getString(R.string.trash_recently_deleted);
             }
 
             try {
                 // Parse ISO format timestamp
                 SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
                 Date deletedDate = isoFormat.parse(updatedAtStr);
-                if (deletedDate == null) return itemView.getContext().getString(R.string.trash_deleted_recently);
+                if (deletedDate == null) return itemView.getContext().getString(R.string.trash_recently_deleted);
 
                 long diffMs = System.currentTimeMillis() - deletedDate.getTime();
                 long diffDays = diffMs / (1000 * 60 * 60 * 24);
@@ -130,7 +130,7 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
                     return itemView.getContext().getString(R.string.trash_deleted_days_ago, diffDays);
                 }
             } catch (Exception e) {
-                return itemView.getContext().getString(R.string.trash_deleted_recently);
+                return itemView.getContext().getString(R.string.trash_recently_deleted);
             }
         }
     }

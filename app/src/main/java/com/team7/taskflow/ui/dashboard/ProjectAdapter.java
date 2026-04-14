@@ -23,6 +23,8 @@ import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.utils.ProjectColorUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -33,6 +35,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
     private List<Project> projects = new ArrayList<>();
     private OnProjectClickListener listener;
+    private long lastClickTime = 0; // Throttle navigation clicks
 
     public interface OnProjectClickListener {
         void onProjectClick(Project project);
@@ -43,7 +46,14 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     }
 
     public void setProjects(List<Project> projects) {
-        this.projects = projects;
+        if (projects != null) {
+            Collections.sort(projects, (p1, p2) -> {
+                if (p1.isPinned() && !p2.isPinned()) return -1;
+                if (!p1.isPinned() && p2.isPinned()) return 1;
+                return 0;
+            });
+        }
+        this.projects = projects != null ? projects : new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -80,6 +90,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
         private final FrameLayout layoutAvatars;
         private final ProgressBar progressBar;
         private final CardView cardView;
+        private final ImageView ivPinned;
 
         public ProjectViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -92,8 +103,15 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             layoutAvatars = itemView.findViewById(R.id.layoutAvatars);
             progressBar = itemView.findViewById(R.id.progressBar);
             cardView = itemView.findViewById(R.id.cardProject);
+            ivPinned = itemView.findViewById(R.id.ivPinned);
 
             itemView.setOnClickListener(v -> {
+                long now = System.currentTimeMillis();
+                if (now - lastClickTime < 600) {
+                    return;
+                }
+                lastClickTime = now;
+
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     listener.onProjectClick(projects.get(position));
@@ -118,6 +136,10 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             tvProjectDesc.setText(itemView.getContext().getString(R.string.project_activity_count_format, activityCount));
             tvTaskCount.setText(String.valueOf(Math.max(0, project.getTaskActivitiesToday())));
             tvCommentCount.setText(String.valueOf(Math.max(0, project.getCommentActivitiesToday())));
+
+            if (ivPinned != null) {
+                ivPinned.setVisibility(project.isPinned() ? View.VISIBLE : View.GONE);
+            }
 
             renderMemberAvatars(project.getMemberPreviews());
         }

@@ -45,6 +45,7 @@ public class Project {
     private transient List<User> memberPreviews = new ArrayList<>();
     private transient String template;
     private transient String userRole; // OWNER, ADMIN, MEMBER - vai trò của user trong project
+    private transient boolean isPinned;
 
     public Project() {}
 
@@ -127,4 +128,7 @@ public class Project {
         if (totalTasks == 0) return 0;
         return (int) ((completedTasks * 100.0) / totalTasks);
     }
+
+    public boolean isPinned() { return isPinned; }
+    public void setPinned(boolean pinned) { isPinned = pinned; }
 }

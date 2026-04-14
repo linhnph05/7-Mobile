@@ -32,15 +32,16 @@
             tools:text="Owner" />
 
         <ImageView
-            android:id="@+id/btnOptions"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="2dp"
-            android:src="@android:drawable/ic_menu_more"
+            android:id="@+id/ivPinned"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_pin"
+            android:visibility="gone"
+            android:rotation="45"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/theme_text_secondary" />
+            app:tint="#F44336"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/tvProjectName"
