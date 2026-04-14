@@ -216,6 +216,12 @@ public interface TaskApi {
             @Query("order") String order
     );
 
+    @POST("work_logs")
+    Call<Void> addWorkLog(
+            @Body Map<String, Object> body,
+            @Header("Prefer") String prefer
+    );
+
     /**
      * Body for status update
      */

@@ -21,9 +21,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/back"
+            android:contentDescription="Quay lại"
             android:src="@drawable/ic_chevron_left"
             app:tint="@color/theme_text_primary"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,14 +32,14 @@
             android:id="@+id/tvToolbarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/task_detail_title"
+            android:text="Chi tiết công việc"
             android:textColor="@color/theme_text_primary"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/btnBack"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/btnBack" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/btnSave"
@@ -47,60 +48,16 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
             android:paddingHorizontal="10dp"
-            android:text="@string/task_save"
+            android:text="Lưu"
             android:textColor="@color/primary"
             android:textSize="16sp"
             android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardSubTaskInfo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:visibility="gone"
-            app:cardBackgroundColor="@color/theme_surface_variant"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnBack"
-            app:strokeColor="@color/theme_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="14dp">
-
-                <ImageView
-                    android:id="@+id/ivSubTaskIcon"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_grid_view"
-                    app:tint="@color/theme_text_secondary" />
-
-                <TextView
-                    android:id="@+id/tvSubTaskInfo"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:textColor="@color/theme_text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollTaskDetail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="60dp"
@@ -115,6 +72,46 @@
             android:paddingHorizontal="14dp"
             android:paddingTop="14dp"
             android:paddingBottom="36dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSubTaskInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/theme_surface_variant"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/theme_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_task_alt"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:id="@+id/tvSubTaskInfo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:textColor="@color/theme_text_primary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -135,8 +132,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/task_title_label"
-                        android:textColor="@color/theme_text_hint"
+                        android:text="TÊN CÔNG VIỆC"
+                        android:textColor="@color/theme_text_primary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -146,12 +143,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_input"
-                        android:hint="@string/task_title_hint"
+                        android:hint="Tên công việc"
                         android:inputType="textCapSentences"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="14dp"
                         android:textColor="@color/theme_text_primary"
-                        android:textColorHint="@color/theme_text_hint"
+                        android:textColorHint="@color/theme_text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -159,8 +156,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:text="@string/task_description_label"
-                        android:textColor="@color/theme_text_hint"
+                        android:text="MÔ TẢ"
+                        android:textColor="@color/theme_text_primary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -171,12 +168,12 @@
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_input"
                         android:gravity="top"
-                        android:hint="@string/task_description_hint"
+                        android:hint="Mô tả"
                         android:inputType="textCapSentences|textMultiLine"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="14dp"
                         android:textColor="@color/theme_text_primary"
-                        android:textColorHint="@color/theme_text_hint"
+                        android:textColorHint="@color/theme_text_primary"
                         android:textSize="15sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -204,14 +201,14 @@
                         android:layout_height="18dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_check"
-                        app:tint="@color/theme_text_secondary" />
+                        app:tint="@color/theme_text_primary" />
 
                     <TextView
                         android:id="@+id/tvStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="@string/task_status_todo"
+                        android:text="To Do"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -234,14 +231,14 @@
                         android:layout_height="18dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_flag"
-                        app:tint="@color/theme_text_secondary" />
+                        app:tint="@color/theme_text_primary" />
 
                     <TextView
                         android:id="@+id/tvPriority"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="@string/task_priority_medium"
+                        android:text="Medium"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -267,8 +264,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/task_assignee_label"
-                        android:textColor="@color/theme_text_hint"
+                        android:text="NGƯỜI ĐƯỢC GIAO"
+                        android:textColor="@color/theme_text_primary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -288,7 +285,7 @@
                             android:layout_height="22dp"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_person"
-                            app:tint="@color/theme_text_secondary" />
+                            app:tint="@color/theme_text_primary" />
 
                         <TextView
                             android:id="@+id/tvAssignee"
@@ -296,7 +293,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:layout_weight="1"
-                            android:text="@string/task_select_assignee"
+                            android:text="Chọn người"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -330,8 +327,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/task_attachments_label"
-                            android:textColor="@color/theme_text_hint"
+                            android:text="TỆP ĐÍNH KÈM"
+                            android:textColor="@color/theme_text_primary"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
@@ -360,14 +357,14 @@
                             android:layout_height="22dp"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_attach_file"
-                            app:tint="@color/theme_text_secondary" />
+                            app:tint="@color/theme_text_primary" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:layout_weight="1"
-                            android:text="@string/task_add_file"
+                                android:text="Thêm tệp"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -416,7 +413,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:text="@string/task_schedule_title"
+                            android:text="Lịch làm việc"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="17sp"
                             android:textStyle="bold" />
@@ -441,8 +438,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/task_start_date_full"
-                                android:textColor="@color/theme_text_hint"
+                                android:text="NGÀY BẮT ĐẦU"
+                                android:textColor="@color/theme_text_primary"
                                 android:textSize="10sp"
                                 android:textStyle="bold" />
 
@@ -458,7 +455,7 @@
                                     android:layout_height="18dp"
                                     android:contentDescription="@null"
                                     android:src="@drawable/ic_calendar"
-                                    app:tint="@color/theme_text_secondary" />
+                                    app:tint="@color/theme_text_primary" />
 
                                 <TextView
                                     android:id="@+id/tvStartDate"
@@ -485,8 +482,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/task_due_date_full"
-                                android:textColor="@color/theme_text_hint"
+                                android:text="HẠN CHÓT"
+                                android:textColor="@color/theme_text_primary"
                                 android:textSize="10sp"
                                 android:textStyle="bold" />
 
@@ -502,7 +499,7 @@
                                     android:layout_height="18dp"
                                     android:contentDescription="@null"
                                     android:src="@drawable/ic_calendar"
-                                    app:tint="@color/theme_text_secondary" />
+                                    app:tint="@color/theme_text_primary" />
 
                                 <TextView
                                     android:id="@+id/tvDueDate"
@@ -539,7 +536,7 @@
                                 android:layout_height="18dp"
                                 android:contentDescription="@null"
                                 android:src="@android:drawable/ic_lock_idle_alarm"
-                                app:tint="@color/theme_text_secondary" />
+                                app:tint="@color/theme_text_primary" />
 
                             <TextView
                                 android:id="@+id/tvStartTime"
@@ -568,7 +565,7 @@
                                 android:layout_height="18dp"
                                 android:contentDescription="@null"
                                 android:src="@android:drawable/ic_lock_idle_alarm"
-                                app:tint="@color/theme_text_secondary" />
+                                app:tint="@color/theme_text_primary" />
 
                             <TextView
                                 android:id="@+id/tvDueTime"
@@ -609,7 +606,7 @@
                         android:layout_height="22dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_label"
-                        app:tint="@color/theme_text_secondary" />
+                        app:tint="@color/theme_text_primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -626,7 +623,54 @@
                         android:layout_weight="1"
                         android:gravity="end"
                         android:text="Trống"
-                        android:textColor="@color/theme_text_secondary"
+                        android:textColor="@color/theme_text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardDependency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/theme_surface_variant"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/theme_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <ImageView
+                        android:id="@+id/ivDependency"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_task_alt"
+                        app:tint="@color/theme_text_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Phụ thuộc task"
+                        android:textColor="@color/theme_text_primary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/tvDependency"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="Không có"
+                        android:textColor="@color/theme_text_primary"
                         android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -648,17 +692,17 @@
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/task_activity_comments_tab" />
+                    android:text="Bình luận" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/task_activity_history_tab" />
+                    android:text="Lịch sử" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/task_activity_time_tab" />
+                    android:text="Thời gian" />
             </com.google.android.material.tabs.TabLayout>
 
             <FrameLayout
@@ -686,7 +730,7 @@
                             android:layout_height="24dp"
                             android:src="@drawable/ic_person"
                             android:background="@drawable/bg_circle_outline"
-                            app:tint="@color/theme_text_hint"/>
+                            app:tint="@color/theme_text_primary"/>
 
                         <EditText
                             android:id="@+id/etCommentInput"
@@ -695,12 +739,12 @@
                             android:layout_weight="1"
                             android:layout_marginStart="8dp"
                             android:background="@null"
-                            android:hint="@string/task_comment_hint"
+                            android:hint="Viết bình luận..."
                             android:inputType="textCapSentences|textMultiLine"
                             android:maxLines="4"
                             android:minHeight="40dp"
                             android:textColor="@color/theme_text_primary"
-                            android:textColorHint="@color/theme_text_hint"
+                            android:textColorHint="@color/theme_text_primary"
                             android:textSize="13sp" />
 
                         <ImageView
@@ -746,8 +790,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:gravity="center"
-                        android:text="@string/task_history_empty_activity"
-                        android:textColor="@color/theme_text_hint"
+                        android:text="Chưa có lịch sử hoạt động."
+                        android:textColor="@color/theme_text_primary"
                         android:textSize="13sp"
                         android:visibility="gone" />
                 </LinearLayout>
@@ -758,45 +802,145 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingHorizontal="16dp"
-                    android:paddingTop="8dp"
+                    android:paddingTop="12dp"
                     android:paddingBottom="24dp"
                     android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/tvPomodoroState"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Focus mode"
-                        android:textColor="@color/theme_text_secondary"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
+                        app:cardBackgroundColor="@color/theme_surface_variant"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/theme_border"
+                        app:strokeWidth="1dp">
 
-                    <TextView
-                        android:id="@+id/tvWorklogTotal"
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:src="@drawable/ic_timer"
+                                    app:tint="@color/primary" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="10dp"
+                                    android:text="Tổng quan thời gian"
+                                    android:textColor="@color/theme_text_primary"
+                                    android:textSize="17sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tvWorklogSummary"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="14dp"
+                                android:text="Đã tốn: 0m • Còn lại: 0m"
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvWorklogTotal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Tổng cộng: 0m"
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:text="@string/task_total_time_format"
-                        android:textColor="@color/theme_text_primary"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
+                        app:cardBackgroundColor="@color/theme_surface_variant"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/theme_border"
+                        app:strokeWidth="1dp">
 
-                    <TextView
-                        android:id="@+id/tvWorklogEntries"
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:src="@drawable/ic_history"
+                                    app:tint="@color/warning" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="10dp"
+                                    android:text="Nhật ký làm việc"
+                                    android:textColor="@color/theme_text_primary"
+                                    android:textSize="17sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tvWorklogEntries"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="14dp"
+                                android:text="Chưa ghi nhận thời gian làm việc."
+                                android:textColor="@color/theme_text_primary"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:id="@+id/btnEditWorklog"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/task_worklog_empty"
-                        android:textColor="@color/theme_text_hint"
-                        android:textSize="13sp" />
+                        android:layout_height="52dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_input"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/task_focus_help"
-                        android:textColor="@color/theme_text_hint"
-                        android:textSize="13sp" />
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_edit"
+                            app:tint="@color/theme_text_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Cập nhật Work Log"
+                            android:textColor="@color/theme_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>
@@ -808,8 +952,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/spacing_lg"
-        android:layout_marginBottom="184dp"
-        android:text="@string/task_focus_start"
+        android:layout_marginBottom="152dp"
+        android:text="Start Focus"
         android:textStyle="bold"
         android:textColor="@color/white"
         android:visibility="gone"
@@ -827,7 +971,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/spacing_lg"
-        android:layout_marginBottom="248dp"
+        android:layout_marginBottom="88dp"
         android:contentDescription="@string/task_add_subtask"
         android:visibility="gone"
         app:backgroundTint="@color/primary"

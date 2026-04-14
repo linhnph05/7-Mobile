@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
@@ -133,6 +134,7 @@ public class TaskDetailActivity extends BaseActivity {
     private TextView tvPomodoroState;
     private TextView tvWorklogTotal;
     private TextView tvWorklogEntries;
+    private TextView tvWorklogSummary;
     private View fabFocusMode;
     private ActivityResultLauncher<Intent> focusModeLauncher;
 
@@ -281,9 +283,14 @@ public class TaskDetailActivity extends BaseActivity {
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
         btnSendComment = findViewById(R.id.btnSendComment);
-        tvPomodoroState = findViewById(R.id.tvPomodoroState);
+//        tvPomodoroState = findViewById(R.id.tvPomodoroState);
         tvWorklogTotal = findViewById(R.id.tvWorklogTotal);
+        tvWorklogSummary = findViewById(R.id.tvWorklogSummary);
         tvWorklogEntries = findViewById(R.id.tvWorklogEntries);
+        View btnEditWorklog = findViewById(R.id.btnEditWorklog);
+        if (btnEditWorklog != null) {
+            btnEditWorklog.setOnClickListener(v -> showEditWorkLogDialog());
+        }
         fabFocusMode = findViewById(R.id.fabFocusMode);
 
         Intent intent = getIntent();
@@ -639,6 +646,91 @@ public class TaskDetailActivity extends BaseActivity {
         refreshWorkLogUi();
     }
 
+    private void showEditWorkLogDialog() {
+        if (taskId == null || taskId <= 0) {
+            Toast.makeText(this, getString(R.string.task_not_found), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_work_log, null);
+        EditText etTimeSpent = dialogView.findViewById(R.id.etWorklogTimeSpent);
+        EditText etDescription = dialogView.findViewById(R.id.etWorklogDescription);
+
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Cập nhật Work Log")
+            .setView(dialogView)
+            .setPositiveButton(R.string.task_save, (dialog, which) -> {
+                String timeText = etTimeSpent.getText().toString().trim();
+                String descText = etDescription != null ? etDescription.getText().toString().trim() : "";
+                
+                long durationMs = parseDurationToMs(timeText);
+                if (durationMs <= 0) {
+                    Toast.makeText(this, "Thời gian không hợp lệ. Vui lòng nhập định dạng 2h 30m", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
+                long currentTotal = prefs.getLong(worklogTotalKey(taskId), 0L);
+                
+                JSONArray entries = readWorklogEntries(prefs, taskId);
+                JSONObject newEntry = new JSONObject();
+                long now = System.currentTimeMillis();
+                try {
+                    newEntry.put("started_at", now - durationMs);
+                    newEntry.put("ended_at", now);
+                    newEntry.put("duration_ms", durationMs);
+                    newEntry.put("completed", true);
+                    newEntry.put("description", descText);
+                    entries.put(newEntry);
+                } catch (Exception ignored) {}
+
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong(worklogTotalKey(taskId), currentTotal + durationMs);
+                editor.putString(worklogLogsKey(taskId), entries.toString());
+                editor.apply();
+
+                String currentUserId = com.team7.taskflow.utils.SessionManager.getUserId();
+                if (currentUserId != null && taskId != null) {
+                    taskRepository.addWorkLog(taskId, currentUserId, now - durationMs, durationMs, descText, new TaskRepository.TaskCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            Log.d("WorkLog", "Synced to Supabase successfully.");
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("WorkLog", "Sync failed: " + error);
+                        }
+                    });
+                }
+
+                refreshWorkLogUi();
+                Toast.makeText(this, "Đã cập nhật work log", Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
+    }
+
+    private long parseDurationToMs(String timeStr) {
+        if (timeStr == null || timeStr.isEmpty()) return 0;
+        long totalMs = 0;
+        String[] parts = timeStr.toLowerCase().split("\\s+");
+        for (String part : parts) {
+            try {
+                if (part.endsWith("h")) {
+                    totalMs += Long.parseLong(part.replace("h", "")) * 3600000L;
+                } else if (part.endsWith("m")) {
+                    totalMs += Long.parseLong(part.replace("m", "")) * 60000L;
+                } else if (part.endsWith("d")) {
+                    totalMs += Long.parseLong(part.replace("d", "")) * 86400000L;
+                } else if (part.endsWith("w")) {
+                    totalMs += Long.parseLong(part.replace("w", "")) * 604800000L;
+                }
+            } catch (Exception ignored) {}
+        }
+        return totalMs;
+    }
+
     private void openFocusMode() {
         if (taskId == null || taskId <= 0) {
             Toast.makeText(this, getString(R.string.task_not_found), Toast.LENGTH_SHORT).show();
@@ -675,7 +767,8 @@ public class TaskDetailActivity extends BaseActivity {
         }
 
         if (taskId == null) {
-            if (tvWorklogTotal != null) tvWorklogTotal.setText("Total tracked: 0m");
+            if (tvWorklogTotal != null) tvWorklogTotal.setText("Tổng cộng: 0m");
+            if (tvWorklogSummary != null) tvWorklogSummary.setText("Đã tốn: 0m • Còn lại: 0m");
             if (tvWorklogEntries != null) tvWorklogEntries.setText(getString(R.string.task_worklog_empty));
             return;
         }
@@ -683,7 +776,11 @@ public class TaskDetailActivity extends BaseActivity {
         SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
         long totalMs = prefs.getLong(worklogTotalKey(taskId), 0L);
         if (tvWorklogTotal != null) {
-            tvWorklogTotal.setText("Total tracked: " + formatDurationCompact(totalMs));
+            tvWorklogTotal.setText("Tổng cộng: " + formatDurationCompact(totalMs));
+        }
+        
+        if (tvWorklogSummary != null) {
+            tvWorklogSummary.setText("Đã tốn: " + formatDurationCompact(totalMs) + " • Còn lại: ---");
         }
 
         if (tvWorklogEntries != null) {
@@ -738,7 +835,9 @@ public class TaskDetailActivity extends BaseActivity {
             boolean completed = obj.optBoolean("completed", false);
             String startText = startedAt > 0 ? timeFormat.format(new Date(startedAt)) : "-";
             String endText = endedAt > 0 ? timeFormat.format(new Date(endedAt)) : "-";
-            String outcome = completed ? "done" : "not done";
+            String outcome = completed ? "Hoàn thành" : "Chưa xong";
+            String description = obj.optString("description", "").trim();
+            
             builder.append("• ")
                     .append(startText)
                     .append(" -> ")
@@ -748,8 +847,13 @@ public class TaskDetailActivity extends BaseActivity {
                     .append("  (")
                     .append(outcome)
                     .append(")");
+                    
+            if (!description.isEmpty()) {
+                builder.append("\n    Mô tả: ").append(description);
+            }
+            
             if (i > 0) {
-                builder.append("\n");
+                builder.append("\n\n");
             }
         }
         return builder.toString();
@@ -1311,7 +1415,7 @@ public class TaskDetailActivity extends BaseActivity {
         int colorRes;
         if ("DONE".equals(status)) { colorRes = R.color.success; tvStatus.setText(R.string.task_status_done); }
         else if ("DOING".equals(status)) { colorRes = R.color.warning; tvStatus.setText(R.string.task_status_in_progress); }
-        else { colorRes = R.color.slate_700; tvStatus.setText(R.string.task_status_todo); }
+        else { colorRes = R.color.theme_text_primary; tvStatus.setText(R.string.task_status_todo); }
         setActive(cardStatus, tvStatus, ivStatus, colorRes);
     }
 

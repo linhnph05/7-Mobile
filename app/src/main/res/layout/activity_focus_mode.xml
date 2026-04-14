@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_focus_mode_gradient"
+    android:background="@color/theme_background"
     android:padding="24dp">
 
     <TextView
         android:id="@+id/tvFocusState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Deep focus mode"
+        android:text="Chế độ tập trung"
         android:textColor="@color/primary"
         android:textSize="15sp"
         android:textStyle="bold"
@@ -30,7 +30,7 @@
         android:gravity="center"
         android:maxLines="2"
         android:ellipsize="end"
-        android:text="Task"
+        tools:text="Tên công việc"
         android:textColor="@color/theme_text_primary"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -57,7 +57,7 @@
             app:indicatorSize="260dp"
             app:trackThickness="14dp"
             app:indicatorColor="@color/primary"
-        app:trackColor="@color/slate_200"
+            app:trackColor="@color/theme_divider"
             android:indeterminate="false" />
 
         <TextView
@@ -79,7 +79,7 @@
         android:gravity="center"
         android:maxLines="3"
         android:ellipsize="end"
-        android:textColor="@color/slate_700"
+        android:textColor="@color/theme_text_secondary"
         android:textSize="15sp"
         app:layout_constraintTop_toBottomOf="@id/layoutCircle"
         app:layout_constraintStart_toStartOf="parent"
@@ -92,8 +92,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:gravity="center"
-        android:text="Stay on this screen and focus until the timer ends."
-        android:textColor="@color/slate_500"
+        android:text="Hãy giữ nguyên màn hình và tập trung cho đến khi hết giờ."
+        android:textColor="@color/theme_text_primary"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/tvFocusTaskDescription"
         app:layout_constraintStart_toStartOf="parent"
@@ -106,7 +106,7 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/bg_focus_stop_button"
         android:gravity="center"
-        android:text="Stop counting"
+        android:text="Kết thúc"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"

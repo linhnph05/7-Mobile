@@ -1090,4 +1090,34 @@ public class TaskRepository {
                     }
                 });
     }
+
+    public void addWorkLog(long taskId, String userId, long startTime, long durationMs, String note, TaskCallback<Void> callback) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("task_id", taskId);
+        body.put("user_id", userId);
+        
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+        format.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        body.put("start_time", format.format(new java.util.Date(startTime)));
+        body.put("end_time", format.format(new java.util.Date(startTime + durationMs)));
+        body.put("duration_minutes", (int)(durationMs / 60000));
+        body.put("note", note);
+
+        taskApi.addWorkLog(body, "return=minimal")
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            callback.onSuccess(null);
+                        } else {
+                            callback.onError("Failed to add work log: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
+    }
 }
