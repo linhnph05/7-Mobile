@@ -1091,7 +1091,7 @@ public class TaskRepository {
                 });
     }
 
-    public void addWorkLog(long taskId, String userId, long startTime, long durationMs, String note, TaskCallback<Void> callback) {
+    public void addWorkLog(long taskId, String userId, long startTime, long durationMs, long remainingMs, String note, TaskCallback<Void> callback) {
         Map<String, Object> body = new HashMap<>();
         body.put("task_id", taskId);
         body.put("user_id", userId);
@@ -1101,6 +1101,7 @@ public class TaskRepository {
         body.put("start_time", format.format(new java.util.Date(startTime)));
         body.put("end_time", format.format(new java.util.Date(startTime + durationMs)));
         body.put("duration_minutes", (int)(durationMs / 60000));
+        body.put("remaining_minutes", (int)(remainingMs / 60000));
         body.put("note", note);
 
         taskApi.addWorkLog(body, "return=minimal")

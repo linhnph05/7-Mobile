@@ -654,6 +654,7 @@ public class TaskDetailActivity extends BaseActivity {
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_work_log, null);
         EditText etTimeSpent = dialogView.findViewById(R.id.etWorklogTimeSpent);
+        EditText etTimeRemaining = dialogView.findViewById(R.id.etWorklogTimeRemaining);
         EditText etDescription = dialogView.findViewById(R.id.etWorklogDescription);
 
         new MaterialAlertDialogBuilder(this)
@@ -661,11 +662,13 @@ public class TaskDetailActivity extends BaseActivity {
             .setView(dialogView)
             .setPositiveButton(R.string.task_save, (dialog, which) -> {
                 String timeText = etTimeSpent.getText().toString().trim();
+                String remainText = etTimeRemaining != null ? etTimeRemaining.getText().toString().trim() : "";
                 String descText = etDescription != null ? etDescription.getText().toString().trim() : "";
                 
                 long durationMs = parseDurationToMs(timeText);
+                long remainingMs = parseDurationToMs(remainText);
                 if (durationMs <= 0) {
-                    Toast.makeText(this, "Thời gian không hợp lệ. Vui lòng nhập định dạng 2h 30m", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Thời gian đã tốn không hợp lệ. Vui lòng nhập định dạng 2h 30m", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 
@@ -679,6 +682,7 @@ public class TaskDetailActivity extends BaseActivity {
                     newEntry.put("started_at", now - durationMs);
                     newEntry.put("ended_at", now);
                     newEntry.put("duration_ms", durationMs);
+                    newEntry.put("remaining_minutes", remainingMs / 60000);
                     newEntry.put("completed", true);
                     newEntry.put("description", descText);
                     entries.put(newEntry);
@@ -691,7 +695,7 @@ public class TaskDetailActivity extends BaseActivity {
 
                 String currentUserId = com.team7.taskflow.utils.SessionManager.getUserId();
                 if (currentUserId != null && taskId != null) {
-                    taskRepository.addWorkLog(taskId, currentUserId, now - durationMs, durationMs, descText, new TaskRepository.TaskCallback<Void>() {
+                    taskRepository.addWorkLog(taskId, currentUserId, now - durationMs, durationMs, remainingMs, descText, new TaskRepository.TaskCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             Log.d("WorkLog", "Synced to Supabase successfully.");
@@ -779,8 +783,18 @@ public class TaskDetailActivity extends BaseActivity {
             tvWorklogTotal.setText("Tổng cộng: " + formatDurationCompact(totalMs));
         }
         
+        long remainingMs = 0;
+        JSONArray entries = readWorklogEntries(prefs, taskId);
+        if (entries.length() > 0) {
+            JSONObject lastEntry = entries.optJSONObject(entries.length() - 1);
+            if (lastEntry != null) {
+                remainingMs = lastEntry.optLong("remaining_minutes", 0L) * 60000;
+            }
+        }
+        
         if (tvWorklogSummary != null) {
-            tvWorklogSummary.setText("Đã tốn: " + formatDurationCompact(totalMs) + " • Còn lại: ---");
+            String remainStr = remainingMs > 0 ? formatDurationCompact(remainingMs) : "---";
+            tvWorklogSummary.setText("Đã tốn: " + formatDurationCompact(totalMs) + " • Còn lại: " + remainStr);
         }
 
         if (tvWorklogEntries != null) {
