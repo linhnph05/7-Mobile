@@ -79,7 +79,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         });
     }
 
-    private void refreshAll(Context context) {
+    public static void refreshAll(Context context) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         ComponentName provider = new ComponentName(context, TaskTodayWidgetProvider.class);
         int[] ids = manager.getAppWidgetIds(provider);
@@ -87,7 +87,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         TaskTodaySummaryWidgetProvider.refreshAll(context);
     }
 
-    private void updateWidgets(Context context, AppWidgetManager manager, int[] ids) {
+    private static void updateWidgets(Context context, AppWidgetManager manager, int[] ids) {
         String userId = SessionManager.getUserId();
         TaskRepository.getInstance().getMyTasksWithProjectName(userId, new TaskRepository.TaskCallback<List<Task>>() {
             @Override
@@ -95,8 +95,11 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
                 List<Task> recentOpen = filterRecentOpenTasks(result);
                 for (int appWidgetId : ids) {
                     RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_today_tasks);
-                    views.setTextViewText(R.id.tvWidgetCount, recentOpen.size() + " RECENT");
+                    views.setTextViewText(R.id.tvWidgetCount,
+                            context.getString(R.string.widget_recent_count_format, recentOpen.size()));
                     views.setViewVisibility(R.id.btnWidgetReload, android.view.View.VISIBLE);
+                    views.setViewVisibility(R.id.tvWidgetEmpty,
+                            recentOpen.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
                     bindRow(context, views, recentOpen, 0, appWidgetId, R.id.rowTask1, R.id.ivState1, R.id.tvTask1, R.id.tvMeta1);
                     bindRow(context, views, recentOpen, 1, appWidgetId, R.id.rowTask2, R.id.ivState2, R.id.tvTask2, R.id.tvMeta2);
                     bindRow(context, views, recentOpen, 2, appWidgetId, R.id.rowTask3, R.id.ivState3, R.id.tvTask3, R.id.tvMeta3);
@@ -118,12 +121,14 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
             public void onError(String error) {
                 for (int appWidgetId : ids) {
                     RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_today_tasks);
-                    views.setTextViewText(R.id.tvWidgetCount, "0 RECENT");
+                    views.setTextViewText(R.id.tvWidgetCount,
+                        context.getString(R.string.widget_recent_count_format, 0));
                     views.setViewVisibility(R.id.btnWidgetReload, android.view.View.VISIBLE);
-                    views.setTextViewText(R.id.tvTask1, context.getString(R.string.widget_error));
-                    views.setTextViewText(R.id.tvMeta1, "-");
+                    views.setViewVisibility(R.id.tvWidgetEmpty, android.view.View.VISIBLE);
+                    views.setTextViewText(R.id.tvWidgetEmpty, context.getString(R.string.widget_error));
                     views.setViewVisibility(R.id.rowTask2, android.view.View.GONE);
                     views.setViewVisibility(R.id.rowTask3, android.view.View.GONE);
+                    views.setViewVisibility(R.id.rowTask1, android.view.View.GONE);
 
                     PendingIntent reloadPending = buildReloadPendingIntent(context, appWidgetId);
                     views.setOnClickPendingIntent(R.id.btnWidgetReload, reloadPending);
@@ -134,7 +139,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         });
     }
 
-    private PendingIntent buildReloadPendingIntent(Context context, int appWidgetId) {
+    private static PendingIntent buildReloadPendingIntent(Context context, int appWidgetId) {
         Intent reloadIntent = new Intent(context, TaskTodayWidgetProvider.class);
         reloadIntent.setAction(ACTION_RELOAD);
         return PendingIntent.getBroadcast(
@@ -144,7 +149,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private List<Task> filterRecentOpenTasks(List<Task> tasks) {
+    private static List<Task> filterRecentOpenTasks(List<Task> tasks) {
         List<Task> filtered = new ArrayList<>();
         if (tasks == null) return filtered;
 
@@ -160,7 +165,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         return filtered;
     }
 
-    private boolean isTaskInTodayRange(LocalDate today, LocalDate startDate, LocalDate dueDate) {
+    private static boolean isTaskInTodayRange(LocalDate today, LocalDate startDate, LocalDate dueDate) {
         if (today == null) {
             return false;
         }
@@ -180,7 +185,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         return false;
     }
 
-    private LocalDate parseLocalDate(String raw) {
+    private static LocalDate parseLocalDate(String raw) {
         if (raw == null || raw.trim().isEmpty()) {
             return null;
         }
@@ -211,7 +216,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         return null;
     }
 
-    private void bindRow(Context context,
+    private static void bindRow(Context context,
             RemoteViews views,
             List<Task> tasks,
             int index,
@@ -247,7 +252,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
             views.setOnClickPendingIntent(checkId, donePending);
     }
 
-    private String mapPriorityLabel(String rawPriority) {
+    private static String mapPriorityLabel(String rawPriority) {
         if (rawPriority == null || rawPriority.trim().isEmpty()) {
             return "MEDIUM";
         }

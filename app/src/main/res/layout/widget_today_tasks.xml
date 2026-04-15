@@ -32,7 +32,7 @@
             android:paddingTop="4dp"
             android:paddingRight="8dp"
             android:paddingBottom="4dp"
-            android:text="0 TODAY"
+            android:text="@string/widget_recent_count_format"
             android:textColor="#2B82F8"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -53,6 +53,17 @@
                 android:textStyle="bold"
                 android:visibility="visible" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvWidgetEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:gravity="center"
+        android:text="@string/widget_recent_empty"
+        android:textColor="#7E8EA6"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/rowTask1"

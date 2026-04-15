@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="0%"
+            android:text="@string/widget_summary_percent_placeholder"
             android:textColor="#2B82F8"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -40,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="0 Tasks Left"
+        android:text="@string/widget_summary_count_placeholder"
         android:textColor="#E6EEF9"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="TODAY"
+        android:text="@string/widget_summary_subtitle"
         android:textColor="#7E8EA6"
         android:textSize="13sp"
         android:textStyle="bold" />

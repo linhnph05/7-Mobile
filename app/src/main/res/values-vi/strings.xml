@@ -339,6 +339,15 @@
     <string name="ai_create_desc_hint">Mô tả tác vụ (tùy chọn)</string>
     <string name="ai_create_badge">✨ Tạo task với AI</string>
 
+    <string name="widget_recent_count_format">%1$d GẦN ĐÂY</string>
+    <string name="widget_recent_empty">Không có task gần đây</string>
+
+    <string name="widget_summary_percent_placeholder">0%</string>
+    <string name="widget_summary_count_placeholder">0 task còn lại</string>
+    <string name="widget_summary_subtitle">HÔM NAY</string>
+    <string name="widget_summary_percent_format">%1$d%%</string>
+    <string name="widget_summary_count_format">%1$d task còn lại</string>
+
     <string name="project_settings_key_format">KEY: %1$s</string>
     <string name="project_settings_key_na">N/A</string>
     <string name="project_settings_action_pin">Ghim</string>
