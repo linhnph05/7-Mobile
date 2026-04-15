@@ -20,13 +20,13 @@ import okhttp3.Response;
 
 /**
  * Service to call Gemini API for natural language → structured Task parsing.
- * Uses OkHttp directly (separate from Supabase client) to call Google's Gemini REST API.
+ * Uses OkHttp directly (separate from Supabase client) to call Google's Gemini
+ * REST API.
  */
 public class AiService {
 
     private static final String TAG = "AiService";
-    private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent";
+    private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent";
 
     private static AiService instance;
     private final OkHttpClient client;
@@ -48,7 +48,8 @@ public class AiService {
     /**
      * Parse a natural language prompt into structured task fields.
      */
-    public void parsePrompt(String prompt, String membersCsv, String tagsCsv, String parentTaskTitle, AiCallback callback) {
+    public void parsePrompt(String prompt, String membersCsv, String tagsCsv, String parentTaskTitle,
+            AiCallback callback) {
         String apiKey = BuildConfig.GEMINI_API_KEY;
         if (apiKey == null || apiKey.isEmpty() || apiKey.equals("PASTE_YOUR_GEMINI_KEY_HERE")) {
             callback.onError("GEMINI_API_KEY not configured");
@@ -56,7 +57,7 @@ public class AiService {
         }
 
         String systemPrompt = buildSystemPrompt(membersCsv, tagsCsv, parentTaskTitle);
-// ... existing code for building JSON ...
+        // ... existing code for building JSON ...
         try {
             JSONObject requestJson = new JSONObject();
 
@@ -86,8 +87,7 @@ public class AiService {
             String url = GEMINI_URL + "?key=" + apiKey;
             RequestBody body = RequestBody.create(
                     requestJson.toString(),
-                    MediaType.parse("application/json; charset=utf-8")
-            );
+                    MediaType.parse("application/json; charset=utf-8"));
 
             Request request = new Request.Builder()
                     .url(url)
@@ -118,7 +118,8 @@ public class AiService {
                             return;
                         }
                         JSONObject candidate = json.getJSONArray("candidates").getJSONObject(0);
-                        String text = candidate.getJSONObject("content").getJSONArray("parts").getJSONObject(0).getString("text");
+                        String text = candidate.getJSONObject("content").getJSONArray("parts").getJSONObject(0)
+                                .getString("text");
                         text = cleanJsonString(text);
                         JSONObject parsed = new JSONObject(text);
                         ParsedTask result = new ParsedTask();
@@ -150,16 +151,19 @@ public class AiService {
 
     private String buildSystemPrompt(String membersCsv, String tagsCsv, String parentTitle) {
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, yyyy-MM-dd HH:mm", java.util.Locale.ENGLISH);
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, yyyy-MM-dd HH:mm",
+                java.util.Locale.ENGLISH);
         String currentDateTime = sdf.format(cal.getTime());
 
         StringBuilder sb = new StringBuilder();
         sb.append("You are a task extraction assistant for 'TaskFlow'. ");
-        sb.append("The user writes in Vietnamese or English. Extract ONLY what is explicitly stated or clearly implied.\n\n");
+        sb.append(
+                "The user writes in Vietnamese or English. Extract ONLY what is explicitly stated or clearly implied.\n\n");
 
         // Core principle
         sb.append("## GOLDEN RULE\n");
-        sb.append("Do NOT guess or fabricate. If the user does not mention something, leave the field as empty string \"\".\n");
+        sb.append(
+                "Do NOT guess or fabricate. If the user does not mention something, leave the field as empty string \"\".\n");
         sb.append("Only fill a field if you are confident the user intended it.\n\n");
 
         // Available values
@@ -175,17 +179,24 @@ public class AiService {
 
         // Field-by-field rules
         sb.append("## FIELD RULES\n");
-        sb.append("- title: Short, actionable summary. Do NOT copy the entire input. E.g. 'Đi chợ mua rau cho mẹ' → 'Mua rau'.\n");
-        sb.append("- description: Provide helpful context or details ONLY if the user's input contains extra info beyond the title. ");
+        sb.append(
+                "- title: Short, actionable summary. Do NOT copy the entire input. E.g. 'Đi chợ mua rau cho mẹ' → 'Mua rau'.\n");
+        sb.append(
+                "- description: Provide helpful context or details ONLY if the user's input contains extra info beyond the title. ");
         sb.append("Do NOT just repeat the title. If there is nothing extra to say, leave it as \"\".\n");
-        sb.append("- priority: Set ONLY if the user explicitly mentions urgency (gấp, khẩn, quan trọng → HIGH; chậm, khi nào rảnh → LOW). ");
+        sb.append(
+                "- priority: Set ONLY if the user explicitly mentions urgency (gấp, khẩn, quan trọng → HIGH; chậm, khi nào rảnh → LOW). ");
         sb.append("Otherwise leave as \"\".\n");
-        sb.append("- assignee_name: Set ONLY if the user explicitly names a person AND that person is in the Members list. Otherwise \"\".\n");
-        sb.append("- tag: Set ONLY if the user's task clearly relates to a tag (e.g. fix bug → Bug, code API → Backend, thiết kế → Design). ");
+        sb.append(
+                "- assignee_name: Set ONLY if the user explicitly names a person AND that person is in the Members list. Otherwise \"\".\n");
+        sb.append(
+                "- tag: Set ONLY if the user's task clearly relates to a tag (e.g. fix bug → Bug, code API → Backend, thiết kế → Design). ");
         sb.append("Do NOT guess. Otherwise \"\".\n");
-        sb.append("- start_date / due_date: Set ONLY if the user mentions a specific time/date (ngày mai, chiều nay, thứ 2, 15/4...). ");
+        sb.append(
+                "- start_date / due_date: Set ONLY if the user mentions a specific time/date (ngày mai, chiều nay, thứ 2, 15/4...). ");
         sb.append("Use ISO 8601 format (yyyy-MM-ddTHH:mm:ss). If only one date is mentioned, put it in due_date. ");
-        sb.append("IMPORTANT: due_date MUST be after start_date. If both are the same day, due_date's time must be later. ");
+        sb.append(
+                "IMPORTANT: due_date MUST be after start_date. If both are the same day, due_date's time must be later. ");
         sb.append("If no time/date is mentioned at all, leave both as \"\".\n\n");
 
         // JSON schema

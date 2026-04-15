@@ -88,7 +88,7 @@ public interface TaskApi {
      */
     @POST("tasks")
     Call<List<Task>> createTask(
-            @Body Task task,
+            @Body Map<String, Object> task,
             @Header("Prefer") String prefer
     );
 

@@ -58,7 +58,10 @@ public class TaskRepository {
     // ── Create ──────────────────────────────────────────────────────────
 
     public void createTask(Task task, TaskCallback<Task> callback) {
-        Task payload = buildCreatePayload(task);
+        Map<String, Object> payload = getTaskMap(task);
+        // Bổ sung các trường bắt buộc cho việc tạo mới mà getTaskMap có thể thiếu
+        payload.put("project_id", task.getProjectId());
+        
         taskApi.createTask(payload, SupabaseConfig.PREFER_RETURN_REPRESENTATION)
                 .enqueue(new Callback<List<Task>>() {
                     @Override
@@ -67,7 +70,7 @@ public class TaskRepository {
                             Task created = response.body().get(0);
                             callback.onSuccess(created);
                         } else {
-                            callback.onError("Failed to create task: " + response.code());
+                            callback.onError("Failed to create task: " + buildApiError("create_task", response));
                         }
                     }
 
@@ -886,16 +889,14 @@ public class TaskRepository {
         Map<String, Object> map = new HashMap<>();
         if (task.getTitle() != null)
             map.put("title", task.getTitle());
-        if (task.getDescription() != null)
-            map.put("description", task.getDescription());
-        if (task.getStatus() != null)
-            map.put("status", task.getStatus());
-        if (task.getPriority() != null)
-            map.put("priority", task.getPriority());
+            
+        map.put("description", normalizeNullableText(task.getDescription()));
+        map.put("status", normalizeNullableText(task.getStatus()));
+        map.put("priority", normalizeNullableText(task.getPriority()));
+        
         if (task.getPosition() != null)
             map.put("position", task.getPosition());
-        // Optional fields used by detail/edit screens – always send them so
-        // clearing values (null) is reflected in Supabase
+            
         map.put("due_date", normalizeTimestamp(task.getDueDate()));
         map.put("start_date", normalizeTimestamp(task.getStartDate()));
         map.put("assignee_id", normalizeUuid(task.getAssigneeId()));
