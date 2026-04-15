@@ -30,7 +30,7 @@ public class TaskTodaySummaryWidgetProvider extends AppWidgetProvider {
         updateWidgets(context, appWidgetManager, appWidgetIds);
     }
 
-    static void refreshAll(Context context) {
+    public static void refreshAll(Context context) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         ComponentName provider = new ComponentName(context, TaskTodaySummaryWidgetProvider.class);
         int[] ids = manager.getAppWidgetIds(provider);
@@ -57,8 +57,10 @@ public class TaskTodaySummaryWidgetProvider extends AppWidgetProvider {
 
                 for (int appWidgetId : ids) {
                     RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_today_summary_2x2);
-                    views.setTextViewText(R.id.tvSummaryPercent, percent + "%");
-                    views.setTextViewText(R.id.tvSummaryCount, remaining + " Tasks Left");
+                    views.setTextViewText(R.id.tvSummaryPercent,
+                        context.getString(R.string.widget_summary_percent_format, percent));
+                    views.setTextViewText(R.id.tvSummaryCount,
+                        context.getString(R.string.widget_summary_count_format, remaining));
                     views.setProgressBar(R.id.pbSummaryProgress, 100, percent, false);
 
                     Intent openIntent = new Intent(context, DashboardActivity.class);
@@ -77,8 +79,10 @@ public class TaskTodaySummaryWidgetProvider extends AppWidgetProvider {
             public void onError(String error) {
                 for (int appWidgetId : ids) {
                     RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_today_summary_2x2);
-                    views.setTextViewText(R.id.tvSummaryPercent, "0%");
-                    views.setTextViewText(R.id.tvSummaryCount, "0 Tasks Left");
+                    views.setTextViewText(R.id.tvSummaryPercent,
+                            context.getString(R.string.widget_summary_percent_format, 0));
+                    views.setTextViewText(R.id.tvSummaryCount,
+                            context.getString(R.string.widget_summary_count_format, 0));
                     views.setProgressBar(R.id.pbSummaryProgress, 100, 0, false);
                     manager.updateAppWidget(appWidgetId, views);
                 }

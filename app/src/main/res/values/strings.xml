@@ -457,6 +457,13 @@
     <!-- ==================== -->
     <string name="widget_today_title">3 việc cần làm hôm nay</string>
     <string name="widget_recent_title">Recent Tasks</string>
+    <string name="widget_recent_count_format">%1$d RECENT</string>
+    <string name="widget_recent_empty">No recent tasks</string>
+    <string name="widget_summary_percent_placeholder">0%</string>
+    <string name="widget_summary_count_placeholder">0 Tasks Left</string>
+    <string name="widget_summary_subtitle">TODAY</string>
+    <string name="widget_summary_percent_format">%1$d%%</string>
+    <string name="widget_summary_count_format">%1$d Tasks Left</string>
     <string name="widget_mark_done">Hoàn thành</string>
     <string name="widget_today_desc">Hiển thị 3 việc cần làm hôm nay và tick Done nhanh</string>
     <string name="widget_recent_desc">Hiển thị 3 task trong ngày theo giao diện recent tasks</string>
