@@ -193,7 +193,7 @@ public class ProjectDetailActivity extends BaseActivity {
     private void initViews() {
         tvProjectName = findViewById(R.id.tvProjectName);
         tvProjectDescription = findViewById(R.id.tvProjectDescription);
-        
+
         tabOverview = findViewById(R.id.tabOverview);
         tabBoard = findViewById(R.id.tabBoard);
         tabList = findViewById(R.id.tabList);
@@ -706,12 +706,11 @@ public class ProjectDetailActivity extends BaseActivity {
     // Project Settings Panel
     // ─────────────────────────────────────────────────────────────────────────
     private void showProjectSettingsPanel() {
-        BottomSheetDialog bottomSheet = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
-        View sheetView = getLayoutInflater()
-                .inflate(R.layout.layout_project_settings_panel, null);
-        bottomSheet.setContentView(sheetView);
+        BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        View sheetView = getLayoutInflater().inflate(R.layout.layout_project_settings_panel, null);
+        dialog.setContentView(sheetView);
 
-        android.widget.FrameLayout bsl = bottomSheet
+        android.widget.FrameLayout bsl = dialog
                 .findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (bsl != null) {
             com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -721,7 +720,12 @@ public class ProjectDetailActivity extends BaseActivity {
                     .from(bsl).setSkipCollapsed(true);
         }
 
-        // Action Buttons (Pin, Share)
+        populateProjectSettingsPanel(sheetView, dialog);
+        dialog.show();
+    }
+
+    private void populateProjectSettingsPanel(View sheetView, BottomSheetDialog dialog) {
+        // 1. Action Buttons (Pin, Share)
         View btnActionPin = sheetView.findViewById(R.id.btnActionPin);
         CardView cdPinBackground = sheetView.findViewById(R.id.cdPinBackground);
         ImageView ivPinIcon = sheetView.findViewById(R.id.ivPinIcon);
@@ -737,12 +741,12 @@ public class ProjectDetailActivity extends BaseActivity {
                 boolean newValue = !currentlyPinned;
                 prefsManager.setProjectPinned(projectId, newValue);
                 updatePinStatusUI(newValue, cdPinBackground, ivPinIcon, tvPinLabel);
-                
-                // Hiệu ứng scale nhẹ cho nút ghim khi nhấn
+
                 if (cdPinBackground != null) {
                     cdPinBackground.animate().scaleX(1.1f).scaleY(1.1f).setDuration(100)
-                        .withEndAction(() -> cdPinBackground.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start())
-                        .start();
+                            .withEndAction(
+                                    () -> cdPinBackground.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start())
+                            .start();
                 }
 
                 String message = newValue ? getString(R.string.project_pinned_success)
@@ -763,7 +767,7 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        // Project Info views
+        // 2. Project Info views
         TextView tvNameDisplay = sheetView.findViewById(R.id.tvProjectNameDisplay);
         TextView tvDescDisplay = sheetView.findViewById(R.id.tvProjectDescDisplay);
         TextView tvKey = sheetView.findViewById(R.id.tvProjectKey);
@@ -778,7 +782,7 @@ public class ProjectDetailActivity extends BaseActivity {
                 tvDescDisplay.setText(projectDesc);
                 tvDescDisplay.setAlpha(1.0f);
             } else {
-                tvDescDisplay.setText("Hãy thêm mô tả cho project");
+                tvDescDisplay.setText("Hãy thêm mô tả cho dự án");
                 tvDescDisplay.setAlpha(0.5f);
             }
         }
@@ -792,47 +796,38 @@ public class ProjectDetailActivity extends BaseActivity {
             cardColor.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
 
-        // Edit Project Prompt
+        // 3. Conditional Editing (Based on isOwner)
         if (btnEditDesc != null) {
             btnEditDesc.setVisibility(isOwner ? View.VISIBLE : View.GONE);
             btnEditDesc.setOnClickListener(v -> showEditProjectDialog(tvNameDisplay, tvDescDisplay));
         }
 
-        // Status Management (Private vs Public)
+        // Privacy Status
         TextView tvStatusValue = sheetView.findViewById(R.id.tvProjectStatusValue);
         TextView tvStatusLabel = sheetView.findViewById(R.id.tvProjectStatusLabel);
         if (tvStatusLabel != null)
             tvStatusLabel.setText("Quyền riêng tư");
 
-        // Use isPrivate from the project model instead of local storage
-        boolean currentIsPrivate = false;
-        // In ProjectDetailActivity, we should have a way to get the latest project
-        // state.
-        // Let's assume the activity's 'isPrivate' matches what we loaded.
-        // Wait, I need to check if ProjectDetailActivity has an 'isPrivate' field.
-        // Looking at the code, it has projectId, projectName, etc. but maybe not
-        // isPrivate.
-        // I will use a local variable to track and update it.
         if (tvStatusValue != null)
-            tvStatusValue.setText(isPrivateMode() ? "Riêng tư" : "Công khai");
+            tvStatusValue.setText(isPrivate ? "Riêng tư" : "Công khai");
 
         View btnStatus = sheetView.findViewById(R.id.btnProjectStatus);
         if (btnStatus != null) {
-            // ONLY Owner can change privacy
             btnStatus.setEnabled(isOwner);
-            if (!isOwner) {
-                btnStatus.setAlpha(0.5f);
-            }
+            btnStatus.setAlpha(isOwner ? 1.0f : 0.5f);
             btnStatus.setOnClickListener(v -> {
                 if (!isOwner) {
-                    Toast.makeText(this, "Chỉ chủ dự án mới có quyền thay đổi quyền riêng tư", Toast.LENGTH_SHORT)
+                    Toast.makeText(this, getString(R.string.project_settings_privacy_owner_only), Toast.LENGTH_SHORT)
                             .show();
                     return;
                 }
-                String[] modes = { "Công khai (Mọi thành viên đều thấy)", "Riêng tư (Chỉ mình bạn thấy)" };
-                new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Quyền riêng tư dự án")
-                        .setItems(modes, (dialog, which) -> {
+                String[] modes = {
+                    getString(R.string.project_settings_privacy_public_desc),
+                    getString(R.string.project_settings_privacy_private_desc)
+                };
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
+                        .setTitle(getString(R.string.project_settings_privacy_dialog_title))
+                        .setItems(modes, (dialogI, which) -> {
                             boolean targetPrivate = (which == 1);
                             updateProjectPrivacy(targetPrivate, tvStatusValue);
                         })
@@ -840,9 +835,7 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        // Notification Preferences - REMOVED
-
-        // Management Actions
+        // 4. Management Actions
         View btnMembers = sheetView.findViewById(R.id.btnManageMembers);
         if (btnMembers != null) {
             btnMembers.setOnClickListener(v -> {
@@ -866,7 +859,7 @@ public class ProjectDetailActivity extends BaseActivity {
         View btnEditLabels = sheetView.findViewById(R.id.btnEditLabels);
         if (btnEditLabels != null) {
             btnEditLabels.setOnClickListener(v -> {
-                Toast.makeText(this, "Tính năng đang được phát triển", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.project_settings_feature_developing), Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -882,33 +875,32 @@ public class ProjectDetailActivity extends BaseActivity {
             });
         }
 
-        // Leave Project
+        // Leave/Delete Project toggle
         View btnLeave = sheetView.findViewById(R.id.btnLeaveProject);
         if (btnLeave != null) {
             btnLeave.setVisibility(isOwner ? View.GONE : View.VISIBLE);
             btnLeave.setOnClickListener(v -> {
-                new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Rời dự án")
-                        .setMessage("Bạn có chắc chắn muốn rời khỏi dự án này?")
-                        .setNegativeButton("Hủy", null)
-                        .setPositiveButton("Rời đi", (dialog, which) -> {
-                            performLeaveProject(bottomSheet);
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
+                        .setTitle(getString(R.string.project_settings_leave_title))
+                        .setMessage(getString(R.string.project_settings_leave_message))
+                        .setNegativeButton(getString(R.string.cancel), null)
+                        .setPositiveButton(getString(R.string.project_settings_leave_button), (dialogI, which) -> {
+                            performLeaveProject(dialog);
                         })
                         .show();
             });
         }
 
-        // Delete Project
         View btnDeleteProject = sheetView.findViewById(R.id.btnDeleteProject);
         if (btnDeleteProject != null) {
             btnDeleteProject.setVisibility(isOwner ? View.VISIBLE : View.GONE);
             btnDeleteProject.setOnClickListener(v -> {
-                new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Xóa dự án")
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
+                        .setTitle(getString(R.string.project_settings_delete_title))
                         .setMessage(getString(R.string.project_delete_confirm_message))
                         .setNegativeButton(getString(R.string.cancel), null)
-                        .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
-                            performDeleteProject(bottomSheet);
+                        .setPositiveButton(getString(R.string.delete), (dialogI, which) -> {
+                            performDeleteProject(dialog);
                         })
                         .show();
             });
@@ -916,14 +908,15 @@ public class ProjectDetailActivity extends BaseActivity {
 
         View btnCollapse = sheetView.findViewById(R.id.btnCollapse);
         if (btnCollapse != null)
-            btnCollapse.setOnClickListener(v -> bottomSheet.dismiss());
+            btnCollapse.setOnClickListener(v -> dialog.dismiss());
 
         TextView tvMetadata = sheetView.findViewById(R.id.tvProjectMetadata);
         if (tvMetadata != null && projectCreatedAt != null) {
             LocalDate date = extractHistoryDate(projectCreatedAt);
             if (date != null) {
                 String dateStr = date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                tvMetadata.setText("Kiến tạo từ ngày " + dateStr);
+                // Reuse existing string for translation if possible or use formatted one
+                tvMetadata.setText(getString(R.string.profile_joined_date_format, dateStr)); 
             }
         }
 
@@ -931,8 +924,6 @@ public class ProjectDetailActivity extends BaseActivity {
         if (tvProjectMetadata != null) {
             tvProjectMetadata.setText(getString(R.string.project_settings_metadata_placeholder));
         }
-
-        bottomSheet.show();
     }
 
     private void showEditProjectDialog(TextView tvNameDisp, TextView tvDescDisp) {
@@ -950,15 +941,27 @@ public class ProjectDetailActivity extends BaseActivity {
             et.setSelection(et.getText().length());
         }
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.project_edit_description_title)
+        androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
                 .setView(dialogView)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.save, (d, w) -> {
-                    String newDesc = et.getText().toString().trim();
-                    updateProjectInfo(null, newDesc, null, tvDescDisp);
-                })
-                .show();
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        View btnCancelInt = dialogView.findViewById(R.id.btnCancel);
+        View btnSaveInt = dialogView.findViewById(R.id.btnSave);
+
+        if (btnCancelInt != null) btnCancelInt.setOnClickListener(v -> dialog.dismiss());
+        if (btnSaveInt != null) {
+            btnSaveInt.setOnClickListener(v -> {
+                String newDesc = et.getText().toString().trim();
+                updateProjectInfo(null, newDesc, null, tvDescDisp);
+                dialog.dismiss();
+            });
+        }
+
+        dialog.show();
     }
 
     private void updateProjectInfo(String newName, String newDesc, TextView tvNameDisp, TextView tvDescDisp) {
@@ -975,8 +978,10 @@ public class ProjectDetailActivity extends BaseActivity {
                         runOnUiThread(() -> {
                             if (newName != null) {
                                 projectName = newName;
-                                if (tvNameDisp != null) tvNameDisp.setText(newName);
-                                if (tvProjectName != null) tvProjectName.setText(newName);
+                                if (tvNameDisp != null)
+                                    tvNameDisp.setText(newName);
+                                if (tvProjectName != null)
+                                    tvProjectName.setText(newName);
                             }
                             if (newDesc != null) {
                                 projectDesc = newDesc;

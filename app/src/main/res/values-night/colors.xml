@@ -6,11 +6,12 @@
          when night mode is active.
          ════════════════════════════════════════════ -->
 
-    <color name="primary">@color/primary_light</color>
+    <color name="primary">#2945FF</color>
 
     <!-- Backgrounds -->
     <color name="theme_background">#121629</color>
     <color name="theme_surface">#1A1F36</color>
+    <color name="theme_dialog_surface">#1A1F36</color>
     <color name="theme_surface_variant">#1E2235</color>
     <color name="theme_card">#1A1F36</color>
     <color name="theme_input_bg">#1E2235</color>

@@ -7,11 +7,11 @@
     android:background="@android:color/transparent"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:elevation="18dp"
+    android:elevation="0dp"
     android:fitsSystemWindows="true"
     android:paddingTop="0dp"
     android:paddingBottom="0dp"
-    android:translationZ="18dp">
+    android:translationZ="0dp">
 
     <!-- WARNING: Shared bottom nav shell. Do not change structure/ids without updating all screens. -->
     <FrameLayout

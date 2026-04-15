@@ -59,6 +59,7 @@ public class ProfileActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        NavigationUtils.suppressActivityTransition(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
@@ -81,6 +82,7 @@ public class ProfileActivity extends BaseActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        NavigationUtils.suppressActivityTransition(this);
         super.onNewIntent(intent);
         setIntent(intent);
         applyNavTransitionIfNeeded();
@@ -217,13 +219,13 @@ public class ProfileActivity extends BaseActivity {
         };
         int checkedItem = LanguageManager.getSelectedIndex(this);
 
-        new MaterialAlertDialogBuilder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.profile_language_dialog_title)
                 .setSingleChoiceItems(languageLabels, checkedItem, (dialog, which) -> {
                     LanguageManager.setLanguage(ProfileActivity.this, languageTags[which]);
                     dialog.dismiss();
                 })
-                .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
@@ -363,6 +365,8 @@ public class ProfileActivity extends BaseActivity {
             @Override
             public void onSuccess(User user) {
                 runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed())
+                        return;
                     tvProfileName.setText(user.getDisplayNameOrEmail());
                     etName.setText(user.getDisplayName());
                     etBio.setText(user.getBio());

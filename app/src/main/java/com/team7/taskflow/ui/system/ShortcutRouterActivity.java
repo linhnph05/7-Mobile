@@ -163,6 +163,7 @@ public class ShortcutRouterActivity extends BaseActivity {
         intent.putExtra("project_id", project.getId());
         intent.putExtra("project_name", project.getName());
         intent.putExtra("project_key", project.getProjectKey());
+        intent.putExtra("user_role", project.getUserRole());
         intent.putExtra(EXTRA_OPEN_AI_CREATE, true);
         startActivity(intent);
         finish();

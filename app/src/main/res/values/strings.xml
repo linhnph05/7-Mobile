@@ -184,9 +184,9 @@
     <string name="project_visibility_private_desc">Only members</string>
     <string name="project_create_button">Create Project</string>
     <string name="project_save_button">Save Changes</string>
-    <string name="project_edit_description_title">Chỉnh sửa mô tả</string>
-    <string name="project_edit_description_subtitle">Cập nhật mô tả để mọi người nắm rõ mục tiêu dự án.</string>
-    <string name="project_edit_description_hint">Nhập mô tả dự án...</string>
+    <string name="project_edit_description_title">Edit Description</string>
+    <string name="project_edit_description_subtitle">Update the description so everyone understands the project goals.</string>
+    <string name="project_edit_description_hint">Enter project description…</string>
     <string name="project_delete_button">Delete Project</string>
     <string name="project_delete_confirm_title">Delete Project</string>
     <string name="project_delete_confirm_message">Are you sure you want to delete this project? All tasks will also be deleted.</string>
@@ -273,10 +273,29 @@
     <string name="timeline_weekday_sun">SUN</string>
     <string name="dashboard_task_activities_today">Task activities today</string>
     <string name="dashboard_comment_activities_today">Comment activities today</string>
-    <string name="project_pinned_success">Đã ghim dự án thành công!</string>
-    <string name="project_unpinned_success">Đã bỏ ghim dự án.</string>
-    <string name="project_pin_label">Ghim</string>
-    <string name="project_pinned_label">Đã ghim</string>
+    <string name="project_pinned_success">Project pinned successfully!</string>
+    <string name="project_unpinned_success">Project unpinned.</string>
+    <string name="project_pin_label">Pin</string>
+    <string name="project_pinned_label">Pinned</string>
+    <string name="project_settings_history_title">Activity History</string>
+    <string name="project_settings_management_label">MANAGEMENT</string>
+    <string name="project_settings_members_label">Members</string>
+    <string name="project_settings_privacy_label">Privacy</string>
+    <string name="project_settings_privacy_public">Public</string>
+    <string name="project_settings_privacy_private">Private</string>
+    <string name="project_settings_privacy_dialog_title">Project Privacy</string>
+    <string name="project_settings_privacy_owner_only">Only the project owner can change privacy settings.</string>
+    <string name="project_settings_privacy_public_desc">Public (Everyone can see)</string>
+    <string name="project_settings_privacy_private_desc">Private (Only you can see)</string>
+    <string name="project_settings_privacy_updated_public">Project is now Public</string>
+    <string name="project_settings_privacy_updated_private">Project is now Private</string>
+    <string name="project_settings_leave_title">Leave Project</string>
+    <string name="project_settings_leave_message">Are you sure you want to leave this project?</string>
+    <string name="project_settings_leave_button">Leave</string>
+    <string name="project_settings_delete_title">Delete Project</string>
+    <string name="project_settings_feature_developing">This feature is under development</string>
+    <string name="project_settings_desc_placeholder">Add a description for the project</string>
+    <string name="project_settings_update_success">Update successful</string>
 
     <!-- ==================== -->
     <!-- TASK                 -->
@@ -406,6 +425,17 @@
     <string name="task_history_time_days_ago">%1$d days ago</string>
     <string name="task_not_found">Task not found</string>
     <string name="task_load_error">Failed to load task</string>
+    <string name="worklog_update_title">Update Work Log</string>
+    <string name="worklog_error_duration_invalid">Duration must be greater than 0 (e.g., 2h 30m)</string>
+    <string name="worklog_error_description_required">Please enter a work description</string>
+    <string name="worklog_success_message">Work log updated</string>
+    <string name="worklog_summary_placeholder">0m spent • 0m remaining</string>
+    <string name="worklog_time_spent_label">Time Spent</string>
+    <string name="worklog_time_remaining_label">Time Remaining</string>
+    <string name="worklog_start_date_label">Start Date</string>
+    <string name="worklog_description_label">Work Description</string>
+    <string name="worklog_description_hint">What did you do?</string>
+    <string name="worklog_format_helper">Format: 2w 4d 6h 45m</string>
     <string name="task_history_action_updated">updated</string>
     <string name="task_history_action_created">created</string>
     <string name="task_history_action_status_changed">changed status</string>

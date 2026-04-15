@@ -68,6 +68,7 @@
         <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:windowSoftInputMode="adjustPan"
+            android:theme="@style/Theme.TaskFlow.NoAnimation"
             android:exported="false" />
 
         <!-- Auth -->
@@ -116,6 +117,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.foryou.ForYouActivity"
+            android:theme="@style/Theme.TaskFlow.NoAnimation"
             android:exported="false" />
         <activity
             android:name=".ui.timeline.ProjectDetailActivity"
@@ -143,6 +145,7 @@
         <!-- Profile -->
         <activity
             android:name=".ui.profile.ProfileActivity"
+            android:theme="@style/Theme.TaskFlow.NoAnimation"
             android:exported="false" />
         <activity
             android:name=".ui.profile.ProjectTrashActivity"

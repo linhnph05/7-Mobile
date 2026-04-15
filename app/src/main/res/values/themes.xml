@@ -14,12 +14,15 @@
         <!-- Status Bar Colors -->
         <item name="android:statusBarColor">@color/theme_background</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">@color/theme_background</item>
+        <item name="android:navigationBarColor">@color/theme_bottom_nav_bg</item>
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:enforceNavigationBarContrast">false</item>
         
         <!-- Page Transition Animation -->
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+
+        <!-- Global Dialog Theme -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.TaskFlow.MaterialAlertDialog</item>
     </style>
 
     <!-- Global Activity Animations -->
@@ -65,6 +68,19 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
+    <!-- Material AlertDialog Style -->
+    <style name="ThemeOverlay.TaskFlow.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.TaskFlow.AlertDialog.Rounded</item>
+        <item name="colorSurface">@color/theme_dialog_surface</item>
+        <item name="colorOnSurface">@color/theme_text_primary</item>
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="android:backgroundTint">@color/theme_dialog_surface</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.TaskFlow.AlertDialog.Rounded" parent="">
+        <item name="cornerSize">28dp</item>
+    </style>
+
     <!-- Translucent Overlay Theme for AI Dialog -->
     <style name="Theme.TaskFlow.Translucent" parent="Theme.TaskFlow">
         <item name="android:windowIsTranslucent">true</item>
@@ -74,5 +90,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <!-- Theme không hoạt ảnh cho các trang có Bottom Nav để tránh bị trượt thanh điều hướng -->
+    <style name="Theme.TaskFlow.NoAnimation" parent="Theme.TaskFlow">
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
     </style>
 </resources>

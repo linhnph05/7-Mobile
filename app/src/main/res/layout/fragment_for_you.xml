@@ -187,43 +187,65 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/chipAll"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_chip_for_you_selected"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="8dp"
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:checked="true"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/spacing_lg"
+                        android:paddingEnd="@dimen/spacing_lg"
+                        android:backgroundTint="@color/chip_background_selector"
                         android:text="@string/for_you_filter_all"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textAllCaps="false"
+                        android:textColor="@color/chip_text_selector"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/chip_stroke_selector"
+                        app:strokeWidth="1dp" />
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/chipToday"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:background="@drawable/bg_chip_for_you_unselected"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="8dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:checkable="true"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/spacing_lg"
+                        android:paddingEnd="@dimen/spacing_lg"
+                        android:backgroundTint="@color/chip_background_selector"
                         android:text="@string/for_you_filter_today"
-                        android:textColor="@color/primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textAllCaps="false"
+                        android:textColor="@color/chip_text_selector"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/chip_stroke_selector"
+                        app:strokeWidth="1dp" />
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/chipUpcoming"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:background="@drawable/bg_chip_for_you_unselected"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="8dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:checkable="true"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/spacing_lg"
+                        android:paddingEnd="@dimen/spacing_lg"
+                        android:backgroundTint="@color/chip_background_selector"
                         android:text="@string/for_you_filter_upcoming"
-                        android:textColor="@color/primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textAllCaps="false"
+                        android:textColor="@color/chip_text_selector"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/chip_stroke_selector"
+                        app:strokeWidth="1dp" />
 
                 </LinearLayout>
             </HorizontalScrollView>

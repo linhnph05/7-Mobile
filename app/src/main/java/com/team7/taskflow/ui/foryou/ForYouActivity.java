@@ -60,9 +60,9 @@ public class ForYouActivity extends BaseActivity {
     private TextView tvProgressPercent;
     private TextView tvDoneCount;
     private TextView tvRemainingCount;
-    private TextView chipAll;
-    private TextView chipToday;
-    private TextView chipUpcoming;
+    private com.google.android.material.button.MaterialButton chipAll;
+    private com.google.android.material.button.MaterialButton chipToday;
+    private com.google.android.material.button.MaterialButton chipUpcoming;
     private ProgressBar pbOverallProgress;
     private RecyclerView rvMyTasks;
     private ImageView ivProfilePic;
@@ -78,9 +78,10 @@ public class ForYouActivity extends BaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        NavigationUtils.suppressActivityTransition(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_for_you);
-
+        
         SessionManager.init(this);
         taskRepository = TaskRepository.getInstance();
 
@@ -95,6 +96,7 @@ public class ForYouActivity extends BaseActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        NavigationUtils.suppressActivityTransition(this);
         super.onNewIntent(intent);
         setIntent(intent);
         applyNavTransitionIfNeeded();
@@ -161,6 +163,10 @@ public class ForYouActivity extends BaseActivity {
                 intent.putExtra(ProjectDetailActivity.EXTRA_INITIAL_TAB, ProjectDetailActivity.INITIAL_TAB_TIMELINE);
                 if (task.getId() != null) {
                     intent.putExtra(ProjectDetailActivity.EXTRA_OPEN_TASK_ID, task.getId());
+                }
+                if (task.getProjectInfo() != null) {
+                    intent.putExtra("user_role", task.getProjectInfo().getUserRole());
+                    intent.putExtra("project_color", task.getProjectInfo().getColor());
                 }
                 startActivity(intent);
             }
@@ -348,6 +354,16 @@ public class ForYouActivity extends BaseActivity {
     }
 
     private void applyFilter(TaskFilter filter) {
+        if (filter == null) {
+            return;
+        }
+
+        // Nếu nhấn lại filter cũ, chỉ bộ đồng bộ lại UI (tránh bị uncheck do toggle)
+        if (activeFilter == filter) {
+            updateFilterUi();
+            return;
+        }
+
         activeFilter = filter;
         updateFilterUi();
 
@@ -439,14 +455,12 @@ public class ForYouActivity extends BaseActivity {
     }
 
     private void updateFilterUi() {
-        styleChip(chipAll, activeFilter == TaskFilter.ALL);
-        styleChip(chipToday, activeFilter == TaskFilter.TODAY);
-        styleChip(chipUpcoming, activeFilter == TaskFilter.UPCOMING);
-    }
-
-    private void styleChip(TextView chip, boolean selected) {
-        chip.setBackgroundResource(selected ? R.drawable.bg_chip_selected : R.drawable.bg_chip_neutral);
-        chip.setTextColor(ContextCompat.getColor(this, selected ? R.color.primary : R.color.theme_text_secondary));
+        if (chipAll == null || chipToday == null || chipUpcoming == null) {
+            return;
+        }
+        chipAll.setChecked(activeFilter == TaskFilter.ALL);
+        chipToday.setChecked(activeFilter == TaskFilter.TODAY);
+        chipUpcoming.setChecked(activeFilter == TaskFilter.UPCOMING);
     }
 
     private boolean matchesFilter(Task task, TaskFilter filter) {

@@ -27,8 +27,6 @@ public class NavigationUtils {
 
     /**
      * Start activity với directional animation dựa vào current và target nav index
-     * - Nếu target > current: item ở phía phải → activity slide in từ phải (slide_in_right, slide_out_left)
-     * - Nếu target < current: item ở phía trái → activity slide in từ trái (slide_in_left, slide_out_right)
      */
     public static boolean startActivityWithNavAnimation(
             Activity currentActivity,
@@ -51,12 +49,27 @@ public class NavigationUtils {
         }
 
         lastNavigationAtMs = now;
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        
+        // Flag quan trọng: Không chạy animation ở mức độ hệ thống
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT 
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP 
+                | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        
         intent.putExtra(EXTRA_NAV_FROM, currentNavIndex);
         intent.putExtra(EXTRA_NAV_TO, targetNavIndex);
-        currentActivity.startActivity(intent);
-        // Disable whole-activity transition so bottom bar does not slide.
-        currentActivity.overridePendingTransition(0, 0);
+
+        // Sử dụng ActivityOptions để ghi đè hiệu ứng ngay lúc khởi tạo (Mạnh nhất)
+        android.app.ActivityOptions options = android.app.ActivityOptions.makeCustomAnimation(currentActivity, 0, 0);
+        currentActivity.startActivity(intent, options.toBundle());
+
+        // Vẫn giữ lại các lệnh ghi đè cũ để hỗ trợ các máy đời thấp hơn
+        if (android.os.Build.VERSION.SDK_INT >= 34) {
+            currentActivity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0);
+            currentActivity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE, 0, 0);
+        } else {
+            currentActivity.overridePendingTransition(0, 0);
+        }
+        
         return true;
     }
 
@@ -73,13 +86,18 @@ public class NavigationUtils {
 
         contentView.post(() -> {
             int width = contentView.getWidth();
+            // Nếu View chưa kịp đo (width = 0), dùng chiều rộng màn hình làm fallback
             if (width <= 0) {
-                return;
+                android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
+                activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+                width = metrics.widthPixels;
             }
+            
+            if (width <= 0) return;
 
             float startTranslationX = to > from ? width : -width;
             contentView.setTranslationX(startTranslationX);
-            contentView.setAlpha(0.92f);
+            contentView.setAlpha(0f); // Bắt đầu từ trong suốt để tránh bị "giật"
             contentView.animate()
                     .translationX(0f)
                     .alpha(1f)
@@ -87,5 +105,19 @@ public class NavigationUtils {
                     .setInterpolator(new DecelerateInterpolator())
                     .start();
         });
+    }
+
+    /**
+     * Triệt tiêu hiệu ứng chuyển cảnh mặc định của hệ thống ngay bên trong Activity.
+     * Gọi hàm này trong onCreate() hoặc onNewIntent() để đảm bảo thanh điều hướng đứng yên.
+     */
+    public static void suppressActivityTransition(Activity activity) {
+        if (activity == null) return;
+        if (android.os.Build.VERSION.SDK_INT >= 34) {
+            activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0);
+            activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE, 0, 0);
+        } else {
+            activity.overridePendingTransition(0, 0);
+        }
     }
 }

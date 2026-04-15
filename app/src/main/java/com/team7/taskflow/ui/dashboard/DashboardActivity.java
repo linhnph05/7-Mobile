@@ -114,6 +114,7 @@ public class DashboardActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        NavigationUtils.suppressActivityTransition(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
@@ -148,6 +149,7 @@ public class DashboardActivity extends BaseActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        NavigationUtils.suppressActivityTransition(this);
         super.onNewIntent(intent);
         setIntent(intent);
         applyNavTransitionIfNeeded();
@@ -251,6 +253,7 @@ public class DashboardActivity extends BaseActivity {
             intent.putExtra("project_key", project.getProjectKey());
             intent.putExtra("project_desc", project.getDescription());
             intent.putExtra("project_color", project.getColor());
+            intent.putExtra("user_role", project.getUserRole());
             startActivity(intent);
         });
 
@@ -397,9 +400,16 @@ public class DashboardActivity extends BaseActivity {
     }
 
     private void updateActiveFilter(DashboardProjectFilter filter) {
-        if (filter == null || activeFilter == filter) {
+        if (filter == null) {
             return;
         }
+
+        // Nếu nhấn lại filter cũ, chỉ bộ đồng bộ lại UI (tránh bị uncheck do toggle)
+        if (activeFilter == filter) {
+            syncFilterButtonState();
+            return;
+        }
+
         activeFilter = filter;
         syncFilterButtonState();
 

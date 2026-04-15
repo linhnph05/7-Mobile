@@ -52,6 +52,16 @@ public final class AvatarUiUtils {
             return;
         }
 
+        // Check context validity before calling Glide
+        android.content.Context context = avatarView.getContext();
+        if (context instanceof android.app.Activity) {
+            android.app.Activity activity = (android.app.Activity) context;
+            if (activity.isFinishing() || activity.isDestroyed()) {
+                showFallbackInsideAvatar(avatarView, letterView, letter);
+                return;
+            }
+        }
+
         com.bumptech.glide.Glide.with(avatarView)
                 .load(avatarUrl)
                 .circleCrop()

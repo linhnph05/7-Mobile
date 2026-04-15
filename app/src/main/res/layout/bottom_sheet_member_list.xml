@@ -13,8 +13,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="8dp"
-        android:background="#FFCCCCCC"
-        android:backgroundTint="@color/text_secondary" />
+        android:background="@color/theme_divider" />
 
     <!-- Header -->
     <LinearLayout
@@ -29,19 +28,20 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Thành viên dự án"
+            android:text="@string/project_settings_members_label"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary" />
+            android:textColor="@color/theme_text_primary" />
 
         <!-- Chỉ hiện với Admin/Owner, ẩn/hiện programmatically -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_invite"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.Material3.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+ Mời"
+            android:text="+ Invite"
             android:textSize="13sp"
+            app:backgroundTint="@color/primary"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -50,7 +50,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider" />
+        android:background="@color/theme_divider" />
 
     <!-- Loading -->
     <ProgressBar

@@ -35,6 +35,12 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         return sheet;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(STYLE_NORMAL, R.style.Theme_TaskFlow_BottomSheet);
+    }
+
     public InviteMemberBottomSheet() {}
 
     private long projectId;
@@ -78,7 +84,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         btnSearch.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             if (email.isEmpty()) {
-                tvError.setText("Vui lòng nhập email");
+                tvError.setText(getString(R.string.auth_email_required));
                 tvError.setVisibility(View.VISIBLE);
                 return;
             }
@@ -115,7 +121,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         // ── Gửi lời mời ────────────────────────────────────────
         btnAddMember.setOnClickListener(v -> {
             if (foundUserEmail == null || foundUserEmail.trim().isEmpty()) {
-                tvError.setText("Vui lòng tìm kiếm user trước");
+                tvError.setText(getString(R.string.search));
                 tvError.setVisibility(View.VISIBLE);
                 return;
             }
@@ -123,7 +129,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
             SessionManager.init(requireContext());
             String inviterId = SessionManager.getUserId();
             if (inviterId == null || inviterId.trim().isEmpty()) {
-                tvError.setText("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại");
+                tvError.setText(getString(R.string.notification_session_expired));
                 tvError.setVisibility(View.VISIBLE);
                 return;
             }
@@ -142,7 +148,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
                             if (!isAdded()) return;
                             requireActivity().runOnUiThread(() -> {
                                 Toast.makeText(requireContext(),
-                                        "Đã gửi lời mời thành công",
+                                        getString(R.string.activity_invitation_sent),
                                         Toast.LENGTH_SHORT).show();
                                 dismiss();
                             });
@@ -151,7 +157,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
                         public void onError(String message) {
                             if (!isAdded()) return;
                             requireActivity().runOnUiThread(() -> {
-                                tvError.setText("Lỗi: " + message);
+                                tvError.setText(getString(R.string.error) + ": " + message);
                                 tvError.setVisibility(View.VISIBLE);
                             });
                         }

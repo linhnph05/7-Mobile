@@ -35,6 +35,10 @@ public class TaskRepository {
     private final com.team7.taskflow.data.remote.api.StorageApi storageApi;
     private final Map<Long, String> statusBeforeTrashCache = new HashMap<>();
 
+    // ── In-Memory Cache ────────────────────────────────────────────────
+    private final Map<Long, Task> taskCache = new HashMap<>();
+    private final Map<Long, List<Task>> projectTasksCache = new HashMap<>();
+
     private TaskRepository() {
         taskApi = SupabaseClient.getInstance().getService(TaskApi.class);
         projectApi = SupabaseClient.getInstance().getService(ProjectApi.class);
@@ -68,6 +72,10 @@ public class TaskRepository {
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task created = response.body().get(0);
+                            
+                            // Cập nhật Cache cá nhân
+                            taskCache.put(created.getId(), created);
+                            
                             callback.onSuccess(created);
                         } else {
                             callback.onError("Failed to create task: " + buildApiError("create_task", response));
@@ -90,6 +98,10 @@ public class TaskRepository {
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task updated = response.body().get(0);
+                            
+                            // Cập nhật Cache cá nhân
+                            taskCache.put(updated.getId(), updated);
+                            
                             callback.onSuccess(updated);
                         } else {
                             callback.onError("Update failed: " + buildApiError("update_task", response));
@@ -153,6 +165,12 @@ public class TaskRepository {
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     List<Task> subtasks = response.body();
+                    
+                    // Cập nhật cache cho các task con vừa lấy được
+                    for (Task sub : subtasks) {
+                        taskCache.put(sub.getId(), sub);
+                    }
+                    
                     // Update each subtask to DONE status
                     updateSubtasksRecursively(subtasks, 0, callback);
                 } else {
@@ -167,6 +185,21 @@ public class TaskRepository {
                 callback.onSuccess(null);
             }
         });
+    }
+
+    // ── Cache Accessors ────────────────────────────────────────────────
+
+    public Task getCachedTask(long taskId) {
+        return taskCache.get(taskId);
+    }
+
+    public List<Task> getCachedTasksByProject(long projectId) {
+        return projectTasksCache.get(projectId);
+    }
+
+    public void clearCache() {
+        taskCache.clear();
+        projectTasksCache.clear();
     }
 
     private void updateSubtasksRecursively(List<Task> subtasks, int index, TaskCallback<Void> callback) {
@@ -995,8 +1028,18 @@ public class TaskRepository {
         taskApi.getTasksByProject("eq." + projectId, "position.asc").enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
-                if (response.isSuccessful()) {
-                    callback.onSuccess(response.body());
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Task> tasks = response.body();
+                    
+                    // Điền dữ liệu vào project-wide cache
+                    projectTasksCache.put(projectId, tasks);
+                    
+                    // Điền dữ liệu vào individual task cache
+                    for (Task t : tasks) {
+                        taskCache.put(t.getId(), t);
+                    }
+                    
+                    callback.onSuccess(tasks);
                 } else {
                     callback.onError("Load failed");
                 }

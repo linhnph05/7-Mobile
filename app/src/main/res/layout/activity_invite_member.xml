@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:orientation="vertical">
 
     <!-- Handle bar -->
     <View
@@ -13,7 +13,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="8dp"
-        android:background="#CCCCCC"/>
+        android:background="@color/theme_divider"/>
 
     <!-- Header -->
     <LinearLayout
@@ -26,8 +26,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mời thành viên"
-            android:textColor="#1A1A1A"
+            android:text="@string/project_settings_manage_members_title"
+            android:textColor="@color/theme_text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -35,7 +35,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#F0F0F0" />
+        android:background="@color/theme_divider" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,8 +46,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Email thành viên"
-            android:textColor="#666666"
+            android:text="@string/auth_email_label"
+            android:textColor="@color/theme_text_secondary"
             android:textSize="13sp"
             android:layout_marginBottom="6dp" />
 
@@ -64,20 +64,21 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_input"
                 android:paddingHorizontal="12dp"
-                android:hint="Nhập email..."
-                android:textColor="#1A1A1A"
+                android:hint="user@example.com"
+                android:textColor="@color/theme_text_primary"
+                android:textColorHint="@color/theme_text_hint"
                 android:textSize="14sp"
                 android:inputType="textEmailAddress"
                 android:singleLine="true" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_search"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:text="Tìm"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#2945FF" />
+                android:text="@string/search"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/primary" />
         </LinearLayout>
 
         <!-- Kết quả tìm kiếm -->
@@ -87,10 +88,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:visibility="gone"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:cardBackgroundColor="#F8F8F8"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
+            app:cardBackgroundColor="@color/theme_surface_variant"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -110,7 +110,7 @@
                         android:layout_height="42dp"
                         android:background="@drawable/bg_color_circle"
                         android:gravity="center"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/white"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -125,7 +125,7 @@
                             android:id="@+id/tv_result_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#1A1A1A"
+                            android:textColor="@color/theme_text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
@@ -133,7 +133,7 @@
                             android:id="@+id/tv_result_email"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#666666"
+                            android:textColor="@color/theme_text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -142,8 +142,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Phân quyền"
-                    android:textColor="#666666"
+                    android:text="@string/project_visibility_label"
+                    android:textColor="@color/theme_text_secondary"
                     android:textSize="13sp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp" />
@@ -159,16 +159,18 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Admin"
-                        android:textColor="#1A1A1A" />
+                        android:text="@string/project_role_admin"
+                        android:buttonTint="@color/primary"
+                        android:textColor="@color/theme_text_primary" />
 
                     <RadioButton
                         android:id="@+id/rb_member"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Member"
-                        android:textColor="#1A1A1A"
+                        android:text="@string/project_role_member"
+                        android:buttonTint="@color/primary"
+                        android:textColor="@color/theme_text_primary"
                         android:checked="true" />
 
                     <RadioButton
@@ -176,18 +178,20 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Viewer"
-                        android:textColor="#1A1A1A" />
+                        android:text="@string/project_role_viewer"
+                        android:buttonTint="@color/primary"
+                        android:textColor="@color/theme_text_primary" />
                 </RadioGroup>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_add_member"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="52dp"
                     android:layout_marginTop="16dp"
-                    android:text="Thêm vào dự án"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#2945FF" />
+                    android:text="@string/activity_invitation_sent"
+                    android:textColor="@color/white"
+                    app:cornerRadius="12dp"
+                    app:backgroundTint="@color/primary" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -196,7 +200,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:textColor="#EF4444"
+            android:textColor="@color/danger"
             android:textSize="13sp"
             android:visibility="gone" />
 

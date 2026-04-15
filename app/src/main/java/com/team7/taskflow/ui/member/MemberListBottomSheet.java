@@ -35,7 +35,12 @@ public class MemberListBottomSheet extends BottomSheetDialogFragment {
         return sheet;
     }
 
-    // Constructor rỗng bắt buộc cho Fragment
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(STYLE_NORMAL, R.style.Theme_TaskFlow_BottomSheet);
+    }
+
     public MemberListBottomSheet() {}
 
     private long projectId;

@@ -56,6 +56,7 @@
     <!-- Backgrounds -->
     <color name="theme_background">#F6F7F8</color>
     <color name="theme_surface">#FFFFFF</color>
+    <color name="theme_dialog_surface">#FFFFFF</color>
     <color name="theme_surface_variant">#F1F5F9</color>
     <color name="theme_card">#FFFFFF</color>
     <color name="theme_input_bg">#F1F5F9</color>
@@ -84,11 +85,11 @@
     <color name="theme_icon_purple_bg">#F3E8FF</color>
     <color name="theme_icon_orange_bg">#FFEDD5</color>
     
-    <color name="theme_icon_blue">#3B82F6</color>
-    <color name="theme_icon_green">#10B981</color>
-    <color name="theme_icon_orange">#F59E0B</color>
-    <color name="theme_icon_purple">#8B5CF6</color>
-    <color name="theme_icon_slate">#64748B</color>
+    <color name="theme_icon_blue">#2563EB</color>
+    <color name="theme_icon_green">#059669</color>
+    <color name="theme_icon_orange">#D97706</color>
+    <color name="theme_icon_purple">#7C3AED</color>
+    <color name="theme_icon_slate">#475569</color>
     <color name="theme_btn_danger_bg">#FEF2F2</color>
     <color name="theme_btn_danger_text">#DC2626</color>
      <color name="chip_selected_bg">#1A2945FF</color>
