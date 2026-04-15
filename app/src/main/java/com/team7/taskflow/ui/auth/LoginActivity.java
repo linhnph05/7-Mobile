@@ -3,9 +3,6 @@ package com.team7.taskflow.ui.auth;
 import com.team7.taskflow.R;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
-import com.team7.taskflow.auth.LoginCallback;
-import com.team7.taskflow.auth.LoginStrategy;
-import com.team7.taskflow.auth.LoginStrategyFactory;
 import com.team7.taskflow.utils.AppConfig;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -236,12 +233,11 @@ public class LoginActivity extends BaseActivity {
         }
 
         setLoading(true);
-        LoginStrategy strategy = LoginStrategyFactory.create();
-        Log.d(TAG, "Using auth strategy: " + strategy.getClass().getSimpleName());
+        Log.d(TAG, "Using direct AuthRepository login");
 
-        strategy.login(email, password, new LoginCallback() {
+        AuthRepository.signIn(email, password, new AuthRepository.AuthCallback() {
             @Override
-            public void onSuccess(String userId, String displayName) {
+            public void onSuccess(String userId) {
                 runOnUiThread(() -> {
                     setLoading(false);
                         Toast.makeText(LoginActivity.this,

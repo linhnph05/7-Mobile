@@ -189,6 +189,56 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/passwordContainer" />
 
+        <!-- Confirm Password -->
+        <TextView
+            android:id="@+id/labelConfirmPassword"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/auth_confirm_password_label"
+            android:textColor="@color/text_slate_900"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPasswordHint" />
+
+        <!-- Confirm Password field container -->
+        <FrameLayout
+            android:id="@+id/confirmPasswordContainer"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelConfirmPassword">
+
+            <EditText
+                android:id="@+id/etConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_input"
+                android:hint="@string/auth_confirm_password_hint"
+                android:inputType="textPassword"
+                android:autofillHints="newPassword"
+                android:paddingStart="16dp"
+                android:paddingEnd="52dp"
+                android:textColor="@color/text_slate_900"
+                android:textColorHint="@color/text_slate_500"
+                android:textSize="14sp" />
+
+            <ImageButton
+                android:id="@+id/btnToggleConfirmPassword"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_eye"
+                android:contentDescription="@string/auth_toggle_password_content_desc"
+                app:tint="@color/text_slate_500" />
+        </FrameLayout>
+
         <!-- Sign Up Button + ProgressBar overlay -->
         <FrameLayout
             android:id="@+id/btnSignUpContainer"
@@ -197,7 +247,7 @@
             android:layout_marginTop="28dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvPasswordHint">
+            app:layout_constraintTop_toBottomOf="@id/confirmPasswordContainer">
 
             <Button
                 android:id="@+id/btnSignUp"

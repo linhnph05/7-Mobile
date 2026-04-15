@@ -130,6 +130,7 @@ CREATE TABLE public.tasks (
   start_date timestamp with time zone,
   tag text,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  deadline_reminded_at timestamp with time zone,
   CONSTRAINT tasks_pkey PRIMARY KEY (task_id),
   CONSTRAINT tasks_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(project_id),
   CONSTRAINT tasks_assignee_id_fkey FOREIGN KEY (assignee_id) REFERENCES public.users(user_id),
@@ -155,6 +156,7 @@ CREATE TABLE public.work_logs (
   duration_minutes integer DEFAULT 0,
   note text,
   created_at timestamp with time zone DEFAULT now(),
+  remaining_minutes integer DEFAULT 0,
   CONSTRAINT work_logs_pkey PRIMARY KEY (log_id),
   CONSTRAINT work_logs_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id),
   CONSTRAINT work_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)

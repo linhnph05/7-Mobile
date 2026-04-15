@@ -38,8 +38,9 @@ public class SignUpActivity extends BaseActivity {
     private static final String TAG = "SignUpActivity";
 
     private boolean passwordVisible = false;
+    private boolean confirmPasswordVisible = false;
 
-    private EditText etFullName, etEmail, etPassword;
+    private EditText etFullName, etEmail, etPassword, etConfirmPassword;
     private Button btnSignUp;
     private ProgressBar progressBar;
     private AppCompatButton btnGoogle;
@@ -56,6 +57,7 @@ public class SignUpActivity extends BaseActivity {
         etFullName = findViewById(R.id.etFullName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
         btnSignUp = findViewById(R.id.btnSignUp);
         progressBar = findViewById(R.id.progressBar);
         btnGoogle = findViewById(R.id.btnGoogle);
@@ -80,6 +82,20 @@ public class SignUpActivity extends BaseActivity {
                 passwordVisible = true;
             }
             etPassword.setSelection(etPassword.getText().length());
+        });
+
+        ImageButton btnToggleConfirmPassword = findViewById(R.id.btnToggleConfirmPassword);
+        btnToggleConfirmPassword.setOnClickListener(v -> {
+            if (confirmPasswordVisible) {
+                etConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                btnToggleConfirmPassword.setImageResource(R.drawable.ic_eye);
+                confirmPasswordVisible = false;
+            } else {
+                etConfirmPassword.setTransformationMethod(null);
+                btnToggleConfirmPassword.setImageResource(R.drawable.ic_eye);
+                confirmPasswordVisible = true;
+            }
+            etConfirmPassword.setSelection(etConfirmPassword.getText().length());
         });
 
         TextView tvLogin = findViewById(R.id.tvLogin);
@@ -179,6 +195,7 @@ public class SignUpActivity extends BaseActivity {
         String name = etFullName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString();
+        String confirmPassword = etConfirmPassword.getText().toString();
 
         if (TextUtils.isEmpty(name)) {
             etFullName.setError(getString(R.string.auth_full_name_required));
@@ -198,6 +215,11 @@ public class SignUpActivity extends BaseActivity {
         if (!password.matches(".*\\d.*")) {
             etPassword.setError(getString(R.string.auth_password_number_error));
             etPassword.requestFocus();
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            etConfirmPassword.setError(getString(R.string.auth_passwords_not_match));
+            etConfirmPassword.requestFocus();
             return;
         }
 
