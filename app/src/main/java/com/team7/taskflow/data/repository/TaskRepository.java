@@ -2,6 +2,8 @@ package com.team7.taskflow.data.repository;
 
 import androidx.annotation.NonNull;
 
+import android.content.Context;
+
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.SupabaseConfig;
 import com.team7.taskflow.data.remote.api.ProjectApi;
@@ -13,6 +15,8 @@ import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.CommentReaction;
 import com.team7.taskflow.utils.SessionManager;
+import com.team7.taskflow.ui.widget.TaskTodaySummaryWidgetProvider;
+import com.team7.taskflow.ui.widget.TaskTodayWidgetProvider;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -68,6 +72,7 @@ public class TaskRepository {
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task created = response.body().get(0);
+                            refreshTaskWidgets();
                             callback.onSuccess(created);
                         } else {
                             callback.onError("Failed to create task: " + buildApiError("create_task", response));
@@ -90,6 +95,7 @@ public class TaskRepository {
                     public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Task updated = response.body().get(0);
+                            refreshTaskWidgets();
                             callback.onSuccess(updated);
                         } else {
                             callback.onError("Update failed: " + buildApiError("update_task", response));
@@ -129,6 +135,7 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
+                    refreshTaskWidgets();
                     callback.onSuccess(null);
                 } else {
                     callback.onError("Failed to update status: " + buildApiError("update_task_status", response));
@@ -171,6 +178,7 @@ public class TaskRepository {
 
     private void updateSubtasksRecursively(List<Task> subtasks, int index, TaskCallback<Void> callback) {
         if (index >= subtasks.size()) {
+            refreshTaskWidgets();
             callback.onSuccess(null);
             return;
         }
@@ -222,6 +230,7 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
+                    refreshTaskWidgets();
                     callback.onSuccess(null);
                 } else {
                     callback.onError("Failed to delete task");
@@ -243,6 +252,7 @@ public class TaskRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful()) {
+                            refreshTaskWidgets();
                             callback.onSuccess(null);
                         } else {
                             callback.onError("Delete failed: " + response.code());
@@ -262,6 +272,7 @@ public class TaskRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful()) {
+                            refreshTaskWidgets();
                             callback.onSuccess(null);
                         } else {
                             callback.onError("Delete failed: " + response.code());
@@ -316,6 +327,7 @@ public class TaskRepository {
             @Override
             public void onResponse(@NonNull Call<List<Task>> call, @NonNull Response<List<Task>> response) {
                 if (response.isSuccessful()) {
+                            refreshTaskWidgets();
                     statusBeforeTrashCache.remove(taskId);
                     callback.onSuccess(null);
                 } else {
@@ -332,6 +344,15 @@ public class TaskRepository {
 
     public void permanentlyDeleteTask(long taskId, TaskCallback<Void> callback) {
         deleteTask(taskId, callback);
+    }
+
+    private void refreshTaskWidgets() {
+        Context appContext = SessionManager.getAppContext();
+        if (appContext == null) {
+            return;
+        }
+        TaskTodayWidgetProvider.refreshAll(appContext);
+        TaskTodaySummaryWidgetProvider.refreshAll(appContext);
     }
 
     // ── Attachments ─────────────────────────────────────────────────────

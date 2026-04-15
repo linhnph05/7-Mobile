@@ -86,6 +86,11 @@ public class SessionManager {
         return prefs.getString(KEY_DISPLAY_NAME, "");
     }
 
+    public static Context getAppContext() {
+        ensureInit();
+        return appContext;
+    }
+
     public static boolean isLoggedIn() {
         ensureInit();
         String userId = getUserId();
