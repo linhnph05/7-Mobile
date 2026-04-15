@@ -6,6 +6,8 @@
          when night mode is active.
          ════════════════════════════════════════════ -->
 
+    <color name="primary">@color/primary_light</color>
+
     <!-- Backgrounds -->
     <color name="theme_background">#121629</color>
     <color name="theme_surface">#1A1F36</color>

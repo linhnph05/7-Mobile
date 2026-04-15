@@ -150,7 +150,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/auth_toggle_password_content_desc"
                 android:src="@drawable/ic_eye"
-                app:tint="@color/slate_400" />
+                app:tint="@color/text_slate_500" />
         </FrameLayout>
 
         <TextView
