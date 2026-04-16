@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
@@ -82,8 +83,8 @@ public class TrashActivity extends BaseActivity {
             // Restore action
             restoreTask(task);
         }, task -> {
-            // Delete permanently action
-            deleteTaskPermanently(task);
+            // Delete permanently action with confirmation
+            confirmDeleteTask(task);
         });
         rvTrashItems.setLayoutManager(new LinearLayoutManager(this));
         rvTrashItems.setAdapter(adapter);
@@ -190,9 +191,26 @@ public class TrashActivity extends BaseActivity {
         });
     }
 
+    private void confirmDeleteTask(Task task) {
+        if (task == null || task.getId() == 0) return;
+
+        String title = task.getTitle() != null && !task.getTitle().trim().isEmpty()
+                ? task.getTitle().trim()
+                : getString(R.string.trash_untitled_task);
+
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
+                .setTitle(R.string.trash_delete_confirm_title)
+                .setMessage(getString(R.string.trash_delete_confirm_message_format, title))
+                .setPositiveButton(R.string.trash_delete_confirm_action, (dialog, which) -> {
+                    deleteTaskPermanently(task);
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
     private void emptyAllTrash() {
         // Show confirmation dialog
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
                 .setTitle(R.string.trash_empty_confirm_title)
                 .setMessage(R.string.trash_empty_confirm_message)
                 .setPositiveButton(R.string.trash_empty_confirm_action, (dialog, which) -> {

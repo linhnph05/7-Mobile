@@ -12,6 +12,7 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
+import com.team7.taskflow.ui.project.TaskDetailActivity;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.time.LocalDate;
@@ -248,15 +249,27 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
             return;
         }
 
-        Intent doneIntent = new Intent(context, TaskTodayWidgetProvider.class);
-        doneIntent.setAction(ACTION_MARK_DONE);
+        Intent doneIntent = new Intent(context, WidgetTaskDoneConfirmActivity.class);
         doneIntent.putExtra("task_id", task.getId());
-        PendingIntent donePending = PendingIntent.getBroadcast(
-                context,
-                appWidgetId * 10 + index,
-                doneIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            views.setOnClickPendingIntent(checkId, donePending);
+        doneIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        doneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent donePending = PendingIntent.getActivity(
+            context,
+            appWidgetId * 10 + index,
+            doneIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        views.setOnClickPendingIntent(checkId, donePending);
+
+        Intent openTaskIntent = new Intent(context, TaskDetailActivity.class);
+        openTaskIntent.putExtra("task_id", task.getId());
+        openTaskIntent.putExtra("project_id", task.getProjectId());
+        openTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent openTaskPending = PendingIntent.getActivity(
+            context,
+            appWidgetId * 100 + index,
+            openTaskIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        views.setOnClickPendingIntent(rowId, openTaskPending);
     }
 
     private static String mapPriorityLabel(String rawPriority) {
