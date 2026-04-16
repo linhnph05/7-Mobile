@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.notification;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -28,52 +29,56 @@ public class NotificationPushWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        Log.d("PushTest", "Worker started");
         Context appContext = getApplicationContext();
         SessionManager.init(appContext);
 
         if (!SessionManager.isLoggedIn()) {
+            Log.d("PushTest", "Worker stopped: User not logged in");
             return Result.success();
         }
 
         String userId = SessionManager.getUserId();
+        Log.d("PushTest", "Processing for userId: " + userId);
+        
         if (userId == null || userId.trim().isEmpty()) {
             return Result.success();
         }
 
         NotificationRepository repository = NotificationRepository.getInstance();
+        
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<List<Notification>> dataRef = new AtomicReference<>();
-        AtomicReference<String> errorRef = new AtomicReference<>();
-
+        AtomicReference<List<Notification>> notificationsRef = new AtomicReference<>();
+        
+        // 1. Quét thông báo hệ thống (Unread)
+        Log.d("PushTest", "Worker: Fetching notifications...");
         repository.getNotifications(userId, new NotificationRepository.NotificationCallback<List<Notification>>() {
             @Override
             public void onSuccess(List<Notification> result) {
-                dataRef.set(result);
-                latch.countDown();
+                String userEmail = SessionManager.getUserEmail();
+                repository.hydrateInviteStatuses(result, userEmail, () -> {
+                    notificationsRef.set(result);
+                    latch.countDown();
+                });
             }
-
             @Override
             public void onError(String error) {
-                errorRef.set(error);
                 latch.countDown();
             }
         });
 
         try {
-            boolean completed = latch.await(25, TimeUnit.SECONDS);
-            if (!completed) {
-                return Result.retry();
-            }
+            latch.await(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return Result.retry();
         }
 
-        if (errorRef.get() != null) {
-            return Result.retry();
+        // 2. Đẩy thông báo hệ thống (Unread, Invites, etc.)
+        List<Notification> notifs = notificationsRef.get();
+        if (notifs != null && !notifs.isEmpty()) {
+            NotificationPushDispatcher.dispatchUnread(appContext, userId, notifs);
         }
-
-        NotificationPushDispatcher.dispatchUnread(appContext, userId, dataRef.get());
+        
         return Result.success();
     }
 }

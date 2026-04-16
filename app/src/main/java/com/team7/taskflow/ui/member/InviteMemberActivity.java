@@ -54,7 +54,7 @@ public class InviteMemberActivity extends AppCompatActivity {
         Button btnAddMember = findViewById(R.id.btn_add_member);
 
         memberRepository = new MemberRepository();
-        invitationRepository = new InvitationRepository();
+        invitationRepository = InvitationRepository.getInstance();
 
         // Tìm user
         btnSearch.setOnClickListener(v -> {

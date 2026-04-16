@@ -359,11 +359,6 @@ public class ForYouActivity extends BaseActivity {
         }
 
         // Nếu nhấn lại filter cũ, chỉ bộ đồng bộ lại UI (tránh bị uncheck do toggle)
-        if (activeFilter == filter) {
-            updateFilterUi();
-            return;
-        }
-
         activeFilter = filter;
         updateFilterUi();
 

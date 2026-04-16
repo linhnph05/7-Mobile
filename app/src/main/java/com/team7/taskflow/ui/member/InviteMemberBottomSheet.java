@@ -78,7 +78,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         Button btnAddMember    = view.findViewById(R.id.btn_add_member);
 
         memberRepo = new MemberRepository();
-        invitationRepo = new InvitationRepository();
+        invitationRepo = InvitationRepository.getInstance();
 
         // ── Tìm kiếm user theo email ────────────────────────────
         btnSearch.setOnClickListener(v -> {

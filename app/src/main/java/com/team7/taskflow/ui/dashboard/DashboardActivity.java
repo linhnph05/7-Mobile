@@ -20,6 +20,9 @@ import android.widget.Toast;
 import com.team7.taskflow.ui.foryou.ForYouActivity;
 import com.team7.taskflow.ui.profile.ProfileActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import com.team7.taskflow.ui.base.BaseActivity;
@@ -43,7 +46,9 @@ import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.ui.notification.NotificationsActivity;
 import com.team7.taskflow.ui.notification.NotificationPushScheduler;
 import com.team7.taskflow.ui.project.CreateProjectActivity;
-import com.team7.taskflow.ui.system.StickyTaskService;
+
+import com.team7.taskflow.domain.model.Task;
+import com.team7.taskflow.data.repository.TaskRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -80,6 +85,7 @@ public class DashboardActivity extends BaseActivity {
     private ImageView imgAvatar;
     private TextView tvAvatarLetter;
     private TextView tvWorkspaceName;
+    private TextView tvAiSuggestion;
     private EditText searchBar;
     private MaterialButton btnFilterAll;
     private MaterialButton btnFilterRecent;
@@ -135,9 +141,10 @@ public class DashboardActivity extends BaseActivity {
         currentUserId = SessionManager.getUserId();
         Log.d(TAG, "Logged in userId=" + currentUserId);
 
-        // Initialize repository
         projectRepository = ProjectRepository.getInstance();
         NotificationPushScheduler.ensureScheduled(this);
+        requestNotificationPermission();
+
         whiteNoisePlayer = new WhiteNoisePlayer();
 
         initViews();
@@ -145,6 +152,19 @@ public class DashboardActivity extends BaseActivity {
         setupRecyclerView();
         setupListeners();
         loadUserInfo();
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        101
+                );
+            }
+        }
     }
 
     @Override
@@ -165,12 +185,10 @@ public class DashboardActivity extends BaseActivity {
             bottomNavigationView.setItemIconTintList(null);
             bottomNavigationView.getMenu().findItem(R.id.nav_home).setChecked(true);
         }
-        startStickyServiceSafely();
         loadUnreadNotificationCount();
         if (currentUserId != null && !currentUserId.isEmpty()) {
-            // Khi quay lại từ Detail, buộc reload để cập nhật trạng thái Ghim và nội dung
-            // mới nhất
             loadProjects(true);
+            loadAiSuggestions();
         }
     }
 
@@ -201,13 +219,6 @@ public class DashboardActivity extends BaseActivity {
         return ageMs >= 0L && ageMs <= PROJECTS_CACHE_TTL_MS;
     }
 
-    private void startStickyServiceSafely() {
-        try {
-            ContextCompat.startForegroundService(this, new Intent(this, StickyTaskService.class));
-        } catch (SecurityException | IllegalStateException e) {
-            Log.e(TAG, "Cannot start sticky foreground service", e);
-        }
-    }
 
     /**
      * Khởi tạo các view
@@ -225,10 +236,10 @@ public class DashboardActivity extends BaseActivity {
         btnFilterOwned = findViewById(R.id.btnFilterOwned);
         rvProjects = findViewById(R.id.projectRecyclerView);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        if (bottomNavigationView != null) {
-            bottomNavigationView.setItemIconTintList(null);
-            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        if (tvWorkspaceName != null) {
+            tvWorkspaceName.setText(getString(R.string.dashboard_workspace_guest));
         }
+        tvAiSuggestion = findViewById(R.id.tvAiSuggestion);
 
         View bottomBarContainer = findViewById(R.id.includeBottomBar);
         if (bottomBarContainer != null) {
@@ -522,6 +533,131 @@ public class DashboardActivity extends BaseActivity {
     }
 
     /**
+     * Gợi ý task quan trọng từ AI dựa trên danh sách For You
+     * Quy định: Chỉ gọi AI 1 lần mỗi ngày để tiết kiệm RPM và bảo trì dễ dàng.
+     * LƯU Ý: Đã thêm lệnh xóa cache tạm thời để bạn nạp code là gọi API được ngay.
+     */
+    private void loadAiSuggestions() {
+        if (currentUserId == null || currentUserId.isEmpty() || tvAiSuggestion == null) {
+            return;
+        }
+
+        // Lấy ngày hiện tại format YYYY-MM-DD
+        java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String currentTime = timeFormat.format(new java.util.Date());
+        String today = dateFormat.format(new java.util.Date());
+
+        // Kiểm tra Cache
+        String cachedSuggestion = SessionManager.getCachedAiSuggestion();
+        String cachedDate = SessionManager.getCachedAiSuggestionDate();
+
+        if (today.equals(cachedDate) && !cachedSuggestion.isEmpty()) {
+            // Giả lập hiệu ứng "AI đang phân tích" trong 1.5 giây để UX hay hơn
+            tvAiSuggestion.setText(getString(R.string.dashboard_ai_suggestion_loading));
+            tvAiSuggestion.setAlpha(0.5f);
+            
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    displayFormattedSuggestion(cachedSuggestion);
+                }
+            }, 1500); // Trì hoãn 1.5s
+            return;
+        }
+
+        // Bắt đầu gọi AI
+        tvAiSuggestion.setText(getString(R.string.dashboard_ai_suggestion_loading));
+        tvAiSuggestion.setAlpha(0.5f);
+
+        TaskRepository.getInstance().getMyTasksWithProjectName(currentUserId,
+                new TaskRepository.TaskCallback<List<Task>>() {
+                    @Override
+                    public void onSuccess(List<Task> tasks) {
+                        if (tasks == null || tasks.isEmpty()) {
+                            runOnUiThread(() -> {
+                                tvAiSuggestion.setAlpha(1.0f);
+                                tvAiSuggestion.setText(getString(R.string.dashboard_ai_no_tasks));
+                            });
+                            return;
+                        }
+
+                        List<Task> activeTasks = new ArrayList<>();
+                        for (Task t : tasks) {
+                            if (!"DONE".equals(t.getStatus())) {
+                                activeTasks.add(t);
+                            }
+                        }
+
+                        if (activeTasks.isEmpty()) {
+                            runOnUiThread(() -> {
+                                tvAiSuggestion.setAlpha(1.0f);
+                                tvAiSuggestion.setText(getString(R.string.dashboard_ai_no_tasks));
+                            });
+                            return;
+                        }
+
+                        // Gọi AI Service với ngữ cảnh đầy đủ
+                        com.team7.taskflow.data.remote.AiService.getInstance().getTaskPrioritySuggestion(
+                                activeTasks, currentTime, today,
+                                new com.team7.taskflow.data.remote.AiService.AiStringCallback() {
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        // Lưu vào cache
+                                        SessionManager.saveAiSuggestion(result, today);
+                                        
+                                        runOnUiThread(() -> {
+                                            if (!isFinishing() && !isDestroyed()) {
+                                                displayFormattedSuggestion(result);
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        runOnUiThread(() -> {
+                                            if (!isFinishing() && !isDestroyed()) {
+                                                tvAiSuggestion.setAlpha(1.0f);
+                                                tvAiSuggestion.setText(getString(R.string.dashboard_ai_suggestion_error));
+                                            }
+                                        });
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> {
+                            if (!isFinishing() && !isDestroyed()) {
+                                tvAiSuggestion.setAlpha(1.0f);
+                                tvAiSuggestion.setText(getString(R.string.dashboard_ai_suggestion_error));
+                            }
+                        });
+                    }
+                });
+    }
+
+    /**
+     * Helper để hiển thị nội dung gợi ý với định dạng HTML và hiệu ứng mờ dần
+     */
+    private void displayFormattedSuggestion(String text) {
+        // Chuyển đổi **abc** thành <b>abc</b> để TextView hiển thị Bold
+        String formattedText = text.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
+        
+        // Hiệu ứng Fade-in
+        tvAiSuggestion.setAlpha(0f);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            tvAiSuggestion.setText(android.text.Html.fromHtml(formattedText, android.text.Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            tvAiSuggestion.setText(android.text.Html.fromHtml(formattedText));
+        }
+        
+        tvAiSuggestion.animate()
+                .alpha(1.0f)
+                .setDuration(800)
+                .start();
+    }
+
+    /**
      * Load danh sách projects từ Supabase
      */
     private void loadProjects(boolean forceReload) {
@@ -548,7 +684,7 @@ public class DashboardActivity extends BaseActivity {
             @Override
             public void onSuccess(List<Project> projects) {
                 runOnUiThread(() -> {
-                    if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                    if (isFinishing() || isDestroyed()) {
                         return;
                     }
 
@@ -578,7 +714,7 @@ public class DashboardActivity extends BaseActivity {
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> {
-                    if (isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && isDestroyed())) {
+                    if (isFinishing() || isDestroyed()) {
                         return;
                     }
                     Log.d(TAG, "Error loading projects: " + error);
@@ -759,6 +895,7 @@ public class DashboardActivity extends BaseActivity {
         private AudioTrack audioTrack;
         private Thread audioThread;
 
+        @SuppressWarnings("deprecation")
         boolean start() {
             if (playing) {
                 return true;

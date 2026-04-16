@@ -524,43 +524,17 @@ public class TaskRepository {
 
     // ── History ─────────────────────────────────────────────────────────
     public void getProjectMembers(long projectId, TaskCallback<List<User>> callback) {
-        // Query: /project_members?project_id=eq.{id}&select=*,users(*)
-        projectApi.getProjectMembers("eq." + projectId, "*,users(*)")
-                .enqueue(new retrofit2.Callback<List<ProjectMember>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<List<ProjectMember>> call,
-                                           @NonNull retrofit2.Response<List<ProjectMember>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<User> users = new java.util.ArrayList<>();
-                            for (ProjectMember pm : response.body()) {
-                                if (pm == null || pm.isRemoved()) {
-                                    continue;
-                                }
-                                User u = new User();
-                                if (pm.getUserInfo() != null) {
-                                    ProjectMember.UserInfo info = pm.getUserInfo();
-                                    u.setUserId(info.userId != null ? info.userId : pm.getUserId());
-                                    u.setDisplayName(info.displayName);
-                                    u.setEmail(info.email);
-                                    u.setAvatarUrl(info.avatarUrl);
-                                } else {
-                                    // Fallback: tạo User tối giản chỉ từ userId
-                                    u.setUserId(pm.getUserId());
-                                    u.setDisplayName(pm.getUserId());
-                                }
-                                users.add(u);
-                            }
-                            callback.onSuccess(users);
-                        } else {
-                            callback.onError("Failed to load members: " + response.code());
-                        }
-                    }
+        ProjectRepository.getInstance().getProjectMembers(projectId, new ProjectRepository.ProjectCallback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> result) {
+                callback.onSuccess(result);
+            }
 
-                    @Override
-                    public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
-                        callback.onError(t.getMessage());
-                    }
-                });
+            @Override
+            public void onError(String error) {
+                callback.onError(error);
+            }
+        });
     }
     public void getTaskHistory(long taskId, TaskCallback<List<TaskActivity>> callback) {
         taskApi.getTaskActivities("eq." + taskId, "created_at.desc").enqueue(new Callback<List<TaskActivity>>() {

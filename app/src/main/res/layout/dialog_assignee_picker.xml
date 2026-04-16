@@ -7,19 +7,49 @@
     android:padding="20dp">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Phân công cho"
-        android:textColor="@color/theme_text_primary"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
-
-    <!-- Member list is built dynamically in Java -->
-    <LinearLayout
-        android:id="@+id/containerMembers"
+        android:id="@+id/tvPickerTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:text="@string/task_assignee_picker_title"
+        android:textColor="@color/theme_text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/etMemberSearch"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_input_neutral"
+        android:hint="@string/project_member_search_hint"
+        android:paddingHorizontal="12dp"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="8dp"
+        android:maxLines="1"
+        android:inputType="text" />
+
+    <ProgressBar
+        android:id="@+id/pbLoadingMembers"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
+        android:layout_margin="24dp"
+        android:indeterminateTint="@color/primary"
+        android:visibility="gone" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="400dp">
+
+        <LinearLayout
+            android:id="@+id/containerMembers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+            
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

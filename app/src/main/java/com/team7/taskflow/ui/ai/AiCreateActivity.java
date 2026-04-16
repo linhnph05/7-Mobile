@@ -92,12 +92,12 @@ public class AiCreateActivity extends AppCompatActivity {
     private int nextTaskNumber = 1;
     private List<Uri> attachedFileUris = new ArrayList<>();
     private int uploadSuccessCount = 0;
-    private List<ProjectMember> projectMembers = new ArrayList<>();
+    private List<com.team7.taskflow.domain.model.User> projectMembers = new ArrayList<>();
 
     // Selected values (stored for DB write)
     private String selectedPriority = PRIORITY_MEDIUM;
-    private String selectedStartDate = null;  // ISO 8601
-    private String selectedDueDate = null;    // ISO 8601
+    private String selectedStartDate = null; // ISO 8601
+    private String selectedDueDate = null; // ISO 8601
     private String selectedAssigneeName = null;
     private String selectedAssigneeId = null;
     private String selectedTag = null;
@@ -121,8 +121,8 @@ public class AiCreateActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
 
         int contentLayout = shouldUseSubTaskLayout(getIntent())
-            ? R.layout.activity_ai_create_subtask
-            : R.layout.activity_ai_create;
+                ? R.layout.activity_ai_create_subtask
+                : R.layout.activity_ai_create;
         setContentView(contentLayout);
 
         // Handle back pressed gesture with OnBackPressedDispatcher
@@ -144,16 +144,19 @@ public class AiCreateActivity extends AppCompatActivity {
 
     private void readIntentExtras() {
         String key = getIntent().getStringExtra("project_key");
-        if (key != null && !key.isEmpty()) projectKey = key;
+        if (key != null && !key.isEmpty())
+            projectKey = key;
 
         projectId = getIntent().getLongExtra("project_id", -1);
         int num = getIntent().getIntExtra("next_task_number", 1);
-        if (num > 0) nextTaskNumber = num;
+        if (num > 0)
+            nextTaskNumber = num;
 
         long parentTaskId = getIntent().getLongExtra(EXTRA_PARENT_TASK_ID, -1);
         if (parentTaskId > 0) {
             selectedParentTaskId = parentTaskId;
-            // Validate that parent task doesn't already have a parent (prevent nested subtasks)
+            // Validate that parent task doesn't already have a parent (prevent nested
+            // subtasks)
             validateParentTaskHierarchy();
         }
         selectedParentTaskTitle = getIntent().getStringExtra(EXTRA_PARENT_TASK_TITLE);
@@ -174,9 +177,9 @@ public class AiCreateActivity extends AppCompatActivity {
                 if (parentTask != null && parentTask.getParentTaskId() != null && parentTask.getParentTaskId() > 0) {
                     // Parent task already has a parent - disallow nesting beyond 1 level
                     runOnUiThread(() -> {
-                        Toast.makeText(AiCreateActivity.this, 
-                            "Không thể tạo task con từ một task con. Chỉ cho phép một cấp độ con.", 
-                            Toast.LENGTH_LONG).show();
+                        Toast.makeText(AiCreateActivity.this,
+                                "Không thể tạo task con từ một task con. Chỉ cho phép một cấp độ con.",
+                                Toast.LENGTH_LONG).show();
                         selectedParentTaskId = null;
                         selectedParentTaskTitle = null;
                         closeActivity();
@@ -194,17 +197,18 @@ public class AiCreateActivity extends AppCompatActivity {
 
     private void loadProjectMembers() {
         ProjectRepository.getInstance()
-                .getProjectMembers(projectId, new ProjectRepository.ProjectCallback<List<ProjectMember>>() {
-                    @Override
-                    public void onSuccess(List<ProjectMember> result) {
-                        projectMembers = result;
-                    }
+                .getProjectMembers(projectId,
+                        new ProjectRepository.ProjectCallback<List<com.team7.taskflow.domain.model.User>>() {
+                            @Override
+                            public void onSuccess(List<com.team7.taskflow.domain.model.User> result) {
+                                projectMembers = result;
+                            }
 
-                    @Override
-                    public void onError(String error) {
-                        Log.e("AiCreateActivity", "Failed to load project members: " + error);
-                    }
-                });
+                            @Override
+                            public void onError(String error) {
+                                Log.e("AiCreateActivity", "Failed to load project members: " + error);
+                            }
+                        });
     }
 
     // ── View binding ─────────────────────────────────────────────────────
@@ -316,7 +320,8 @@ public class AiCreateActivity extends AppCompatActivity {
         etPrompt.requestFocus();
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            if (imm != null) imm.showSoftInput(etPrompt, InputMethodManager.SHOW_IMPLICIT);
+            if (imm != null)
+                imm.showSoftInput(etPrompt, InputMethodManager.SHOW_IMPLICIT);
         }, 150);
     }
 
@@ -349,12 +354,19 @@ public class AiCreateActivity extends AppCompatActivity {
         });
 
         etPrompt.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
                 parseHandler.removeCallbacks(parseDebounceRunnable);
                 parseHandler.postDelayed(parseDebounceRunnable, PARSE_DEBOUNCE_DELAY_MS);
             }
-            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
@@ -375,23 +387,25 @@ public class AiCreateActivity extends AppCompatActivity {
     }
 
     private void callAiParse(String prompt) {
-        if (prompt.isEmpty()) return;
+        if (prompt.isEmpty())
+            return;
         isAiParseInFlight = true;
 
         tvTaskId.setText("AI đang phân tích...");
 
         // 1. Members
         StringBuilder sbMembers = new StringBuilder();
-        for (ProjectMember m : projectMembers) {
-            if (m.getUser() != null) {
-                if (sbMembers.length() > 0) sbMembers.append(", ");
-                sbMembers.append(m.getUser().getDisplayNameOrEmail());
+        for (com.team7.taskflow.domain.model.User m : projectMembers) {
+            if (m.getDisplayName() != null) {
+                if (sbMembers.length() > 0)
+                    sbMembers.append(", ");
+                sbMembers.append(m.getDisplayName());
             }
         }
-        
+
         // 2. Tags (Using the same list as the picker)
         String tagsCsv = "Backend, Frontend, Design, Bug";
-        
+
         // 3. Parent Task Context
         String parentTitle = (selectedParentTaskId != null) ? selectedParentTaskTitle : "";
 
@@ -414,15 +428,15 @@ public class AiCreateActivity extends AppCompatActivity {
                     fallbackLocalParse(prompt);
                     if (error.contains("429")) {
                         tvTaskId.setText("⚠ Đã hết lượt gợi ý bằng AI");
-                        tvTaskId.setBackgroundResource(R.drawable.bg_task_id_red); 
+                        tvTaskId.setBackgroundResource(R.drawable.bg_task_id_red);
                     } else if (error.contains("Safety")) {
                         tvTaskId.setText("❌ AI từ chối (Gợi ý nhạy cảm)");
-                        tvTaskId.setBackgroundResource(R.drawable.bg_task_id_red); 
+                        tvTaskId.setBackgroundResource(R.drawable.bg_task_id_red);
                         parseHandler.postDelayed(AiCreateActivity.this::resetStatusBadge, 2500);
                     } else {
                         tvTaskId.setText("❌ AI Lỗi: " + error);
                         tvTaskId.setBackgroundResource(R.drawable.bg_task_id_red);
-                        // Don't reset if it's an error so user can see what's wrong 
+                        // Don't reset if it's an error so user can see what's wrong
                     }
                 });
             }
@@ -449,8 +463,8 @@ public class AiCreateActivity extends AppCompatActivity {
         if (!result.assigneeName.isEmpty()) {
             selectedAssigneeName = result.assigneeName;
             // Try matching ID
-            for (ProjectMember m : projectMembers) {
-                if (m.getUser() != null && m.getUser().getDisplayNameOrEmail().equalsIgnoreCase(result.assigneeName)) {
+            for (com.team7.taskflow.domain.model.User m : projectMembers) {
+                if (m.getDisplayName() != null && m.getDisplayName().equalsIgnoreCase(result.assigneeName)) {
                     selectedAssigneeId = m.getUserId();
                     break;
                 }
@@ -492,7 +506,8 @@ public class AiCreateActivity extends AppCompatActivity {
             String line = prompt.split("\n")[0];
             // If the prompt is starting with "hủy diệt", just take the title
             String cleanTitle = line.replace("ngày mai", "").replace("hôm nay", "").replace("lúc", "").trim();
-            if (cleanTitle.length() > 60) cleanTitle = cleanTitle.substring(0, 60) + "...";
+            if (cleanTitle.length() > 60)
+                cleanTitle = cleanTitle.substring(0, 60) + "...";
             etParsedTitle.setText(cleanTitle);
         }
 
@@ -509,10 +524,21 @@ public class AiCreateActivity extends AppCompatActivity {
             setActive(cardDueDate, tvDueDate, ivDueDate, R.color.project_blue);
         }
 
-        if (text.contains("đức")) { selectedAssigneeName = "Đức"; tvAssignee.setText("@Đức"); setActive(cardAssignee, tvAssignee, ivAssignee, R.color.text_purple_600); }
-        else if (text.contains("linh")) { selectedAssigneeName = "Linh"; tvAssignee.setText("@Linh"); setActive(cardAssignee, tvAssignee, ivAssignee, R.color.text_purple_600); }
+        if (text.contains("đức")) {
+            selectedAssigneeName = "Đức";
+            tvAssignee.setText("@Đức");
+            setActive(cardAssignee, tvAssignee, ivAssignee, R.color.text_purple_600);
+        } else if (text.contains("linh")) {
+            selectedAssigneeName = "Linh";
+            tvAssignee.setText("@Linh");
+            setActive(cardAssignee, tvAssignee, ivAssignee, R.color.text_purple_600);
+        }
 
-        if (text.contains("code") || text.contains("dev") || text.contains("fix")) { selectedTag = "Backend"; tvTag.setText("#Backend"); setActive(cardTag, tvTag, ivTag, R.color.text_orange_600); }
+        if (text.contains("code") || text.contains("dev") || text.contains("fix")) {
+            selectedTag = "Backend";
+            tvTag.setText("#Backend");
+            setActive(cardTag, tvTag, ivTag, R.color.text_orange_600);
+        }
     }
 
     // ── Save Task to Supabase ────────────────────────────────────────────
@@ -536,10 +562,14 @@ public class AiCreateActivity extends AppCompatActivity {
         task.setDescription(etParsedDescription.getText().toString().trim());
         task.setPriority(selectedPriority);
         task.setStatus("TODO");
-        if (selectedDueDate != null) task.setDueDate(selectedDueDate);
-        if (selectedStartDate != null) task.setStartDate(selectedStartDate);
-        if (selectedTag != null) task.setTag(selectedTag);
-        if (selectedAssigneeId != null) task.setAssigneeId(selectedAssigneeId);
+        if (selectedDueDate != null)
+            task.setDueDate(selectedDueDate);
+        if (selectedStartDate != null)
+            task.setStartDate(selectedStartDate);
+        if (selectedTag != null)
+            task.setTag(selectedTag);
+        if (selectedAssigneeId != null)
+            task.setAssigneeId(selectedAssigneeId);
         task.setParentTaskId(selectedParentTaskId);
 
         TaskRepository.getInstance().createTask(task, new TaskRepository.TaskCallback<Task>() {
@@ -562,7 +592,8 @@ public class AiCreateActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     btnSaveTask.setEnabled(true);
                     if (error.contains("401")) {
-                        Toast.makeText(AiCreateActivity.this, "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(AiCreateActivity.this, "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!",
+                                Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(AiCreateActivity.this, "Lỗi tạo Task: " + error, Toast.LENGTH_LONG).show();
                     }
@@ -574,8 +605,8 @@ public class AiCreateActivity extends AppCompatActivity {
     // ── Pickers (BottomSheet) ────────────────────────────────────────────
 
     private void showDatePicker(boolean isStartDate) {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(
+                this, R.style.Theme_TaskFlow_BottomSheet);
         View view = getLayoutInflater().inflate(R.layout.dialog_datetime_picker, null);
         dialog.setContentView(view);
 
@@ -593,14 +624,17 @@ public class AiCreateActivity extends AppCompatActivity {
 
         tvSelectedTime.setText(String.format(java.util.Locale.getDefault(), "%02d:%02d", sel[3], sel[4]));
 
-        calendarView.setOnDateChangeListener((v, y, m, d) -> { sel[0] = y; sel[1] = m; sel[2] = d; });
+        calendarView.setOnDateChangeListener((v, y, m, d) -> {
+            sel[0] = y;
+            sel[1] = m;
+            sel[2] = d;
+        });
 
-        layoutTimePicker.setOnClickListener(v ->
-                new android.app.TimePickerDialog(this, (tp, h, mi) -> {
-                    sel[3] = h; sel[4] = mi;
-                    tvSelectedTime.setText(String.format(java.util.Locale.getDefault(), "%02d:%02d", h, mi));
-                }, sel[3], sel[4], true).show()
-        );
+        layoutTimePicker.setOnClickListener(v -> new android.app.TimePickerDialog(this, (tp, h, mi) -> {
+            sel[3] = h;
+            sel[4] = mi;
+            tvSelectedTime.setText(String.format(java.util.Locale.getDefault(), "%02d:%02d", h, mi));
+        }, sel[3], sel[4], true).show());
 
         btnSaveDateTime.setOnClickListener(v -> {
             // Build ISO datetime string
@@ -624,19 +658,22 @@ public class AiCreateActivity extends AppCompatActivity {
     }
 
     private void showPriorityPicker() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(
+                this, R.style.Theme_TaskFlow_BottomSheet);
         View view = getLayoutInflater().inflate(R.layout.dialog_priority_picker, null);
         dialog.setContentView(view);
 
         view.findViewById(R.id.optHigh).setOnClickListener(v -> {
-            setPriority(PRIORITY_HIGH); dialog.dismiss();
+            setPriority(PRIORITY_HIGH);
+            dialog.dismiss();
         });
         view.findViewById(R.id.optMedium).setOnClickListener(v -> {
-            setPriority(PRIORITY_MEDIUM); dialog.dismiss();
+            setPriority(PRIORITY_MEDIUM);
+            dialog.dismiss();
         });
         view.findViewById(R.id.optLow).setOnClickListener(v -> {
-            setPriority(PRIORITY_LOW); dialog.dismiss();
+            setPriority(PRIORITY_LOW);
+            dialog.dismiss();
         });
         view.findViewById(R.id.optNone).setOnClickListener(v -> {
             setPriority(PRIORITY_NONE);
@@ -650,24 +687,30 @@ public class AiCreateActivity extends AppCompatActivity {
         selectedPriority = priority;
         tvPriority.setText(getPriorityLabel(priority));
         int colorRes = R.color.theme_text_primary;
-        if (PRIORITY_HIGH.equals(priority)) colorRes = R.color.priority_high;
-        else if (PRIORITY_MEDIUM.equals(priority)) colorRes = R.color.priority_medium;
-        else if (PRIORITY_LOW.equals(priority)) colorRes = R.color.priority_low;
-        else if (PRIORITY_NONE.equals(priority)) colorRes = R.color.theme_text_secondary;
+        if (PRIORITY_HIGH.equals(priority))
+            colorRes = R.color.priority_high;
+        else if (PRIORITY_MEDIUM.equals(priority))
+            colorRes = R.color.priority_medium;
+        else if (PRIORITY_LOW.equals(priority))
+            colorRes = R.color.priority_low;
+        else if (PRIORITY_NONE.equals(priority))
+            colorRes = R.color.theme_text_secondary;
         setActive(cardPriority, tvPriority, ivPriority, colorRes);
     }
 
     private void showAssigneePicker() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(
+                this, R.style.Theme_TaskFlow_BottomSheet);
         View view = getLayoutInflater().inflate(R.layout.dialog_assignee_picker, null);
         dialog.setContentView(view);
 
         LinearLayout container = view.findViewById(R.id.containerMembers);
 
-        for (ProjectMember member : projectMembers) {
-            if (member.getUser() == null) continue;
-            String name = member.getUser().getDisplayNameOrEmail();
+        for (com.team7.taskflow.domain.model.User member : projectMembers) {
+            String initialName = member.getDisplayName();
+            if (initialName == null)
+                initialName = member.getUserId();
+            final String name = initialName;
             container.addView(createPickerItem(name, v -> {
                 selectedAssigneeName = name;
                 selectedAssigneeId = member.getUserId();
@@ -690,12 +733,12 @@ public class AiCreateActivity extends AppCompatActivity {
     }
 
     private void showTagPicker() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(
+                this, R.style.Theme_TaskFlow_BottomSheet);
         View view = getLayoutInflater().inflate(R.layout.dialog_tag_picker, null);
         dialog.setContentView(view);
 
-        String[] tags = {"Backend", "Frontend", "Design", "Bug"};
+        String[] tags = { "Backend", "Frontend", "Design", "Bug" };
         LinearLayout container = view.findViewById(R.id.containerTags);
 
         for (String tag : tags) {
@@ -735,8 +778,7 @@ public class AiCreateActivity extends AppCompatActivity {
                         }
                         updateAttachmentUi();
                     }
-                }
-        );
+                });
     }
 
     private void openFilePicker() {
@@ -766,16 +808,16 @@ public class AiCreateActivity extends AppCompatActivity {
             Uri uri = attachedFileUris.get(i);
             int index = i;
             View itemView = inflater.inflate(R.layout.item_attachment_chip, containerAttachments, false);
-            
+
             TextView tvName = itemView.findViewById(R.id.tvFileName);
             ImageView btnRemove = itemView.findViewById(R.id.btnRemoveFile);
-            
+
             tvName.setText(getFileNameFromUri(uri));
             btnRemove.setOnClickListener(v -> {
                 attachedFileUris.remove(uri);
                 updateAttachmentUi();
             });
-            
+
             containerAttachments.addView(itemView);
         }
     }
@@ -813,12 +855,12 @@ public class AiCreateActivity extends AppCompatActivity {
                     @Override
                     public void onError(String error) {
                         runOnUiThread(() -> {
-                            Toast.makeText(AiCreateActivity.this, "Lỗi file " + (index + 1) + ": " + error, Toast.LENGTH_LONG).show();
+                            Toast.makeText(AiCreateActivity.this, "Lỗi file " + (index + 1) + ": " + error,
+                                    Toast.LENGTH_LONG).show();
                             uploadNextAttachment(index + 1, taskId, baseMsg);
                         });
                     }
-                }
-        );
+                });
     }
 
     // ── UI Helpers (Color management) ────────────────────────────────────
@@ -827,7 +869,8 @@ public class AiCreateActivity extends AppCompatActivity {
     private void setActive(View container, TextView tv, ImageView icon, int tintColorRes) {
         int color = ContextCompat.getColor(this, tintColorRes);
         tv.setTextColor(color);
-        if (icon != null) icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+        if (icon != null)
+            icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
         if (container != null) {
             android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
             gd.setColor(androidx.core.graphics.ColorUtils.setAlphaComponent(color, 25)); // 10% opacity
@@ -841,16 +884,22 @@ public class AiCreateActivity extends AppCompatActivity {
     private void setDefault(View container, TextView tv, ImageView icon) {
         int color = ContextCompat.getColor(this, COLOR_DEFAULT);
         tv.setTextColor(color);
-        if (icon != null) icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
-        if (container != null) container.setBackgroundResource(R.drawable.bg_chip_neutral);
+        if (icon != null)
+            icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+        if (container != null)
+            container.setBackgroundResource(R.drawable.bg_chip_neutral);
     }
 
     private String getPriorityLabel(String priority) {
         switch (priority) {
-            case PRIORITY_HIGH:   return getString(R.string.task_priority_high);
-            case PRIORITY_LOW:    return getString(R.string.task_priority_low);
-            case PRIORITY_NONE:   return getString(R.string.task_priority_none);
-            default:              return getString(R.string.task_priority_medium);
+            case PRIORITY_HIGH:
+                return getString(R.string.task_priority_high);
+            case PRIORITY_LOW:
+                return getString(R.string.task_priority_low);
+            case PRIORITY_NONE:
+                return getString(R.string.task_priority_none);
+            default:
+                return getString(R.string.task_priority_medium);
         }
     }
 
@@ -871,7 +920,7 @@ public class AiCreateActivity extends AppCompatActivity {
         tv.setTextColor(ContextCompat.getColor(this, colorRes));
         tv.setPadding(dp(20), dp(14), dp(20), dp(14));
         // Ripple effect
-        int[] attrs = new int[] {android.R.attr.selectableItemBackground};
+        int[] attrs = new int[] { android.R.attr.selectableItemBackground };
         android.content.res.TypedArray ta = obtainStyledAttributes(attrs);
         tv.setBackground(ta.getDrawable(0));
         ta.recycle();
@@ -901,10 +950,10 @@ public class AiCreateActivity extends AppCompatActivity {
                         Integer.parseInt(dateParts[1]),
                         Integer.parseInt(dateParts[0]),
                         Integer.parseInt(timeParts[0]),
-                        Integer.parseInt(timeParts[1])
-                );
+                        Integer.parseInt(timeParts[1]));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return isoDate;
     }
 
@@ -914,14 +963,16 @@ public class AiCreateActivity extends AppCompatActivity {
             try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (idx >= 0) result = cursor.getString(idx);
+                    if (idx >= 0)
+                        result = cursor.getString(idx);
                 }
             }
         }
         if ("file".equals(result) && uri.getPath() != null) {
             String path = uri.getPath();
             int cut = path.lastIndexOf('/');
-            if (cut != -1) result = path.substring(cut + 1);
+            if (cut != -1)
+                result = path.substring(cut + 1);
         }
         return result;
     }
@@ -945,7 +996,9 @@ public class AiCreateActivity extends AppCompatActivity {
             dayOffset = 0;
         }
 
-        Pattern timePattern = Pattern.compile("\\b(\\d{1,2})(?:\\s*[:h]\\s*(\\d{1,2}))?\\s*(giờ|h)?\\s*(am|pm|sáng|trưa|chiều|tối|đêm)?\\b", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        Pattern timePattern = Pattern.compile(
+                "\\b(\\d{1,2})(?:\\s*[:h]\\s*(\\d{1,2}))?\\s*(giờ|h)?\\s*(am|pm|sáng|trưa|chiều|tối|đêm)?\\b",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         Matcher matcher = timePattern.matcher(normalized);
         if (dayOffset == null) {
             return null;
@@ -1003,15 +1056,17 @@ public class AiCreateActivity extends AppCompatActivity {
     private void hideKeyboard() {
         etPrompt.clearFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) imm.hideSoftInputFromWindow(bottomSheet.getWindowToken(), 0);
+        if (imm != null)
+            imm.hideSoftInputFromWindow(bottomSheet.getWindowToken(), 0);
     }
 
     @Override
     public boolean dispatchTouchEvent(android.view.MotionEvent ev) {
         if (ev.getAction() == android.view.MotionEvent.ACTION_DOWN) {
             boolean isTouchInsideAnyEditText = false;
-            for (EditText et : new EditText[]{etPrompt, etParsedTitle, etParsedDescription}) {
-                if (et == null) continue;
+            for (EditText et : new EditText[] { etPrompt, etParsedTitle, etParsedDescription }) {
+                if (et == null)
+                    continue;
                 android.graphics.Rect outRect = new android.graphics.Rect();
                 et.getGlobalVisibleRect(outRect);
                 if (outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
@@ -1024,7 +1079,8 @@ public class AiCreateActivity extends AppCompatActivity {
                 if (v != null) {
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                    if (imm != null) imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    if (imm != null)
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }

@@ -239,12 +239,16 @@
                         android:textStyle="bold"
                         android:textSize="16sp"/>
                     <TextView
+                        android:id="@+id/tvAiSuggestion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/dashboard_focus_desc"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/dashboard_ai_suggestion_loading"
                         android:textColor="@color/theme_text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="2dp"
+                        android:lineHeight="20sp"
+                        tools:text="Đây là nội dung gợi ý từ AI sẽ hiển thị đầy đủ ở đây, không bị dấu ba chấm."/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

@@ -25,15 +25,21 @@ public class InvitationRepository {
     private static final String STATUS_ACCEPTED = "ACCEPTED";
     private static final String STATUS_DENIED = "DENIED";
 
+    private static InvitationRepository instance;
     private final InvitationApiService api;
+
+    private InvitationRepository() {
+        this.api = SupabaseClient.getInstance().getService(InvitationApiService.class);
+    }
+
+    public static synchronized InvitationRepository getInstance() {
+        if (instance == null) instance = new InvitationRepository();
+        return instance;
+    }
 
     public interface ResultCallback<T> {
         void onSuccess(T data);
         void onError(String message);
-    }
-
-    public InvitationRepository() {
-        this.api = SupabaseClient.getInstance().getService(InvitationApiService.class);
     }
 
     /**

@@ -21,6 +21,8 @@ public class SessionManager {
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_DISPLAY_NAME = "display_name";
     private static final String KEY_EXPIRES_AT = "expires_at";
+    private static final String KEY_AI_SUGGESTION = "ai_suggestion";
+    private static final String KEY_AI_SUGGESTION_DATE = "ai_suggestion_date";
 
     private static SharedPreferences prefs;
     private static Context appContext;
@@ -126,6 +128,24 @@ public class SessionManager {
         Intent intent = new Intent(appContext, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         appContext.startActivity(intent);
+    }
+
+    public static void saveAiSuggestion(String suggestion, String date) {
+        ensureInit();
+        prefs.edit()
+                .putString(KEY_AI_SUGGESTION, suggestion)
+                .putString(KEY_AI_SUGGESTION_DATE, date)
+                .apply();
+    }
+
+    public static String getCachedAiSuggestion() {
+        ensureInit();
+        return prefs.getString(KEY_AI_SUGGESTION, "");
+    }
+
+    public static String getCachedAiSuggestionDate() {
+        ensureInit();
+        return prefs.getString(KEY_AI_SUGGESTION_DATE, "");
     }
 
     private static void ensureInit() {

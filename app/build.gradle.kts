@@ -39,6 +39,7 @@ android {
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${env("GOOGLE_WEB_CLIENT_ID")}\"")
         buildConfigField("String", "GITHUB_REDIRECT_URI",  "\"${env("GITHUB_REDIRECT_URI")}\"")
         buildConfigField("String", "GEMINI_API_KEY",       "\"${env("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "GEMINI_MODEL",         "\"${env("GEMINI_MODEL")}\"")
     }
 
     buildFeatures {

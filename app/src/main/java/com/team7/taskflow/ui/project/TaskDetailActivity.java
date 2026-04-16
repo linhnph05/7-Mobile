@@ -41,6 +41,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.repository.ProjectRepository;
 import com.team7.taskflow.data.repository.TaskRepository;
 import com.team7.taskflow.domain.model.Comment;
 import com.team7.taskflow.domain.model.ProjectHistoryItem;
@@ -111,6 +112,10 @@ public class TaskDetailActivity extends BaseActivity {
     private String currentUserId;
     private TaskRepository taskRepository;
     private List<User> projectMembers = new ArrayList<>();
+    private boolean isMembersLoading = false;
+    private android.widget.LinearLayout currentPickerContainer;
+    private android.widget.ProgressBar currentPickerProgressBar;
+    private String currentSearchFilter = "";
     private ArrayAdapter<String> assigneeAdapter;
     private long projectId;
 
@@ -574,19 +579,19 @@ public class TaskDetailActivity extends BaseActivity {
         if (isImage) {
             // Hiá»‡n thumbnail, áº©n icon
             ivIcon.setVisibility(View.GONE);
-                if (ivThumb != null) {
-                    ivThumb.setVisibility(View.VISIBLE);
-                    Object src = localUri != null ? localUri : remoteUrl;
+            if (ivThumb != null) {
+                ivThumb.setVisibility(View.VISIBLE);
+                Object src = localUri != null ? localUri : remoteUrl;
 
-                    // Lifecycle-safe Glide call
-                    if (!isFinishing() && !isDestroyed()) {
-                        Glide.with(this).load(src)
-                                .placeholder(R.drawable.ic_attach_file)
-                                .error(R.drawable.ic_attach_file)
-                                .centerCrop()
-                                .into(ivThumb);
-                    }
+                // Lifecycle-safe Glide call
+                if (!isFinishing() && !isDestroyed()) {
+                    Glide.with(this).load(src)
+                            .placeholder(R.drawable.ic_attach_file)
+                            .error(R.drawable.ic_attach_file)
+                            .centerCrop()
+                            .into(ivThumb);
                 }
+            }
         } else {
             if (ivThumb != null)
                 ivThumb.setVisibility(View.GONE);
@@ -768,7 +773,7 @@ public class TaskDetailActivity extends BaseActivity {
         EditText etTimeSpent = dialogView.findViewById(R.id.etWorklogTimeSpent);
         EditText etTimeRemaining = dialogView.findViewById(R.id.etWorklogTimeRemaining);
         EditText etDescription = dialogView.findViewById(R.id.etWorklogDescription);
-        
+
         TextView tvErrorSpent = dialogView.findViewById(R.id.tvErrorTimeSpent);
         TextView tvErrorRemain = dialogView.findViewById(R.id.tvErrorTimeRemaining);
         TextView tvErrorDesc = dialogView.findViewById(R.id.tvErrorDescription);
@@ -785,7 +790,8 @@ public class TaskDetailActivity extends BaseActivity {
         TextView tvTime = dialogView.findViewById(R.id.tvWorklogTime);
 
         java.util.Calendar calendar = java.util.Calendar.getInstance();
-        java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd",
+                java.util.Locale.getDefault());
         java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
 
         if (tvDate != null) {
@@ -796,7 +802,8 @@ public class TaskDetailActivity extends BaseActivity {
                     calendar.set(java.util.Calendar.MONTH, month);
                     calendar.set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth);
                     tvDate.setText(dateFormat.format(calendar.getTime()));
-                }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH), calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
+                }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH),
+                        calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
             });
         }
 
@@ -829,9 +836,12 @@ public class TaskDetailActivity extends BaseActivity {
         if (btnSaveInternal != null) {
             btnSaveInternal.setOnClickListener(v -> {
                 // Reset Errors
-                if (tvErrorSpent != null) tvErrorSpent.setVisibility(View.GONE);
-                if (tvErrorRemain != null) tvErrorRemain.setVisibility(View.GONE);
-                if (tvErrorDesc != null) tvErrorDesc.setVisibility(View.GONE);
+                if (tvErrorSpent != null)
+                    tvErrorSpent.setVisibility(View.GONE);
+                if (tvErrorRemain != null)
+                    tvErrorRemain.setVisibility(View.GONE);
+                if (tvErrorDesc != null)
+                    tvErrorDesc.setVisibility(View.GONE);
 
                 String timeText = etTimeSpent.getText().toString().trim();
                 String remainText = etTimeRemaining != null ? etTimeRemaining.getText().toString().trim() : "";
@@ -849,20 +859,22 @@ public class TaskDetailActivity extends BaseActivity {
                     etTimeSpent.requestFocus();
                     hasError = true;
                 }
-                
+
                 if (descText.isEmpty()) {
                     if (tvErrorDesc != null) {
                         tvErrorDesc.setText(R.string.worklog_error_description_required);
                         tvErrorDesc.setVisibility(View.VISIBLE);
                     }
-                    if (!hasError) etDescription.requestFocus();
+                    if (!hasError)
+                        etDescription.requestFocus();
                     hasError = true;
                 }
 
-                if (hasError) return;
+                if (hasError)
+                    return;
 
                 hideKeyboard(dialogView);
-                
+
                 SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
                 long currentTotal = prefs.getLong(worklogTotalKey(taskId), 0L);
 
@@ -878,7 +890,8 @@ public class TaskDetailActivity extends BaseActivity {
                     newEntry.put("completed", true);
                     newEntry.put("description", descText);
                     entries.put(newEntry);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
 
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putLong(worklogTotalKey(taskId), currentTotal + durationMs);
@@ -1481,7 +1494,8 @@ public class TaskDetailActivity extends BaseActivity {
                     @Override
                     public void onError(String e) {
                         runOnUiThread(() -> {
-                            if (isFinishing() || isDestroyed()) return;
+                            if (isFinishing() || isDestroyed())
+                                return;
                             Toast.makeText(TaskDetailActivity.this, e, Toast.LENGTH_SHORT).show();
                             loadComments();
                         });
@@ -1670,21 +1684,58 @@ public class TaskDetailActivity extends BaseActivity {
     }
 
     private void loadProjectMembers() {
+        if (projectId <= 0)
+            return;
+
+        // Check cache manually for immediate UI response
+        List<User> cached = ProjectRepository.getInstance().getCachedMembers(projectId);
+        if (cached != null && !cached.isEmpty()) {
+            projectMembers = new ArrayList<>(cached);
+            isMembersLoading = false;
+            runOnUiThread(() -> {
+                syncAssigneeUI();
+                if (currentPickerContainer != null) {
+                    populateMemberPicker(currentPickerContainer, currentPickerProgressBar, null);
+                }
+            });
+            return;
+        }
+
+        isMembersLoading = true;
+        if (currentPickerProgressBar != null) {
+            currentPickerProgressBar.setVisibility(View.VISIBLE);
+        }
+
         taskRepository.getProjectMembers(projectId, new TaskRepository.TaskCallback<List<User>>() {
             @Override
             public void onSuccess(List<User> members) {
-                projectMembers = members;
+                isMembersLoading = false;
+                projectMembers = members != null ? members : new ArrayList<>();
                 runOnUiThread(() -> {
-                    if (taskId != null && currentAssigneeId != null)
-                        setAssigneeById(currentAssigneeId);
+                    syncAssigneeUI();
+                    if (currentPickerContainer != null) {
+                        populateMemberPicker(currentPickerContainer, currentPickerProgressBar, null);
+                    }
                 });
             }
 
             @Override
             public void onError(String e) {
+                isMembersLoading = false;
                 Log.e("MEMBER_LOAD", e);
+                runOnUiThread(() -> {
+                    if (currentPickerProgressBar != null) {
+                        currentPickerProgressBar.setVisibility(View.GONE);
+                    }
+                });
             }
         });
+    }
+
+    private void syncAssigneeUI() {
+        if (currentAssigneeId != null) {
+            setAssigneeById(currentAssigneeId);
+        }
     }
 
     private void saveTask() {
@@ -1918,19 +1969,129 @@ public class TaskDetailActivity extends BaseActivity {
         BottomSheetDialog d = new BottomSheetDialog(this, R.style.Theme_TaskFlow_BottomSheet);
         View v = getLayoutInflater().inflate(R.layout.dialog_assignee_picker, null);
         d.setContentView(v);
-        LinearLayout container = v.findViewById(R.id.containerMembers);
-        for (User m : projectMembers) {
-            String name = m.getDisplayName();
-            container.addView(createPickerItem(name, x -> {
-                setAssignee(m.getUserId(), name);
-                d.dismiss();
-            }, R.color.theme_text_primary));
+
+        currentPickerContainer = v.findViewById(R.id.containerMembers);
+        currentPickerProgressBar = v.findViewById(R.id.pbLoadingMembers);
+        android.widget.EditText etSearch = v.findViewById(R.id.etMemberSearch);
+        currentSearchFilter = "";
+
+        if (etSearch != null) {
+            etSearch.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    currentSearchFilter = s.toString().toLowerCase(Locale.getDefault());
+                    populateMemberPicker(currentPickerContainer, currentPickerProgressBar, d);
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) {
+                }
+            });
         }
-        container.addView(createPickerItem(getString(R.string.task_unassign), x -> {
-            setAssignee(null, null);
-            d.dismiss();
-        }, R.color.theme_text_secondary));
+
+        d.setOnDismissListener(dialog -> {
+            currentPickerContainer = null;
+            currentPickerProgressBar = null;
+        });
+
+        populateMemberPicker(currentPickerContainer, currentPickerProgressBar, d);
+
+        if (projectMembers.isEmpty() || isMembersLoading) {
+            loadProjectMembers();
+        }
+
         d.show();
+    }
+
+    private void populateMemberPicker(LinearLayout container, ProgressBar pb, BottomSheetDialog dialog) {
+        if (container == null)
+            return;
+        container.removeAllViews();
+
+        if (isMembersLoading && projectMembers.isEmpty()) {
+            if (pb != null)
+                pb.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (pb != null)
+            pb.setVisibility(View.GONE);
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        // Option: Unassign
+        if (currentSearchFilter.isEmpty()) {
+            View unassignView = inflater.inflate(R.layout.item_picker_member, container, false);
+            TextView tvName = unassignView.findViewById(R.id.tvMemberName);
+            ImageView ivAvatar = unassignView.findViewById(R.id.ivMemberAvatar);
+            ImageView ivCheck = unassignView.findViewById(R.id.ivCheck);
+
+            if (tvName != null)
+                tvName.setText(R.string.task_unassign);
+            if (ivAvatar != null)
+                ivAvatar.setImageResource(R.drawable.ic_person);
+            if (ivCheck != null)
+                ivCheck.setVisibility(currentAssigneeId == null ? View.VISIBLE : View.GONE);
+
+            unassignView.setOnClickListener(x -> {
+                setAssignee(null, null);
+                if (dialog != null)
+                    dialog.dismiss();
+            });
+            container.addView(unassignView);
+        }
+
+        List<User> filtered = new ArrayList<>();
+        for (User u : projectMembers) {
+            String name = u.getDisplayName() != null ? u.getDisplayName().toLowerCase(Locale.getDefault()) : "";
+            if (currentSearchFilter.isEmpty() || name.contains(currentSearchFilter)) {
+                filtered.add(u);
+            }
+        }
+
+        if (!filtered.isEmpty()) {
+            for (User m : filtered) {
+                View itemView = inflater.inflate(R.layout.item_picker_member, container, false);
+                TextView tvName = itemView.findViewById(R.id.tvMemberName);
+                ImageView ivAvatar = itemView.findViewById(R.id.ivMemberAvatar);
+                ImageView ivCheck = itemView.findViewById(R.id.ivCheck);
+
+                String name = m.getDisplayName();
+                if (tvName != null)
+                    tvName.setText(name != null ? name : getString(R.string.task_member_fallback));
+
+                if (currentAssigneeId != null && currentAssigneeId.equals(m.getUserId())) {
+                    if (ivCheck != null)
+                        ivCheck.setVisibility(View.VISIBLE);
+                }
+
+                if (ivAvatar != null) {
+                    Glide.with(this)
+                            .load(m.getAvatarUrl())
+                            .placeholder(R.drawable.ic_person)
+                            .error(R.drawable.ic_person)
+                            .circleCrop()
+                            .into(ivAvatar);
+                }
+
+                itemView.setOnClickListener(x -> {
+                    setAssignee(m.getUserId(), name);
+                    if (dialog != null)
+                        dialog.dismiss();
+                });
+                container.addView(itemView);
+            }
+        } else if (!isMembersLoading) {
+            TextView tvEmpty = new TextView(this);
+            tvEmpty.setText(R.string.task_members_empty);
+            tvEmpty.setPadding(32, 64, 32, 64);
+            tvEmpty.setGravity(android.view.Gravity.CENTER);
+            tvEmpty.setTextColor(ContextCompat.getColor(this, R.color.theme_text_secondary));
+            container.addView(tvEmpty);
+        }
     }
 
     private void showTagPicker() {

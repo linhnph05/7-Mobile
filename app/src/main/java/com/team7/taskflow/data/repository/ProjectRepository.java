@@ -51,11 +51,25 @@ public class ProjectRepository {
         taskApi = SupabaseClient.getInstance().getService(TaskApi.class);
     }
 
+    private final Map<Long, List<User>> memberCache = new HashMap<>();
+
     public static synchronized ProjectRepository getInstance() {
         if (instance == null) {
             instance = new ProjectRepository();
         }
         return instance;
+    }
+
+    public List<User> getCachedMembers(long projectId) {
+        return memberCache.get(projectId);
+    }
+
+    public void clearMemberCache(long projectId) {
+        memberCache.remove(projectId);
+    }
+
+    public void clearAllCaches() {
+        memberCache.clear();
     }
 
     /**
@@ -1184,7 +1198,14 @@ public class ProjectRepository {
     /**
      * Get all members of a specific project (with nested User info)
      */
-    public void getProjectMembers(long projectId, ProjectCallback<List<ProjectMember>> callback) {
+    public void getProjectMembers(long projectId, ProjectCallback<List<User>> callback) {
+        // Check cache first
+        List<User> cached = memberCache.get(projectId);
+        if (cached != null && !cached.isEmpty()) {
+            callback.onSuccess(cached);
+            return;
+        }
+
         projectApi.getProjectMembers(
                 "eq." + projectId,
                 "*,users(*)").enqueue(new Callback<List<ProjectMember>>() {
@@ -1192,13 +1213,26 @@ public class ProjectRepository {
                     public void onResponse(@NonNull Call<List<ProjectMember>> call,
                             @NonNull Response<List<ProjectMember>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<ProjectMember> filtered = new ArrayList<>();
-                            for (ProjectMember member : response.body()) {
-                                if (member != null && !member.isRemoved()) {
-                                    filtered.add(member);
+                            List<User> users = new ArrayList<>();
+                            for (ProjectMember pm : response.body()) {
+                                if (pm == null || pm.isRemoved()) {
+                                    continue;
                                 }
+                                User u = new User();
+                                if (pm.getUserInfo() != null) {
+                                    ProjectMember.UserInfo info = pm.getUserInfo();
+                                    u.setUserId(info.userId != null ? info.userId : pm.getUserId());
+                                    u.setDisplayName(info.displayName);
+                                    u.setEmail(info.email);
+                                    u.setAvatarUrl(info.avatarUrl);
+                                } else {
+                                    u.setUserId(pm.getUserId());
+                                    u.setDisplayName(pm.getUserId());
+                                }
+                                users.add(u);
                             }
-                            callback.onSuccess(filtered);
+                            memberCache.put(projectId, users);
+                            callback.onSuccess(users);
                         } else {
                             callback.onError("Failed to load members: " + response.code());
                         }

@@ -69,7 +69,14 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
         TaskRepository.getInstance().updateTaskStatus(taskId, oldStatus, "DONE", new TaskRepository.TaskCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
+                // Làm mới Widget
                 refreshAll(context);
+                
+                // Đồng bộ: Xóa thông báo Push nhiệm vụ (nếu có)
+                android.app.NotificationManager manager = (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (manager != null) {
+                    manager.cancel(1001);
+                }
             }
 
             @Override

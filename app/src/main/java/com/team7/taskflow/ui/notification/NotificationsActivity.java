@@ -52,7 +52,7 @@ public class NotificationsActivity extends BaseActivity {
     private NotificationAdapter adapter;
     private List<Notification> allNotifications = new ArrayList<>();
     private final NotificationRepository notificationRepo = NotificationRepository.getInstance();
-    private final InvitationRepository invitationRepo = new InvitationRepository();
+    private final InvitationRepository invitationRepo = InvitationRepository.getInstance();
     private final TaskRepository taskRepository = TaskRepository.getInstance();
 
         private String[] filterOptions;

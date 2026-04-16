@@ -121,7 +121,10 @@
     <string name="dashboard_filter_recent">Recent</string>
     <string name="dashboard_filter_owned">Mine</string>
     <string name="dashboard_focus_title">Focus for today</string>
-    <string name="dashboard_focus_desc">AI suggests prioritizing Mobile App MVP. The deadline is approaching in 2 days.</string>
+    <string name="dashboard_ai_suggestion_loading">Analyzing your schedule...</string>
+    <string name="dashboard_ai_suggestion_error">The assistant is busy coordinating data, please try again in a moment!</string>
+    <string name="dashboard_ai_suggestion_prefix">Suggestion: </string>
+    <string name="dashboard_ai_no_tasks">Your schedule is clear. Let\'s start something new!</string>
     <string name="dashboard_workspace_guest">Hello, Guest</string>
     <string name="dashboard_workspace_format">Hello, %1$s</string>
     <string name="dashboard_avatar_content_desc">User avatar</string>
@@ -240,6 +243,7 @@
     <string name="project_deleted_at_unknown">Deleted time unknown</string>
     <string name="project_deleted_at_format">Deleted at: %1$s</string>
     <string name="project_activity_count_format">%1$d new activities</string>
+    <string name="project_member_search_hint">Tìm kiếm thành viên...</string>
     <string name="project_role_owner">Owner</string>
     <string name="project_role_admin">Admin</string>
     <string name="project_role_member">Member</string>
@@ -353,6 +357,10 @@
     <string name="task_focus_start">Start Focus</string>
     <string name="task_status_picker_title">Choose status</string>
     <string name="task_unassign">Unassign</string>
+    <string name="task_assignee_picker_title">Phân công cho</string>
+    <string name="task_member_role_default">Thành viên dự án</string>
+    <string name="task_members_empty">Không tìm thấy thành viên.</string>
+    <string name="task_member_fallback">Thành viên</string>
     <string name="calendar_month_year_placeholder">Tháng %1$d năm %2$d</string>
     <string name="calendar_today">Today</string>
     <string name="calendar_tasks_in_selected_date">Tasks in selected date</string>
@@ -583,4 +591,10 @@
     <string name="push_title_attachment_added">New attachment</string>
     <string name="push_title_deadline_reminder">Deadline reminder</string>
     <string name="trash_item_untitled">Untitled task</string>
+
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">Enable Notifications</string>
+    <string name="notification_permission_desc">To ensure you don\'t miss important task updates and invitations, please allow TaskFlow to send notifications.</string>
+    <string name="notification_permission_allow">Allow</string>
+    <string name="notification_permission_deny">Not now</string>
 </resources>

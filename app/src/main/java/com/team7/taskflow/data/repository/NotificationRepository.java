@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.team7.taskflow.data.repository.InvitationRepository;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,6 +48,50 @@ public class NotificationRepository {
     public interface NotificationCallback<T> {
         void onSuccess(T result);
         void onError(String error);
+    }
+
+    public void hydrateInviteStatuses(List<Notification> notifications, String userEmail, Runnable onComplete) {
+        if (notifications == null || notifications.isEmpty() || userEmail == null) {
+            if (onComplete != null) onComplete.run();
+            return;
+        }
+
+        List<Notification> inviteNotifications = new ArrayList<>();
+        for (Notification n : notifications) {
+            if (n.getType() == Notification.NotificationType.PROJECT_INVITE && n.getReferenceId() != null) {
+                inviteNotifications.add(n);
+            }
+        }
+
+        if (inviteNotifications.isEmpty()) {
+            if (onComplete != null) onComplete.run();
+            return;
+        }
+
+        InvitationRepository invitationRepo = InvitationRepository.getInstance();
+        AtomicInteger pending = new AtomicInteger(inviteNotifications.size());
+        String normalizedEmail = userEmail.trim().toLowerCase(Locale.US);
+
+        for (Notification inviteNotification : inviteNotifications) {
+            invitationRepo.getLatestInvitationStatus(
+                    inviteNotification.getReferenceId(),
+                    normalizedEmail,
+                    new InvitationRepository.ResultCallback<String>() {
+                        @Override
+                        public void onSuccess(String status) {
+                            inviteNotification.setInviteStatus(status);
+                            if (pending.decrementAndGet() == 0 && onComplete != null) {
+                                onComplete.run();
+                            }
+                        }
+                        @Override
+                        public void onError(String message) {
+                            if (pending.decrementAndGet() == 0 && onComplete != null) {
+                                onComplete.run();
+                            }
+                        }
+                    });
+        }
     }
 
     public void getNotifications(String userId, NotificationCallback<List<Notification>> callback) {

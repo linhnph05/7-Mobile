@@ -8,7 +8,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import com.team7.taskflow.domain.model.Task;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -26,7 +28,8 @@ import okhttp3.Response;
 public class AiService {
 
     private static final String TAG = "AiService";
-    private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent";
+    private static final String GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
+    private static final String GEMINI_URL = GEMINI_BASE_URL + BuildConfig.GEMINI_MODEL + ":generateContent";
 
     private static AiService instance;
     private final OkHttpClient client;
@@ -48,6 +51,95 @@ public class AiService {
     /**
      * Parse a natural language prompt into structured task fields.
      */
+    public void getTaskPrioritySuggestion(List<Task> tasks, String currentTime, String currentDate, AiStringCallback callback) {
+        String apiKey = BuildConfig.GEMINI_API_KEY;
+        if (apiKey == null || apiKey.isEmpty()) {
+            callback.onError("API Key missing");
+            return;
+        }
+
+        StringBuilder taskData = new StringBuilder();
+        taskData.append("Dữ liệu phân tích tại: ").append(currentTime).append(" ngày ").append(currentDate).append("\n");
+        taskData.append("Danh sách công việc đang chờ:\n");
+        for (Task t : tasks) {
+            taskData.append("- ").append(t.getTitle())
+                    .append(" (Dự án: ").append(t.getProjectName() != null ? t.getProjectName() : "N/A").append(")\n")
+                    .append("  Mô tả: ").append(t.getDescription() != null ? t.getDescription() : "Không có")
+                    .append("\n  Độ ưu tiên: ").append(t.getPriority())
+                    .append("\n  Hạn chót: ").append(t.getDueDate() != null ? t.getDueDate() : "Chưa đặt")
+                    .append("\n\n");
+        }
+
+        String systemPrompt = "Bạn là một Huấn luyện viên Hiệu suất (Productivity Coach) thân thiện. " +
+                "Nhiệm vụ: Phân tích danh sách công việc và đưa ra CHIẾN LƯỢC TẬP TRUNG.\n\n" +
+                "Phong cách: Trò chuyện tự nhiên, khích lệ (nhận xét ngắn về số lượng task hoặc ngày mới).\n\n" +
+                "Cấu trúc phản hồi:\n" +
+                "1. Một câu chào hoặc nhận xét ngắn (1-2 câu).\n" +
+                "2. Danh sách 3 điểm mấu chốt dùng gạch đầu dòng • :\n" +
+                "• **Tâm điểm**: [Tên Task] - [Dự án]\n" +
+                "• **Chiến lược**: [Lý do chọn - tối đa 15 từ]\n" +
+                "• **Bắt đầu ngay**: [Hành động nhỏ - tối đa 10 từ]\n" +
+                "Lưu ý: Tổng văn bản không quá 50 từ để vừa vặn màn hình mobile.";
+
+        try {
+            JSONObject requestJson = new JSONObject();
+            JSONObject systemInstruction = new JSONObject();
+            systemInstruction.put("parts", new JSONArray().put(new JSONObject().put("text", systemPrompt)));
+            requestJson.put("system_instruction", systemInstruction);
+
+            JSONArray contents = new JSONArray();
+            JSONObject userContent = new JSONObject();
+            userContent.put("role", "user");
+            userContent.put("parts", new JSONArray().put(new JSONObject().put("text", taskData.toString())));
+            contents.put(userContent);
+            requestJson.put("contents", contents);
+
+            JSONObject genConfig = new JSONObject();
+            genConfig.put("temperature", 0.7); // Tăng độ sáng tạo cho Coach
+            requestJson.put("generation_config", genConfig);
+
+            String url = GEMINI_URL + "?key=" + apiKey;
+            RequestBody body = RequestBody.create(requestJson.toString(), MediaType.parse("application/json; charset=utf-8"));
+            Request request = new Request.Builder().url(url).post(body).build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError(e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    try {
+                        String responseBody = response.body() != null ? response.body().string() : "";
+                        if (!response.isSuccessful()) {
+                            callback.onError("Error: " + response.code());
+                            return;
+                        }
+                        JSONObject json = new JSONObject(responseBody);
+                        if (!json.has("candidates") || json.getJSONArray("candidates").length() == 0) {
+                            callback.onError("No candidates");
+                            return;
+                        }
+                        String text = json.getJSONArray("candidates").getJSONObject(0)
+                                .getJSONObject("content").getJSONArray("parts").getJSONObject(0)
+                                .getString("text").trim();
+                        callback.onSuccess(text);
+                    } catch (Exception e) {
+                        callback.onError(e.getMessage());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onError(e.getMessage());
+        }
+    }
+
+    public interface AiStringCallback {
+        void onSuccess(String result);
+        void onError(String error);
+    }
+
     public void parsePrompt(String prompt, String membersCsv, String tagsCsv, String parentTaskTitle,
             AiCallback callback) {
         String apiKey = BuildConfig.GEMINI_API_KEY;
