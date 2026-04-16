@@ -139,6 +139,12 @@
             android:name=".ui.project.FocusModeActivity"
             android:exported="false"
             android:theme="@style/Theme.TaskFlow" />
+        <activity
+            android:name=".ui.widget.WidgetTaskDoneConfirmActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:theme="@style/Theme.TaskFlow.Translucent" />
         <!-- Notification -->
         <activity android:name=".ui.notification.NotificationsActivity" />
 
