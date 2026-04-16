@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
 import com.team7.taskflow.data.remote.api.UserApi;
@@ -153,7 +154,23 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
 
             itemView.setOnClickListener(v -> { if (listener != null) listener.onTaskClick(task); });
-            btnMenu.setOnClickListener(v -> { if (listener != null) listener.onTaskMenuClick(task, v); });
+                btnMenu.setOnClickListener(v -> {
+                if (listener == null) return;
+
+                String taskTitle = task != null && task.getTitle() != null && !task.getTitle().trim().isEmpty()
+                    ? task.getTitle().trim()
+                    : itemView.getContext().getString(R.string.trash_untitled_task);
+
+                new MaterialAlertDialogBuilder(itemView.getContext(), R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
+                    .setTitle(R.string.task_move_to_trash_confirm_title)
+                    .setMessage(itemView.getContext().getString(
+                        R.string.task_move_to_trash_confirm_message_format,
+                        taskTitle))
+                    .setPositiveButton(R.string.task_move_to_trash_confirm_action,
+                        (dialog, which) -> listener.onTaskMenuClick(task, v))
+                    .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
+                    .show();
+                });
             itemView.setOnLongClickListener(v -> {
                 if (longPressListener != null) {
                     longPressListener.onTaskLongPress(task, v);

@@ -27,7 +27,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Quay lại"
+                android:contentDescription="@string/back"
                 android:src="@drawable/ic_chevron_left"
                 app:tint="@color/theme_text_primary"
                 app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +37,7 @@
                 android:id="@+id/tvToolbarTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chi tiết công việc"
+                android:text="@string/task_detail_title"
                 android:textColor="@color/theme_text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -53,7 +53,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
                 android:paddingHorizontal="10dp"
-                android:text="Lưu"
+                android:text="@string/task_save"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -141,7 +141,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TÊN CÔNG VIỆC"
+                        android:text="@string/task_title_label"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -152,7 +152,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_input"
-                        android:hint="Tên công việc"
+                        android:hint="@string/task_title_hint"
                         android:inputType="textCapSentences"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="14dp"
@@ -165,7 +165,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:text="MÔ TẢ"
+                        android:text="@string/task_description_label"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -177,7 +177,7 @@
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_input"
                         android:gravity="top"
-                        android:hint="Mô tả"
+                        android:hint="@string/task_description_hint"
                         android:inputType="textCapSentences|textMultiLine"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="14dp"
@@ -273,7 +273,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="NGƯỜI ĐƯỢC GIAO"
+                        android:text="@string/task_assignee_label"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -302,7 +302,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:layout_weight="1"
-                            android:text="Chọn người"
+                            android:text="@string/task_select_assignee"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -336,7 +336,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="TỆP ĐÍNH KÈM"
+                            android:text="@string/task_attachments_label"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="11sp"
                             android:textStyle="bold" />
@@ -373,7 +373,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:layout_weight="1"
-                                android:text="Thêm tệp"
+                            android:text="@string/task_add_file"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -422,7 +422,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:text="Lịch làm việc"
+                            android:text="@string/task_schedule_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="17sp"
                             android:textStyle="bold" />
@@ -447,7 +447,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="NGÀY BẮT ĐẦU"
+                                android:text="@string/task_start_date_full"
                                 android:textColor="@color/theme_text_primary"
                                 android:textSize="10sp"
                                 android:textStyle="bold" />
@@ -491,7 +491,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="HẠN CHÓT"
+                                android:text="@string/task_due_date_full"
                                 android:textColor="@color/theme_text_primary"
                                 android:textSize="10sp"
                                 android:textStyle="bold" />
@@ -621,7 +621,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
-                        android:text="Tag"
+                        android:text="@string/task_tag_label"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="15sp" />
 
@@ -631,7 +631,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="Trống"
+                        android:text="@string/task_tag_empty"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -668,7 +668,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
-                        android:text="Phụ thuộc task"
+                        android:text="@string/task_dependency_label"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="15sp" />
 
@@ -678,7 +678,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="Không có"
+                        android:text="@string/task_dependency_none"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -701,17 +701,17 @@
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bình luận" />
+                    android:text="@string/task_activity_comments_tab" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lịch sử" />
+                    android:text="@string/task_activity_history_tab" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Thời gian" />
+                    android:text="@string/task_activity_time_tab" />
             </com.google.android.material.tabs.TabLayout>
 
             <FrameLayout
@@ -748,7 +748,7 @@
                             android:layout_weight="1"
                             android:layout_marginStart="8dp"
                             android:background="@null"
-                            android:hint="Viết bình luận..."
+                            android:hint="@string/task_comment_hint"
                             android:inputType="textCapSentences|textMultiLine"
                             android:maxLines="4"
                             android:minHeight="40dp"
@@ -799,7 +799,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:gravity="center"
-                        android:text="Chưa có lịch sử hoạt động."
+                        android:text="@string/task_history_empty_activity"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="13sp"
                         android:visibility="gone" />
@@ -846,7 +846,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="10dp"
-                                    android:text="Tổng quan thời gian"
+                                    android:text="@string/task_worklog_overview_title"
                                     android:textColor="@color/theme_text_primary"
                                     android:textSize="17sp"
                                     android:textStyle="bold" />
@@ -857,7 +857,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="14dp"
-                                android:text="Đã tốn: 0m • Còn lại: 0m"
+                                android:text="@string/worklog_summary_placeholder"
                                 android:textColor="@color/theme_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -867,7 +867,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="Tổng cộng: 0m"
+                                android:text="@string/task_total_time_format"
                                 android:textColor="@color/theme_text_primary"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -906,7 +906,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="10dp"
-                                    android:text="Nhật ký làm việc"
+                                    android:text="@string/task_worklog_log_title"
                                     android:textColor="@color/theme_text_primary"
                                     android:textSize="17sp"
                                     android:textStyle="bold" />
@@ -917,7 +917,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="14dp"
-                                android:text="Chưa ghi nhận thời gian làm việc."
+                                android:text="@string/task_worklog_empty"
                                 android:textColor="@color/theme_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -945,7 +945,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Cập nhật Work Log"
+                            android:text="@string/worklog_update_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />

@@ -136,6 +136,9 @@
     <string name="trash_pending_purge">Đang chờ xóa</string>
     <string name="trash_next_auto_cleanup">DỌN TỰ ĐỘNG TIẾP THEO</string>
     <string name="trash_info_text">Các mục trong thùng rác sẽ bị xóa vĩnh viễn sau 30 ngày. Hãy thao tác cẩn thận.</string>
+    <string name="task_move_to_trash_confirm_title">Chuyển task vào thùng rác?</string>
+    <string name="task_move_to_trash_confirm_message_format">Task "%1$s" sẽ được chuyển vào Thùng rác.</string>
+    <string name="task_move_to_trash_confirm_action">Chuyển</string>
     <string name="trash_empty_state_title">Thùng rác đang trống</string>
     <string name="trash_auto_cleanup_placeholder">12 giờ 45 phút</string>
     <string name="trash_back_content_desc">Quay lại</string>
@@ -144,6 +147,9 @@
     <string name="trash_empty_confirm_title">Dọn thùng rác</string>
     <string name="trash_empty_confirm_message">Thao tác này sẽ xóa vĩnh viễn toàn bộ mục trong thùng rác. Không thể hoàn tác.</string>
     <string name="trash_empty_confirm_action">Dọn</string>
+    <string name="trash_delete_confirm_title">Xóa vĩnh viễn task này?</string>
+    <string name="trash_delete_confirm_message_format">Task \"%1$s\" sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.</string>
+    <string name="trash_delete_confirm_action">Xóa</string>
     <string name="trash_item_untitled">Công việc chưa có tên</string>
     <string name="trash_item_category_task">CÔNG VIỆC</string>
     <string name="trash_item_icon_content_desc">Mục trong thùng rác</string>
@@ -235,6 +241,11 @@
     <string name="task_status_todo">Cần làm</string>
     <string name="task_status_in_progress">Đang làm</string>
     <string name="task_status_done">Hoàn thành</string>
+    <string name="task_tag_empty">Trống</string>
+    <string name="task_dependency_label">Phụ thuộc task</string>
+    <string name="task_dependency_none">Không có</string>
+    <string name="task_worklog_overview_title">Tổng quan thời gian</string>
+    <string name="task_worklog_log_title">Nhật ký làm việc</string>
     <string name="task_create_button">Tạo</string>
     <string name="task_priority_low">Thấp</string>
     <string name="task_priority_medium">Trung bình</string>
@@ -268,6 +279,12 @@
     <string name="task_start_date_full">Ngày bắt đầu</string>
     <string name="task_due_date_full">Hạn chót</string>
     <string name="task_comment_hint">Viết bình luận...</string>
+    <string name="comment_edit_dialog_title">Chỉnh sửa bình luận</string>
+    <string name="comment_edit_dialog_subtitle">Cập nhật nội dung bình luận</string>
+    <string name="comment_edit_dialog_input_hint">Nội dung bình luận</string>
+    <string name="comment_edit_dialog_cancel">Hủy</string>
+    <string name="comment_edit_dialog_save">Lưu</string>
+    <string name="comment_edit_dialog_error_empty">Bình luận không được để trống</string>
     <string name="task_history_empty_activity">Chưa có lịch sử hoạt động.</string>
     <string name="task_total_time_format">Tổng thời gian: 0m</string>
     <string name="task_focus_help">Nhấn nút Focus nổi để bắt đầu tập trung 25 phút.</string>
@@ -277,7 +294,18 @@
     <string name="task_assignee_label">Người được giao</string>
     <string name="task_tag_label">Nhãn</string>
     <string name="task_attach_label">Đính kèm</string>
+    <string name="task_attach_source_camera">Chụp ảnh từ Camera</string>
+    <string name="task_attach_source_files">Thư viện / File</string>
     <string name="task_attach_chooser">Chọn tệp để đính kèm</string>
+    <string name="task_camera_open_failed">Không thể mở camera: %1$s</string>
+    <string name="task_camera_permission_required">Cần cấp quyền Camera để chụp ảnh</string>
+    <string name="task_focus_mode_label">Chế độ Focus</string>
+    <string name="task_total_time_dynamic_format">Tổng cộng: %1$s</string>
+    <string name="worklog_summary_dynamic_format">Đã tốn: %1$s • Còn lại: %2$s</string>
+    <string name="worklog_remaining_placeholder">---</string>
+    <string name="task_title_required_error">Vui lòng nhập tên công việc</string>
+    <string name="task_datetime_order_error">Giờ bắt đầu không được lớn hơn giờ kết thúc. Vui lòng chỉnh lại thời gian.</string>
+    <string name="task_save_failed_format">Không thành công: %1$s</string>
     <string name="task_start_date_label">Bắt đầu</string>
     <string name="ai_task_due_date_label">Hạn chót</string>
     <string name="task_date_placeholder">Chọn ngày</string>
@@ -372,6 +400,10 @@
     <string name="widget_summary_subtitle">HÔM NAY</string>
     <string name="widget_summary_percent_format">%1$d%%</string>
     <string name="widget_summary_count_format">%1$d task còn lại</string>
+    <string name="widget_confirm_done_title">Đánh dấu hoàn thành?</string>
+    <string name="widget_confirm_done_message">Task này sẽ được chuyển sang trạng thái Đã xong.</string>
+    <string name="widget_confirm_done_action">Đánh dấu xong</string>
+    <string name="widget_confirm_done_cancel">Hủy</string>
 
     <string name="project_settings_key_format">KEY: %1$s</string>
     <string name="project_settings_key_na">N/A</string>

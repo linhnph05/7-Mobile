@@ -206,6 +206,9 @@
     <string name="trash_pending_purge">Pending Purge</string>
     <string name="trash_next_auto_cleanup">NEXT AUTO-CLEANUP</string>
     <string name="trash_info_text">Items in the trash will be permanently deleted after 30 days. Action wisely.</string>
+    <string name="task_move_to_trash_confirm_title">Move task to trash?</string>
+    <string name="task_move_to_trash_confirm_message_format">Task "%1$s" will be moved to Trash.</string>
+    <string name="task_move_to_trash_confirm_action">Move</string>
     <string name="trash_empty_state_title">Trash is empty</string>
     <string name="trash_auto_cleanup_placeholder">12 Hours 45 Mins</string>
     <string name="trash_back_content_desc">Back</string>
@@ -214,6 +217,9 @@
     <string name="trash_empty_confirm_title">Empty Trash</string>
     <string name="trash_empty_confirm_message">This will permanently delete all items in trash. This action cannot be undone.</string>
     <string name="trash_empty_confirm_action">Empty</string>
+    <string name="trash_delete_confirm_title">Delete task permanently?</string>
+    <string name="trash_delete_confirm_message_format">Task \"%1$s\" will be permanently deleted. This action cannot be undone.</string>
+    <string name="trash_delete_confirm_action">Delete</string>
     <string name="trash_auto_cleanup_demo">12 Hours 45 Mins</string>
     <string name="trash_restore_success">Task restored successfully</string>
     <string name="trash_delete_success">Task deleted permanently</string>
@@ -314,6 +320,11 @@
     <string name="task_status_todo">To Do</string>
     <string name="task_status_in_progress">Doing</string>
     <string name="task_status_done">Done</string>
+        <string name="task_tag_empty">Empty</string>
+        <string name="task_dependency_label">Task dependency</string>
+        <string name="task_dependency_none">None</string>
+        <string name="task_worklog_overview_title">Time overview</string>
+        <string name="task_worklog_log_title">Work log</string>
     <string name="task_create_button">Create</string>
     <string name="task_priority_low">Low</string>
     <string name="task_priority_medium">Medium</string>
@@ -347,6 +358,12 @@
     <string name="task_start_date_full">Start Date</string>
     <string name="task_due_date_full">Due Date</string>
     <string name="task_comment_hint">Write a comment...</string>
+    <string name="comment_edit_dialog_title">Edit comment</string>
+    <string name="comment_edit_dialog_subtitle">Update your comment content</string>
+    <string name="comment_edit_dialog_input_hint">Comment content</string>
+    <string name="comment_edit_dialog_cancel">Cancel</string>
+    <string name="comment_edit_dialog_save">Save</string>
+    <string name="comment_edit_dialog_error_empty">Comment cannot be empty</string>
     <string name="task_history_empty_activity">No activity history yet.</string>
     <string name="task_total_time_format">Total time: 0m</string>
     <string name="task_focus_help">Tap the floating Focus button to start a 25-minute session.</string>
@@ -408,7 +425,18 @@
     <string name="task_assignee_label">Assignee</string>
     <string name="task_tag_label">Tag</string>
     <string name="task_attach_label">Attach</string>
+    <string name="task_attach_source_camera">Take photo from camera</string>
+    <string name="task_attach_source_files">Library / Files</string>
     <string name="task_attach_chooser">Choose file to attach</string>
+    <string name="task_camera_open_failed">Cannot open camera: %1$s</string>
+    <string name="task_camera_permission_required">Camera permission is required to take photos</string>
+    <string name="task_focus_mode_label">Focus mode</string>
+    <string name="task_total_time_dynamic_format">Total: %1$s</string>
+    <string name="worklog_summary_dynamic_format">Spent: %1$s • Remaining: %2$s</string>
+    <string name="worklog_remaining_placeholder">---</string>
+    <string name="task_title_required_error">Please enter task title</string>
+    <string name="task_datetime_order_error">Start time cannot be later than due time. Please adjust it.</string>
+    <string name="task_save_failed_format">Failed: %1$s</string>
     <string name="task_start_date_label">Start</string>
     <string name="ai_task_due_date_label">Due</string>
     <string name="task_date_placeholder">Select date</string>
@@ -471,6 +499,10 @@
     <string name="widget_error">Không thể tải danh sách task</string>
 
     <string name="widget_reload">Tải lại</string>
+    <string name="widget_confirm_done_title">Mark task as done?</string>
+    <string name="widget_confirm_done_message">This task will be moved to Done status.</string>
+    <string name="widget_confirm_done_action">Mark done</string>
+    <string name="widget_confirm_done_cancel">Cancel</string>
 
     <string name="shortcut_add_task_short">Thêm Task mới</string>
     <string name="shortcut_add_task_long">Tạo task mới nhanh</string>

@@ -432,8 +432,11 @@ public class TaskDetailActivity extends BaseActivity {
     // âœ… Má»Ÿ dialog chá»n nguá»“n: Camera hoáº·c File
     private void openFilePicker() {
         new AlertDialog.Builder(this)
-                .setTitle("Đính kèm file")
-                .setItems(new String[] { "Chụp ảnh từ Camera", "Thư viện / File" }, (dialog, which) -> {
+                .setTitle(R.string.task_attach_label)
+                .setItems(new String[] {
+                        getString(R.string.task_attach_source_camera),
+                        getString(R.string.task_attach_source_files)
+                }, (dialog, which) -> {
                     if (which == 0)
                         openCamera();
                     else
@@ -458,7 +461,7 @@ public class TaskDetailActivity extends BaseActivity {
                     this, getPackageName() + ".fileprovider", imgFile);
             cameraLauncher.launch(cameraImageUri);
         } catch (Exception e) {
-            Toast.makeText(this, "Không thể mở camera: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.task_camera_open_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -467,7 +470,7 @@ public class TaskDetailActivity extends BaseActivity {
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        filePickerLauncher.launch(Intent.createChooser(intent, "Chọn file đính kèm"));
+        filePickerLauncher.launch(Intent.createChooser(intent, getString(R.string.task_attach_chooser)));
     }
 
     @Override
@@ -478,7 +481,7 @@ public class TaskDetailActivity extends BaseActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openCamera();
             } else {
-                Toast.makeText(this, "Cần cấp quyền Camera để chụp ảnh", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.task_camera_permission_required, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -964,14 +967,14 @@ public class TaskDetailActivity extends BaseActivity {
 
     private void refreshWorkLogUi() {
         if (tvPomodoroState != null) {
-            tvPomodoroState.setText("Focus mode");
+            tvPomodoroState.setText(R.string.task_focus_mode_label);
         }
 
         if (taskId == null) {
             if (tvWorklogTotal != null)
-                tvWorklogTotal.setText("Tổng cộng: 0m");
+                tvWorklogTotal.setText(R.string.task_total_time_format);
             if (tvWorklogSummary != null)
-                tvWorklogSummary.setText("Đã tốn: 0m • Còn lại: 0m");
+                tvWorklogSummary.setText(R.string.worklog_summary_placeholder);
             if (tvWorklogEntries != null)
                 tvWorklogEntries.setText(getString(R.string.task_worklog_empty));
             return;
@@ -980,7 +983,7 @@ public class TaskDetailActivity extends BaseActivity {
         SharedPreferences prefs = getSharedPreferences(WORKLOG_PREFS, MODE_PRIVATE);
         long totalMs = prefs.getLong(worklogTotalKey(taskId), 0L);
         if (tvWorklogTotal != null) {
-            tvWorklogTotal.setText("Tổng cộng: " + formatDurationCompact(totalMs));
+            tvWorklogTotal.setText(getString(R.string.task_total_time_dynamic_format, formatDurationCompact(totalMs)));
         }
 
         long remainingMs = 0;
@@ -993,8 +996,13 @@ public class TaskDetailActivity extends BaseActivity {
         }
 
         if (tvWorklogSummary != null) {
-            String remainStr = remainingMs > 0 ? formatDurationCompact(remainingMs) : "---";
-            tvWorklogSummary.setText("Đã tốn: " + formatDurationCompact(totalMs) + " • Còn lại: " + remainStr);
+            String remainStr = remainingMs > 0
+                ? formatDurationCompact(remainingMs)
+                : getString(R.string.worklog_remaining_placeholder);
+            tvWorklogSummary.setText(getString(
+                R.string.worklog_summary_dynamic_format,
+                formatDurationCompact(totalMs),
+                remainStr));
         }
 
         if (tvWorklogEntries != null) {
@@ -1374,7 +1382,7 @@ public class TaskDetailActivity extends BaseActivity {
 
         if (tvAssignee != null && tvAssignee.getText() != null) {
             String assigneeText = tvAssignee.getText().toString().trim();
-            if (!assigneeText.isEmpty() && !"Chọn người".equalsIgnoreCase(assigneeText)) {
+            if (!assigneeText.isEmpty() && !getString(R.string.task_select_assignee).equalsIgnoreCase(assigneeText)) {
                 shareText.append("\nNgười phụ trách: ").append(assigneeText);
             }
         }
@@ -1410,8 +1418,12 @@ public class TaskDetailActivity extends BaseActivity {
             if (et.getText() != null)
                 et.setSelection(et.getText().length());
         }
-        AlertDialog dlg = new AlertDialog.Builder(this).setTitle("Chỉnh sửa bình luận").setView(dv)
-                .setNegativeButton("Hủy", null).setPositiveButton("Lưu", null).create();
+        AlertDialog dlg = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_TaskFlow_MaterialAlertDialog)
+            .setTitle(R.string.comment_edit_dialog_title)
+            .setView(dv)
+            .setNegativeButton(R.string.comment_edit_dialog_cancel, null)
+            .setPositiveButton(R.string.comment_edit_dialog_save, null)
+            .create();
         dlg.setOnShowListener(d -> {
             android.widget.Button neg = dlg.getButton(AlertDialog.BUTTON_NEGATIVE);
             android.widget.Button pos = dlg.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -1426,7 +1438,7 @@ public class TaskDetailActivity extends BaseActivity {
                     String c = et != null && et.getText() != null ? et.getText().toString().trim() : "";
                     if (c.isEmpty()) {
                         if (til != null)
-                            til.setError("Bình luận không được để trống");
+                            til.setError(getString(R.string.comment_edit_dialog_error_empty));
                         return;
                     }
                     if (til != null)
@@ -1690,7 +1702,7 @@ public class TaskDetailActivity extends BaseActivity {
     private void saveTask() {
         String title = etTitle.getText().toString().trim();
         if (title.isEmpty()) {
-            etTitle.setError("Vui lòng nhập tên công việc");
+            etTitle.setError(getString(R.string.task_title_required_error));
             return;
         }
         String sd = tvStartDate.getText().toString();
@@ -1705,7 +1717,7 @@ public class TaskDetailActivity extends BaseActivity {
         if (startDateTime != null && dueDateTime != null && startDateTime.isAfter(dueDateTime)) {
             Toast.makeText(
                     this,
-                    "Giờ bắt đầu không được lớn hơn giờ kết thúc. Vui lòng chỉnh lại thời gian.",
+                    R.string.task_datetime_order_error,
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -1783,7 +1795,9 @@ public class TaskDetailActivity extends BaseActivity {
             public void onError(String e) {
                 runOnUiThread(() -> {
                     setLoading(false);
-                    Toast.makeText(TaskDetailActivity.this, "Không thành công: " + e, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskDetailActivity.this,
+                            getString(R.string.task_save_failed_format, e),
+                            Toast.LENGTH_SHORT).show();
                 });
             }
         };
