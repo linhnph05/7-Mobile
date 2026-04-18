@@ -136,9 +136,9 @@ public class FocusModeActivity extends BaseActivity {
         progressTimer.setProgressCompat(Math.max(0, elapsedSec), true);
 
         if (remainingMs <= 0L) {
-            tvFocusState.setText("Time is up");
+            tvFocusState.setText(R.string.focus_mode_state_finished);
         } else {
-            tvFocusState.setText("Deep focus mode");
+            tvFocusState.setText(R.string.focus_mode_state_deep);
         }
     }
 
@@ -153,17 +153,19 @@ public class FocusModeActivity extends BaseActivity {
         long endedAtMs = System.currentTimeMillis();
         long workedMs = Math.max(0L, FOCUS_DURATION_MS - remainingMs);
 
-        String title = timedOut ? "Pomodoro finished" : "Stop focus mode";
+        String title = timedOut
+            ? getString(R.string.focus_mode_finished_title)
+            : getString(R.string.focus_mode_stop_title);
         String message = timedOut
-                ? "25 minutes completed. Is this task done?"
-                : "Is this task done?";
+            ? getString(R.string.focus_mode_finished_message)
+            : getString(R.string.focus_mode_stop_message);
 
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton("Yes, done", (dialog, which) -> completeTaskAsDone())
-                .setNegativeButton("Not yet", (dialog, which) -> {
+            .setPositiveButton(R.string.focus_mode_yes_done, (dialog, which) -> completeTaskAsDone())
+            .setNegativeButton(R.string.focus_mode_not_yet, (dialog, which) -> {
                     saveWorklog(taskId, sessionStartedAtMs, endedAtMs, workedMs, timedOut);
                     Intent data = new Intent();
                     data.putExtra("task_done", false);
@@ -194,7 +196,7 @@ public class FocusModeActivity extends BaseActivity {
                     @Override
                     public void onSuccess(Void result) {
                         runOnUiThread(() -> {
-                            Toast.makeText(FocusModeActivity.this, "Task moved to Done", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(FocusModeActivity.this, R.string.focus_mode_task_moved_done, Toast.LENGTH_SHORT).show();
                             Intent data = new Intent();
                             data.putExtra("task_done", true);
                             setResult(RESULT_OK, data);
@@ -205,7 +207,7 @@ public class FocusModeActivity extends BaseActivity {
                     @Override
                     public void onError(String error) {
                         runOnUiThread(() -> {
-                            Toast.makeText(FocusModeActivity.this, "Failed to update task: " + error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(FocusModeActivity.this, getString(R.string.focus_mode_update_failed, error), Toast.LENGTH_SHORT).show();
                             setResult(RESULT_CANCELED);
                             finish();
                         });
@@ -216,7 +218,7 @@ public class FocusModeActivity extends BaseActivity {
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> {
-                    Toast.makeText(FocusModeActivity.this, "Failed to load task: " + error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FocusModeActivity.this, getString(R.string.focus_mode_load_failed, error), Toast.LENGTH_SHORT).show();
                     setResult(RESULT_CANCELED);
                     finish();
                 });

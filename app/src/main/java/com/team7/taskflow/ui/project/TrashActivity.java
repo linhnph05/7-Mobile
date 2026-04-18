@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -35,7 +34,6 @@ public class TrashActivity extends BaseActivity {
     private ImageView btnBack;
     private TextView btnEmptyTrash;
     private TextView tvTotalItems;
-    private TextView tvAutoCleanup;
     private RecyclerView rvTrashItems;
     private LinearLayout emptyState;
     private TrashItemAdapter adapter;
@@ -73,7 +71,6 @@ public class TrashActivity extends BaseActivity {
         btnBack = findViewById(R.id.btnBack);
         btnEmptyTrash = findViewById(R.id.btnEmptyTrash);
         tvTotalItems = findViewById(R.id.tvTotalItems);
-        tvAutoCleanup = findViewById(R.id.tvAutoCleanup);
         rvTrashItems = findViewById(R.id.rvTrashItems);
         emptyState = findViewById(R.id.emptyState);
     }
@@ -138,9 +135,6 @@ public class TrashActivity extends BaseActivity {
 
     private void updateUI() {
         tvTotalItems.setText(String.valueOf(trashedTasks.size()));
-        if (tvAutoCleanup != null) {
-            tvAutoCleanup.setText(getString(R.string.trash_auto_cleanup_demo));
-        }
 
         if (trashedTasks.isEmpty()) {
             rvTrashItems.setVisibility(View.GONE);

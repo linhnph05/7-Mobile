@@ -205,8 +205,9 @@ public class ProjectDetailActivity extends BaseActivity {
         btnMore = findViewById(R.id.btnMoreOptions);
 
         if (tvProjectName != null) {
-            tvProjectName.setText(isMyTasksMode ? "My Assigned Tasks"
-                    : (projectName != null ? projectName : "Project"));
+            tvProjectName.setText(isMyTasksMode
+                ? getString(R.string.project_settings_my_tasks_title)
+                : (projectName != null ? projectName : getString(R.string.project_settings_default_title)));
         }
         if (tvProjectDescription != null) {
             if (projectDesc != null && !projectDesc.trim().isEmpty()) {
@@ -760,10 +761,12 @@ public class ProjectDetailActivity extends BaseActivity {
             btnActionShare.setOnClickListener(v -> {
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT,
-                        "Tham gia dự án " + projectName + " trên TaskFlow với mã: " + projectKey);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getString(
+                R.string.project_settings_share_text_format,
+                projectName != null ? projectName : getString(R.string.project_settings_default_title),
+                projectKey != null ? projectKey : getString(R.string.project_settings_key_na)));
                 sendIntent.setType("text/plain");
-                startActivity(Intent.createChooser(sendIntent, "Chia sẻ dự án"));
+            startActivity(Intent.createChooser(sendIntent, getString(R.string.project_settings_share_chooser_title)));
             });
         }
 
@@ -782,12 +785,14 @@ public class ProjectDetailActivity extends BaseActivity {
                 tvDescDisplay.setText(projectDesc);
                 tvDescDisplay.setAlpha(1.0f);
             } else {
-                tvDescDisplay.setText("Hãy thêm mô tả cho dự án");
+                tvDescDisplay.setText(R.string.project_no_description);
                 tvDescDisplay.setAlpha(0.5f);
             }
         }
         if (tvKey != null)
-            tvKey.setText(projectKey != null ? "Project Key: " + projectKey : "N/A");
+            tvKey.setText(projectKey != null
+                    ? getString(R.string.project_settings_key_format, projectKey)
+                    : getString(R.string.project_settings_key_na));
         if (tvInitial != null && projectName != null && !projectName.isEmpty()) {
             tvInitial.setText(projectName.substring(0, 1).toUpperCase());
         }
@@ -806,10 +811,12 @@ public class ProjectDetailActivity extends BaseActivity {
         TextView tvStatusValue = sheetView.findViewById(R.id.tvProjectStatusValue);
         TextView tvStatusLabel = sheetView.findViewById(R.id.tvProjectStatusLabel);
         if (tvStatusLabel != null)
-            tvStatusLabel.setText("Quyền riêng tư");
+            tvStatusLabel.setText(R.string.project_settings_privacy_label);
 
         if (tvStatusValue != null)
-            tvStatusValue.setText(isPrivate ? "Riêng tư" : "Công khai");
+            tvStatusValue.setText(isPrivate
+                    ? R.string.project_settings_privacy_private
+                    : R.string.project_settings_privacy_public);
 
         View btnStatus = sheetView.findViewById(R.id.btnProjectStatus);
         if (btnStatus != null) {
@@ -910,16 +917,6 @@ public class ProjectDetailActivity extends BaseActivity {
         if (btnCollapse != null)
             btnCollapse.setOnClickListener(v -> dialog.dismiss());
 
-        TextView tvMetadata = sheetView.findViewById(R.id.tvProjectMetadata);
-        if (tvMetadata != null && projectCreatedAt != null) {
-            LocalDate date = extractHistoryDate(projectCreatedAt);
-            if (date != null) {
-                String dateStr = date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                // Reuse existing string for translation if possible or use formatted one
-                tvMetadata.setText(getString(R.string.profile_joined_date_format, dateStr)); 
-            }
-        }
-
         TextView tvProjectMetadata = sheetView.findViewById(R.id.tvProjectMetadata);
         if (tvProjectMetadata != null) {
             tvProjectMetadata.setText(getString(R.string.project_settings_metadata_placeholder));
@@ -990,7 +987,7 @@ public class ProjectDetailActivity extends BaseActivity {
                                         tvDescDisp.setText(newDesc);
                                         tvDescDisp.setAlpha(1.0f);
                                     } else {
-                                        tvDescDisp.setText("Hãy thêm mô tả cho dự án");
+                                        tvDescDisp.setText(R.string.project_no_description);
                                         tvDescDisp.setAlpha(0.5f);
                                     }
                                 }
@@ -1003,7 +1000,7 @@ public class ProjectDetailActivity extends BaseActivity {
                                     }
                                 }
                             }
-                            Toast.makeText(ProjectDetailActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT)
+                                Toast.makeText(ProjectDetailActivity.this, R.string.project_settings_update_success, Toast.LENGTH_SHORT)
                                     .show();
                         });
                     }

@@ -84,7 +84,7 @@
                         android:id="@+id/tvProjectNameDisplay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tên dự án"
+                        android:text="@string/project_name_label"
                         android:textColor="@color/theme_text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -265,14 +265,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Thành viên"
+                            android:text="@string/project_settings_manage_members_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Thêm hoặc xóa thành viên"
+                            android:text="@string/project_settings_manage_members_subtitle"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -323,14 +323,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lịch sử hoạt động"
+                            android:text="@string/project_activity_title"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Xem tiến độ làm việc của team"
+                            android:text="@string/project_settings_activity_subtitle"
                             android:textColor="@color/theme_text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -382,7 +382,7 @@
                             android:id="@+id/tvProjectStatusLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Trạng thái dự án"
+                            android:text="@string/project_settings_privacy_label"
                             android:textColor="@color/theme_text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -390,7 +390,7 @@
                             android:id="@+id/tvProjectStatusValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Đang hoạt động"
+                            android:text="@string/project_settings_privacy_public"
                             android:textColor="@color/primary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -414,7 +414,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="KHÁC"
+            android:text="@string/project_settings_section_other"
 
             android:textColor="@color/theme_text_secondary"
             android:textSize="12sp"
