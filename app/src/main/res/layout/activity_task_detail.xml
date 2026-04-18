@@ -962,7 +962,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/spacing_lg"
         android:layout_marginBottom="184dp"
-        android:text="Start Focus"
+        android:text="@string/task_focus_start"
         android:textStyle="bold"
         android:textColor="@color/white"
         android:visibility="gone"

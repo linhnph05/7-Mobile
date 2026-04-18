@@ -188,7 +188,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginTop="16dp"
-                    android:text="@string/activity_invitation_sent"
+                    android:text="@string/member_invite_send_button"
                     android:textColor="@color/white"
                     app:cornerRadius="12dp"
                     app:backgroundTint="@color/primary" />

@@ -904,7 +904,7 @@ public class AiCreateActivity extends AppCompatActivity {
     }
 
     private void resetStatusBadge() {
-        tvTaskId.setText("✨ Tạo task với AI");
+        tvTaskId.setText(R.string.ai_create_badge);
         tvTaskId.setBackgroundResource(R.drawable.bg_task_id);
     }
 
