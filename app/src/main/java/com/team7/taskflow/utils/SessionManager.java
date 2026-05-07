@@ -26,7 +26,7 @@ public class SessionManager {
 
     private static SharedPreferences prefs;
     private static Context appContext;
-    private static boolean redirectingToLogin;
+    private static volatile boolean redirectingToLogin;
 
     public static void init(Context context) {
         if (prefs == null) {

@@ -402,6 +402,7 @@ public class CalendarActivity extends BaseActivity {
         List<Task> filteredList = new ArrayList<>();
 
         for (Task t : allProjectTasks) {
+            if ("TRASH".equalsIgnoreCase(t.getStatus())) continue;
             String due = null;
             if (t.getDueDate() != null && !t.getDueDate().isEmpty()) {
                 due = t.getDueDate().length() >= 10

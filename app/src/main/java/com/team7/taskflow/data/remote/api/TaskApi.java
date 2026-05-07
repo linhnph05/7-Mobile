@@ -66,12 +66,13 @@ public interface TaskApi {
     );
 
     /**
-     * Get tasks assigned to a user
+     * Get tasks assigned to a user, với filter tùy chọn theo status (PostgREST: eq./neq./...)
      */
     @GET("tasks")
     Call<List<Task>> getTasksByAssignee(
             @Query("select") String select,
             @Query("assignee_id") String assigneeIdFilter,
+            @Query("status") String statusFilter,
             @Query("order") String order
     );
 
@@ -120,10 +121,11 @@ public interface TaskApi {
     );
 
     /**
-     * Add attachment to task
+     * Add attachment to task — trả về attachment có DB-assigned ID.
+     * Dùng Prefer: return=representation để nhận lại record vừa insert.
      */
     @POST("attachments")
-    Call<Void> addAttachment(
+    Call<List<com.team7.taskflow.domain.model.Attachment>> addAttachment(
             @Body java.util.Map<String, Object> attachmentData,
             @Header("Prefer") String prefer
     );

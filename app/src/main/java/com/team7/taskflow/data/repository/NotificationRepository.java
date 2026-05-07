@@ -26,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NotificationRepository {
+public class NotificationRepository extends BaseRepository {
 
     private static final String TAG = "NotificationRepo";
     private static final String EXCLUDE_PROJECT_INVITE_FILTER = "neq.PROJECT_INVITE";
@@ -109,7 +109,7 @@ public class NotificationRepository {
                     }
                     @Override
                     public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
-                        Log.w(TAG, "Select with actor failed, fallback to basic select: " + t.getMessage());
+                        Log.w(TAG, "Select with actor failed, fallback to basic select: " + getErrorMessage(t));
                         fetchNotificationsFallback(userId, callback);
                     }
                 });
@@ -130,7 +130,7 @@ public class NotificationRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -146,7 +146,7 @@ public class NotificationRepository {
             }
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                callback.onError("Network error: " + t.getMessage());
+                callback.onError("Network error: " + getErrorMessage(t));
             }
         });
     }
@@ -163,7 +163,7 @@ public class NotificationRepository {
             }
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                callback.onError("Network error: " + t.getMessage());
+                callback.onError("Network error: " + getErrorMessage(t));
             }
         });
     }
@@ -179,7 +179,7 @@ public class NotificationRepository {
                     }
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -281,7 +281,7 @@ public class NotificationRepository {
                         }
                         @Override
                         public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                            Log.e(TAG, "Failed to fetch projects: " + t.getMessage());
+                            Log.e(TAG, "Failed to fetch projects: " + getErrorMessage(t));
                             onPrimaryDone.run();
                         }
                     });
@@ -304,7 +304,7 @@ public class NotificationRepository {
                         }
                         @Override
                         public void onFailure(@NonNull Call<List<Comment>> call, @NonNull Throwable t) {
-                            Log.e(TAG, "Failed to fetch comments: " + t.getMessage());
+                            Log.e(TAG, "Failed to fetch comments: " + getErrorMessage(t));
                             onPrimaryDone.run();
                         }
                     });
@@ -349,8 +349,8 @@ public class NotificationRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Task>> call, @NonNull Throwable t) {
-                        Log.e(TAG, "Failed to fetch tasks: " + t.getMessage());
-                        callback.onError(t.getMessage());
+                        Log.e(TAG, "Failed to fetch tasks: " + getErrorMessage(t));
+                        callback.onError(getErrorMessage(t));
                     }
                 });
     }
@@ -437,8 +437,8 @@ public class NotificationRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<TaskActivity>> call, @NonNull Throwable t) {
-                        Log.w(TAG, "Failed to fetch task activities by ids: " + t.getMessage());
-                        callback.onError(t.getMessage());
+                        Log.w(TAG, "Failed to fetch task activities by ids: " + getErrorMessage(t));
+                        callback.onError(getErrorMessage(t));
                     }
                 });
     }

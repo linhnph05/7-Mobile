@@ -282,7 +282,10 @@ public class ForYouActivity extends BaseActivity {
         }
 
         if (canUseTaskCache(currentUserId)) {
-            allTasks = new ArrayList<>(cachedMyTasks);
+            allTasks = new ArrayList<>();
+            for (Task t : cachedMyTasks) {
+                if (!"TRASH".equalsIgnoreCase(t.getStatus())) allTasks.add(t);
+            }
             taskAdapter.setSubtaskProgressSource(allTasks);
             updateOverview(allTasks);
             applyFilter(activeFilter);

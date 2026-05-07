@@ -1,29 +1,22 @@
 package com.team7.taskflow.domain.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.team7.taskflow.ui.notification.NotificationFormatter;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
 /**
- * Model class representing a Notification from the database.
+ * Domain model đại diện cho một Notification từ database.
  *
- * Database schema:
- * notification_id, user_id, actor_id, type, reference_id, is_read, created_at
+ * Chỉ chứa dữ liệu và getter/setter.
+ * Mọi logic hiển thị (HTML, i18n, date format) được xử lý trong NotificationFormatter.
  *
- * Supabase select query joins:
- * actor:users!notifications_actor_id_fkey(display_name, avatar_url)
- *
- * Content is NOT stored in DB — it is built dynamically on the client
- * based on type + actor name + referenced entity name.
+ * Schema DB: notification_id, user_id, actor_id, type, reference_id, is_read, created_at
+ * Supabase join: actor:users!notifications_actor_id_fkey(display_name, avatar_url)
  */
 public class Notification {
 
-    /**
-     * Maps to the "type" column in the notifications table.
-     */
     public enum NotificationType {
         PROJECT_INVITE,
         TASK_ASSIGNED,
@@ -37,7 +30,7 @@ public class Notification {
         SYSTEM_ALERT
     }
 
-    // ── Database columns ────────────────────────────────────────────
+    // ── Database columns ────────────────────────────────────────────────
 
     @SerializedName("notification_id")
     private long notificationId;
@@ -49,13 +42,13 @@ public class Notification {
     private String actorId;
 
     @SerializedName("type")
-    private String typeRaw; // raw string from DB, e.g. "PROJECT_INVITE"
+    private String typeRaw;
 
     @SerializedName("reference_id")
-    private Long referenceId; // FK to projects.project_id or tasks.task_id
+    private Long referenceId;
 
     @SerializedName("task_activity_id")
-    private Long taskActivityId; // FK to task_activities.activity_id (for TASK_STATUS_CHANGED)
+    private Long taskActivityId;
 
     @SerializedName("is_read")
     private boolean isRead;
@@ -63,38 +56,10 @@ public class Notification {
     @SerializedName("created_at")
     private Date createdAt;
 
-    // ── Nested join objects from Supabase select ────────────────────
+    // ── Nested join: actor từ bảng users ───────────────────────────────
 
-    /** Joined from users table via actor_id */
     @SerializedName("actor")
     private ActorInfo actor;
-
-    // ── Client-side enriched fields (set after fetching) ───────────
-
-    /** Resolved display name of the actor */
-    private transient String actorName;
-
-    /** Resolved name of the referenced entity (project name or task title) */
-    private transient String referenceName;
-
-    /** Parsed enum type (converted from typeRaw) */
-    private transient NotificationType typeParsed;
-
-    /** Pre-built HTML content string for display */
-    private transient String displayContent;
-
-    /** Task activity details (fetched from task_activities table for TASK_STATUS_CHANGED) */
-    private transient TaskActivity activityDetail;
-
-    /** Invitation status for PROJECT_INVITE notifications: PENDING/ACCEPTED/DENIED */
-    private transient String inviteStatus;
-
-    // ── Constructors ────────────────────────────────────────────────
-
-    public Notification() {
-    }
-
-    // ── Nested class for actor join ─────────────────────────────────
 
     public static class ActorInfo {
         @SerializedName("display_name")
@@ -103,139 +68,82 @@ public class Notification {
         @SerializedName("avatar_url")
         private String avatarUrl;
 
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public String getAvatarUrl() {
-            return avatarUrl;
-        }
+        public String getDisplayName() { return displayName; }
+        public String getAvatarUrl()   { return avatarUrl; }
     }
 
-    // ── Getters / Setters ───────────────────────────────────────────
+    // ── Client-side enriched fields (set bởi Repository sau khi fetch) ─
 
-    public long getNotificationId() {
-        return notificationId;
-    }
+    private transient String actorName;
+    private transient String referenceName;
+    private transient NotificationType typeParsed;
+    private transient String displayContent;
+    private transient TaskActivity activityDetail;
+    private transient String inviteStatus;
 
-    public void setNotificationId(long notificationId) {
-        this.notificationId = notificationId;
-    }
+    // ── Constructors ────────────────────────────────────────────────────
 
-    public String getUserId() {
-        return userId;
-    }
+    public Notification() {}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    // ── Getters / Setters ───────────────────────────────────────────────
 
-    public String getActorId() {
-        return actorId;
-    }
+    public long getNotificationId()                   { return notificationId; }
+    public void setNotificationId(long v)             { this.notificationId = v; }
 
-    public void setActorId(String actorId) {
-        this.actorId = actorId;
-    }
+    public String getUserId()                         { return userId; }
+    public void setUserId(String v)                   { this.userId = v; }
 
-    public String getTypeRaw() {
-        return typeRaw;
-    }
+    public String getActorId()                        { return actorId; }
+    public void setActorId(String v)                  { this.actorId = v; }
 
-    public void setTypeRaw(String typeRaw) {
-        this.typeRaw = typeRaw;
-    }
+    public String getTypeRaw()                        { return typeRaw; }
+    public void setTypeRaw(String v)                  { this.typeRaw = v; }
 
-    public Long getReferenceId() {
-        return referenceId;
-    }
+    public Long getReferenceId()                      { return referenceId; }
+    public void setReferenceId(Long v)                { this.referenceId = v; }
 
-    public void setReferenceId(Long referenceId) {
-        this.referenceId = referenceId;
-    }
+    public Long getTaskActivityId()                   { return taskActivityId; }
+    public void setTaskActivityId(Long v)             { this.taskActivityId = v; }
 
-    public boolean isRead() {
-        return isRead;
-    }
+    public boolean isRead()                           { return isRead; }
+    public void setRead(boolean v)                    { this.isRead = v; }
 
-    public void setRead(boolean read) {
-        isRead = read;
-    }
+    public Date getCreatedAt()                        { return createdAt; }
+    public void setCreatedAt(Date v)                  { this.createdAt = v; }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+    public ActorInfo getActor()                       { return actor; }
+    public void setActor(ActorInfo v)                 { this.actor = v; }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+    public TaskActivity getActivityDetail()           { return activityDetail; }
+    public void setActivityDetail(TaskActivity v)     { this.activityDetail = v; }
 
-    public Long getTaskActivityId() {
-        return taskActivityId;
-    }
+    public String getInviteStatus()                   { return inviteStatus; }
+    public void setInviteStatus(String v)             { this.inviteStatus = v; }
 
-    public void setTaskActivityId(Long taskActivityId) {
-        this.taskActivityId = taskActivityId;
-    }
+    // ── Enriched field accessors ────────────────────────────────────────
 
-    public ActorInfo getActor() {
-        return actor;
-    }
-
-    public void setActor(ActorInfo actor) {
-        this.actor = actor;
-    }
-
-    public TaskActivity getActivityDetail() {
-        return activityDetail;
-    }
-
-    public void setActivityDetail(TaskActivity activityDetail) {
-        this.activityDetail = activityDetail;
-    }
-
-    public String getInviteStatus() {
-        return inviteStatus;
-    }
-
-    public void setInviteStatus(String inviteStatus) {
-        this.inviteStatus = inviteStatus;
-    }
-
-    // ── Client-enriched field accessors ──────────────────────────────
-
+    /** Tên actor hiển thị; fallback về "Someone" nếu chưa có dữ liệu. */
     public String getActorName() {
-        if (actorName != null)
-            return actorName;
-        if (actor != null && actor.getDisplayName() != null)
-            return actor.getDisplayName();
+        if (actorName != null) return actorName;
+        if (actor != null && actor.getDisplayName() != null) return actor.getDisplayName();
         return "Someone";
     }
-
-    public void setActorName(String actorName) {
-        this.actorName = actorName;
-    }
+    public void setActorName(String v) { this.actorName = v; }
 
     public String getActorAvatarUrl() {
         return actor != null ? actor.getAvatarUrl() : null;
     }
 
-    public String getReferenceName() {
-        return referenceName;
-    }
-
-    public void setReferenceName(String referenceName) {
-        this.referenceName = referenceName;
-    }
+    public String getReferenceName()        { return referenceName; }
+    public void setReferenceName(String v)  { this.referenceName = v; }
 
     /**
-     * Parse and cache the NotificationType enum from the raw DB string.
+     * Parse và cache NotificationType enum từ chuỗi DB.
+     * "TASK_COMPLETED" được map về TASK_STATUS_CHANGED để tương thích ngược.
      */
     public NotificationType getType() {
-        if (typeParsed != null)
-            return typeParsed;
-        if (typeRaw == null)
-            return NotificationType.SYSTEM_ALERT;
+        if (typeParsed != null) return typeParsed;
+        if (typeRaw == null) return NotificationType.SYSTEM_ALERT;
         try {
             if ("TASK_COMPLETED".equals(typeRaw)) {
                 typeParsed = NotificationType.TASK_STATUS_CHANGED;
@@ -247,366 +155,29 @@ public class Notification {
         }
         return typeParsed;
     }
+    public void setType(NotificationType v) { this.typeParsed = v; }
 
-    public void setType(NotificationType type) {
-        this.typeParsed = type;
-    }
+    // ── Display content (delegate sang NotificationFormatter) ───────────
 
     /**
-     * Get the pre-built display content for this notification.
-     * Must call buildDisplayContent() or setDisplayContent() first.
+     * Lấy nội dung HTML để hiển thị.
+     * Gọi buildDisplayContent() nếu chưa có cache.
      */
     public String getContent() {
-        if (displayContent != null)
-            return displayContent;
+        if (displayContent != null) return displayContent;
         return buildDisplayContent();
     }
 
-    public String getContextText() {
-        String ref = (referenceName != null && !referenceName.isEmpty()) ? referenceName : "";
-        String projectPrefix = isVietnameseLocale() ? "Dự án: " : "Project: ";
-        String taskPrefix = isVietnameseLocale() ? "Công việc: " : "Task: ";
-        switch (getType()) {
-            case PROJECT_INVITE:
-                return projectPrefix + ref;
-            case TASK_ASSIGNED:
-            case MENTION:
-            case COMMENT:
-            case TASK_STATUS_CHANGED:
-            case REACTION:
-            case DELETED:
-            case ATTACHMENT_ADDED:
-            case DEADLINE_REMINDER:
-                return taskPrefix + ref;
-            default:
-                return "";
-        }
-    }
-
-    public void setDisplayContent(String displayContent) {
-        this.displayContent = displayContent;
-    }
-
-    /**
-     * Build a human-readable HTML content string based on type, actor, and reference.
-     * For TASK_STATUS_CHANGED, uses activityDetail (fetched from task_activities by Repository).
-     * Routes to different content builders based on actionType.
-     */
+    /** Build và cache nội dung hiển thị qua NotificationFormatter. */
     public String buildDisplayContent() {
-        String actor = "<b>" + getActorName() + "</b>";
-        boolean vi = isVietnameseLocale();
-
-        switch (getType()) {
-            case PROJECT_INVITE:
-                displayContent = actor + (vi
-                        ? " đã mời bạn tham gia dự án."
-                        : " invited you to join a project.");
-                break;
-            case TASK_ASSIGNED:
-                displayContent = actor + (vi
-                        ? " đã giao một công việc cho bạn."
-                        : " assigned a task to you.");
-                break;
-            case MENTION:
-                displayContent = actor + (vi
-                        ? " đã nhắc đến bạn trong một công việc."
-                        : " mentioned you in a task.");
-                break;
-            case COMMENT:
-                displayContent = actor + (vi
-                        ? " đã bình luận về một công việc."
-                        : " commented on a task.");
-                break;
-            case TASK_STATUS_CHANGED:
-                // Route to specific builders based on activity details
-                if (activityDetail != null && activityDetail.getActionType() != null) {
-                    displayContent = buildActivityContent(actor, activityDetail);
-                } else {
-                    displayContent = actor + (vi ? " đã cập nhật công việc." : " updated task.");
-                }
-                break;
-            case REACTION:
-                displayContent = actor + (vi
-                        ? " đã phản ứng với bình luận của bạn."
-                        : " reacted to your comment.");
-                break;
-            case DELETED:
-                displayContent = actor + (vi
-                        ? " đã thu hồi một phản ứng."
-                        : " withdrew a reaction.");
-                break;
-            case ATTACHMENT_ADDED:
-                displayContent = actor + (vi
-                        ? " đã thêm một tệp đính kèm."
-                        : " added an attachment.");
-                break;
-            case DEADLINE_REMINDER:
-                displayContent = vi ? "Một công việc sắp đến hạn!" : "A task is due soon!";
-                break;
-            case SYSTEM_ALERT:
-                displayContent = vi ? "Cảnh báo hệ thống" : "System alert";
-                break;
-            default:
-                displayContent = vi ? "Bạn có một thông báo mới." : "You have a new notification.";
-        }
+        displayContent = NotificationFormatter.format(this);
         return displayContent;
     }
 
-    /**
-     * Route to specific content builder based on actionType from TaskActivity.
-     * Handles: UPDATE_STATUS, UPDATE_DUE_DATE, UPDATE_PRIORITY, UPDATE_START_DATE, UPDATE_TITLE, UPDATE_ASSIGNEE, UPDATE_TAG, etc.
-     */
-    private String buildActivityContent(String actor, TaskActivity activity) {
-        String actionType = activity.getActionType();
-        boolean vi = isVietnameseLocale();
-        if (actionType == null) {
-            return actor + (vi ? " đã cập nhật công việc." : " updated task.");
-        }
+    public void setDisplayContent(String v) { this.displayContent = v; }
 
-        actionType = actionType.toUpperCase().trim();
-
-        switch (actionType) {
-            case "UPDATE_STATUS":
-                return buildStatusChangeContent(actor, activity);
-            case "UPDATE_DUE_DATE":
-                return buildDueDateChangeContent(actor, activity);
-            case "UPDATE_TIME":
-            case "UPDATE_DATETIME":
-            case "UPDATE_DATE_TIME":
-            case "UPDATE_START_AND_DUE_DATE":
-            case "UPDATE_TIME_RANGE":
-                return buildDateTimeChangeContent(actor, activity);
-            case "UPDATE_PRIORITY":
-                return buildPriorityChangeContent(actor, activity);
-            case "UPDATE_START_DATE":
-                return buildStartDateChangeContent(actor, activity);
-            case "UPDATE_TITLE":
-                return buildTitleChangeContent(actor, activity);
-            case "UPDATE_ASSIGNEE":
-                return buildAssigneeChangeContent(actor, activity);
-            case "UPDATE_TAG":
-                return buildTagChangeContent(actor, activity);
-            case "UPDATE_DESCRIPTION":
-                return buildDescriptionChangeContent(actor, activity);
-            case "DELETE":
-            case "CREATE":
-                return actor + (vi ? " đã cập nhật công việc." : " updated task.");
-            default:
-                return actor + (vi ? " đã cập nhật công việc." : " updated task.");
-        }
-    }
-
-    private String buildStatusChangeContent(String actor, TaskActivity activity) {
-        String oldVal = activity.getOldValue();
-        String newVal = activity.getNewValue();
-        boolean vi = isVietnameseLocale();
-
-        if (oldVal != null && newVal != null) {
-            return vi
-                    ? actor + " đã đổi trạng thái từ <b>" + oldVal + "</b> sang <b>" + newVal + "</b>."
-                    : actor + " changed status from <b>" + oldVal + "</b> to <b>" + newVal + "</b>.";
-        }
-        return vi
-                ? actor + " đã đổi trạng thái công việc thành <b>" + (newVal != null ? newVal : "?") + "</b>."
-                : actor + " changed task status to <b>" + (newVal != null ? newVal : "?") + "</b>.";
-    }
-
-    private String buildDueDateChangeContent(String actor, TaskActivity activity) {
-        String oldVal = activity.getOldValue();
-        String newVal = activity.getNewValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã đổi hạn chót thành <b>" + formatDateDisplay(newVal) + "</b>."
-                    : actor + " changed due date to <b>" + formatDateDisplay(newVal) + "</b>.";
-        } else if (oldVal != null && !oldVal.isEmpty()) {
-            return vi ? actor + " đã xóa hạn chót." : actor + " removed the due date.";
-        }
-        return vi ? actor + " đã thay đổi hạn chót." : actor + " changed the due date.";
-    }
-
-    private String buildPriorityChangeContent(String actor, TaskActivity activity) {
-        String oldVal = activity.getOldValue();
-        String newVal = activity.getNewValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty() && (oldVal == null || oldVal.isEmpty())) {
-            return vi
-                    ? actor + " đã thêm mức ưu tiên <b>" + newVal + "</b>."
-                    : actor + " added priority <b>" + newVal + "</b>.";
-        } else if ((newVal == null || newVal.isEmpty()) && oldVal != null && !oldVal.isEmpty()) {
-            return vi
-                    ? actor + " đã bỏ mức ưu tiên <b>" + oldVal + "</b>."
-                    : actor + " removed priority <b>" + oldVal + "</b>.";
-        } else if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã đổi mức ưu tiên thành <b>" + newVal + "</b>."
-                    : actor + " changed priority to <b>" + newVal + "</b>.";
-        }
-        return vi ? actor + " đã thay đổi mức ưu tiên công việc." : actor + " changed task priority.";
-    }
-
-    private String buildStartDateChangeContent(String actor, TaskActivity activity) {
-        String oldVal = activity.getOldValue();
-        String newVal = activity.getNewValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã đổi ngày bắt đầu thành <b>" + formatDateDisplay(newVal) + "</b>."
-                    : actor + " changed start date to <b>" + formatDateDisplay(newVal) + "</b>.";
-        } else if (oldVal != null && !oldVal.isEmpty()) {
-            return vi ? actor + " đã xóa ngày bắt đầu." : actor + " removed the start date.";
-        }
-        return vi ? actor + " đã thay đổi ngày bắt đầu." : actor + " changed the start date.";
-    }
-
-    private String buildDateTimeChangeContent(String actor, TaskActivity activity) {
-        String oldVal = activity.getOldValue();
-        String newVal = activity.getNewValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã đổi thời gian công việc thành <b>" + formatDateDisplay(newVal) + "</b>."
-                    : actor + " changed task time to <b>" + formatDateDisplay(newVal) + "</b>.";
-        } else if (oldVal != null && !oldVal.isEmpty()) {
-            return vi ? actor + " đã xóa thời gian công việc." : actor + " removed task time.";
-        }
-        return vi ? actor + " đã thay đổi thời gian công việc." : actor + " changed task time.";
-    }
-
-    private String buildTitleChangeContent(String actor, TaskActivity activity) {
-        String newVal = activity.getNewValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã đổi tiêu đề công việc thành <b>" + escapeHtml(newVal) + "</b>."
-                    : actor + " changed task title to <b>" + escapeHtml(newVal) + "</b>.";
-        }
-        return vi ? actor + " đã thay đổi tiêu đề công việc." : actor + " changed task title.";
-    }
-
-    private String buildAssigneeChangeContent(String actor, TaskActivity activity) {
-        String newVal = activity.getNewValue();
-        String oldVal = activity.getOldValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã giao công việc cho <b>" + newVal + "</b>."
-                    : actor + " assigned task to <b>" + newVal + "</b>.";
-        } else if (oldVal != null && !oldVal.isEmpty()) {
-            return vi ? actor + " đã gỡ người được giao công việc." : actor + " removed task assignment.";
-        }
-        return vi ? actor + " đã thay đổi người được giao công việc." : actor + " changed task assignee.";
-    }
-
-    private String buildTagChangeContent(String actor, TaskActivity activity) {
-        String newVal = activity.getNewValue();
-        String oldVal = activity.getOldValue();
-        boolean vi = isVietnameseLocale();
-
-        if (newVal != null && !newVal.isEmpty()) {
-            return vi
-                    ? actor + " đã thêm nhãn <b>" + newVal + "</b>."
-                    : actor + " added tag <b>" + newVal + "</b>.";
-        } else if (oldVal != null && !oldVal.isEmpty()) {
-            return vi
-                    ? actor + " đã gỡ nhãn <b>" + oldVal + "</b>."
-                    : actor + " removed tag <b>" + oldVal + "</b>.";
-        }
-        return vi ? actor + " đã thay đổi nhãn công việc." : actor + " changed task tag.";
-    }
-
-    private String buildDescriptionChangeContent(String actor, TaskActivity activity) {
-        return isVietnameseLocale()
-                ? actor + " đã thay đổi mô tả công việc."
-                : actor + " changed task description.";
-    }
-
-    private boolean isVietnameseLocale() {
-        Locale locale = Locale.getDefault();
-        if (locale == null) {
-            return false;
-        }
-        String language = locale.getLanguage();
-        return language != null && language.toLowerCase(Locale.US).startsWith("vi");
-    }
-
-    /**
-     * Escape HTML special characters to prevent injection
-     */
-    private String escapeHtml(String text) {
-        if (text == null) return "";
-        return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
-    }
-
-    /**
-     * Format date string for display in Vietnam timezone.
-     * - Date only: dd/MM/yyyy
-     * - Date-time: dd/MM/yyyy HH:mm
-     */
-    private String formatDateDisplay(String dateStr) {
-        if (dateStr == null || dateStr.isEmpty()) {
-            return dateStr;
-        }
-
-        String normalized = dateStr.trim().replace('T', ' ');
-        String datePart = extractDatePart(normalized);
-        if (datePart == null) {
-            return normalized;
-        }
-
-        String formattedDate = formatDatePart(datePart);
-        String timePart = extractTimePart(normalized);
-        if (timePart == null) {
-            return formattedDate;
-        }
-
-        return formattedDate + " " + timePart;
-    }
-
-    private String extractDatePart(String value) {
-        try {
-            if (value != null && value.length() >= 10) {
-                String candidate = value.substring(0, 10);
-                LocalDate.parse(candidate, DateTimeFormatter.ISO_LOCAL_DATE);
-                return candidate;
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
-    }
-
-    private String formatDatePart(String datePart) {
-        try {
-            LocalDate localDate = LocalDate.parse(datePart, DateTimeFormatter.ISO_LOCAL_DATE);
-            return localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception ignored) {
-            return datePart;
-        }
-    }
-
-    private String extractTimePart(String value) {
-        if (value == null || value.length() <= 10) {
-            return null;
-        }
-
-        try {
-            String rawTime = value.substring(11).trim();
-            if (rawTime.isEmpty()) {
-                return null;
-            }
-            return rawTime.length() >= 5 ? rawTime.substring(0, 5) : rawTime;
-        } catch (Exception ignored) {
-        }
-        return null;
+    /** Text ngữ cảnh (tên project / task) hiển thị bên dưới nội dung. */
+    public String getContextText() {
+        return NotificationFormatter.formatContextText(this);
     }
 }

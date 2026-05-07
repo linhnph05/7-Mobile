@@ -5,7 +5,6 @@ import com.team7.taskflow.data.remote.api.MemberApiService;
 import com.team7.taskflow.domain.model.ProjectMember;
 import com.team7.taskflow.domain.model.User;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MemberRepository {
+public class MemberRepository extends BaseRepository {
 
     private static final String ROLE_REMOVED = ProjectMember.ROLE_REMOVED;
 
@@ -51,7 +50,7 @@ public class MemberRepository {
             }
             @Override
             public void onFailure(Call<List<ProjectMember>> call, Throwable t) {
-                cb.onError(t.getMessage());
+                cb.onError(getErrorMessage(t));
             }
         });
     }
@@ -74,30 +73,15 @@ public class MemberRepository {
                         if (r.isSuccessful()) {
                             cb.onSuccess(null);
                         } else {
-                            cb.onError("Lỗi thêm thành viên: " + r.code() + formatErrorBody(r));
+                            cb.onError("Lỗi thêm thành viên: " + buildApiError("add_member", r));
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        cb.onError(t.getMessage());
+                        cb.onError(getErrorMessage(t));
                     }
                 });
-    }
-
-    private String formatErrorBody(Response<?> response) {
-        if (response == null || response.errorBody() == null) {
-            return "";
-        }
-        try {
-            String body = response.errorBody().string();
-            if (body == null || body.trim().isEmpty()) {
-                return "";
-            }
-            return " - " + body;
-        } catch (IOException ignored) {
-            return "";
-        }
     }
 
     // Cập nhật role
@@ -114,7 +98,7 @@ public class MemberRepository {
                     }
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        cb.onError(t.getMessage());
+                        cb.onError(getErrorMessage(t));
                     }
                 });
     }
@@ -136,7 +120,7 @@ public class MemberRepository {
                     }
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        cb.onError(t.getMessage());
+                        cb.onError(getErrorMessage(t));
                     }
                 });
     }
@@ -155,7 +139,7 @@ public class MemberRepository {
                     }
                     @Override
                     public void onFailure(Call<List<User>> call, Throwable t) {
-                        cb.onError(t.getMessage());
+                        cb.onError(getErrorMessage(t));
                     }
                 });
     }

@@ -189,6 +189,7 @@ public class DashboardActivity extends BaseActivity {
         if (currentUserId != null && !currentUserId.isEmpty()) {
             loadProjects(true);
             loadAiSuggestions();
+            fetchUserFromDatabase(currentUserId);
         }
     }
 

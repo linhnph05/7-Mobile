@@ -24,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UserRepository {
+public class UserRepository extends BaseRepository {
     private static final String TAG = "DEBUG_UPLOAD";
 
     // Tên Bucket trong Supabase Storage (BẠN PHẢI TẠO BUCKET NÀY TRÊN DASHBOARD)
@@ -51,7 +51,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
-                callback.onError(t.getMessage());
+                callback.onError(getErrorMessage(t));
             }
         });
     }
@@ -84,7 +84,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                callback.onError(t.getMessage());
+                callback.onError(getErrorMessage(t));
             }
         });
     }
@@ -98,19 +98,22 @@ public class UserRepository {
                 return;
             }
 
-            byte[] bytes = getBytes(inputStream);
-            // Tên file lưu trên storage
+            byte[] bytes;
+            try {
+                bytes = getBytes(inputStream);
+            } finally {
+                try { inputStream.close(); } catch (IOException ignored) {}
+            }
+
             String fileName = "profile_" + System.currentTimeMillis() + ".jpg";
             String path = userId + "/" + fileName;
 
             RequestBody requestBody = RequestBody.create(bytes, MediaType.parse("image/jpeg"));
 
-            // Gọi API upload với x-upsert=true để tránh lỗi 409 nếu file đã tồn tại
             storageApi.uploadFile(STORAGE_BUCKET, path, requestBody, "true").enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.isSuccessful()) {
-                        // Tạo Public URL để lưu vào database
                         String publicUrl = SupabaseConfig.SUPABASE_URL + "/storage/v1/object/public/" + STORAGE_BUCKET
                                 + "/" + path;
                         Log.d(TAG, "Upload THÀNH CÔNG. Public URL: " + publicUrl);
@@ -130,13 +133,13 @@ public class UserRepository {
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.e(TAG, "Lỗi kết nối: " + t.getMessage());
-                    callback.onError("Network error: " + t.getMessage());
+                    Log.e(TAG, "Lỗi kết nối: " + getErrorMessage(t));
+                    callback.onError("Network error: " + getErrorMessage(t));
                 }
             });
 
         } catch (IOException e) {
-            callback.onError(e.getMessage());
+            callback.onError(getErrorMessage(e));
         }
     }
 

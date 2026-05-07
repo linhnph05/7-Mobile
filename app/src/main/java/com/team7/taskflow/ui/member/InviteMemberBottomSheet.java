@@ -1,9 +1,11 @@
 package com.team7.taskflow.ui.member;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -46,8 +48,8 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
     private long projectId;
     private MemberRepository memberRepo;
     private InvitationRepository invitationRepo;
+    private EditText etEmail;
 
-    // Lưu thông tin user tìm được
     private String foundUserEmail;
 
     @Nullable
@@ -67,7 +69,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         }
         if (projectId == -1) { dismiss(); return; }
 
-        EditText etEmail       = view.findViewById(R.id.et_email);
+        etEmail                = view.findViewById(R.id.et_email);
         TextView tvResultName  = view.findViewById(R.id.tv_result_name);
         TextView tvResultEmail = view.findViewById(R.id.tv_result_email);
         TextView tvAvatar      = view.findViewById(R.id.tv_avatar);
@@ -81,6 +83,13 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         invitationRepo = InvitationRepository.getInstance();
 
         // ── Tìm kiếm user theo email ────────────────────────────
+        etEmail.post(() -> {
+            etEmail.requestFocus();
+            InputMethodManager imm = (InputMethodManager)
+                    requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.showSoftInput(etEmail, InputMethodManager.SHOW_IMPLICIT);
+        });
+
         btnSearch.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             if (email.isEmpty()) {

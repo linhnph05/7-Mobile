@@ -1773,6 +1773,10 @@ public class TaskDetailActivity extends BaseActivity {
             return;
         }
 
+        if (projectId <= 0) {
+            Toast.makeText(this, getString(R.string.error_unknown), Toast.LENGTH_SHORT).show();
+            return;
+        }
         setLoading(true);
         Task task = new Task(projectId, title);
         task.setAssigneeId(selectedAssigneeName != null ? currentAssigneeId : null);

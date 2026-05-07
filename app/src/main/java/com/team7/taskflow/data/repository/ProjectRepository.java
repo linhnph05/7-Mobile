@@ -17,15 +17,12 @@ import com.team7.taskflow.domain.model.Task;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.utils.SessionManager;
 
-import java.time.LocalDate;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,9 +36,8 @@ import retrofit2.Response;
  * Repository for Project data operations
  * Handles communication with Supabase API
  */
-public class ProjectRepository {
+public class ProjectRepository extends BaseRepository {
 
-    private static final String TAG = "ProjectRepository";
     private static ProjectRepository instance;
     private final ProjectApi projectApi;
     private final TaskApi taskApi;
@@ -101,7 +97,7 @@ public class ProjectRepository {
                                 if (member == null || member.isRemoved()) {
                                     continue;
                                 }
-                                Project project = member != null ? member.getProject() : null;
+                                Project project = member.getProject();
                                 if (project == null || project.isDeleted()) {
                                     continue;
                                 }
@@ -117,7 +113,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
-                        callback.onError("Network error (member projects): " + t.getMessage());
+                        callback.onError("Network error (member projects): " + getErrorMessage(t));
                     }
                 });
     }
@@ -330,7 +326,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<ProjectActivity>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -445,7 +441,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<ProjectActivity>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -847,13 +843,6 @@ public class ProjectRepository {
         return "";
     }
 
-    private String resolveProjectTargetTitle(long entityId, Map<Long, String> taskTitleMap) {
-        if (entityId <= 0 || taskTitleMap == null) {
-            return "";
-        }
-        return taskTitleMap.getOrDefault(entityId, "Task #" + entityId);
-    }
-
     private String resolveUserName(String userId, Map<String, UserProfile> userProfileMap) {
         if (userId == null || userId.trim().isEmpty()) {
             return "Unknown";
@@ -895,10 +884,8 @@ public class ProjectRepository {
                         Map<String, UserProfile> profiles = new HashMap<>();
                         List<ProjectMember> members = response.body() != null ? response.body() : new ArrayList<>();
                         for (ProjectMember member : members) {
-                            if (member == null || member.isRemoved()) {
-                                continue;
-                            }
-                            if (member == null || member.getUserId() == null || member.getUserId().trim().isEmpty()) {
+                            if (member == null || member.isRemoved()
+                                    || member.getUserId() == null || member.getUserId().trim().isEmpty()) {
                                 continue;
                             }
                             String userId = member.getUserId();
@@ -922,7 +909,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -980,7 +967,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -1001,7 +988,7 @@ public class ProjectRepository {
 
             @Override
             public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                callback.onError("Network error: " + t.getMessage());
+                callback.onError("Network error: " + getErrorMessage(t));
             }
         });
     }
@@ -1061,7 +1048,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -1123,7 +1110,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -1146,7 +1133,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -1168,7 +1155,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -1190,7 +1177,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Project>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
@@ -1240,7 +1227,7 @@ public class ProjectRepository {
 
                     @Override
                     public void onFailure(@NonNull Call<List<ProjectMember>> call, @NonNull Throwable t) {
-                        callback.onError("Network error: " + t.getMessage());
+                        callback.onError("Network error: " + getErrorMessage(t));
                     }
                 });
     }
