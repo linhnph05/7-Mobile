@@ -37,6 +37,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        SessionManager.init(context);
         super.onReceive(context, intent);
         if (intent == null) return;
 
@@ -88,6 +89,7 @@ public class TaskTodayWidgetProvider extends AppWidgetProvider {
     }
 
     public static void refreshAll(Context context) {
+        SessionManager.init(context);
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         ComponentName provider = new ComponentName(context, TaskTodayWidgetProvider.class);
         int[] ids = manager.getAppWidgetIds(provider);

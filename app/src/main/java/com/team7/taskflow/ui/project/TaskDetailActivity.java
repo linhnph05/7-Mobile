@@ -734,8 +734,20 @@ public class TaskDetailActivity extends BaseActivity {
             currentUserName = "User";
         }
         
-        // Avatar URL is null for current user - AvatarUiUtils will show fallback letter
-        AvatarUiUtils.bindAvatarOrFallback(imgCommentAvatar, tvCommentAvatarLetter, null, currentUserName);
+        String avatarUrl = null;
+        if (currentUserId != null && projectMembers != null) {
+            for (User u : projectMembers) {
+                if (currentUserId.equals(u.getUserId())) {
+                    avatarUrl = u.getAvatarUrl();
+                    if (currentUserName.equals("User") && u.getDisplayNameOrEmail() != null) {
+                        currentUserName = u.getDisplayNameOrEmail();
+                    }
+                    break;
+                }
+            }
+        }
+        
+        AvatarUiUtils.bindAvatarOrFallback(imgCommentAvatar, tvCommentAvatarLetter, avatarUrl, currentUserName);
     }
 
     private void setupActivityTabs() {
@@ -1221,6 +1233,9 @@ public class TaskDetailActivity extends BaseActivity {
                 : "Task");
         item.setDetail(resolveTaskDetail(activity.getActionType(), activity.getOldValue(), activity.getNewValue()));
         item.setCreatedAt(activity.getCreatedAt());
+        item.setRawActionType(activity.getActionType());
+        item.setOldValue(activity.getOldValue());
+        item.setNewValue(activity.getNewValue());
         return item;
     }
 
@@ -1302,9 +1317,9 @@ public class TaskDetailActivity extends BaseActivity {
         if ("COMMENT_CREATE".equals(normalized))
             return newText;
         if ("COMMENT_UPDATE".equals(normalized))
-            return oldText + " -> " + newText;
+            return "";
         if ("COMMENT_DELETE".equals(normalized))
-            return oldText;
+            return "";
         if ("ADD_REACTION".equals(normalized) || "REMOVE_REACTION".equals(normalized))
             return newText;
         if ("HARD_DELETE".equals(normalized))
@@ -1312,7 +1327,7 @@ public class TaskDetailActivity extends BaseActivity {
         if ("UPDATE_STATUS".equals(normalized) || "DELETE".equals(normalized) || "RESTORE".equals(normalized)) {
             return oldText + " -> " + newText;
         }
-        return oldText + " -> " + newText;
+        return "";
     }
 
     private long parseHistoryTime(String raw) {
@@ -1731,6 +1746,7 @@ public class TaskDetailActivity extends BaseActivity {
             isMembersLoading = false;
             runOnUiThread(() -> {
                 syncAssigneeUI();
+                bindCommentInputAvatar();
                 if (currentPickerContainer != null) {
                     populateMemberPicker(currentPickerContainer, currentPickerProgressBar, null);
                 }
@@ -1750,6 +1766,7 @@ public class TaskDetailActivity extends BaseActivity {
                 projectMembers = members != null ? members : new ArrayList<>();
                 runOnUiThread(() -> {
                     syncAssigneeUI();
+                    bindCommentInputAvatar();
                     if (currentPickerContainer != null) {
                         populateMemberPicker(currentPickerContainer, currentPickerProgressBar, null);
                     }
@@ -1975,7 +1992,7 @@ public class TaskDetailActivity extends BaseActivity {
                     break;
                 case "DOING":
                     label = getString(R.string.task_status_in_progress);
-                    color = R.color.warning;
+                    color = R.color.primary;
                     break;
                 default:
                     label = getString(R.string.task_status_todo);
@@ -1999,7 +2016,7 @@ public class TaskDetailActivity extends BaseActivity {
             colorRes = R.color.success;
             tvStatus.setText(R.string.task_status_done);
         } else if ("DOING".equals(status)) {
-            colorRes = R.color.warning;
+            colorRes = R.color.primary;
             tvStatus.setText(R.string.task_status_in_progress);
         } else {
             colorRes = R.color.theme_text_primary;

@@ -78,8 +78,10 @@ public class HistoryEventAdapter extends BaseAdapter {
             holder.tvMeta.setText("Vua xong");
             holder.tvComment.setVisibility(View.GONE);
             holder.tvDetail.setVisibility(View.GONE);
+            holder.layoutStatusTransition.setVisibility(View.GONE);
             holder.bindAvatar(null, "?");
-            holder.viewAccent.setBackgroundColor(ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary));
+            holder.viewAccent.setCardBackgroundColor(
+                    ContextCompat.getColor(inflater.getContext(), R.color.theme_text_secondary));
             return;
         }
 
@@ -101,12 +103,21 @@ public class HistoryEventAdapter extends BaseAdapter {
         String taskTitle = historyItem.getTaskTitle() != null ? historyItem.getTaskTitle().trim() : "";
         String detail = historyItem.getDetail() != null ? historyItem.getDetail().trim() : "";
 
-        int accentColor = resolveAccentColor(historyItem.getSource(), historyItem.getActionLabel(), detail);
-        holder.viewAccent.setBackgroundColor(accentColor);
+        String rawActionType = historyItem.getRawActionType() != null
+                ? historyItem.getRawActionType().trim().toUpperCase(Locale.US)
+                : "";
+        String actionLabel = historyItem.getActionLabel();
+        if ("UPDATE_STATUS".equals(rawActionType) && historyItem.getNewValue() != null &&
+                ("TRASH".equalsIgnoreCase(historyItem.getNewValue())
+                        || "DELETED".equalsIgnoreCase(historyItem.getNewValue()))) {
+            actionLabel = "đã xóa công việc";
+        }
+
+        int accentColor = resolveAccentColor(historyItem.getSource(), historyItem.getRawActionType(), detail);
+        holder.viewAccent.setCardBackgroundColor(accentColor);
         holder.tvActor.setText(actor);
         holder.bindAvatar(historyItem.getAvatarUrl(), resolveAvatarLetter(actor));
-        holder.tvAction.setText(buildActionLine(historyItem.getActionLabel(), taskTitle));
-        holder.tvAction.setTextColor(accentColor);
+        holder.tvAction.setText(buildActionLine(actionLabel, taskTitle));
 
         String source = historyItem.getSource();
         if (ProjectHistoryItem.SOURCE_TASK_ACTIVITY.equals(source)) {
@@ -127,11 +138,27 @@ public class HistoryEventAdapter extends BaseAdapter {
                 || "Noi dung binh luan".equalsIgnoreCase(detail)
                 || shouldHideTaskUpdateDetail(historyItem);
 
-        if (hideDetail) {
+        boolean isStatusChange = ("UPDATE_STATUS".equals(rawActionType) || "RESTORE".equals(rawActionType)
+                || "DELETE".equals(rawActionType) || "TRASH".equals(rawActionType));
+
+        if (isStatusChange && historyItem.getNewValue() != null && ("TRASH".equalsIgnoreCase(historyItem.getNewValue())
+                || "DELETED".equalsIgnoreCase(historyItem.getNewValue()))) {
+            isStatusChange = false; // Hide status badge if moving to trash
+        }
+
+        if (isStatusChange && historyItem.getOldValue() != null && historyItem.getNewValue() != null) {
             holder.tvDetail.setVisibility(View.GONE);
+            holder.layoutStatusTransition.setVisibility(View.VISIBLE);
+            bindStatusBadge(holder.tvOldStatus, historyItem.getOldValue());
+            bindStatusBadge(holder.tvNewStatus, historyItem.getNewValue());
         } else {
-            holder.tvDetail.setVisibility(View.VISIBLE);
-            holder.tvDetail.setText(detail);
+            holder.layoutStatusTransition.setVisibility(View.GONE);
+            if (hideDetail) {
+                holder.tvDetail.setVisibility(View.GONE);
+            } else {
+                holder.tvDetail.setVisibility(View.VISIBLE);
+                holder.tvDetail.setText(detail);
+            }
         }
     }
 
@@ -156,14 +183,14 @@ public class HistoryEventAdapter extends BaseAdapter {
         }
 
         int accentColor = resolveLegacyAccentColor(action, detail);
-        holder.viewAccent.setBackgroundColor(accentColor);
+        holder.viewAccent.setCardBackgroundColor(accentColor);
         holder.bindAvatar(null, "H");
         holder.tvActor.setText("History");
         holder.tvAction.setText(prettyActionLabel(action));
-        holder.tvAction.setTextColor(accentColor);
         holder.tvMeta.setText(time);
         holder.tvComment.setVisibility(View.GONE);
 
+        holder.layoutStatusTransition.setVisibility(View.GONE);
         if (detail.isEmpty()) {
             holder.tvDetail.setVisibility(View.GONE);
         } else {
@@ -213,50 +240,49 @@ public class HistoryEventAdapter extends BaseAdapter {
         return actor.trim().substring(0, 1).toUpperCase(Locale.US);
     }
 
-    private int resolveAccentColor(String source, String actionRaw, String detailRaw) {
-        String action = actionRaw != null ? actionRaw.toUpperCase(Locale.US) : "";
+    private int resolveAccentColor(String source, String rawActionType, String detailRaw) {
+        String action = rawActionType != null ? rawActionType.toUpperCase(Locale.US) : "";
         String detail = detailRaw != null ? detailRaw.toUpperCase(Locale.US) : "";
         String normalizedSource = source != null ? source.toUpperCase(Locale.US) : "";
 
         if (ProjectHistoryItem.SOURCE_COMMENT.equals(normalizedSource)
-                || action.contains("BINH LUAN")
                 || action.contains("COMMENT")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.indigo_600);
         }
 
-        if (action.contains("DOI TRANG THAI")) {
+        if (action.contains("UPDATE_STATUS") || action.contains("RESTORE")) {
             if (detail.contains("-> TRASH")) {
                 return ContextCompat.getColor(inflater.getContext(), R.color.text_red_600);
             }
-            if (detail.contains("TRASH ->")) {
+            if (detail.contains("TRASH ->") || action.contains("RESTORE")) {
                 return ContextCompat.getColor(inflater.getContext(), R.color.success);
             }
             if (detail.contains("-> DONE")) {
                 return ContextCompat.getColor(inflater.getContext(), R.color.success);
             }
             if (detail.contains("-> IN_PROGRESS") || detail.contains("-> DOING")) {
-                return ContextCompat.getColor(inflater.getContext(), R.color.indigo_600);
+                return ContextCompat.getColor(inflater.getContext(), R.color.primary);
             }
             return ContextCompat.getColor(inflater.getContext(), R.color.warning);
         }
 
-        if (action.contains("XOA") || action.contains("TRASH")) {
+        if (action.contains("DELETE") || action.contains("TRASH")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.text_red_600);
         }
 
-        if (action.contains("MEMBER_REMOVED") || action.contains("MEMBER_LEFT") || action.contains("XOA THANH VIEN")) {
+        if (action.contains("MEMBER_REMOVED") || action.contains("MEMBER_LEFT")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.text_red_600);
         }
 
-        if (action.contains("MEMBER") || action.contains("THANH VIEN") || action.contains("JOIN")) {
+        if (action.contains("MEMBER_ADD") || action.contains("MEMBER_JOIN")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.success);
         }
 
-        if (action.contains("TAO") || action.contains("CREATE")) {
+        if (action.contains("CREATE")) {
             return ContextCompat.getColor(inflater.getContext(), R.color.success);
         }
 
-        if (action.contains("CHINH SUA") || action.contains("CAP NHAT") || action.contains("UPDATE")) {
+        if (action.contains("UPDATE")) {
             if (isNightMode()) {
                 return ContextCompat.getColor(inflater.getContext(), R.color.theme_text_primary);
             }
@@ -315,7 +341,8 @@ public class HistoryEventAdapter extends BaseAdapter {
     }
 
     private boolean isNightMode() {
-        int nightMode = inflater.getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        int nightMode = inflater.getContext().getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
         return nightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
@@ -325,32 +352,44 @@ public class HistoryEventAdapter extends BaseAdapter {
         }
 
         try {
-            Instant created = OffsetDateTime.parse(rawTime).toInstant();
-            Duration duration = Duration.between(created, Instant.now());
-            long minutes = duration.toMinutes();
-            if (minutes < 1) {
+            Instant created;
+            if (rawTime.contains("T")) {
+                created = OffsetDateTime.parse(rawTime).toInstant();
+            } else {
+                created = Instant.ofEpochMilli(Long.parseLong(rawTime));
+            }
+            Instant now = Instant.now();
+            if (created.isAfter(now)) {
                 return "Vua xong";
             }
-            if (minutes < 60) {
-                return minutes + " phut truoc";
-            }
-            long hours = duration.toHours();
-            if (hours < 24) {
+
+            Duration duration = Duration.between(created, now);
+            long minutes = duration.toMinutes();
+
+            ZoneId zone = ZoneId.systemDefault();
+            java.time.LocalDate createdDate = created.atZone(zone).toLocalDate();
+            java.time.LocalDate currentDate = now.atZone(zone).toLocalDate();
+
+            if (createdDate.equals(currentDate)) {
+                if (minutes < 1) {
+                    return "Vua xong";
+                }
+                if (minutes < 60) {
+                    return minutes + " phut truoc";
+                }
+                long hours = duration.toHours();
                 return hours + " gio truoc";
             }
-            if (hours < 48) {
+
+            if (createdDate.equals(currentDate.minusDays(1))) {
                 return "Hom qua";
             }
-            Date date = Date.from(created);
-            return new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(date);
+
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                    .ofPattern("dd/MM/yyyy HH:mm");
+            return created.atZone(zone).format(formatter);
         } catch (Exception ignored) {
-            try {
-                return OffsetDateTime.parse(rawTime)
-                        .atZoneSameInstant(ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
-            } catch (Exception secondIgnored) {
-                return rawTime;
-            }
+            return rawTime;
         }
     }
 
@@ -392,7 +431,9 @@ public class HistoryEventAdapter extends BaseAdapter {
             if (days <= 0) {
                 return inflater.getContext().getString(R.string.task_history_time_just_now);
             }
-            return inflater.getContext().getString(R.string.task_history_time_days_ago, days);
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                    .ofPattern("dd/MM/yyyy HH:mm");
+            return created.atZone(zone).format(formatter);
         } catch (Exception ignored) {
             return formatRelativeTime(rawTime);
         }
@@ -413,8 +454,34 @@ public class HistoryEventAdapter extends BaseAdapter {
         return normalized.contains("CHINH SUA") || normalized.contains("UPDATE") || normalized.contains("CAP NHAT");
     }
 
+    private void bindStatusBadge(TextView tv, String status) {
+        if (status == null)
+            status = "TODO";
+        String normalized = status.trim().toUpperCase(Locale.US);
+        if ("DONE".equals(normalized)) {
+            tv.setText(inflater.getContext().getString(R.string.task_status_done));
+            tv.setBackgroundResource(R.drawable.bg_badge_green);
+            tv.setTextColor(ContextCompat.getColor(inflater.getContext(), R.color.success));
+        } else if ("IN_PROGRESS".equals(normalized) || "DOING".equals(normalized)) {
+            tv.setText(inflater.getContext().getString(R.string.task_status_in_progress));
+            tv.setBackgroundResource(R.drawable.bg_badge_blue);
+            tv.setTextColor(ContextCompat.getColor(inflater.getContext(), R.color.primary));
+        } else if ("TRASH".equals(normalized) || "DELETED".equals(normalized)) {
+            tv.setText("Trash");
+            tv.setBackgroundResource(R.drawable.bg_badge_red);
+            tv.setTextColor(ContextCompat.getColor(inflater.getContext(), R.color.text_red_600));
+        } else {
+            tv.setText(inflater.getContext().getString(R.string.task_status_todo));
+            tv.setBackgroundResource(R.drawable.bg_badge_neutral);
+            tv.setTextColor(ContextCompat.getColor(inflater.getContext(), R.color.slate_700));
+            if (isNightMode()) {
+                tv.setTextColor(ContextCompat.getColor(inflater.getContext(), R.color.slate_300));
+            }
+        }
+    }
+
     private static class ViewHolder {
-        final View viewAccent;
+        final com.google.android.material.card.MaterialCardView viewAccent;
         final ImageView imgAvatar;
         final TextView tvAvatarLetter;
         final TextView tvActor;
@@ -422,6 +489,9 @@ public class HistoryEventAdapter extends BaseAdapter {
         final TextView tvMeta;
         final TextView tvComment;
         final TextView tvDetail;
+        final View layoutStatusTransition;
+        final TextView tvOldStatus;
+        final TextView tvNewStatus;
 
         ViewHolder(View itemView) {
             viewAccent = itemView.findViewById(R.id.viewHistoryAccent);
@@ -432,6 +502,9 @@ public class HistoryEventAdapter extends BaseAdapter {
             tvMeta = itemView.findViewById(R.id.tvHistoryMeta);
             tvComment = itemView.findViewById(R.id.tvHistoryComment);
             tvDetail = itemView.findViewById(R.id.tvHistoryDetail);
+            layoutStatusTransition = itemView.findViewById(R.id.layoutStatusTransition);
+            tvOldStatus = itemView.findViewById(R.id.tvOldStatus);
+            tvNewStatus = itemView.findViewById(R.id.tvNewStatus);
         }
 
         void bindAvatar(String avatarUrl, String fallbackLetter) {

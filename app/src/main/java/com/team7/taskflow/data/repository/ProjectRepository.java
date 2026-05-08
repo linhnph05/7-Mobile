@@ -479,6 +479,9 @@ public class ProjectRepository extends BaseRepository {
                 item.setCommentContent(resolveProjectCommentContent(activity));
             }
             item.setCreatedAt(activity.getCreatedAt());
+            item.setRawActionType(activity.getActionType());
+            item.setOldValue(activity.getOldValue());
+            item.setNewValue(activity.getNewValue());
             result.add(item);
         }
 
@@ -678,6 +681,8 @@ public class ProjectRepository extends BaseRepository {
         item.setCommentContent(ownedComment != null ? ownedComment.getContent() : null);
         item.setDetail(buildCommentReactionDetail(reaction.getReactionType()));
         item.setCreatedAt(reaction.getCreatedAt());
+        item.setRawActionType("COMMENT_REACTION");
+        item.setNewValue(reaction.getReactionType());
         return item;
     }
 
@@ -753,7 +758,10 @@ public class ProjectRepository extends BaseRepository {
             return "đã bỏ phản ứng";
 
         // Member activities
-        if (action.contains("MEMBER_JOINED") || action.contains("MEMBER_ADDED") || action.contains("OWNER_JOINED")) {
+        if (action.contains("MEMBER_JOINED") || action.contains("OWNER_JOINED")) {
+            return "đã tham gia";
+        }
+        if (action.contains("MEMBER_ADDED")) {
             return "đã thêm thành viên";
         }
         if (action.contains("MEMBER_REMOVED") || action.contains("MEMBER_LEFT")) {

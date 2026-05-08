@@ -15,6 +15,10 @@ public class ProjectHistoryItem {
     private String detail;
     private String commentContent;
     private String createdAt;
+    
+    private String rawActionType;
+    private String oldValue;
+    private String newValue;
 
     public String getSource() {
         return source;
@@ -86,5 +90,29 @@ public class ProjectHistoryItem {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getRawActionType() {
+        return rawActionType;
+    }
+
+    public void setRawActionType(String rawActionType) {
+        this.rawActionType = rawActionType;
+    }
+
+    public String getOldValue() {
+        return oldValue;
+    }
+
+    public void setOldValue(String oldValue) {
+        this.oldValue = oldValue;
+    }
+
+    public String getNewValue() {
+        return newValue;
+    }
+
+    public void setNewValue(String newValue) {
+        this.newValue = newValue;
     }
 }

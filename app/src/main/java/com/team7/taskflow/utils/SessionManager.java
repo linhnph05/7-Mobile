@@ -33,7 +33,7 @@ public class SessionManager {
             appContext = context.getApplicationContext();
             prefs = appContext
                     .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-            
+
             String token = getAccessToken();
             if (!token.isEmpty()) {
                 SupabaseClient.getInstance().setAccessToken(token);
@@ -41,7 +41,8 @@ public class SessionManager {
         }
     }
 
-    public static void saveSession(String accessToken, String refreshToken, String userId, String email, String displayName) {
+    public static void saveSession(String accessToken, String refreshToken, String userId, String email,
+            String displayName) {
         ensureInit();
         redirectingToLogin = false;
         SharedPreferences.Editor editor = prefs.edit();
@@ -54,7 +55,7 @@ public class SessionManager {
         }
         editor.putLong(KEY_EXPIRES_AT, System.currentTimeMillis() + 3600 * 1000);
         editor.apply();
-        
+
         SupabaseClient.getInstance().setAccessToken(accessToken);
         Log.d(TAG, "Session saved for email=" + email);
     }
@@ -149,6 +150,7 @@ public class SessionManager {
     }
 
     private static void ensureInit() {
-        if (prefs == null) throw new IllegalStateException("SessionManager not initialized");
+        if (prefs == null)
+            throw new IllegalStateException("SessionManager not initialized");
     }
 }

@@ -31,6 +31,7 @@ public class TaskTodaySummaryWidgetProvider extends AppWidgetProvider {
     }
 
     public static void refreshAll(Context context) {
+        SessionManager.init(context);
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         ComponentName provider = new ComponentName(context, TaskTodaySummaryWidgetProvider.class);
         int[] ids = manager.getAppWidgetIds(provider);

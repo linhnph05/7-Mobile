@@ -71,13 +71,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
         String role = member.getRole() != null ? member.getRole() : "MEMBER";
         holder.tvRole.setText(role);
 
-        // Màu role
-        switch (role.toUpperCase()) {
-            case "OWNER":  holder.tvRole.setTextColor(0xFFFFD700); break; // vàng
-            case "ADMIN":  holder.tvRole.setTextColor(0xFF2945FF); break; // xanh dương
-            case "VIEWER": holder.tvRole.setTextColor(0xFFA0A0A0); break; // xám
-            default:       holder.tvRole.setTextColor(0xFF4CAF50); break; // xanh lá = MEMBER
-        }
+        // Màu role được định nghĩa chuẩn trong XML (item_member.xml)
 
         // ✅ FIX #3: Phân quyền đúng — Admin/Owner thấy nút xóa & đổi role
         // OWNER không được xóa chính mình

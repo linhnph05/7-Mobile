@@ -11,6 +11,12 @@
         <item name="android:textColorSecondary">@color/theme_text_secondary</item>
         <item name="android:textColorHint">@color/theme_text_hint</item>
         
+        <!-- Brand Colors for Widgets (like DatePicker/TimePicker headers) -->
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:datePickerDialogTheme">@style/TaskFlow.PickerDialog</item>
+        <item name="android:timePickerDialogTheme">@style/TaskFlow.PickerDialog</item>
+        
         <!-- Status Bar Colors -->
         <item name="android:statusBarColor">@color/theme_background</item>
         <item name="android:windowLightStatusBar">true</item>
@@ -79,6 +85,17 @@
 
     <style name="ShapeAppearanceOverlay.TaskFlow.AlertDialog.Rounded" parent="">
         <item name="cornerSize">28dp</item>
+    </style>
+
+    <!-- Theme for Date/Time Picker to ensure headers use primary color -->
+    <style name="TaskFlow.PickerDialog" parent="Theme.Material3.DayNight.Dialog">
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:colorBackground">@color/theme_dialog_surface</item>
+        <item name="colorSurface">@color/theme_dialog_surface</item>
+        <item name="colorOnSurface">@color/theme_text_primary</item>
     </style>
 
     <!-- Translucent Overlay Theme for AI Dialog -->
