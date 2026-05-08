@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class NotificationPushDispatcher {
 
-    private static final String CHANNEL_ID = "taskflow_push_channel_v3";
+    private static final String CHANNEL_ID = "taskflow_push_channel_v4";
     private static final String PREF_NAME = "taskflow_push_state";
     private static final String KEY_LAST_PUSHED_ID_PREFIX = "last_pushed_notification_id_";
 
@@ -97,10 +97,9 @@ public class NotificationPushDispatcher {
             }
 
             // --- KIỂM TRA ĐIỀU KIỆN ---
-            if (notification.isRead()) {
-                Log.d("PushTest", "Dispatcher: ID " + notificationId + " ignored (Already Read)");
-                continue;
-            }
+            // NOTE: Push should be triggered for new rows regardless of `is_read` flag
+            // (server may pre-mark items as read for other UI flows). We therefore
+            // no longer filter on `isRead()` here.
             if (userId.equals(notification.getActorId())) {
                 Log.d("PushTest", "Dispatcher: ID " + notificationId + " ignored (Self Action)");
                 continue;
@@ -132,7 +131,7 @@ public class NotificationPushDispatcher {
         if (pending.isEmpty()) {
             if (newMaxId > lastPushedId) {
                 Log.d("PushTest", "Dispatcher: Updating lastPushedId to " + newMaxId);
-                // prefs.edit().putLong(key, newMaxId).commit();
+                prefs.edit().putLong(key, newMaxId).commit();
             }
             return;
         }
@@ -146,7 +145,7 @@ public class NotificationPushDispatcher {
         }
 
         Log.d("PushTest", "Dispatcher: Updating lastPushedId to " + newMaxId);
-        // prefs.edit().putLong(key, newMaxId).commit();
+        prefs.edit().putLong(key, newMaxId).commit();
     }
 
     private static void showSinglePush(Context context, Notification notification) {
@@ -179,21 +178,46 @@ public class NotificationPushDispatcher {
         remoteViews.setTextViewText(R.id.tvNotifTime, timeStr);
         remoteViews.setImageViewResource(R.id.ivNotifIcon, getPushIcon(notification.getType()));
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setCustomContentView(remoteViews) 
-                .setCustomBigContentView(remoteViews) 
-                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setAutoCancel(true)
-                .setContentIntent(contentIntent)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        NotificationCompat.Builder builder = buildPushNotificationBuilder(context, remoteViews, contentIntent);
 
         int notifId = 200000 + (int) (notification.getNotificationId() % 100000);
         Log.d("PushTest", "Calling notify() for ID: " + notifId);
         NotificationManagerCompat.from(context).notify(notifId, builder.build());
+    }
+
+    private static NotificationCompat.Builder buildPushNotificationBuilder(
+            Context context,
+            android.widget.RemoteViews remoteViews,
+            PendingIntent contentIntent) {
+
+        return new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setCustomContentView(remoteViews)
+                .setCustomBigContentView(remoteViews)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
+                .setContentIntent(contentIntent)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+    }
+
+    /**
+     * Public wrapper to display a single push coming from remote (FCM) payloads.
+     * Keeps internal showSinglePush private for other flows.
+     */
+    public static void showFromRemote(Context context, Notification notification) {
+        if (context == null || notification == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("PushTest", "showFromRemote: Permission DENIED");
+                return;
+            }
+        }
+        createChannelIfNeeded(context);
+        showSinglePush(context, notification);
     }
 
     private static int getPushIcon(Notification.NotificationType type) {
@@ -243,17 +267,27 @@ public class NotificationPushDispatcher {
 
         NotificationChannel existing = manager.getNotificationChannel(CHANNEL_ID);
         if (existing != null) {
-            return;
+            boolean importanceOk = existing.getImportance() == NotificationManager.IMPORTANCE_HIGH;
+            boolean visibilityOk = existing.getLockscreenVisibility() == android.app.Notification.VISIBILITY_PUBLIC;
+            if (importanceOk && visibilityOk) {
+                return;
+            }
+
+            Log.w("PushTest", "Recreating push channel because existing channel config is outdated: importance="
+                    + existing.getImportance() + ", visibility=" + existing.getLockscreenVisibility());
+            manager.deleteNotificationChannel(CHANNEL_ID);
         }
 
         NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.push_channel_name),
-                NotificationManager.IMPORTANCE_HIGH
+            CHANNEL_ID,
+            context.getString(R.string.push_channel_name),
+            NotificationManager.IMPORTANCE_HIGH
         );
         channel.setDescription(context.getString(R.string.push_channel_description));
         channel.enableVibration(true);
+        channel.enableLights(true);
         channel.setShowBadge(true);
+        channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
         manager.createNotificationChannel(channel);
     }
 }

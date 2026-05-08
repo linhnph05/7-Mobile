@@ -11,8 +11,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="14dp"
-        android:background="@color/theme_surface">
+        android:paddingVertical="14dp">
 
         <ImageView
             android:id="@+id/btnBack"

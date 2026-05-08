@@ -10,15 +10,26 @@
     android:background="?attr/selectableItemBackground">
 
     <!-- Avatar -->
-    <TextView
-        android:id="@+id/tv_avatar"
+    <FrameLayout
         android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:background="@drawable/bg_color_circle"
-        android:gravity="center"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:layout_height="42dp">
+
+        <ImageView
+            android:id="@+id/img_member_avatar"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_avatar_grey_bordered"/>
+
+        <TextView
+            android:id="@+id/tv_avatar"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <!-- Tên + Email -->
     <LinearLayout

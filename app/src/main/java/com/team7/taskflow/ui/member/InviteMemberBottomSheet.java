@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.InvitationRepository;
 import com.team7.taskflow.data.repository.MemberRepository;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
@@ -49,6 +51,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
     private MemberRepository memberRepo;
     private InvitationRepository invitationRepo;
     private EditText etEmail;
+    private ImageView imgMemberAvatar;
 
     private String foundUserEmail;
 
@@ -72,6 +75,7 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
         etEmail                = view.findViewById(R.id.et_email);
         TextView tvResultName  = view.findViewById(R.id.tv_result_name);
         TextView tvResultEmail = view.findViewById(R.id.tv_result_email);
+        imgMemberAvatar        = view.findViewById(R.id.imgMemberAvatar);
         TextView tvAvatar      = view.findViewById(R.id.tv_avatar);
         TextView tvError       = view.findViewById(R.id.tv_error);
         CardView cardResult    = view.findViewById(R.id.card_result);
@@ -112,7 +116,13 @@ public class InviteMemberBottomSheet extends BottomSheetDialogFragment {
                                 ? user.getDisplayName() : email;
                         tvResultName.setText(name);
                         tvResultEmail.setText(foundUserEmail);
-                        tvAvatar.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                        
+                        // Bind user avatar with fallback letter
+                        if (imgMemberAvatar != null) {
+                            String avatarUrl = user.getAvatarUrl();
+                            AvatarUiUtils.bindAvatarOrFallback(imgMemberAvatar, tvAvatar, avatarUrl, name);
+                        }
+                        
                         cardResult.setVisibility(View.VISIBLE);
                     });
                 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.ProjectMember;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 
 import java.util.List;
 
@@ -54,11 +56,16 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ProjectMember member = members.get(position);
 
-        // Tên + avatar chữ cái đầu
+        // Tên + email
         String name = member.getDisplayName();
         holder.tvName.setText(name);
         holder.tvEmail.setText(member.getEmail());
-        holder.tvAvatar.setText(name.isEmpty() ? "?" : String.valueOf(name.charAt(0)).toUpperCase());
+        
+        // Bind avatar with fallback letter
+        if (holder.imgMemberAvatar != null) {
+            String avatarUrl = member.getAvatarUrl();
+            AvatarUiUtils.bindAvatarOrFallback(holder.imgMemberAvatar, holder.tvAvatar, avatarUrl, name);
+        }
 
         // Role badge
         String role = member.getRole() != null ? member.getRole() : "MEMBER";
@@ -111,11 +118,13 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     public int getItemCount() { return members.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView   imgMemberAvatar;
         TextView    tvAvatar, tvName, tvEmail, tvRole;
         ImageButton btnRemove;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
+            imgMemberAvatar = itemView.findViewById(R.id.img_member_avatar);
             tvAvatar  = itemView.findViewById(R.id.tv_avatar);
             tvName    = itemView.findViewById(R.id.tv_member_name);
             tvEmail   = itemView.findViewById(R.id.tv_member_email);

@@ -44,7 +44,6 @@ import com.team7.taskflow.domain.model.Project;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.ui.notification.NotificationsActivity;
-import com.team7.taskflow.ui.notification.NotificationPushScheduler;
 import com.team7.taskflow.ui.project.CreateProjectActivity;
 
 import com.team7.taskflow.domain.model.Task;
@@ -142,7 +141,8 @@ public class DashboardActivity extends BaseActivity {
         Log.d(TAG, "Logged in userId=" + currentUserId);
 
         projectRepository = ProjectRepository.getInstance();
-        NotificationPushScheduler.ensureScheduled(this);
+        // Using FCM for push delivery — cancel periodic DB polling worker to avoid duplicate flows
+        // Push delivery now handled via FCM; removed periodic DB polling.
         requestNotificationPermission();
 
         whiteNoisePlayer = new WhiteNoisePlayer();
@@ -584,7 +584,7 @@ public class DashboardActivity extends BaseActivity {
 
                         List<Task> activeTasks = new ArrayList<>();
                         for (Task t : tasks) {
-                            if (!"DONE".equals(t.getStatus())) {
+                            if (!"DONE".equals(t.getStatus()) && isTaskDueAfterToday(t)) {
                                 activeTasks.add(t);
                             }
                         }
@@ -641,8 +641,19 @@ public class DashboardActivity extends BaseActivity {
      * Helper để hiển thị nội dung gợi ý với định dạng HTML và hiệu ứng mờ dần
      */
     private void displayFormattedSuggestion(String text) {
+        if (text == null) {
+            text = "";
+        }
+
         // Chuyển đổi **abc** thành <b>abc</b> để TextView hiển thị Bold
-        String formattedText = text.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
+        String formattedText = text
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                // Tách bullet ra từng dòng để tránh bị dính thành đoạn văn.
+                .replaceAll("\\s*•\\s*", "<br/>• ")
+                .replace("\n", "<br/>")
+                .replaceAll("^<br/>", "")
+                .replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
         
         // Hiệu ứng Fade-in
         tvAiSuggestion.setAlpha(0f);
@@ -656,6 +667,42 @@ public class DashboardActivity extends BaseActivity {
                 .alpha(1.0f)
                 .setDuration(800)
                 .start();
+    }
+
+    /**
+     * Chỉ giữ task có deadline lớn hơn ngày hôm nay.
+     * Ưu tiên parse các dạng yyyy-MM-dd và ISO datetime.
+     */
+    private boolean isTaskDueAfterToday(Task task) {
+        if (task == null || task.getDueDate() == null || task.getDueDate().trim().isEmpty()) {
+            return false;
+        }
+
+        String due = task.getDueDate().trim();
+        LocalDate today = LocalDate.now();
+
+        try {
+            LocalDate dueDate = LocalDate.parse(due, DB_DATE_FORMAT);
+            return dueDate.isAfter(today);
+        } catch (DateTimeParseException ignored) {
+            // Fallback sang parse dạng datetime nếu backend trả đủ giờ phút giây.
+        }
+
+        try {
+            LocalDate dueDate = LocalDateTime.parse(due, DB_DATETIME_FORMAT).toLocalDate();
+            return dueDate.isAfter(today);
+        } catch (DateTimeParseException ignored) {
+            // Tiếp tục fallback khác.
+        }
+
+        try {
+            LocalDate dueDate = Instant.parse(due)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            return dueDate.isAfter(today);
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     /**

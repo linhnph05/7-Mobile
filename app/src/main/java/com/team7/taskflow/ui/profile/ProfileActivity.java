@@ -1,6 +1,7 @@
 package com.team7.taskflow.ui.profile;
 import com.team7.taskflow.R;
 import com.team7.taskflow.data.remote.SupabaseClient;
+import com.team7.taskflow.data.repository.DeviceRepository;
 import com.team7.taskflow.data.repository.UserRepository;
 import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.common.AvatarUiUtils;
@@ -8,7 +9,6 @@ import com.team7.taskflow.ui.auth.LoginActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
 import com.team7.taskflow.ui.foryou.ForYouActivity;
-import com.team7.taskflow.ui.notification.NotificationPushScheduler;
 import com.team7.taskflow.utils.LanguageManager;
 import com.team7.taskflow.utils.SessionManager;
 import com.team7.taskflow.utils.NavigationUtils;
@@ -18,6 +18,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -268,16 +271,48 @@ public class ProfileActivity extends BaseActivity {
     private void setupLogout() {
         if (btnLogout != null) {
             btnLogout.setOnClickListener(v -> {
-                NotificationPushScheduler.cancel(ProfileActivity.this);
-                SessionManager.clearSession();
-                SupabaseClient.getInstance().clearAccessToken();
-
-                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                removeDeviceTokenThenLogout();
             });
         }
+    }
+
+    private void removeDeviceTokenThenLogout() {
+        String userId = SessionManager.getUserId();
+        if (TextUtils.isEmpty(userId)) {
+            performLogout();
+            return;
+        }
+
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String token = task.getResult();
+                DeviceRepository.getInstance().deleteDeviceToken(userId, token, new DeviceRepository.ResultCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d("ProfileActivity", "Device token deleted on logout");
+                        performLogout();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Log.w("ProfileActivity", "Failed to delete device token on logout: " + message);
+                        performLogout();
+                    }
+                });
+            } else {
+                performLogout();
+            }
+        });
+    }
+
+    private void performLogout() {
+        SessionManager.clearSession();
+        SupabaseClient.getInstance().clearAccessToken();
+
+        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void setupProjectTrash() {

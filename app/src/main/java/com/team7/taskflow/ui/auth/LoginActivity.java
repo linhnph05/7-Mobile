@@ -1,8 +1,11 @@
 package com.team7.taskflow.ui.auth;
 
 import com.team7.taskflow.R;
+import com.team7.taskflow.data.repository.NotificationRepository;
+import com.team7.taskflow.domain.model.Notification;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.dashboard.DashboardActivity;
+import com.team7.taskflow.ui.notification.NotificationPushDispatcher;
 import com.team7.taskflow.utils.AppConfig;
 import com.team7.taskflow.utils.SessionManager;
 
@@ -38,6 +41,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import java.util.List;
 import java.util.Locale;
 
 public class LoginActivity extends BaseActivity {
@@ -240,9 +244,30 @@ public class LoginActivity extends BaseActivity {
             public void onSuccess(String userId) {
                 runOnUiThread(() -> {
                     setLoading(false);
-                        Toast.makeText(LoginActivity.this,
-                            R.string.auth_login_success, Toast.LENGTH_SHORT).show();
-                    goToMain();
+                    Toast.makeText(LoginActivity.this,
+                        R.string.auth_login_success, Toast.LENGTH_SHORT).show();
+                    
+                    // Send FCM device token to backend
+                    com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                String token = task.getResult();
+                                com.team7.taskflow.data.repository.DeviceRepository.getInstance()
+                                    .upsertDeviceToken(userId, token, new com.team7.taskflow.data.repository.DeviceRepository.ResultCallback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            Log.d(TAG, "Device token upserted after login");
+                                        }
+                                        @Override
+                                        public void onError(String message) {
+                                            Log.w(TAG, "Failed to upsert device token: " + message);
+                                        }
+                                    });
+                            }
+
+                            syncMissedPushNotifications(userId);
+                            goToMain();
+                        });
                 });
             }
 
@@ -284,6 +309,26 @@ public class LoginActivity extends BaseActivity {
             btnGoogle.setText(R.string.auth_google);
         }
         progressBar.setVisibility(View.GONE);
+    }
+
+    private void syncMissedPushNotifications(String userId) {
+        if (TextUtils.isEmpty(userId)) {
+            return;
+        }
+
+        NotificationRepository.getInstance().getNotifications(userId, new NotificationRepository.NotificationCallback<List<Notification>>() {
+            @Override
+            public void onSuccess(List<Notification> notifications) {
+                String userEmail = SessionManager.getUserEmail();
+                NotificationRepository.getInstance().hydrateInviteStatuses(notifications, userEmail, () ->
+                        NotificationPushDispatcher.dispatchUnread(getApplicationContext(), userId, notifications));
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.w(TAG, "syncMissedPushNotifications failed: " + error);
+            }
+        });
     }
 
     private void goToMain() {

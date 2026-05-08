@@ -161,3 +161,17 @@ CREATE TABLE public.work_logs (
   CONSTRAINT work_logs_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id),
   CONSTRAINT work_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)
 );
+
+-- Table: user_devices - stores device tokens for push notifications
+CREATE TABLE public.user_devices (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id uuid NOT NULL,
+  device_token text NOT NULL,
+  platform text NOT NULL DEFAULT 'android',
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_devices_pkey PRIMARY KEY (id),
+  CONSTRAINT user_devices_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS user_devices_user_token_idx ON public.user_devices (user_id, device_token);

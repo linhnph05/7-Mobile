@@ -11,7 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Project;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 public class ProjectTrashAdapter extends RecyclerView.Adapter<ProjectTrashAdapter.ProjectTrashViewHolder> {
 
@@ -54,7 +59,7 @@ public class ProjectTrashAdapter extends RecyclerView.Adapter<ProjectTrashAdapte
         } else {
             holder.tvDeletedAt.setText(holder.itemView.getContext().getString(
                     R.string.project_deleted_at_format,
-                    deletedAt.replace("T", " ").replace("Z", "")));
+                    formatVietnamDateTime(deletedAt)));
         }
 
         holder.btnRestore.setOnClickListener(v -> {
@@ -67,6 +72,27 @@ public class ProjectTrashAdapter extends RecyclerView.Adapter<ProjectTrashAdapte
     @Override
     public int getItemCount() {
         return projects != null ? projects.size() : 0;
+    }
+
+    private String formatVietnamDateTime(String isoDateTime) {
+        if (isoDateTime == null || isoDateTime.trim().isEmpty()) {
+            return "";
+        }
+
+        try {
+            ZoneId vnZone = ZoneId.of("Asia/Ho_Chi_Minh");
+            DateTimeFormatter vnFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", new Locale("vi", "VN"));
+
+            try {
+                OffsetDateTime odt = OffsetDateTime.parse(isoDateTime);
+                return odt.atZoneSameInstant(vnZone).format(vnFormatter);
+            } catch (Exception ignored) {
+                Instant instant = Instant.parse(isoDateTime);
+                return instant.atZone(vnZone).format(vnFormatter);
+            }
+        } catch (Exception e) {
+            return isoDateTime.replace("T", " ").replace("Z", "");
+        }
     }
 
     static class ProjectTrashViewHolder extends RecyclerView.ViewHolder {

@@ -65,16 +65,16 @@
                     android:paddingHorizontal="6dp"
                     android:paddingVertical="2dp"
                     android:background="@drawable/bg_chip_neutral" />
-
-                <TextView
-                    android:id="@+id/tvTrashItemDeletedDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/trash_item_preview_deleted_date"
-                    android:textColor="@color/theme_text_secondary"
-                    android:textSize="11sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvTrashItemDeletedDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/trash_item_preview_deleted_date"
+                android:textColor="@color/theme_text_secondary"
+                android:textSize="11sp" />
         </LinearLayout>
 
         <!-- Action Buttons -->

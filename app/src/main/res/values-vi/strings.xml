@@ -90,7 +90,7 @@
     <string name="dashboard_login_required">Vui lòng đăng nhập để xem dự án</string>
     <string name="dashboard_no_projects_message">Bạn chưa có dự án nào. Nhấn + để tạo mới!</string>
     <string name="dashboard_load_projects_error">Lỗi tải dự án: %1$s</string>
-    <string name="dashboard_search_hint">Tìm dự án hoặc hỏi AI…</string>
+    <string name="dashboard_search_hint">Tìm dự án</string>
     <string name="dashboard_focus_title">Tập trung hôm nay</string>
     <string name="dashboard_ai_suggestion_loading">Đang phân tích lịch trình của bạn...</string>
     <string name="dashboard_ai_suggestion_error">Trợ lý đang bận điều phối dữ liệu, hãy thử lại sau giây lát nhé!</string>

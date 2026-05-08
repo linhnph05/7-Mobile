@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.team7.taskflow.R;
 import com.team7.taskflow.domain.model.Task;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -110,27 +113,36 @@ public class TrashItemAdapter extends RecyclerView.Adapter<TrashItemAdapter.View
             }
 
             try {
-                // Parse ISO format timestamp
-                SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
-                Date deletedDate = isoFormat.parse(updatedAtStr);
-                if (deletedDate == null) return itemView.getContext().getString(R.string.trash_recently_deleted);
-
-                long diffMs = System.currentTimeMillis() - deletedDate.getTime();
-                long diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-                if (diffDays == 0) {
-                    long diffHours = diffMs / (1000 * 60 * 60);
-                    if (diffHours == 0) {
-                        return itemView.getContext().getString(R.string.trash_deleted_just_now);
-                    }
-                    return itemView.getContext().getString(R.string.trash_deleted_hours_ago, diffHours);
-                } else if (diffDays == 1) {
-                    return itemView.getContext().getString(R.string.trash_deleted_yesterday);
-                } else {
-                    return itemView.getContext().getString(R.string.trash_deleted_days_ago, diffDays);
+                // Try parsing as OffsetDateTime/Instant-aware ISO string, fallback gracefully
+                OffsetDateTime odt;
+                try {
+                    odt = OffsetDateTime.parse(updatedAtStr);
+                } catch (Exception ex) {
+                    // If no offset present, try parsing as instant
+                    Instant instant = Instant.parse(updatedAtStr);
+                    odt = instant.atOffset(ZoneId.of("UTC").getRules().getOffset(instant));
                 }
+
+                // Convert to Vietnam timezone
+                ZoneId vnZone = ZoneId.of("Asia/Ho_Chi_Minh");
+                DateTimeFormatter vnFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", new Locale("vi","VN"));
+                String formatted = odt.atZoneSameInstant(vnZone).format(vnFormatter);
+
+                return formatted;
             } catch (Exception e) {
-                return itemView.getContext().getString(R.string.trash_recently_deleted);
+                // Fallback: try to parse roughly with existing SimpleDateFormat patterns
+                try {
+                    // Attempt naive parse as yyyy-MM-dd'T'HH:mm:ss
+                    java.text.SimpleDateFormat isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                    Date deletedDate = isoFormat.parse(updatedAtStr);
+                    if (deletedDate == null) return itemView.getContext().getString(R.string.trash_recently_deleted);
+                    // Format in VN locale
+                    java.text.SimpleDateFormat vn = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("vi","VN"));
+                    vn.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+                    return vn.format(deletedDate);
+                } catch (Exception ex2) {
+                    return itemView.getContext().getString(R.string.trash_recently_deleted);
+                }
             }
         }
     }

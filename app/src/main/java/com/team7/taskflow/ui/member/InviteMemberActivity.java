@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +16,7 @@ import com.team7.taskflow.R;
 import com.team7.taskflow.data.repository.InvitationRepository;
 import com.team7.taskflow.data.repository.MemberRepository;
 import com.team7.taskflow.domain.model.User;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class InviteMemberActivity extends AppCompatActivity {
 
     private EditText etEmail;
     private TextView tvResultName, tvResultEmail, tvAvatar, tvError;
+    private ImageView imgMemberAvatar;
     private CardView cardResult;
     private RadioGroup rgRole;
     private MemberRepository memberRepository;
@@ -45,6 +48,7 @@ public class InviteMemberActivity extends AppCompatActivity {
         etEmail      = findViewById(R.id.et_email);
         tvResultName = findViewById(R.id.tv_result_name);
         tvResultEmail= findViewById(R.id.tv_result_email);
+        imgMemberAvatar = findViewById(R.id.imgMemberAvatar);
         tvAvatar     = findViewById(R.id.tv_avatar);
         tvError      = findViewById(R.id.tv_error);
         cardResult   = findViewById(R.id.card_result);
@@ -88,7 +92,13 @@ public class InviteMemberActivity extends AppCompatActivity {
                     String name = user.getDisplayName() != null ? user.getDisplayName() : email;
                     tvResultName.setText(name);
                     tvResultEmail.setText(user.getEmail());
-                    tvAvatar.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                    
+                    // Bind user avatar with fallback letter
+                    if (imgMemberAvatar != null) {
+                        String avatarUrl = user.getAvatarUrl();
+                        AvatarUiUtils.bindAvatarOrFallback(imgMemberAvatar, tvAvatar, avatarUrl, name);
+                    }
+                    
                     cardResult.setVisibility(View.VISIBLE);
                 });
             }

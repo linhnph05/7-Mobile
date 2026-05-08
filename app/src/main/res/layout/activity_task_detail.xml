@@ -734,12 +734,23 @@
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="4dp">
 
-                        <ImageView
+                        <FrameLayout
                             android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_person"
-                            android:background="@drawable/bg_circle_outline"
-                            app:tint="@color/theme_text_primary"/>
+                            android:layout_height="24dp">
+
+                            <ImageView
+                                android:id="@+id/imgCommentAvatar"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:background="@drawable/bg_avatar_grey_bordered"/>
+
+                            <TextView
+                                android:id="@+id/tvCommentAvatarLetter"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:gravity="center"
+                                android:visibility="gone" />
+                        </FrameLayout>
 
                         <EditText
                             android:id="@+id/etCommentInput"

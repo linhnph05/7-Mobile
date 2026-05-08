@@ -51,6 +51,7 @@ import com.team7.taskflow.domain.model.User;
 import com.team7.taskflow.ui.attachment.FullscreenImageActivity;
 import com.team7.taskflow.ui.base.BaseActivity;
 import com.team7.taskflow.ui.ai.AiCreateActivity;
+import com.team7.taskflow.ui.common.AvatarUiUtils;
 import com.team7.taskflow.utils.SessionManager;
 
 import java.time.LocalDate;
@@ -107,6 +108,8 @@ public class TaskDetailActivity extends BaseActivity {
     private RecyclerView rvComments;
     private EditText etCommentInput;
     private ImageView btnSendComment;
+    private ImageView imgCommentAvatar;
+    private TextView tvCommentAvatarLetter;
     private TabLayout tabLayoutActivity;
     private TaskCommentAdapter commentAdapter;
     private String currentUserId;
@@ -293,6 +296,8 @@ public class TaskDetailActivity extends BaseActivity {
         rvComments = findViewById(R.id.rvComments);
         etCommentInput = findViewById(R.id.etCommentInput);
         btnSendComment = findViewById(R.id.btnSendComment);
+        imgCommentAvatar = findViewById(R.id.imgCommentAvatar);
+        tvCommentAvatarLetter = findViewById(R.id.tvCommentAvatarLetter);
         // tvPomodoroState = findViewById(R.id.tvPomodoroState);
         tvWorklogTotal = findViewById(R.id.tvWorklogTotal);
         tvWorklogSummary = findViewById(R.id.tvWorklogSummary);
@@ -708,9 +713,29 @@ public class TaskDetailActivity extends BaseActivity {
         rvComments.setLayoutManager(new LinearLayoutManager(this));
         rvComments.setAdapter(commentAdapter);
         rvComments.setNestedScrollingEnabled(false);
+        
+        // Bind current user avatar to comment input
+        bindCommentInputAvatar();
+        
         if (btnSendComment != null)
             btnSendComment.setOnClickListener(v -> createComment());
         loadComments();
+    }
+    
+    private void bindCommentInputAvatar() {
+        if (imgCommentAvatar == null) return;
+        
+        SessionManager.init(this);
+        String currentUserName = SessionManager.getDisplayName();
+        if (currentUserName == null || currentUserName.isEmpty()) {
+            currentUserName = SessionManager.getUserEmail();
+        }
+        if (currentUserName == null || currentUserName.isEmpty()) {
+            currentUserName = "User";
+        }
+        
+        // Avatar URL is null for current user - AvatarUiUtils will show fallback letter
+        AvatarUiUtils.bindAvatarOrFallback(imgCommentAvatar, tvCommentAvatarLetter, null, currentUserName);
     }
 
     private void setupActivityTabs() {
